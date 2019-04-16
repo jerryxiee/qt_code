@@ -21,6 +21,9 @@ public:
     QQuickWidget* m_quickWidget;
 
 
+private slots:
+    void on_pushButton_clicked();
+
 private:
 
     Ui::MainWindow *ui;

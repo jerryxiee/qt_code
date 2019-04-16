@@ -4,7 +4,7 @@ import QtQuick.Controls 2.0
 
 
 Rectangle {
-    opacity: 0.1
+    opacity: 0.2
     color:"blue"
 
 }

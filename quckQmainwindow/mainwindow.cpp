@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
     QUrl source("qrc:/main.qml");
     m_quickWidget->setSource(source);
+    //m_quickWidget->deleteLater();
 
 }
 
@@ -34,7 +35,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
     QPainter painter(this);// 创建QPainter一个对象
 
     painter.setCompositionMode( QPainter::CompositionMode_Clear );
-    painter.fillRect( 10, 10, 800, 600, Qt::SolidPattern );
+    painter.fillRect( 10, 10, 500, 500, Qt::SolidPattern );
 
     /*// 画一条直线
     QPen pen;
@@ -96,3 +97,8 @@ void MainWindow::paintEvent(QPaintEvent *event)
     painter.drawPath(path);*/
 }
 
+
+void MainWindow::on_pushButton_clicked()
+{
+    m_quickWidget->deleteLater();
+}
