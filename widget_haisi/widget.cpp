@@ -11,15 +11,15 @@ Widget::Widget(QWidget *parent) :
     ui(new Ui::Widget)
 {
     ui->setupUi(this);
-    this->resize(1280,720);
+    this->resize(1920,1080);
 
-    m_quickWidget = new QQuickWidget();
-    m_quickWidget = new QQuickWidget(this);//this基类为QWidget
-    m_quickWidget->move(0,0);
-    m_quickWidget->resize(200,200);
-    m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    QUrl source("qrc:/main.qml");
-    m_quickWidget->setSource(source);
+//    m_quickWidget = new QQuickWidget();
+//    m_quickWidget = new QQuickWidget(this);//this基类为QWidget
+//    m_quickWidget->move(0,0);
+//    m_quickWidget->resize(200,200);
+//    m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+//    QUrl source("qrc:/main.qml");
+//    m_quickWidget->setSource(source);
 
 
     //this->setWindowOpacity(0.2);
@@ -36,7 +36,7 @@ void Widget::paintEvent(QPaintEvent *event)
     QPainter painter(this);// 创建QPainter一个对象
 
     painter.setCompositionMode( QPainter::CompositionMode_Clear );
-    painter.fillRect( 10, 10, 300, 300, Qt::SolidPattern );
+    painter.fillRect( 0, 0, 1280, 7200, Qt::SolidPattern );
 
     /*// 画一条直线
     QPen pen;
@@ -98,7 +98,11 @@ void Widget::paintEvent(QPaintEvent *event)
     painter.drawPath(path);*/
 }
 
-void Widget::on_pushButton_clicked()
+
+void Widget::mousePressEvent(QMouseEvent * event)
 {
-    m_quickWidget->deleteLater();
+    qDebug()<<event->pos();
+    if(event->button() == Qt::RightButton){
+        qDebug("press right ");
+    }
 }

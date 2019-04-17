@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QtQuickWidgets>
+#include <QEvent>
+#include <QMouseEvent>
 
 namespace Ui {
 class Widget;
@@ -18,8 +20,11 @@ public:
 
     void paintEvent(QPaintEvent *event);
 
+protected:
+    void mousePressEvent(QMouseEvent * event);
+
 private slots:
-    void on_pushButton_clicked();
+    //void on_pushButton_clicked();
 
 private:
     QQuickWidget* m_quickWidget;

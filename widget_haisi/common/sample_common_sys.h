@@ -1,0 +1,70 @@
+#ifndef SAMPLE_COMMON_SYS_H
+#define SAMPLE_COMMON_SYS_H
+
+#include <QObject>
+#include "sample_comm.h"
+#include "common/sample_common_vo.h"
+#include "common/sample_common_vdec.h"
+#include "hifb.h"
+
+class Sample_Common_Sys : public QObject
+{
+    Q_OBJECT
+public:
+    explicit Sample_Common_Sys();
+    ~Sample_Common_Sys();
+
+    HI_S32 SAMPLE_SYS_SetReg(HI_U32 u32Addr, HI_U32 u32Value);
+    HI_S32 SAMPLE_SYS_GetReg(HI_U32 u32Addr, HI_U32 *pu32Value);
+    HI_S32 SAMPLE_COMM_SYS_GetPicSize(VIDEO_NORM_E enNorm, PIC_SIZE_E enPicSize, SIZE_S *pstSize);
+    HI_U32 SAMPLE_COMM_SYS_CalcHistVbBlkSize(VIDEO_NORM_E enNorm, PIC_SIZE_E enPicSize, SIZE_S *pstHistBlkSize, HI_U32 u32AlignWidth);
+    HI_U32 SAMPLE_COMM_SYS_CalcPicVbBlkSize(VIDEO_NORM_E enNorm, PIC_SIZE_E enPicSize, PIXEL_FORMAT_E enPixFmt, HI_U32 u32AlignWidth,COMPRESS_MODE_E enCompFmt);
+    HI_S32 SAMPLE_COMM_SYS_MemConfig(HI_VOID);
+    HI_S32 SAMPLE_COMM_SYS_Init(VB_CONF_S *pstVbConf);
+    HI_S32 SAMPLE_COMM_SYS_Payload2FilePostfix(PAYLOAD_TYPE_E enPayload, HI_CHAR* szFilePostfix);
+    HI_VOID SAMPLE_COMM_SYS_Exit(void);
+
+    HI_VOID	SAMPLE_COMM_VDEC_ModCommPoolConf(VB_CONF_S *pstModVbConf,PAYLOAD_TYPE_E enType, SIZE_S *pstSize, HI_S32 s32ChnNum, HI_BOOL bCompress);
+    HI_S32	SAMPLE_COMM_VDEC_InitModCommVb(VB_CONF_S *pstModVbConf);
+
+    static HI_S32 SAMPLE_COMM_BindVpss(MPP_CHN_S *pstSrcChn, MPP_CHN_S *pstDestChn);
+
+    //test
+    HI_S32 init();
+    Q_INVOKABLE void test(){qDebug("test\n");}
+    Q_INVOKABLE void Enable_Alpha();
+    Q_INVOKABLE void DisEnable_Alpha();
+    Q_INVOKABLE void Set_ColorKey();
+
+    void m_exit();
+    HI_S32 SAMPLE_VDEC_H264(HI_VOID);
+
+
+public:
+    HI_U32 m_u32PicWidth;
+    HI_U32 m_u32PicHeight;
+   // VO_DEV m_FbVoDev;
+    VO_CHN m_FbVoChn;
+    VPSS_GRP m_VpssDestGrp;
+    VPSS_CHN m_VpssChn;
+    //VO_LAYER m_FbVoLayer;
+    VO_PUB_ATTR_S m_stFbPubAttr;
+    VO_VIDEO_LAYER_ATTR_S m_stFbLayerAttr;
+    HI_S32 Sys_init_Sucess;
+
+private:
+    HI_BOOL Set_Alpha(HIFB_ALPHA_S *pstAlpha);
+
+    static VO_DEV m_FbVoDev;
+    static VO_LAYER m_FbVoLayer;
+    HI_S32 m_sys_hifb_fd;
+    Sample_Common_Vo m_Sys_Vo;
+    Sample_Common_Vdec *m_Sys_Vdec;
+
+
+signals:
+
+public slots:
+};
+
+#endif // SAMPLE_COMMON_SYS_H
