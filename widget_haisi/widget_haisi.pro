@@ -32,7 +32,6 @@ SOURCES += \
     common/sample_comm_vdec.c \
     common/sample_comm_venc.c \
     common/sample_comm_vi.c \
-    common/sample_comm_vpss.c \
     common/sample_common_vo.cpp \
     common/sample_common_vpss.cpp \
     common/sample_common_vdec.cpp

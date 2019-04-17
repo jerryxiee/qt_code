@@ -16,13 +16,56 @@
 #include "common/sample_common_sys.h"
 #include "sample_common_vdec.h"
 
+HI_U32 Sample_Common_Vdec::m_Vdec_MaxTab[VDEC_MAX_CHN_NUM] = {0};
 
 //HI_S32 g_s32VBSource = 0;
 //VB_POOL g_ahVbPool[VB_MAX_POOLS] ;//= {[0 ... (VB_MAX_POOLS-1)] = VB_INVALID_POOLID};
 
-Sample_Common_Vdec::Sample_Common_Vdec():m_Vdec_ChnNum(1),g_s32VBSource(0)
+Sample_Common_Vdec::Sample_Common_Vdec():
+    m_Vdec_ChnNum(1),g_s32VBSource(0),m_nVpssChn(1)
 {
-    //g_ahVbPool[VB_MAX_POOLS] = {0} ;
+    HI_U32 Vdec_ChnIndex = 0;
+
+    g_ahVbPool[VB_MAX_POOLS] = {0} ;
+    while (m_Vdec_MaxTab[Vdec_ChnIndex] != 0) {
+        Vdec_ChnIndex++;
+        if(Vdec_ChnIndex >= VDEC_MAX_CHN_NUM)
+            return;
+    }
+
+    m_Vdec_MaxTab[Vdec_ChnIndex] = 1;
+    m_Vdec_Tab[0] = Vdec_ChnIndex;
+
+}
+
+Sample_Common_Vdec::Sample_Common_Vdec(HI_S32 s32ChnNum,HI_S32 s32VpssChnNum ,HI_S32 s32VBSource):
+    m_Vdec_ChnNum(s32ChnNum),g_s32VBSource(s32VBSource),m_nVpssChn(s32VpssChnNum)
+{
+    HI_U32 i = 0;
+    HI_U32 Vdec_ChnIndex = 0;
+
+    g_ahVbPool[VB_MAX_POOLS] = {0} ;
+    for(;i < m_Vdec_ChnNum;i++){
+        while (m_Vdec_MaxTab[Vdec_ChnIndex] != 0) {
+            Vdec_ChnIndex++;
+            if(Vdec_ChnIndex >= VDEC_MAX_CHN_NUM)
+                return;
+        }
+        m_Vdec_MaxTab[Vdec_ChnIndex] = 1;
+        m_Vdec_Tab[i] = Vdec_ChnIndex;
+    }
+
+
+}
+
+Sample_Common_Vdec::~Sample_Common_Vdec()
+{
+    for(int i = 0;i < m_Vdec_ChnNum;i++)
+    {
+        m_Vdec_MaxTab[m_Vdec_Tab[i]] = 0;
+    }
+    delete []m_pVpss;
+
 }
 
 HI_VOID	Sample_Common_Vdec::SAMPLE_COMM_VDEC_ChnAttr(HI_S32 s32ChnNum,
@@ -30,7 +73,7 @@ HI_VOID	Sample_Common_Vdec::SAMPLE_COMM_VDEC_ChnAttr(HI_S32 s32ChnNum,
 {
     HI_S32 i;
 
-    for(i=0; i<s32ChnNum; i++)
+    for(i=0; i<m_Vdec_ChnNum; i++)
     {
         pstVdecChnAttr[i].enType       = enType;
         pstVdecChnAttr[i].u32BufSize   = 3 * pstSize->u32Width * pstSize->u32Height;
@@ -62,7 +105,7 @@ HI_VOID	Sample_Common_Vdec::SAMPLE_COMM_VDEC_VpssGrpAttr(HI_S32 s32ChnNum, VPSS_
 {
     HI_S32 i;
 
-    for(i=0; i<s32ChnNum; i++)
+    for(i=0; i<m_Vdec_ChnNum; i++)
     {
         pstVpssGrpAttr->enDieMode = VPSS_DIE_MODE_NODIE;
         pstVpssGrpAttr->bIeEn     = HI_FALSE;
@@ -76,7 +119,7 @@ HI_VOID	Sample_Common_Vdec::SAMPLE_COMM_VDEC_VpssGrpAttr(HI_S32 s32ChnNum, VPSS_
     }
 }
 
-HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_Start(HI_S32 s32ChnNum, VDEC_CHN_ATTR_S *pstAttr)
+HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_Start(HI_S32 s32ChnNum, VDEC_CHN_ATTR_S *pstAttr, VPSS_GRP_ATTR_S *pstVpssGrpAttr)
 {
     HI_S32  i;
     HI_U32 u32BlkCnt = 10;
@@ -85,35 +128,47 @@ HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_Start(HI_S32 s32ChnNum, VDEC_CHN_ATT
     MPP_CHN_S stSrcChn;
     MPP_CHN_S stDestChn;
 
-    stRotateSize.u32Width = stRotateSize.u32Height = MAX2(pstAttr[0].u32PicWidth, pstAttr[0].u32PicHeight);
-    m_pVpss = new Sample_Common_Vpss(s32ChnNum,1,&stRotateSize,nullptr);
-
-    for(i=0; i<s32ChnNum; i++)
+    for(i=0; i<m_Vdec_ChnNum; i++)
     {
+        if(m_nVpssChn > 0){
+            stRotateSize.u32Width = stRotateSize.u32Height = MAX2(pstAttr[i].u32PicWidth, pstAttr[i].u32PicHeight);
+            m_pVpss[i] = new Sample_Common_Vpss(1,m_nVpssChn,&stRotateSize,pstVpssGrpAttr);
+            if(!m_pVpss[i]){
+                delete m_pVpss[i];
+                return HI_FALSE;
+            }else if( HI_FALSE == m_pVpss[i]->Creat_Vpss_IsSucess(m_nVpssChn)){
+                m_pVpss[i]->SAMPLE_COMM_VPSS_Stop();
+                delete m_pVpss[i];
+                return HI_FALSE;
+            }
+        }
+
+
         if(1 == g_s32VBSource)
         {
-            CHECK_CHN_RET(HI_MPI_VDEC_SetChnVBCnt(i, u32BlkCnt), i, "HI_MPI_VDEC_SetChnVBCnt");
+            CHECK_CHN_RET(HI_MPI_VDEC_SetChnVBCnt(m_Vdec_Tab[i], u32BlkCnt), i, "HI_MPI_VDEC_SetChnVBCnt");
         }
-        CHECK_CHN_RET(HI_MPI_VDEC_CreateChn(i, &pstAttr[i]), i, "HI_MPI_VDEC_CreateChn");
+        CHECK_CHN_RET(HI_MPI_VDEC_CreateChn(m_Vdec_Tab[i], &pstAttr[i]), m_Vdec_Tab[i], "HI_MPI_VDEC_CreateChn");
         if (2 == g_s32VBSource)
         {
             stPool.hPicVbPool = g_ahVbPool[0];
             stPool.hPmvVbPool = -1;
-            CHECK_CHN_RET(HI_MPI_VDEC_AttachVbPool(i, &stPool), i, "HI_MPI_VDEC_AttachVbPool");
+            CHECK_CHN_RET(HI_MPI_VDEC_AttachVbPool(m_Vdec_Tab[i], &stPool), m_Vdec_Tab[i], "HI_MPI_VDEC_AttachVbPool");
         }
-        CHECK_CHN_RET(HI_MPI_VDEC_StartRecvStream(i), i, "HI_MPI_VDEC_StartRecvStream");
+        CHECK_CHN_RET(HI_MPI_VDEC_StartRecvStream(m_Vdec_Tab[i]), m_Vdec_Tab[i], "HI_MPI_VDEC_StartRecvStream");
         //CHECK_CHN_RET(HI_MPI_VDEC_SetDisplayMode(i, VIDEO_DISPLAY_MODE_PREVIEW), i, "HI_MPI_VDEC_SetDisplayMode");
+        //bind vpss
+        stSrcChn.enModId = HI_ID_VDEC;
+        stSrcChn.s32DevId = 0;
+        stSrcChn.s32ChnId = m_Vdec_Tab[i];
+
+        stDestChn.enModId = HI_ID_VPSS;
+        stDestChn.s32DevId = m_pVpss[i]->m_Grp_Tab[0];
+        stDestChn.s32ChnId = 0;
+
+        Sample_Common_Sys::SAMPLE_COMM_BindVpss(&stSrcChn,&stDestChn);
     }
 
-    stSrcChn.enModId = HI_ID_VDEC;
-    stSrcChn.s32DevId = 0;
-    stSrcChn.s32ChnId = 0;
-
-    stDestChn.enModId = HI_ID_VPSS;
-    stDestChn.s32DevId = m_pVpss->m_Grp_Tab[0];
-    stDestChn.s32ChnId = 0;
-
-    Sample_Common_Sys::SAMPLE_COMM_BindVpss(&stSrcChn,&stDestChn);
     return HI_SUCCESS;
 }
 
@@ -122,10 +177,10 @@ HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_Stop(HI_S32 s32ChnNum)
 {
     HI_S32 i;
 
-    for(i=0; i<s32ChnNum; i++)
+    for(i=0; i<m_Vdec_ChnNum; i++)
     {
-        CHECK_CHN_RET(HI_MPI_VDEC_StopRecvStream(i), i, "HI_MPI_VDEC_StopRecvStream");
-        CHECK_CHN_RET(HI_MPI_VDEC_DestroyChn(i), i, "HI_MPI_VDEC_DestroyChn");
+        CHECK_CHN_RET(HI_MPI_VDEC_StopRecvStream(m_Vdec_Tab[i]), m_Vdec_Tab[i], "HI_MPI_VDEC_StopRecvStream");
+        CHECK_CHN_RET(HI_MPI_VDEC_DestroyChn(m_Vdec_Tab[i]), m_Vdec_Tab[i], "HI_MPI_VDEC_DestroyChn");
     }
 
     return HI_SUCCESS;

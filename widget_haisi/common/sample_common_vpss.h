@@ -12,14 +12,14 @@ public:
     Sample_Common_Vpss(HI_U32 u32GrpCnt,HI_U32 s32ChnCnt,SIZE_S *pstSize,VPSS_GRP_ATTR_S *pstVpssGrpAttr);
     ~Sample_Common_Vpss();
 
-    HI_BOOL Creat_Vpss_IsSucess();
+    HI_BOOL Creat_Vpss_IsSucess(HI_U32 u32GrpCnt);
     HI_S32 SAMPLE_COMM_VPSS_SetChnMod(VPSS_GRP VpssGrpIndex,VPSS_CHN VpssChn,VPSS_CHN_MODE_S *pstVpssMode,HI_U32 u32Depth);
-
+    HI_S32 SAMPLE_COMM_VPSS_Stop();
     HI_S32 SAMPLE_COMM_VPSS_MemConfig();
 
 private:
     HI_S32 SAMPLE_COMM_VPSS_Start(HI_U32 u32GrpIndex, SIZE_S *pstSize, VPSS_GRP_ATTR_S *pstVpssGrpAttr);
-    HI_S32 SAMPLE_COMM_VPSS_Stop();
+
 
 
 public:

@@ -28,7 +28,7 @@ VO_DEV Sample_Common_Sys::m_FbVoLayer = 0;
 //VB_POOL g_ahVbPool[VB_MAX_POOLS] ;//= {[0 ... (VB_MAX_POOLS-1)] = VB_INVALID_POOLID};
 
 
-
+#if 0
 HI_S32 Sample_Common_Sys::SAMPLE_VDEC_H264(HI_VOID)
 {
     VB_CONF_S stVbConf, stModVbConf;
@@ -73,7 +73,7 @@ HI_S32 Sample_Common_Sys::SAMPLE_VDEC_H264(HI_VOID)
     step3:  start VDEC
     *************************************************/
     SAMPLE_COMM_VDEC_ChnAttr(u32VdCnt, &stVdecChnAttr[0], PT_H264, &stSize);
-    s32Ret = SAMPLE_COMM_VDEC_Start(u32VdCnt, &stVdecChnAttr[0]);
+    s32Ret = SAMPLE_COMM_VDEC_Start(u32VdCnt, &stVdecChnAttr[0],nullptr);
     if(s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("start VDEC fail for %#x!\n", s32Ret);
@@ -232,6 +232,8 @@ END1:
 
     return s32Ret;
 }
+
+#endif
 //struct vdec_attr{
 //    VDEC_CHN_ATTR_S stVdecChnAttr[VDEC_MAX_CHN_NUM];
 //    VdecThreadParam stVdecSend[VDEC_MAX_CHN_NUM];
@@ -351,13 +353,13 @@ Sample_Common_Sys::Sample_Common_Sys():m_Sys_Vdec(new Sample_Common_Vdec())
         /************************************************
         step3:  start VDEC
         *************************************************/
-        m_Sys_Vdec->SAMPLE_COMM_VDEC_ChnAttr(u32VdCnt, &stVdecChnAttr[0], PT_H264, &stSize);
-        s32Ret = m_Sys_Vdec->SAMPLE_COMM_VDEC_Start(u32VdCnt, &stVdecChnAttr[0]);
-        if(s32Ret != HI_SUCCESS)
-        {
-            SAMPLE_PRT("start VDEC fail for %#x!\n", s32Ret);
-            goto END2;
-        }
+//        m_Sys_Vdec->SAMPLE_COMM_VDEC_ChnAttr(u32VdCnt, &stVdecChnAttr[0], PT_H264, &stSize);
+//        s32Ret = m_Sys_Vdec->SAMPLE_COMM_VDEC_Start(u32VdCnt, &stVdecChnAttr[0],nullptr);
+//        if(s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_PRT("start VDEC fail for %#x!\n", s32Ret);
+//            goto END2;
+//        }
 
         /************************************************
         step4:  start VPSS
@@ -438,12 +440,12 @@ Sample_Common_Sys::Sample_Common_Sys():m_Sys_Vdec(new Sample_Common_Vdec())
 #endif
     }
 
-    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartChn(m_FbVoLayer, VO_MODE_1MUX);
-    if(s32Ret != HI_SUCCESS)
-    {
-        SAMPLE_PRT("vdec bind vpss fail for %#x!\n", s32Ret);
-        goto END4_4;
-    }
+//    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartChn(m_FbVoLayer, VO_MODE_1MUX);
+//    if(s32Ret != HI_SUCCESS)
+//    {
+//        SAMPLE_PRT("vdec bind vpss fail for %#x!\n", s32Ret);
+//        goto END4_4;
+//    }
 
     /************************************************
     step6:  VDEC bind VPSS
@@ -461,15 +463,15 @@ Sample_Common_Sys::Sample_Common_Sys():m_Sys_Vdec(new Sample_Common_Vdec())
     /************************************************
     step7:  VPSS bind VO
     *************************************************/
-    for(i=0; i<u32GrpCnt; i++)
-    {
-        s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_BindVpss(m_FbVoLayer, i, i, VPSS_CHN0);
-        if(s32Ret != HI_SUCCESS)
-        {
-            SAMPLE_PRT("vpss bind vo fail for %#x!\n", s32Ret);
-            goto END6;
-        }
-    }
+//    for(i=0; i<u32GrpCnt; i++)
+//    {
+//        s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_BindVpss(m_FbVoLayer, i, i, VPSS_CHN0);
+//        if(s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_PRT("vpss bind vo fail for %#x!\n", s32Ret);
+//            goto END6;
+//        }
+//    }
 
 
     /* 1. open framebuffer device overlay 0 */
@@ -547,8 +549,8 @@ Sample_Common_Sys::Sample_Common_Sys():m_Sys_Vdec(new Sample_Common_Vdec())
         goto SAMPLE_HIFB_NoneBufMode_2;
     }
 
-    pthread_t Vdec_Thread;
-    pthread_create(&Vdec_Thread, 0, vdec_stream, (HI_VOID *)&stVdecChnAttr[0]);
+//    pthread_t Vdec_Thread;
+//    pthread_create(&Vdec_Thread, 0, vdec_stream, (HI_VOID *)&stVdecChnAttr[0]);
 
     Sys_init_Sucess = s32Ret;
     qDebug("Sample_Common_Sys init sucess\n");
@@ -565,15 +567,15 @@ END6:
         }
     }
 
-END5:
-    for(i=0; i<u32GrpCnt; i++)
-    {
-        s32Ret = SAMPLE_COMM_VDEC_UnBindVpss(i, i);
-        if(s32Ret != HI_SUCCESS)
-        {
-            SAMPLE_PRT("vdec unbind vpss fail for %#x!\n", s32Ret);
-        }
-    }
+//END5:
+//    for(i=0; i<u32GrpCnt; i++)
+//    {
+//        s32Ret = SAMPLE_COMM_VDEC_UnBindVpss(i, i);
+//        if(s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_PRT("vdec unbind vpss fail for %#x!\n", s32Ret);
+//        }
+//    }
 
 
 END4_4:
@@ -583,11 +585,11 @@ SAMPLE_HIFB_NoneBufMode_2:
     m_Sys_Vo.SAMPLE_COMM_VO_StopLayer(m_FbVoLayer);
 SAMPLE_HIFB_NoneBufMode_1:
     m_Sys_Vo.SAMPLE_COMM_VO_StopDev(m_FbVoDev);
-END3:
-    SAMPLE_COMM_VPSS_Stop(u32GrpCnt, VPSS_CHN0);
+//END3:
+//    SAMPLE_COMM_VPSS_Stop(u32GrpCnt, VPSS_CHN0);
 
 END2:
-    SAMPLE_COMM_VDEC_Stop(u32VdCnt);
+    m_Sys_Vdec->SAMPLE_COMM_VDEC_Stop(u32VdCnt);
 SAMPLE_HIFB_NoneBufMode_0:
     SAMPLE_COMM_SYS_Exit();
 
@@ -601,6 +603,61 @@ SAMPLE_HIFB_NoneBufMode_0:
 
 HI_S32 Sample_Common_Sys::init()
 {
+    HI_S32 i;
+    HI_S32 s32Ret;
+    VDEC_CHN_ATTR_S stVdecChnAttr[VDEC_MAX_CHN_NUM];
+    SIZE_S  stSize;
+
+    stSize.u32Width = HD_WIDTH;
+    stSize.u32Height = HD_HEIGHT;
+
+    m_Sys_Vdec->SAMPLE_COMM_VDEC_ChnAttr(1, &stVdecChnAttr[0], PT_H264, &stSize);
+    s32Ret = m_Sys_Vdec->SAMPLE_COMM_VDEC_Start(1, &stVdecChnAttr[0],nullptr);
+    if(s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_PRT("start VDEC fail for %#x!\n", s32Ret);
+        goto END2;
+    }
+
+    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartChn(m_FbVoLayer, VO_MODE_1MUX);
+    if(s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_PRT("vdec bind vpss fail for %#x!\n", s32Ret);
+        goto END4_4;
+    }
+
+    for(i=0; i<1; i++)
+    {
+        s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_BindVpss(m_FbVoLayer, i, i, VPSS_CHN0);
+        if(s32Ret != HI_SUCCESS)
+        {
+            SAMPLE_PRT("vpss bind vo fail for %#x!\n", s32Ret);
+            goto END6;
+        }
+    }
+
+    pthread_t Vdec_Thread;
+    pthread_create(&Vdec_Thread, 0, vdec_stream, (HI_VOID *)&stVdecChnAttr[0]);
+
+    return 0;
+
+END6:
+    for(i=0; i<1; i++)
+    {
+        s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_UnBindVpss(m_FbVoLayer, i, i, VPSS_CHN0);
+        if(s32Ret != HI_SUCCESS)
+        {
+            SAMPLE_PRT("vpss unbind vo fail for %#x!\n", s32Ret);
+        }
+    }
+
+
+
+END4_4:
+    m_Sys_Vo.SAMPLE_COMM_VO_StopChn(m_FbVoLayer, VO_MODE_4MUX);
+
+END2:
+    m_Sys_Vdec->SAMPLE_COMM_VDEC_Stop(1);
 
     return 0;
 }
@@ -608,6 +665,7 @@ Sample_Common_Sys::~Sample_Common_Sys()
 {
 
 
+    delete m_Sys_Vdec;
       qDebug("Sample_Common_Sys exit\n");
 //    close(m_sys_hifb_fd);
 //    SAMPLE_COMM_VO_StopLayer(m_FbVoLayer);

@@ -17,7 +17,7 @@
 
 HI_U32 Sample_Common_Vpss::m_Grp_MaxTable[VPSS_MAX_GRP_NUM] = {0};
 
-Sample_Common_Vpss::Sample_Common_Vpss():m_Grp_Num(1),m_Chn_Num(1)
+Sample_Common_Vpss::Sample_Common_Vpss():m_Chn_Num(1)
 {
     SIZE_S stSize;
     HI_U32 Grp_Index = 0;
@@ -28,6 +28,7 @@ Sample_Common_Vpss::Sample_Common_Vpss():m_Grp_Num(1),m_Chn_Num(1)
         if(Grp_Index >= VPSS_MAX_GRP_NUM)
             return;
     }
+    m_Grp_Num = 1;
     m_Grp_MaxTable[Grp_Index] = 1;
     m_Grp_Tab[0] = Grp_Index;
 
@@ -56,11 +57,12 @@ Sample_Common_Vpss & Sample_Common_Vpss::operator = (const Sample_Common_Vpss & 
 
 }
 Sample_Common_Vpss::Sample_Common_Vpss(HI_U32 u32GrpCnt,HI_U32 u32ChnCnt,SIZE_S *pstSize,VPSS_GRP_ATTR_S *pstVpssGrpAttr)
-    :m_Chn_Num(u32ChnCnt),m_Grp_Num(u32GrpCnt)
+    :m_Chn_Num(u32ChnCnt)
 {
     HI_U32 Grp_Index = 0;
 
 
+    m_Grp_Num = 0;
     for(int i = 0;i < u32GrpCnt;i++){
         while(m_Grp_MaxTable[Grp_Index] != 0){
             Grp_Index++;
@@ -69,6 +71,7 @@ Sample_Common_Vpss::Sample_Common_Vpss(HI_U32 u32GrpCnt,HI_U32 u32ChnCnt,SIZE_S 
         }
         m_Grp_MaxTable[Grp_Index] = 1;
         m_Grp_Tab[i] = Grp_Index;
+        m_Grp_Num++;
 
         SAMPLE_COMM_VPSS_Start(Grp_Index,pstSize,pstVpssGrpAttr);
 
@@ -81,12 +84,12 @@ Sample_Common_Vpss::~Sample_Common_Vpss()
     for(int i = 0;i < m_Grp_Num;i++)
         m_Grp_MaxTable[m_Grp_Tab[i]] = 0;
 }
-HI_BOOL Sample_Common_Vpss::Creat_Vpss_IsSucess()
+HI_BOOL Sample_Common_Vpss::Creat_Vpss_IsSucess(HI_U32 u32GrpCnt)
 {
-//    if(m_Grp_Index < VPSS_MAX_GRP_NUM)
-//        return HI_TRUE;
+    if(/*m_Grp_Num < VPSS_MAX_GRP_NUM && */(m_Grp_Num == u32GrpCnt) )
+        return HI_TRUE;
 
-//    return HI_FALSE;
+    return HI_FALSE;
 }
 
 /******************************************************************************
