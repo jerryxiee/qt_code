@@ -12,6 +12,7 @@ Widget::Widget(QWidget *parent) :
 {
     ui->setupUi(this);
     this->resize(1920,1080);
+    load_qml = false;
 
 //    m_quickWidget = new QQuickWidget();
 //    m_quickWidget = new QQuickWidget(this);//this基类为QWidget
@@ -36,7 +37,7 @@ void Widget::paintEvent(QPaintEvent *event)
     QPainter painter(this);// 创建QPainter一个对象
 
     painter.setCompositionMode( QPainter::CompositionMode_Clear );
-    painter.fillRect( 0, 0, 1280, 7200, Qt::SolidPattern );
+    painter.fillRect( 0, 0, 1920, 1080, Qt::SolidPattern );
 
     /*// 画一条直线
     QPen pen;
@@ -104,5 +105,25 @@ void Widget::mousePressEvent(QMouseEvent * event)
     qDebug()<<event->pos();
     if(event->button() == Qt::RightButton){
         qDebug("press right ");
+        if(!load_qml){
+            load_qml = true;
+            qDebug("load main.qml");
+            m_quickWidget = new QQuickWidget(this);//this基类为QWidget
+            m_quickWidget->move(0,0);
+            m_quickWidget->resize(1280,720);
+            m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+            QUrl source("qrc:/main.qml");
+            m_quickWidget->setSource(source);
+            m_quickWidget->show();
+        }
+    }else if(event->button() == Qt::LeftButton){
+        qDebug("press left ");
+        if(load_qml){
+            load_qml = false;
+            qDebug("unload main.qml");
+            m_quickWidget->deleteLater();
+            delete m_quickWidget;
+        }
+
     }
 }

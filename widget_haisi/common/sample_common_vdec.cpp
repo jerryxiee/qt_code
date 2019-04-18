@@ -22,40 +22,74 @@ HI_U32 Sample_Common_Vdec::m_Vdec_MaxTab[VDEC_MAX_CHN_NUM] = {0};
 //VB_POOL g_ahVbPool[VB_MAX_POOLS] ;//= {[0 ... (VB_MAX_POOLS-1)] = VB_INVALID_POOLID};
 
 Sample_Common_Vdec::Sample_Common_Vdec():
-    m_Vdec_ChnNum(1),g_s32VBSource(0),m_nVpssChn(1)
+    m_Vdec_ChnNum(1),g_s32VBSource(0)
 {
     HI_U32 Vdec_ChnIndex = 0;
 
+//    printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
+//    m_pstVdecChnAttr = new VDEC_CHN_ATTR_S[m_Vdec_ChnNum];
+//    if(!m_pstVdecChnAttr){
+//        delete [] m_pstVdecChnAttr;
+//        return ;
+//    }
+//    memset(m_pstVdecChnAttr,0,sizeof (VDEC_CHN_ATTR_S));
     g_ahVbPool[VB_MAX_POOLS] = {0} ;
     while (m_Vdec_MaxTab[Vdec_ChnIndex] != 0) {
         Vdec_ChnIndex++;
-        if(Vdec_ChnIndex >= VDEC_MAX_CHN_NUM)
+        if(Vdec_ChnIndex >= VDEC_MAX_CHN_NUM){
+            m_Vdec_ChnNum = 0;
+//            delete [] m_pstVdecChnAttr;
             return;
+        }
     }
 
     m_Vdec_MaxTab[Vdec_ChnIndex] = 1;
     m_Vdec_Tab[0] = Vdec_ChnIndex;
 
+    printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
 }
 
 Sample_Common_Vdec::Sample_Common_Vdec(HI_S32 s32ChnNum,HI_S32 s32VpssChnNum ,HI_S32 s32VBSource):
-    m_Vdec_ChnNum(s32ChnNum),g_s32VBSource(s32VBSource),m_nVpssChn(s32VpssChnNum)
+    g_s32VBSource(s32VBSource)
 {
     HI_U32 i = 0;
     HI_U32 Vdec_ChnIndex = 0;
 
+//    printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
+//    m_pstVdecChnAttr = new VDEC_CHN_ATTR_S[s32ChnNum];
+//    if(!m_pstVdecChnAttr){
+//        delete [] m_pstVdecChnAttr;
+//        return ;
+//    }
+
+//    memset(m_pstVdecChnAttr,0,sizeof (VDEC_CHN_ATTR_S)*s32ChnNum);
+
     g_ahVbPool[VB_MAX_POOLS] = {0} ;
-    for(;i < m_Vdec_ChnNum;i++){
+    m_Vdec_ChnNum = 0;
+    for(;i < s32ChnNum;i++){
         while (m_Vdec_MaxTab[Vdec_ChnIndex] != 0) {
             Vdec_ChnIndex++;
-            if(Vdec_ChnIndex >= VDEC_MAX_CHN_NUM)
+            if(Vdec_ChnIndex >= VDEC_MAX_CHN_NUM){
+                while(--m_Vdec_ChnNum){
+                    m_Vdec_MaxTab[m_Vdec_Tab[m_Vdec_ChnNum]] = 0;
+                }
+//                delete [] m_pstVdecChnAttr;
                 return;
+            }
         }
+        m_Vdec_ChnNum++;
         m_Vdec_MaxTab[Vdec_ChnIndex] = 1;
         m_Vdec_Tab[i] = Vdec_ChnIndex;
     }
 
+//    printf(">>>>>>enter %s:%d\n",__FUNCTION__,__LINE__);
+//    for(i = 0; i < m_Vdec_ChnNum;i++)
+//        printf("m_Vdec_Tab[%d] = %d\n",i,m_Vdec_Tab[i]);
+}
 
+HI_BOOL Sample_Common_Vdec::Sample_Common_Vdec_CreatIsSucess()
+{
+    return m_Vdec_ChnNum > 0?HI_TRUE:HI_FALSE;
 }
 
 Sample_Common_Vdec::~Sample_Common_Vdec()
@@ -64,7 +98,8 @@ Sample_Common_Vdec::~Sample_Common_Vdec()
     {
         m_Vdec_MaxTab[m_Vdec_Tab[i]] = 0;
     }
-    delete []m_pVpss;
+//    delete [] m_pstVdecChnAttr;
+    //delete []m_pVpss;
 
 }
 
@@ -101,6 +136,12 @@ HI_VOID	Sample_Common_Vdec::SAMPLE_COMM_VDEC_ChnAttr(HI_S32 s32ChnNum,
 
 }
 
+HI_VOID	Sample_Common_Vdec::SAMPLE_COMM_VDEC_SetChnAttr(HI_S32 s32ChnIndex,VDEC_CHN_ATTR_S *pstVdecChnAttr)
+{
+//    printf("enter %s:%d s32ChnIndex = %d\n",__FUNCTION__,__LINE__,s32ChnIndex);
+    memcpy(&m_stVdecChnAttr[s32ChnIndex],pstVdecChnAttr,sizeof (VDEC_CHN_ATTR_S));
+}
+
 HI_VOID	Sample_Common_Vdec::SAMPLE_COMM_VDEC_VpssGrpAttr(HI_S32 s32ChnNum, VPSS_GRP_ATTR_S *pstVpssGrpAttr, SIZE_S *pstSize)
 {
     HI_S32 i;
@@ -119,36 +160,38 @@ HI_VOID	Sample_Common_Vdec::SAMPLE_COMM_VDEC_VpssGrpAttr(HI_S32 s32ChnNum, VPSS_
     }
 }
 
-HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_Start(HI_S32 s32ChnNum, VDEC_CHN_ATTR_S *pstAttr, VPSS_GRP_ATTR_S *pstVpssGrpAttr)
+HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_Start(HI_S32 s32ChnNum)
 {
     HI_S32  i;
     HI_U32 u32BlkCnt = 10;
     VDEC_CHN_POOL_S stPool;
-    SIZE_S stRotateSize;
-    MPP_CHN_S stSrcChn;
-    MPP_CHN_S stDestChn;
+//    SIZE_S stRotateSize;
+//    MPP_CHN_S stSrcChn;
+//    MPP_CHN_S stDestChn;
 
     for(i=0; i<m_Vdec_ChnNum; i++)
     {
-        if(m_nVpssChn > 0){
-            stRotateSize.u32Width = stRotateSize.u32Height = MAX2(pstAttr[i].u32PicWidth, pstAttr[i].u32PicHeight);
-            m_pVpss[i] = new Sample_Common_Vpss(1,m_nVpssChn,&stRotateSize,pstVpssGrpAttr);
-            if(!m_pVpss[i]){
-                delete m_pVpss[i];
-                return HI_FALSE;
-            }else if( HI_FALSE == m_pVpss[i]->Creat_Vpss_IsSucess(m_nVpssChn)){
-                m_pVpss[i]->SAMPLE_COMM_VPSS_Stop();
-                delete m_pVpss[i];
-                return HI_FALSE;
-            }
-        }
-
+//        printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
+//        if(m_nVpssChn > 0){
+//            stRotateSize.u32Width = stRotateSize.u32Height = MAX2(m_stVdecChnAttr[i].u32PicWidth, m_stVdecChnAttr[i].u32PicHeight);
+//            m_pVpss[i] = new Sample_Common_Vpss(1,m_nVpssChn,&stRotateSize,nullptr);
+//            if(!m_pVpss[i]){
+//                printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
+//                delete m_pVpss[i];
+//                return HI_FALSE;
+//            }else if( HI_FALSE == m_pVpss[i]->Creat_Vpss_IsSucess(1)){
+//                m_pVpss[i]->SAMPLE_COMM_VPSS_Stop();
+//                printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
+//                delete m_pVpss[i];
+//                return HI_FALSE;
+//            }
+//        }
 
         if(1 == g_s32VBSource)
         {
-            CHECK_CHN_RET(HI_MPI_VDEC_SetChnVBCnt(m_Vdec_Tab[i], u32BlkCnt), i, "HI_MPI_VDEC_SetChnVBCnt");
+            CHECK_CHN_RET(HI_MPI_VDEC_SetChnVBCnt(m_Vdec_Tab[i], u32BlkCnt), m_Vdec_Tab[i], "HI_MPI_VDEC_SetChnVBCnt");
         }
-        CHECK_CHN_RET(HI_MPI_VDEC_CreateChn(m_Vdec_Tab[i], &pstAttr[i]), m_Vdec_Tab[i], "HI_MPI_VDEC_CreateChn");
+        CHECK_CHN_RET(HI_MPI_VDEC_CreateChn(m_Vdec_Tab[i], &m_stVdecChnAttr[i]), m_Vdec_Tab[i], "HI_MPI_VDEC_CreateChn");
         if (2 == g_s32VBSource)
         {
             stPool.hPicVbPool = g_ahVbPool[0];
@@ -157,16 +200,17 @@ HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_Start(HI_S32 s32ChnNum, VDEC_CHN_ATT
         }
         CHECK_CHN_RET(HI_MPI_VDEC_StartRecvStream(m_Vdec_Tab[i]), m_Vdec_Tab[i], "HI_MPI_VDEC_StartRecvStream");
         //CHECK_CHN_RET(HI_MPI_VDEC_SetDisplayMode(i, VIDEO_DISPLAY_MODE_PREVIEW), i, "HI_MPI_VDEC_SetDisplayMode");
-        //bind vpss
-        stSrcChn.enModId = HI_ID_VDEC;
-        stSrcChn.s32DevId = 0;
-        stSrcChn.s32ChnId = m_Vdec_Tab[i];
+//        //bind vpss
+//        printf(">>>>>>%s:%dm_Vdec_Tab[%d] = %d m_pVpss[%d]->m_Grp_Tab[0] = %d\n",__FUNCTION__,__LINE__,i,m_Vdec_Tab[i],i,m_pVpss[i]->m_Grp_Tab[0]);
+//        stSrcChn.enModId = HI_ID_VDEC;
+//        stSrcChn.s32DevId = 0;
+//        stSrcChn.s32ChnId = m_Vdec_Tab[i];
 
-        stDestChn.enModId = HI_ID_VPSS;
-        stDestChn.s32DevId = m_pVpss[i]->m_Grp_Tab[0];
-        stDestChn.s32ChnId = 0;
+//        stDestChn.enModId = HI_ID_VPSS;
+//        stDestChn.s32DevId = m_pVpss[i]->m_Grp_Tab[0];
+//        stDestChn.s32ChnId = 0;
 
-        Sample_Common_Sys::SAMPLE_COMM_BindVpss(&stSrcChn,&stDestChn);
+//        Sample_Common_Sys::SAMPLE_COMM_BindVpss(&stSrcChn,&stDestChn);
     }
 
     return HI_SUCCESS;
@@ -189,7 +233,7 @@ HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_Stop(HI_S32 s32ChnNum)
 
 
 
-HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_BindVpss(VDEC_CHN VdChn, VPSS_GRP VpssGrp)
+HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_BindVpss(VDEC_CHN VdChn, VPSS_GRP VpssGrp,VPSS_CHN VpssChn)
 {
     MPP_CHN_S stSrcChn;
     MPP_CHN_S stDestChn;
@@ -200,7 +244,7 @@ HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_BindVpss(VDEC_CHN VdChn, VPSS_GRP Vp
 
     stDestChn.enModId = HI_ID_VPSS;
     stDestChn.s32DevId = VpssGrp;
-    stDestChn.s32ChnId = 0;
+    stDestChn.s32ChnId = VpssChn;
 
     CHECK_RET(HI_MPI_SYS_Bind(&stSrcChn, &stDestChn), "HI_MPI_SYS_Bind");
 
@@ -229,7 +273,7 @@ HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_BindVo(VDEC_CHN VdChn, VO_LAYER VoLa
 
 
 
-HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_UnBindVpss(VDEC_CHN VdChn, VPSS_GRP VpssGrp)
+HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_UnBindVpss(VDEC_CHN VdChn, VPSS_GRP VpssGrp, VPSS_CHN VpssChn)
 {
     MPP_CHN_S stSrcChn;
     MPP_CHN_S stDestChn;
@@ -240,7 +284,7 @@ HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_UnBindVpss(VDEC_CHN VdChn, VPSS_GRP 
 
     stDestChn.enModId = HI_ID_VPSS;
     stDestChn.s32DevId = VpssGrp;
-    stDestChn.s32ChnId = 0;
+    stDestChn.s32ChnId = VpssChn;
 
     CHECK_RET(HI_MPI_SYS_UnBind(&stSrcChn, &stDestChn), "HI_MPI_SYS_UnBind");
 
@@ -286,7 +330,7 @@ HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_MemConfig(HI_VOID)
 
         if(0 == (i%2))
         {
-            pcMmzName = NULL;
+            pcMmzName = nullptr;
         }
         else
         {

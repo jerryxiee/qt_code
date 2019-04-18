@@ -401,7 +401,7 @@ HI_VOID * SAMPLE_COMM_VDEC_SendStream(HI_VOID *pArgs)
     HI_S32 s32UsedBytes = 0, s32ReadLen = 0;
     HI_U64 u64pts = 0;
     HI_S32 len;
-    HI_BOOL sHasReadStream = HI_FALSE; 
+    HI_BOOL sHasReadStream = HI_FALSE;
 
     prctl(PR_SET_NAME, "hi_SendStream", 0, 0, 0);
 
@@ -788,7 +788,7 @@ HI_VOID * SAMPLE_COMM_VDEC_SendStream(HI_VOID *pArgs)
         
         //printf("Send One Frame");
         //fflush(stdout);   
-        
+
         s32Ret=HI_MPI_VDEC_SendStream(pstVdecThreadParam->s32ChnId, &stStream, pstVdecThreadParam->s32MilliSec);
         pstVdecThreadParam->cUserCmd = 0;
         if (HI_SUCCESS != s32Ret)
@@ -798,14 +798,14 @@ HI_VOID * SAMPLE_COMM_VDEC_SendStream(HI_VOID *pArgs)
         else
         {
             if(pstVdecThreadParam->enType == PT_MJPEG)
-        	{
-        	    s32UsedBytes = s32UsedBytes +s32ReadLen;
-        	}
-			else
-		    {
-                s32UsedBytes = s32UsedBytes +s32ReadLen + start;	
-			}
-            u64pts += pstVdecThreadParam->u64PtsIncrease;            
+            {
+                s32UsedBytes = s32UsedBytes +s32ReadLen;
+            }
+            else
+            {
+                s32UsedBytes = s32UsedBytes +s32ReadLen + start;
+            }
+            u64pts += pstVdecThreadParam->u64PtsIncrease;
         }
        usleep(1000);
     }

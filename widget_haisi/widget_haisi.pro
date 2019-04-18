@@ -31,19 +31,18 @@ SOURCES += \
     common/loadbmp.c \
     common/sample_comm_vdec.c \
     common/sample_comm_venc.c \
-    common/sample_comm_vi.c \
-    common/sample_common_vo.cpp \
     common/sample_common_vpss.cpp \
-    common/sample_common_vdec.cpp
+    common/sample_common_vdec.cpp \
+    common/sample_common_vio.cpp
 
 HEADERS += \
         widget.h \
     common/loadbmp.h \
     common/sample_comm.h \
     common/sample_common_sys.h \
-    common/sample_common_vo.h \
     common/sample_common_vpss.h \
-    common/sample_common_vdec.h
+    common/sample_common_vdec.h \
+    common/sample_common_vio.h
 
 FORMS += \
         widget.ui

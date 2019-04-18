@@ -242,35 +242,8 @@ END1:
 
 
 //};
-void *vdec_stream(void *argv)
-{
 
-    //VDEC_CHN_ATTR_S stVdecChnAttr[VDEC_MAX_CHN_NUM];
-    VdecThreadParam stVdecSend[VDEC_MAX_CHN_NUM];
-    //VPSS_GRP_ATTR_S stVpssGrpAttr[VDEC_MAX_CHN_NUM];
-    pthread_t   VdecThread[2*VDEC_MAX_CHN_NUM];
-
-    VDEC_CHN_ATTR_S *pstVdecChnAttr  = (VDEC_CHN_ATTR_S *)argv;
-    //struct vdec_attr *vedc = (struct vdec_attr*)argv;
-    /************************************************
-    step8:  send stream to VDEC
-    *************************************************/
-    SAMPLE_COMM_VDEC_ThreadParam(1, &stVdecSend[0], pstVdecChnAttr, SAMPLE_1080P_H264_PATH);
-    SAMPLE_COMM_VDEC_StartSendStream(1, &stVdecSend[0], &VdecThread[0]);
-
-    /***  get the stat info of luma pix  ***/
-    SAMPLE_COMM_VDEC_StartGetLuma(1, &stVdecSend[0], &VdecThread[0]);
-
-    /***  set the rotational angle of decode pic  ***/
-
-    /***  control the send stream thread and get luma info thread  ***/
-    SAMPLE_COMM_VDEC_CmdCtrl(1, &stVdecSend[0]);
-
-    SAMPLE_COMM_VDEC_StopSendStream(1, &stVdecSend[0], &VdecThread[0]);
-
-    SAMPLE_COMM_VDEC_StopGetLuma(1, &stVdecSend[0], &VdecThread[0]);
-}
-Sample_Common_Sys::Sample_Common_Sys():m_Sys_Vdec(new Sample_Common_Vdec())
+Sample_Common_Sys::Sample_Common_Sys()
 {
 #if 1
     HI_S32 s32Ret = HI_SUCCESS;
@@ -288,7 +261,7 @@ Sample_Common_Sys::Sample_Common_Sys():m_Sys_Vdec(new Sample_Common_Vdec())
     HI_U32 u32VoFrmRate;
 
     VB_CONF_S       stVbConf;
-    VB_CONF_S       stModVbConf;
+//    VB_CONF_S       stModVbConf;
     //HI_U32 u32BlkSize;
 
     struct fb_var_screeninfo stVarInfo;
@@ -342,13 +315,13 @@ Sample_Common_Sys::Sample_Common_Sys():m_Sys_Vdec(new Sample_Common_Vdec())
       init mod common VB
     *************************************************/
     if(nullptr != m_Sys_Vdec){
-        SAMPLE_COMM_VDEC_ModCommPoolConf(&stModVbConf, PT_H264, &stSize, u32VdCnt, HI_FALSE);
-        s32Ret = SAMPLE_COMM_VDEC_InitModCommVb(&stModVbConf);
-        if(s32Ret != HI_SUCCESS)
-        {
-            SAMPLE_PRT("init mod common vb fail for %#x!\n", s32Ret);
-            goto SAMPLE_HIFB_NoneBufMode_0;
-        }
+//        SAMPLE_COMM_VDEC_ModCommPoolConf(&stModVbConf, PT_H264, &stSize, u32VdCnt, HI_FALSE);
+//        s32Ret = SAMPLE_COMM_VDEC_InitModCommVb(&stModVbConf);
+//        if(s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_PRT("init mod common vb fail for %#x!\n", s32Ret);
+//            goto SAMPLE_HIFB_NoneBufMode_0;
+//        }
 
         /************************************************
         step3:  start VDEC
@@ -557,15 +530,15 @@ Sample_Common_Sys::Sample_Common_Sys():m_Sys_Vdec(new Sample_Common_Vdec())
 
     return ;
 
-END6:
-    for(i=0; i<u32GrpCnt; i++)
-    {
-        s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_UnBindVpss(m_FbVoLayer, i, i, VPSS_CHN0);
-        if(s32Ret != HI_SUCCESS)
-        {
-            SAMPLE_PRT("vpss unbind vo fail for %#x!\n", s32Ret);
-        }
-    }
+//END6:
+//    for(i=0; i<u32GrpCnt; i++)
+//    {
+//        s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_UnBindVpss(m_FbVoLayer, i, i, VPSS_CHN0);
+//        if(s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_PRT("vpss unbind vo fail for %#x!\n", s32Ret);
+//        }
+//    }
 
 //END5:
 //    for(i=0; i<u32GrpCnt; i++)
@@ -578,8 +551,8 @@ END6:
 //    }
 
 
-END4_4:
-    m_Sys_Vo.SAMPLE_COMM_VO_StopChn(m_FbVoLayer, VO_MODE_4MUX);
+//END4_4:
+//    m_Sys_Vo.SAMPLE_COMM_VO_StopChn(m_FbVoLayer, VO_MODE_4MUX);
 
 SAMPLE_HIFB_NoneBufMode_2:
     m_Sys_Vo.SAMPLE_COMM_VO_StopLayer(m_FbVoLayer);
@@ -588,8 +561,8 @@ SAMPLE_HIFB_NoneBufMode_1:
 //END3:
 //    SAMPLE_COMM_VPSS_Stop(u32GrpCnt, VPSS_CHN0);
 
-END2:
-    m_Sys_Vdec->SAMPLE_COMM_VDEC_Stop(u32VdCnt);
+//END2:
+//    m_Sys_Vdec->SAMPLE_COMM_VDEC_Stop(u32VdCnt);
 SAMPLE_HIFB_NoneBufMode_0:
     SAMPLE_COMM_SYS_Exit();
 
@@ -601,39 +574,119 @@ SAMPLE_HIFB_NoneBufMode_0:
 #endif
 }
 
-HI_S32 Sample_Common_Sys::init()
+void *vdec_stream(void *argv)
+{
+
+    HI_U32 Vdec_Chn = 4;
+    //VDEC_CHN_ATTR_S stVdecChnAttr[VDEC_MAX_CHN_NUM];
+    VdecThreadParam stVdecSend[VDEC_MAX_CHN_NUM];
+    //VPSS_GRP_ATTR_S stVpssGrpAttr[VDEC_MAX_CHN_NUM];
+    pthread_t   VdecThread[2*VDEC_MAX_CHN_NUM];
+
+    VDEC_CHN_ATTR_S *pstVdecChnAttr  = (VDEC_CHN_ATTR_S *)argv;
+    //struct vdec_attr *vedc = (struct vdec_attr*)argv;
+    /************************************************
+    step8:  send stream to VDEC
+    *************************************************/
+    SAMPLE_COMM_VDEC_ThreadParam(Vdec_Chn, &stVdecSend[0], pstVdecChnAttr, SAMPLE_1080P_H264_PATH);
+    SAMPLE_COMM_VDEC_StartSendStream(Vdec_Chn, &stVdecSend[0], &VdecThread[0]);
+
+    /***  get the stat info of luma pix  ***/
+    //SAMPLE_COMM_VDEC_StartGetLuma(1, &stVdecSend[0], &VdecThread[0]);
+
+    /***  set the rotational angle of decode pic  ***/
+
+    /***  control the send stream thread and get luma info thread  ***/
+    //SAMPLE_COMM_VDEC_CmdCtrl(1, &stVdecSend[0]);
+    printf("enter key\n");
+    getchar();
+
+    SAMPLE_COMM_VDEC_StopSendStream(Vdec_Chn, &stVdecSend[0], &VdecThread[0]);
+
+//    SAMPLE_COMM_VDEC_StopGetLuma(Vdec_Chn, &stVdecSend[0], &VdecThread[0]);
+}
+
+HI_S32 Sample_Common_Sys::VdecTest()
 {
     HI_S32 i;
+    HI_S32 Vdec_Chn = 4;
     HI_S32 s32Ret;
     VDEC_CHN_ATTR_S stVdecChnAttr[VDEC_MAX_CHN_NUM];
     SIZE_S  stSize;
+    VB_CONF_S       stModVbConf;
+    SIZE_S stRotateSize;
+//    MPP_CHN_S stSrcChn;
+//    MPP_CHN_S stDestChn;
 
     stSize.u32Width = HD_WIDTH;
     stSize.u32Height = HD_HEIGHT;
 
-    m_Sys_Vdec->SAMPLE_COMM_VDEC_ChnAttr(1, &stVdecChnAttr[0], PT_H264, &stSize);
-    s32Ret = m_Sys_Vdec->SAMPLE_COMM_VDEC_Start(1, &stVdecChnAttr[0],nullptr);
+    m_Sys_Vdec = new Sample_Common_Vdec(Vdec_Chn,1,0);
+
+    SAMPLE_COMM_VDEC_ModCommPoolConf(&stModVbConf, PT_H264, &stSize, Vdec_Chn, HI_FALSE);
+    s32Ret = SAMPLE_COMM_VDEC_InitModCommVb(&stModVbConf);
+    if(s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_PRT("init mod common vb fail for %#x!\n", s32Ret);
+        return HI_FALSE;
+    }
+
+    m_Sys_Vdec->SAMPLE_COMM_VDEC_ChnAttr(Vdec_Chn, &stVdecChnAttr[0], PT_H264, &stSize);
+    for(int i = 0;i < Vdec_Chn;i++){
+        m_Sys_Vdec->SAMPLE_COMM_VDEC_SetChnAttr(i,&stVdecChnAttr[i]);
+
+        stRotateSize.u32Width = stRotateSize.u32Height = MAX2(stVdecChnAttr[i].u32PicWidth, stVdecChnAttr[i].u32PicHeight);
+        m_pVpss[i] = new Sample_Common_Vpss(1,1,&stRotateSize,nullptr);
+        if(!m_pVpss[i]){
+            printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
+            delete m_pVpss[i];
+            return HI_FALSE;
+        }else if( HI_FALSE == m_pVpss[i]->SAMPLE_COMM_VPSS_CreatIsSucess()){
+            m_pVpss[i]->SAMPLE_COMM_VPSS_Stop();
+            printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
+            delete m_pVpss[i];
+            return HI_FALSE;
+        }
+    }
+
+    s32Ret = m_Sys_Vdec->SAMPLE_COMM_VDEC_Start(Vdec_Chn);
     if(s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("start VDEC fail for %#x!\n", s32Ret);
         goto END2;
     }
 
-    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartChn(m_FbVoLayer, VO_MODE_1MUX);
+
+    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartChn(m_FbVoLayer, VO_MODE_4MUX);
     if(s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("vdec bind vpss fail for %#x!\n", s32Ret);
         goto END4_4;
     }
 
-    for(i=0; i<1; i++)
+    for(i=0; i<Vdec_Chn; i++)
     {
+        //bind vpss
+
+//        stSrcChn.enModId = HI_ID_VDEC;
+//        stSrcChn.s32DevId = 0;
+//        stSrcChn.s32ChnId = m_Sys_Vdec->m_Vdec_Tab[i];
+
+//        stDestChn.enModId = HI_ID_VPSS;
+//        stDestChn.s32DevId = m_pVpss[i]->m_Grp_Tab[0];
+//        stDestChn.s32ChnId = 0;
+//        SAMPLE_COMM_BindVpss(&stSrcChn,&stDestChn);
+
+        m_Sys_Vdec->SAMPLE_COMM_VDEC_BindVpss(m_Sys_Vdec->m_Vdec_Tab[i],m_pVpss[i]->m_Grp_Tab[0],0);
+
         s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_BindVpss(m_FbVoLayer, i, i, VPSS_CHN0);
         if(s32Ret != HI_SUCCESS)
         {
             SAMPLE_PRT("vpss bind vo fail for %#x!\n", s32Ret);
             goto END6;
         }
+
+
     }
 
     pthread_t Vdec_Thread;
@@ -642,7 +695,7 @@ HI_S32 Sample_Common_Sys::init()
     return 0;
 
 END6:
-    for(i=0; i<1; i++)
+    for(i=0; i<Vdec_Chn; i++)
     {
         s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_UnBindVpss(m_FbVoLayer, i, i, VPSS_CHN0);
         if(s32Ret != HI_SUCCESS)
@@ -661,6 +714,224 @@ END2:
 
     return 0;
 }
+
+HI_S32 Sample_Common_Sys::Vio_8_1080P_Test()
+{
+    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
+    VIDEO_NORM_E enNorm = VIDEO_ENCODING_MODE_NTSC;
+
+    HI_U32 u32ViChnCnt = 8;
+    HI_S32 s32VpssGrpCnt = 8;
+
+    VPSS_GRP VpssGrp;
+    VPSS_GRP_ATTR_S stGrpAttr;
+    VPSS_CHN VpssChn_VoHD0 = VPSS_CHN1;
+    VPSS_CHN VpssChn_VoHD1 = VPSS_CHN2;
+    VPSS_CHN VpssChn_VoSD0 = VPSS_CHN3;
+
+    VO_DEV VoDev;
+    VO_LAYER VoLayer;
+    VO_CHN VoChn;
+//    VO_PUB_ATTR_S stVoPubAttr_hd0, stVoPubAttr_hd1, stVoPubAttr_sd;
+//    VO_VIDEO_LAYER_ATTR_S stLayerAttr;
+    SAMPLE_VO_MODE_E enVoMode, enPreVoMode;
+
+    HI_S32 i;
+    HI_S32 s32Ret = HI_SUCCESS;
+//    HI_U32 u32BlkSize;
+//    HI_S32 ch;
+    SIZE_S stSize;
+    HI_U32 u32WndNum;
+//    HI_U32 vichn;
+
+    /******************************************
+     step 3: start vi dev & chn
+    ******************************************/
+    s32Ret = m_Sys_Vo.SAMPLE_COMM_VI_Start(enViMode, enNorm);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("start vi failed!\n");
+//        goto END_8_1080P_0;
+    }
+
+    /******************************************
+     step 4: start vpss and vi bind vpss
+    ******************************************/
+    s32Ret = SAMPLE_COMM_SYS_GetPicSize(enNorm, PIC_HD1080, &stSize);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("SAMPLE_COMM_SYS_GetPicSize failed!\n");
+//        goto END_8_1080P_1;
+    }
+
+    memset(&stGrpAttr,0,sizeof(VPSS_GRP_ATTR_S));
+    stGrpAttr.u32MaxW = stSize.u32Width;
+    stGrpAttr.u32MaxH = stSize.u32Height;
+    stGrpAttr.bNrEn = HI_TRUE;
+    stGrpAttr.enDieMode = VPSS_DIE_MODE_NODIE;
+    stGrpAttr.enPixFmt = SAMPLE_PIXEL_FORMAT;
+
+    m_pVpss[0] = new Sample_Common_Vpss(s32VpssGrpCnt,VPSS_MAX_CHN_NUM,&stSize,&stGrpAttr);
+
+//    s32Ret = SAMPLE_COMM_VPSS_Start(s32VpssGrpCnt, &stSize, VPSS_MAX_CHN_NUM, &stGrpAttr);
+//    if (HI_SUCCESS != s32Ret)
+//    {
+//        SAMPLE_PRT("Start Vpss failed!\n");
+//        goto END_8_1080P_1;
+//    }
+
+    s32Ret = m_Sys_Vo.SAMPLE_COMM_VI_BindVpss(enViMode);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Vi bind Vpss failed!\n");
+//        goto END_8_1080P_2;
+    }
+
+    /******************************************
+     step 5: start vo HD0 (bt1120+VGA), multi-screen, you can switch mode
+    ******************************************/
+    printf("start vo HD0.\n");
+    VoDev = SAMPLE_VO_DEV_DHD0;
+    VoLayer = SAMPLE_VO_LAYER_VHD0;
+    u32WndNum = 8;
+    enVoMode = VO_MODE_9MUX;
+
+//    stVoPubAttr_hd0.enIntfSync = VO_OUTPUT_1080P60;
+//    stVoPubAttr_hd0.enIntfType = VO_INTF_BT1120|VO_INTF_VGA;
+//    stVoPubAttr_hd0.u32BgColor = 0x0;
+//    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartDev(VoDev, &stVoPubAttr_hd0);
+//    if (HI_SUCCESS != s32Ret)
+//    {
+//        SAMPLE_PRT("Start SAMPLE_COMM_VO_StartDev failed!\n");
+//        goto END_8_1080P_3;
+//    }
+
+//    memset(&(stLayerAttr), 0 , sizeof(VO_VIDEO_LAYER_ATTR_S));
+//    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_GetWH(stVoPubAttr_hd0.enIntfSync, \
+//        &stLayerAttr.stImageSize.u32Width, \
+//        &stLayerAttr.stImageSize.u32Height, \
+//        &stLayerAttr.u32DispFrmRt);
+//    if (HI_SUCCESS != s32Ret)
+//    {
+//        SAMPLE_PRT("Start SAMPLE_COMM_VO_GetWH failed!\n");
+//        goto END_8_1080P_4;
+//    }
+
+//    stLayerAttr.enPixFormat = SAMPLE_PIXEL_FORMAT;
+//    stLayerAttr.stDispRect.s32X       = 0;
+//    stLayerAttr.stDispRect.s32Y       = 0;
+//    stLayerAttr.stDispRect.u32Width   = stLayerAttr.stImageSize.u32Width;
+//    stLayerAttr.stDispRect.u32Height  = stLayerAttr.stImageSize.u32Height;
+//    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartLayer(VoLayer, &stLayerAttr);
+//    if (HI_SUCCESS != s32Ret)
+//    {
+//        SAMPLE_PRT("Start SAMPLE_COMM_VO_StartLayer failed!\n");
+//        goto END_8_1080P_4;
+//    }
+
+    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartChn(VoLayer, enVoMode);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start SAMPLE_COMM_VO_StartChn failed!\n");
+//        goto END_8_1080P_5;
+    }
+
+    for(i=0;i<u32WndNum;i++)
+    {
+        VoChn = i;
+        VpssGrp = i;
+
+        s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_BindVpss(VoDev,VoChn,m_pVpss[0]->m_Grp_Tab[i],VpssChn_VoHD0);
+        if (HI_SUCCESS != s32Ret)
+        {
+            SAMPLE_PRT("Start VO failed!\n");
+//            goto END_8_1080P_5;
+        }
+    }
+
+#if 0
+    printf("enter key to exit\n");
+    getchar();
+    /******************************************
+     step 8: exit process
+    ******************************************/
+END_8_1080P_9:
+    VoDev = SAMPLE_VO_DEV_DSD0;
+    VoLayer = SAMPLE_VO_LAYER_VSD0;
+    u32WndNum = 8;
+    enVoMode = VO_MODE_9MUX;
+    m_Sys_Vo.SAMPLE_COMM_VO_StopChn(VoLayer, enVoMode);
+    for(i=0;i<u32WndNum;i++)
+    {
+        VoChn = i;
+        VpssGrp = i;
+        m_Sys_Vo.SAMPLE_COMM_VO_UnBindVpss(VoLayer,VoChn,VpssGrp,VpssChn_VoSD0);
+    }
+    m_Sys_Vo.SAMPLE_COMM_VO_StopLayer(VoLayer);
+END_8_1080P_8:
+
+    m_Sys_Vo.SAMPLE_COMM_VO_StopDev(VoDev);
+
+END_8_1080P_7:
+    #ifdef HDMI_SUPPORT
+    if (stVoPubAttr_hd1.enIntfType & VO_INTF_HDMI)
+    {
+        SAMPLE_COMM_VO_HdmiStop();
+    }
+    #endif
+    VoDev = SAMPLE_VO_DEV_DHD1;
+    VoLayer = SAMPLE_VO_LAYER_VHD1;
+    u32WndNum = 8;
+    enVoMode = VO_MODE_9MUX;
+    m_Sys_Vo.SAMPLE_COMM_VO_StopChn(VoLayer, enVoMode);
+    for(i=0;i<u32WndNum;i++)
+    {
+        VoChn = i;
+        VpssGrp = i;
+        m_Sys_Vo.SAMPLE_COMM_VO_UnBindVpss(VoLayer,VoChn,VpssGrp,VpssChn_VoHD1);
+    }
+    m_Sys_Vo.SAMPLE_COMM_VO_StopLayer(VoLayer);
+
+END_8_1080P_6:
+    m_Sys_Vo.SAMPLE_COMM_VO_StopDev(VoDev);
+
+END_8_1080P_5:
+
+    #ifdef HDMI_SUPPORT
+    if (stVoPubAttr_hd0.enIntfType & VO_INTF_HDMI)
+    {
+        SAMPLE_COMM_VO_HdmiStop();
+    }
+    #endif
+
+    VoDev = SAMPLE_VO_DEV_DHD0;
+    VoLayer = SAMPLE_VO_LAYER_VHD0;
+    u32WndNum = 8;
+    enVoMode = VO_MODE_9MUX;
+    m_Sys_Vo.SAMPLE_COMM_VO_StopChn(VoLayer, enVoMode);
+    for(i=0;i<u32WndNum;i++)
+    {
+        VoChn = i;
+        VpssGrp = i;
+        m_Sys_Vo.SAMPLE_COMM_VO_UnBindVpss(VoLayer,VoChn,VpssGrp,VpssChn_VoHD0);
+    }
+    m_Sys_Vo.SAMPLE_COMM_VO_StopLayer(VoLayer);
+END_8_1080P_4:
+    m_Sys_Vo.SAMPLE_COMM_VO_StopDev(VoDev);
+END_8_1080P_3:	//vi unbind vpss
+    m_Sys_Vo.SAMPLE_COMM_VI_UnBindVpss(enViMode);
+END_8_1080P_2:	//vpss stop
+    m_pVpss[0]->SAMPLE_COMM_VPSS_Stop();
+END_8_1080P_1:	//vi stop
+    SAMPLE_COMM_VI_Stop(enViMode);
+END_8_1080P_0:	//system exit
+    SAMPLE_COMM_SYS_Exit();
+#endif
+    return s32Ret;
+
+}
+
+
 Sample_Common_Sys::~Sample_Common_Sys()
 {
 
@@ -980,7 +1251,7 @@ HI_S32 Sample_Common_Sys::SAMPLE_COMM_SYS_Init(VB_CONF_S *pstVbConf)
     stVbConf.u32MaxPoolCnt = 128;
     stVbConf.astCommPool[0].u32BlkSize = CEILING_2_POWER(u32PicWidth,SAMPLE_SYS_ALIGN_WIDTH)\
                                                 * CEILING_2_POWER(u32PicHeight,SAMPLE_SYS_ALIGN_WIDTH) *2;;
-    stVbConf.astCommPool[0].u32BlkCnt =  16;
+    stVbConf.astCommPool[0].u32BlkCnt =  64;
 
 
     HI_MPI_SYS_Exit();
@@ -1152,7 +1423,7 @@ HI_VOID Sample_Common_Sys::SAMPLE_COMM_SYS_Exit(void)
     return;
 }
 
-
+#if 0
 void Sample_Common_Sys::m_exit()
 {
     close(m_sys_hifb_fd);
@@ -1240,3 +1511,5 @@ void Sample_Common_Sys::Set_ColorKey()
 
 
 }
+
+#endif

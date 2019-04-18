@@ -27,8 +27,11 @@ private slots:
     //void on_pushButton_clicked();
 
 private:
+    bool load_qml;
     QQuickWidget* m_quickWidget;
+    QQuickView * m_quckView;
     Ui::Widget *ui;
+    QQmlApplicationEngine engine;
 };
 
 #endif // WIDGET_H

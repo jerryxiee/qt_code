@@ -1,11 +1,13 @@
 import QtQuick 2.2
 import QtQuick.Window 2.1
 import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.3
 
 Rectangle {
     id:mainwidow
     color: "blue"
-   // width: 800;height: 600
+    width: 800;height: 600
+
 
 
     MouseArea{
@@ -33,6 +35,8 @@ Rectangle {
         }
 
     }
+
+
 
 
 

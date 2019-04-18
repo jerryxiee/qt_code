@@ -22,20 +22,30 @@ Sample_Common_Vpss::Sample_Common_Vpss():m_Chn_Num(1)
     SIZE_S stSize;
     HI_U32 Grp_Index = 0;
 
-    /*** Set Vpss Grp Attr ***/
+//    m_pstVpssGrpAttr = new VPSS_GRP_ATTR_S[1];
+//    if(!m_pstVpssGrpAttr){
+//        delete [] m_pstVpssGrpAttr;
+//        return;
+//    }
+
     while(m_Grp_MaxTable[Grp_Index] != 0){
         Grp_Index++;
-        if(Grp_Index >= VPSS_MAX_GRP_NUM)
+        if(Grp_Index >= VPSS_MAX_GRP_NUM){
+//            delete [] m_pstVpssGrpAttr;
+            m_Grp_Num = 0;
+            m_Chn_Num = 0;
             return;
+        }
     }
     m_Grp_Num = 1;
     m_Grp_MaxTable[Grp_Index] = 1;
     m_Grp_Tab[0] = Grp_Index;
 
-
     stSize.u32Height = HD_HEIGHT;
     stSize.u32Width = HD_WIDTH;
     SAMPLE_COMM_VPSS_Start(Grp_Index, &stSize,nullptr);
+
+    printf("enter %s:%d Grp_Index = %d\n",__FUNCTION__,__LINE__,Grp_Index);
 
 }
 
@@ -44,6 +54,7 @@ Sample_Common_Vpss::Sample_Common_Vpss(Sample_Common_Vpss &Sample_Vpss)
     m_Chn_Num   = Sample_Vpss.m_Chn_Num;
     m_Grp_Num   = Sample_Vpss.m_Grp_Num;
     memcpy(m_Grp_Tab,Sample_Vpss.m_Grp_Tab,sizeof (HI_U32) * m_Grp_Num);
+//    memcpy(m_pstVpssGrpAttr,Sample_Vpss.m_pstVpssGrpAttr,sizeof (VPSS_GRP_ATTR_S) * m_Grp_Num);
 }
 
 Sample_Common_Vpss & Sample_Common_Vpss::operator = (const Sample_Common_Vpss & Sample_Vpss)
@@ -54,6 +65,7 @@ Sample_Common_Vpss & Sample_Common_Vpss::operator = (const Sample_Common_Vpss & 
     m_Chn_Num   = Sample_Vpss.m_Chn_Num;
     m_Grp_Num   = Sample_Vpss.m_Grp_Num;
     memcpy(m_Grp_Tab,Sample_Vpss.m_Grp_Tab,sizeof (HI_U32) * m_Grp_Num);
+//    memcpy(m_pstVpssGrpAttr,Sample_Vpss.m_pstVpssGrpAttr,sizeof (VPSS_GRP_ATTR_S) * m_Grp_Num);
 
 }
 Sample_Common_Vpss::Sample_Common_Vpss(HI_U32 u32GrpCnt,HI_U32 u32ChnCnt,SIZE_S *pstSize,VPSS_GRP_ATTR_S *pstVpssGrpAttr)
@@ -62,34 +74,45 @@ Sample_Common_Vpss::Sample_Common_Vpss(HI_U32 u32GrpCnt,HI_U32 u32ChnCnt,SIZE_S 
     HI_U32 Grp_Index = 0;
 
 
+//    m_pstVpssGrpAttr = new VPSS_GRP_ATTR_S[u32GrpCnt];
+//    if(!m_pstVpssGrpAttr){
+//        delete [] m_pstVpssGrpAttr;
+//        return;
+//    }
     m_Grp_Num = 0;
     for(int i = 0;i < u32GrpCnt;i++){
         while(m_Grp_MaxTable[Grp_Index] != 0){
             Grp_Index++;
-            if(Grp_Index >= VPSS_MAX_GRP_NUM)
+            if(Grp_Index >= VPSS_MAX_GRP_NUM){
+                while(--m_Grp_Num){
+                    m_Grp_MaxTable[m_Grp_Tab[m_Grp_Num]] = 0;
+                }
+                m_Chn_Num = 0;
+//                delete [] m_pstVpssGrpAttr;
                 return;
+            }
         }
         m_Grp_MaxTable[Grp_Index] = 1;
-        m_Grp_Tab[i] = Grp_Index;
+        m_Grp_Tab[m_Grp_Num] = Grp_Index;
         m_Grp_Num++;
 
         SAMPLE_COMM_VPSS_Start(Grp_Index,pstSize,pstVpssGrpAttr);
 
+//        printf("enter %s:%d Grp_Index = %d m_Grp_Num=%d\n",__FUNCTION__,__LINE__,Grp_Index,m_Grp_Num);
     }
 
 }
 
 Sample_Common_Vpss::~Sample_Common_Vpss()
 {
-    for(int i = 0;i < m_Grp_Num;i++)
+    for(int i = 0;i < m_Grp_Num;i++){
         m_Grp_MaxTable[m_Grp_Tab[i]] = 0;
+//        delete [] m_pstVpssGrpAttr;
+    }
 }
-HI_BOOL Sample_Common_Vpss::Creat_Vpss_IsSucess(HI_U32 u32GrpCnt)
+HI_BOOL Sample_Common_Vpss::SAMPLE_COMM_VPSS_CreatIsSucess()
 {
-    if(/*m_Grp_Num < VPSS_MAX_GRP_NUM && */(m_Grp_Num == u32GrpCnt) )
-        return HI_TRUE;
-
-    return HI_FALSE;
+    return m_Grp_Num > 0 ? HI_TRUE:HI_FALSE;
 }
 
 /******************************************************************************
