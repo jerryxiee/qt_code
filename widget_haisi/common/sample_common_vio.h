@@ -2,6 +2,7 @@
 #define SAMPLE_COMMON_VIO_H
 
 #include "sample_comm.h"
+#include "sample_common_vpss.h"
 
 #define CHECK_POINTER_NO_RET(p) \
 do{                      \
@@ -59,8 +60,8 @@ public:
         SAMPLE_VI_MODE_E enViMode, SAMPLE_VI_CHN_SET_E enViChnSet);
     HI_S32 SAMPLE_COMM_VI_Start(SAMPLE_VI_MODE_E enViMode, VIDEO_NORM_E enNorm);
     HI_S32 SAMPLE_COMM_VI_Stop(SAMPLE_VI_MODE_E enViMode);
-    HI_S32 SAMPLE_COMM_VI_BindVpss(SAMPLE_VI_MODE_E enViMode);
-    HI_S32 SAMPLE_COMM_VI_UnBindVpss(SAMPLE_VI_MODE_E enViMode);
+    HI_S32 SAMPLE_COMM_VI_BindVpss(SAMPLE_VI_MODE_E enViMode, HI_U32 *Vpss_GrpTab, HI_S32 Vpss_nGrp);
+    HI_S32 SAMPLE_COMM_VI_UnBindVpss(SAMPLE_VI_MODE_E enViMode,HI_U32 *Vpss_GrpTab, HI_S32 Vpss_nGrp);
     HI_S32 SAMPLE_COMM_VI_BindVo(VI_CHN ViChn, VO_LAYER VoLayer, VO_CHN VoChn);
     HI_S32 SAMPLE_COMM_VI_UnBindVo(VI_CHN ViChn, VO_LAYER VoLayer, VO_CHN VoChn);
 //    HI_VOID SAMPLE_COMM_VI_ReadFrame(FILE * fp, HI_U8 * pY, HI_U8 * pU, HI_U8 * pV, HI_U32 width, HI_U32 height, HI_U32 stride, HI_U32 stride2);
@@ -93,6 +94,7 @@ private:
 
 
 public:
+    Sample_Common_Vpss *m_ViBindVpss;
 //    HI_U32 m_u32PicWidth;
 //    HI_U32 m_u32PicHeight;
 //    VO_DEV m_VoDev;

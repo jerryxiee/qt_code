@@ -5,6 +5,7 @@
 #include "sample_comm.h"
 #include "common/sample_common_vio.h"
 #include "common/sample_common_vdec.h"
+#include "sample_common_venc.h"
 #include "hifb.h"
 
 class Sample_Common_Sys : public QObject
@@ -33,6 +34,7 @@ public:
     //test
     HI_S32 VdecTest();
     HI_S32 Vio_8_1080P_Test();
+    HI_S32 Vio_Venc_Test();
 //    Q_INVOKABLE void test(){qDebug("test\n");}
 //    Q_INVOKABLE void Enable_Alpha();
 //    Q_INVOKABLE void DisEnable_Alpha();
@@ -62,7 +64,8 @@ private:
     HI_S32 m_sys_hifb_fd;
     Sample_Common_Vio m_Sys_Vo;
     Sample_Common_Vdec *m_Sys_Vdec;
-    Sample_Common_Vpss *m_pVpss[10];
+    Sample_Common_Venc *m_Sys_Venc[VENC_MAX_CHN_NUM];
+    Sample_Common_Vpss *m_pVpss[VPSS_MAX_GRP_NUM];
 
 
 signals:

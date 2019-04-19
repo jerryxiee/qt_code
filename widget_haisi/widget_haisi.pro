@@ -33,7 +33,8 @@ SOURCES += \
     common/sample_comm_venc.c \
     common/sample_common_vpss.cpp \
     common/sample_common_vdec.cpp \
-    common/sample_common_vio.cpp
+    common/sample_common_vio.cpp \
+    common/sample_common_venc.cpp
 
 HEADERS += \
         widget.h \
@@ -42,7 +43,8 @@ HEADERS += \
     common/sample_common_sys.h \
     common/sample_common_vpss.h \
     common/sample_common_vdec.h \
-    common/sample_common_vio.h
+    common/sample_common_vio.h \
+    common/sample_common_venc.h
 
 FORMS += \
         widget.ui

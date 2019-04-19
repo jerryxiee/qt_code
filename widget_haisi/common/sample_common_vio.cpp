@@ -1404,10 +1404,11 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_Stop(SAMPLE_VI_MODE_E enViMode)
 /*****************************************************************************
 * function : Vi chn bind vpss group
 *****************************************************************************/
-HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_BindVpss(SAMPLE_VI_MODE_E enViMode)
+HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_BindVpss(SAMPLE_VI_MODE_E enViMode, HI_U32 *Vpss_GrpTab, HI_S32 Vpss_nGrp)
 {
     HI_S32 j, s32Ret;
-    VPSS_GRP VpssGrp;
+//    VPSS_GRP VpssGrp;
+    VPSS_GRP nVpssGrp;
     MPP_CHN_S stSrcChn;
     MPP_CHN_S stDestChn;
     SAMPLE_VI_PARAM_S stViParam;
@@ -1420,8 +1421,9 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_BindVpss(SAMPLE_VI_MODE_E enViMode)
         return HI_FAILURE;
     }
 
-    VpssGrp = 0;
-    for (j=0; j<stViParam.s32ViChnCnt; j++)
+    //VpssGrp = 0;
+    nVpssGrp = MIN2(Vpss_nGrp,stViParam.s32ViChnCnt);
+    for (j=0; j<nVpssGrp; j++)
     {
         ViChn = j * stViParam.s32ViChnInterval;
 
@@ -1430,7 +1432,7 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_BindVpss(SAMPLE_VI_MODE_E enViMode)
         stSrcChn.s32ChnId = ViChn;
 
         stDestChn.enModId = HI_ID_VPSS;
-        stDestChn.s32DevId = VpssGrp;
+        stDestChn.s32DevId = Vpss_GrpTab[j];
         stDestChn.s32ChnId = 0;
 
         s32Ret = HI_MPI_SYS_Bind(&stSrcChn, &stDestChn);
@@ -1440,7 +1442,7 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_BindVpss(SAMPLE_VI_MODE_E enViMode)
             return HI_FAILURE;
         }
 
-        VpssGrp ++;
+       // VpssGrp ++;
     }
     return HI_SUCCESS;
 }
@@ -1449,7 +1451,7 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_BindVpss(SAMPLE_VI_MODE_E enViMode)
 /*****************************************************************************
 * function : Vi chn unbind vpss group
 *****************************************************************************/
-HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_UnBindVpss(SAMPLE_VI_MODE_E enViMode)
+HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_UnBindVpss(SAMPLE_VI_MODE_E enViMode, HI_U32 *Vpss_GrpTab, HI_S32 Vpss_nGrp)
 {
     HI_S32 i, j, s32Ret;
     VPSS_GRP VpssGrp;
@@ -1466,8 +1468,8 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_UnBindVpss(SAMPLE_VI_MODE_E enViMode)
         return HI_FAILURE;
     }
 
-    VpssGrp = 0;
-    for (i=0; i<stViParam.s32ViDevCnt; i++)
+    VpssGrp = MIN2(Vpss_nGrp,stViParam.s32ViDevCnt);
+    for (i=0; i<VpssGrp; i++)
     {
         ViDev = i * stViParam.s32ViDevInterval;
 
@@ -1480,7 +1482,7 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_UnBindVpss(SAMPLE_VI_MODE_E enViMode)
             stSrcChn.s32ChnId = ViChn;
 
             stDestChn.enModId = HI_ID_VPSS;
-            stDestChn.s32DevId = VpssGrp;
+            stDestChn.s32DevId = Vpss_GrpTab[i];
             stDestChn.s32ChnId = 0;
 
             s32Ret = HI_MPI_SYS_UnBind(&stSrcChn, &stDestChn);
@@ -1490,7 +1492,6 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_UnBindVpss(SAMPLE_VI_MODE_E enViMode)
                 return HI_FAILURE;
             }
 
-            VpssGrp ++;
         }
     }
     return HI_SUCCESS;

@@ -223,6 +223,7 @@ HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_Stop(HI_S32 s32ChnNum)
 
     for(i=0; i<m_Vdec_ChnNum; i++)
     {
+        m_Vdec_MaxTab[m_Vdec_Tab[i]] = 0;
         CHECK_CHN_RET(HI_MPI_VDEC_StopRecvStream(m_Vdec_Tab[i]), m_Vdec_Tab[i], "HI_MPI_VDEC_StopRecvStream");
         CHECK_CHN_RET(HI_MPI_VDEC_DestroyChn(m_Vdec_Tab[i]), m_Vdec_Tab[i], "HI_MPI_VDEC_DestroyChn");
     }

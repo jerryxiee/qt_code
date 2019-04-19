@@ -613,6 +613,11 @@ HI_S32 Sample_Common_Sys::VdecTest()
     HI_S32 s32Ret;
     VDEC_CHN_ATTR_S stVdecChnAttr[VDEC_MAX_CHN_NUM];
     SIZE_S  stSize;
+    VPSS_GRP_ATTR_S stVpssGrpAttr = {0};
+    SAMPLE_RC_E enRcMode= SAMPLE_RC_CBR;
+    HI_U32 u32Profile = 0;
+    VIDEO_NORM_E gs_enNorm_venc = VIDEO_ENCODING_MODE_NTSC;
+
     VB_CONF_S       stModVbConf;
     SIZE_S stRotateSize;
 //    MPP_CHN_S stSrcChn;
@@ -623,6 +628,7 @@ HI_S32 Sample_Common_Sys::VdecTest()
 
     m_Sys_Vdec = new Sample_Common_Vdec(Vdec_Chn,1,0);
 
+    printf("init CommonPool\n");
     SAMPLE_COMM_VDEC_ModCommPoolConf(&stModVbConf, PT_H264, &stSize, Vdec_Chn, HI_FALSE);
     s32Ret = SAMPLE_COMM_VDEC_InitModCommVb(&stModVbConf);
     if(s32Ret != HI_SUCCESS)
@@ -631,12 +637,13 @@ HI_S32 Sample_Common_Sys::VdecTest()
         return HI_FALSE;
     }
 
+
     m_Sys_Vdec->SAMPLE_COMM_VDEC_ChnAttr(Vdec_Chn, &stVdecChnAttr[0], PT_H264, &stSize);
     for(int i = 0;i < Vdec_Chn;i++){
         m_Sys_Vdec->SAMPLE_COMM_VDEC_SetChnAttr(i,&stVdecChnAttr[i]);
 
         stRotateSize.u32Width = stRotateSize.u32Height = MAX2(stVdecChnAttr[i].u32PicWidth, stVdecChnAttr[i].u32PicHeight);
-        m_pVpss[i] = new Sample_Common_Vpss(1,1,&stRotateSize,nullptr);
+        m_pVpss[i] = new Sample_Common_Vpss(1,2,&stRotateSize,nullptr);
         if(!m_pVpss[i]){
             printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
             delete m_pVpss[i];
@@ -649,6 +656,7 @@ HI_S32 Sample_Common_Sys::VdecTest()
         }
     }
 
+    printf("start vdec\n");
     s32Ret = m_Sys_Vdec->SAMPLE_COMM_VDEC_Start(Vdec_Chn);
     if(s32Ret != HI_SUCCESS)
     {
@@ -656,14 +664,15 @@ HI_S32 Sample_Common_Sys::VdecTest()
         goto END2;
     }
 
-
-    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartChn(m_FbVoLayer, VO_MODE_4MUX);
+    printf("start vo\n");
+    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartChn(m_FbVoLayer, VO_MODE_9MUX);
     if(s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("vdec bind vpss fail for %#x!\n", s32Ret);
         goto END4_4;
     }
 
+    printf("vdec bind vpss\n");
     for(i=0; i<Vdec_Chn; i++)
     {
         //bind vpss
@@ -687,6 +696,50 @@ HI_S32 Sample_Common_Sys::VdecTest()
         }
 
 
+    }
+
+    //venc
+    printf("start venc h264\n");
+    m_Sys_Venc[0] = new Sample_Common_Venc();
+    s32Ret = m_Sys_Venc[0]->SAMPLE_COMM_VENC_Start(PT_H264, \
+                                   gs_enNorm_venc, PIC_HD1080, enRcMode,u32Profile);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start Venc failed!\n");
+//            goto END_VENC_1080P_CLASSIC_4;
+    }
+
+    printf("venc bind vpss\n");
+    s32Ret = m_Sys_Venc[0]->SAMPLE_COMM_VENC_BindVpss(m_pVpss[0]->m_Grp_Tab[0], 1);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start Venc failed!\n");
+//            goto END_VENC_1080P_CLASSIC_4;
+    }
+    printf("start venc h265\n");
+    m_Sys_Venc[1] = new Sample_Common_Venc();
+    s32Ret = m_Sys_Venc[1]->SAMPLE_COMM_VENC_Start(PT_H265, \
+                                   gs_enNorm_venc, PIC_HD1080, enRcMode,u32Profile);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start Venc failed!\n");
+//            goto END_VENC_1080P_CLASSIC_4;
+    }
+
+    printf("venc bind vpss\n");
+    s32Ret = m_Sys_Venc[1]->SAMPLE_COMM_VENC_BindVpss(m_pVpss[1]->m_Grp_Tab[0], 1);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start Venc failed!\n");
+//            goto END_VENC_1080P_CLASSIC_4;
+    }
+
+    printf("start get stream\n");
+    s32Ret = SAMPLE_COMM_VENC_StartGetStream(2);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start Venc failed!\n");
+//        goto END_VENC_1080P_CLASSIC_4;
     }
 
     pthread_t Vdec_Thread;
@@ -780,7 +833,7 @@ HI_S32 Sample_Common_Sys::Vio_8_1080P_Test()
 //        goto END_8_1080P_1;
 //    }
 
-    s32Ret = m_Sys_Vo.SAMPLE_COMM_VI_BindVpss(enViMode);
+    s32Ret = m_Sys_Vo.SAMPLE_COMM_VI_BindVpss(enViMode,m_pVpss[0]->m_Grp_Tab,s32VpssGrpCnt);
     if (HI_SUCCESS != s32Ret)
     {
         SAMPLE_PRT("Vi bind Vpss failed!\n");
@@ -931,12 +984,252 @@ END_8_1080P_0:	//system exit
 
 }
 
+//static HI_S32 SAMPLE_COMM_VENC_StartGetStream(HI_S32 s32Cnt)
+//{
+//    SAMPLE_VENC_GETSTREAM_PARA_S gs_stPara;
+//    gs_stPara.bThreadStart = HI_TRUE;
+//    gs_stPara.s32Cnt = s32Cnt;
+//    return pthread_create(&gs_VencPid, 0, SAMPLE_COMM_VENC_GetVencStreamProc, (HI_VOID*)&gs_stPara);
+//}
+
+
+HI_S32 Sample_Common_Sys::Vio_Venc_Test()
+{
+    PAYLOAD_TYPE_E enPayLoad[2]= {PT_H265, PT_H264};
+    PIC_SIZE_E enSize[2] = {PIC_HD1080, PIC_HD1080};
+    HI_U32 u32Profile = 0;
+    VIDEO_NORM_E gs_enNorm_venc = VIDEO_ENCODING_MODE_NTSC;
+
+//    VB_CONF_S stVbConf;
+    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
+    HI_S32 s32VpssGrpCnt = 8;
+
+    VPSS_GRP VpssGrp;
+    VPSS_CHN VpssChn;
+    VPSS_GRP_ATTR_S stVpssGrpAttr = {0};
+
+
+    VENC_CHN VencChn;
+    SAMPLE_RC_E enRcMode= SAMPLE_RC_CBR;
+
+    HI_S32 s32ChnNum=2;
+
+    HI_S32 s32Ret = HI_SUCCESS;
+//    HI_U32 u32BlkSize;
+    SIZE_S stSize;
+//    char c;
+
+
+//    /******************************************
+//     step  1: init sys variable
+//    ******************************************/
+//    memset(&stVbConf,0,sizeof(VB_CONF_S));
+
+//    stVbConf.u32MaxPoolCnt = 128;
+//    /*video buffer*/
+//	if(s32ChnNum >= 1)
+//    {
+//        u32BlkSize = SAMPLE_COMM_SYS_CalcPicVbBlkSize(gs_enNorm_venc,\
+//	                enSize[0], SAMPLE_PIXEL_FORMAT, SAMPLE_SYS_ALIGN_WIDTH,COMPRESS_MODE_SEG);
+//	    stVbConf.astCommPool[0].u32BlkSize = u32BlkSize;
+//	    stVbConf.astCommPool[0].u32BlkCnt = 32;
+//	}
+//	if(s32ChnNum >= 2)
+//    {
+//        u32BlkSize = SAMPLE_COMM_SYS_CalcPicVbBlkSize(gs_enNorm_venc,\
+//	                enSize[1], SAMPLE_PIXEL_FORMAT, SAMPLE_SYS_ALIGN_WIDTH,COMPRESS_MODE_SEG);
+//	    stVbConf.astCommPool[1].u32BlkSize = u32BlkSize;
+//	    stVbConf.astCommPool[1].u32BlkCnt  =32;
+//	}
+
+
+//    /******************************************
+//     step 2: mpp system init.
+//    ******************************************/
+//    s32Ret = SAMPLE_COMM_SYS_Init(&stVbConf);
+//    if (HI_SUCCESS != s32Ret)
+//    {
+//        SAMPLE_PRT("system init failed with %d!\n", s32Ret);
+//        goto END_VENC_1080P_CLASSIC_0;
+//    }
+
+    /******************************************
+     step 3: start vi dev & chn to capture
+    ******************************************/
+    s32Ret = m_Sys_Vo.SAMPLE_COMM_VI_Start(enViMode,gs_enNorm_venc);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("start vi failed!\n");
+//        goto END_VENC_1080P_CLASSIC_1;
+    }
+
+    /******************************************
+     step 4: start vpss and vi bind vpss
+    ******************************************/
+    s32Ret = SAMPLE_COMM_SYS_GetPicSize(gs_enNorm_venc, enSize[0], &stSize);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("SAMPLE_COMM_SYS_GetPicSize failed!\n");
+//        goto END_VENC_1080P_CLASSIC_1;
+    }
+
+    if(s32ChnNum >= 1)
+    {
+        VpssGrp = 0;
+        memset(&stVpssGrpAttr,0,sizeof(VPSS_GRP_ATTR_S));
+        stVpssGrpAttr.u32MaxW 	= stSize.u32Width;
+        stVpssGrpAttr.u32MaxH 	= stSize.u32Height;
+        stVpssGrpAttr.bNrEn 	= HI_TRUE;
+        stVpssGrpAttr.enDieMode = VPSS_DIE_MODE_NODIE;
+        stVpssGrpAttr.enPixFmt 	= SAMPLE_PIXEL_FORMAT;
+        m_pVpss[0] = new Sample_Common_Vpss(s32VpssGrpCnt,VPSS_MAX_CHN_NUM,&stSize,&stVpssGrpAttr);
+//        s32Ret = SAMPLE_COMM_VPSS_Start(s32VpssGrpCnt, &stSize,s32ChnNum , &stVpssGrpAttr);
+//        if (HI_SUCCESS != s32Ret)
+//        {
+//            SAMPLE_PRT("Start Vpss failed!\n");
+//            goto END_VENC_1080P_CLASSIC_2;
+//        }
+
+        s32Ret = m_Sys_Vo.SAMPLE_COMM_VI_BindVpss(enViMode,m_pVpss[0]->m_Grp_Tab,s32VpssGrpCnt);
+        if (HI_SUCCESS != s32Ret)
+        {
+            SAMPLE_PRT("Vi bind Vpss failed!\n");
+//            goto END_VENC_1080P_CLASSIC_3;
+        }
+
+    }
+
+//    /******************************************
+//     step 5: start stream venc
+//    ******************************************/
+//    /*** HD1080P **/
+//    printf("\t c) cbr.\n");
+//    printf("\t v) vbr.\n");
+//    printf("\t a) avbr.\n");
+//    printf("\t f) fixQp\n");
+//    printf("please input choose rc mode!\n");
+//    c = (char)getchar();
+//    switch(c)
+//    {
+//        case 'c':
+//            enRcMode = SAMPLE_RC_CBR;
+//            break;
+//        case 'v':
+//            enRcMode = SAMPLE_RC_VBR;
+//            break;
+//        case 'a':
+//            enRcMode = SAMPLE_RC_AVBR;
+//            break;
+//        case 'f':
+//            enRcMode = SAMPLE_RC_FIXQP;
+//            break;
+//        default:
+//            printf("rc mode! is invaild!\n");
+//            goto END_VENC_1080P_CLASSIC_3;
+//    }
+
+    /*** enSize[0] **/
+    if(s32ChnNum >= 1)
+    {
+        VpssGrp = 0;
+        VpssChn = 0;
+        VencChn = 0;
+
+        m_Sys_Venc[0] = new Sample_Common_Venc();
+        s32Ret = m_Sys_Venc[0]->SAMPLE_COMM_VENC_Start(enPayLoad[0],\
+                                       gs_enNorm_venc, enSize[0], enRcMode,u32Profile);
+        if (HI_SUCCESS != s32Ret)
+        {
+            SAMPLE_PRT("Start Venc failed!\n");
+//            goto END_VENC_1080P_CLASSIC_4;
+        }
+
+        s32Ret = m_Sys_Venc[0]->SAMPLE_COMM_VENC_BindVpss(m_pVpss[0]->m_Grp_Tab[VpssGrp], VpssChn);
+        if (HI_SUCCESS != s32Ret)
+        {
+            SAMPLE_PRT("Start Venc failed!\n");
+//            goto END_VENC_1080P_CLASSIC_4;
+        }
+    }
+
+    /*** enSize[1] **/
+    if(s32ChnNum >= 2)
+    {
+        VpssChn = 1;
+        VencChn = 1;
+        m_Sys_Venc[1] = new Sample_Common_Venc();
+        s32Ret = m_Sys_Venc[1]->SAMPLE_COMM_VENC_Start( enPayLoad[1], \
+                                       gs_enNorm_venc, enSize[1], enRcMode,u32Profile);
+        if (HI_SUCCESS != s32Ret)
+        {
+            SAMPLE_PRT("Start Venc failed!\n");
+//            goto END_VENC_1080P_CLASSIC_4;
+        }
+
+        s32Ret = m_Sys_Venc[1]->SAMPLE_COMM_VENC_BindVpss(VpssGrp, VpssChn);
+        if (HI_SUCCESS != s32Ret)
+        {
+            SAMPLE_PRT("Start Venc failed!\n");
+//            goto END_VENC_1080P_CLASSIC_4;
+        }
+    }
+    /******************************************
+     step 6: stream venc process -- get stream, then save it to file.
+    ******************************************/
+    s32Ret = SAMPLE_COMM_VENC_StartGetStream(s32ChnNum);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start Venc failed!\n");
+//        goto END_VENC_1080P_CLASSIC_4;
+    }
+
+//    printf("please press ENTER to exit this sample\n");
+//    getchar();
+//    getchar();
+
+//    /******************************************
+//     step 7: exit process
+//    ******************************************/
+//    SAMPLE_COMM_VENC_StopGetStream();
+
+//END_VENC_1080P_CLASSIC_4:
+
+//    VpssGrp = 0;
+//    switch(s32ChnNum)
+//    {
+//        case 2:
+//            VpssChn = 1;
+//            VencChn = 1;
+//            m_Sys_Venc->SAMPLE_COMM_VENC_UnBindVpss(VencChn, VpssGrp, VpssChn);
+//            m_Sys_Venc->SAMPLE_COMM_VENC_Stop(VencChn);
+//        case 1:
+//            VpssChn = 0;
+//            VencChn = 0;
+//            m_Sys_Venc->SAMPLE_COMM_VENC_UnBindVpss(VencChn, VpssGrp, VpssChn);
+//            m_Sys_Venc->SAMPLE_COMM_VENC_Stop(VencChn);
+//            break;
+
+//    }
+
+//END_VENC_1080P_CLASSIC_3:    //unbind vpss and vi
+//    m_Sys_Vo.SAMPLE_COMM_VI_UnBindVpss(enViMode);
+//END_VENC_1080P_CLASSIC_2:    //vpss stop
+//    m_pVpss[0]->SAMPLE_COMM_VPSS_Stop();
+//END_VENC_1080P_CLASSIC_1:	//vi stop
+//    m_Sys_Vo.SAMPLE_COMM_VI_Stop(enViMode);
+//END_VENC_1080P_CLASSIC_0:	//system exit
+//    SAMPLE_COMM_SYS_Exit();
+
+    return s32Ret;
+}
 
 Sample_Common_Sys::~Sample_Common_Sys()
 {
 
 
     delete m_Sys_Vdec;
+//    delete [] m_Sys_Venc;
+//    delete [] m_pVpss;
       qDebug("Sample_Common_Sys exit\n");
 //    close(m_sys_hifb_fd);
 //    SAMPLE_COMM_VO_StopLayer(m_FbVoLayer);
