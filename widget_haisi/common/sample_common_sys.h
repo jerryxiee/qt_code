@@ -22,9 +22,7 @@ public:
     HI_S32 SAMPLE_COMM_SYS_Init(VB_CONF_S *pstVbConf);
     HI_S32 SAMPLE_COMM_SYS_Payload2FilePostfix(PAYLOAD_TYPE_E enPayload, HI_CHAR* szFilePostfix);
     HI_VOID SAMPLE_COMM_SYS_Exit(void);
-
-    HI_VOID	SAMPLE_COMM_VDEC_ModCommPoolConf(VB_CONF_S *pstModVbConf,PAYLOAD_TYPE_E enType, SIZE_S *pstSize, HI_S32 s32ChnNum, HI_BOOL bCompress);
-    HI_S32	SAMPLE_COMM_VDEC_InitModCommVb(VB_CONF_S *pstModVbConf);
+//    HI_BOOL SYS_INIT_ISSUCESS();
 
     static HI_S32 SAMPLE_COMM_SYS_GetPicSize(VIDEO_NORM_E enNorm, PIC_SIZE_E enPicSize, SIZE_S *pstSize);
     static HI_U32 SAMPLE_COMM_SYS_CalcHistVbBlkSize(VIDEO_NORM_E enNorm, PIC_SIZE_E enPicSize, SIZE_S *pstHistBlkSize, HI_U32 u32AlignWidth);
@@ -45,19 +43,22 @@ public:
 
 
 public:
-    HI_U32 m_u32PicWidth;
-    HI_U32 m_u32PicHeight;
-   // VO_DEV m_FbVoDev;
+//    HI_U32 m_u32PicWidth;
+//    HI_U32 m_u32PicHeight;
     VO_CHN m_FbVoChn;
     VPSS_GRP m_VpssDestGrp;
     VPSS_CHN m_VpssChn;
     //VO_LAYER m_FbVoLayer;
     VO_PUB_ATTR_S m_stFbPubAttr;
+    VO_PUB_ATTR_S m_stPubAttr;
     VO_VIDEO_LAYER_ATTR_S m_stFbLayerAttr;
     HI_S32 Sys_init_Sucess;
 
 private:
-    HI_BOOL Set_Alpha(HIFB_ALPHA_S *pstAlpha);
+    const struct fb_bitfield s_a32 = {24,8,0};
+    const struct fb_bitfield s_r32 = {16,8,0};
+    const struct fb_bitfield s_g32 = {8,8,0};
+    const struct fb_bitfield s_b32 = {0,8,0};
 
     static VO_DEV m_FbVoDev;
     static VO_LAYER m_FbVoLayer;

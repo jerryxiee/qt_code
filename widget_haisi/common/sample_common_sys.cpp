@@ -16,16 +16,10 @@
 #include <signal.h>
 #include "hifb.h"
 
-static struct fb_bitfield s_a32 = {24,8,0};
-static struct fb_bitfield s_r32 = {16,8,0};
-static struct fb_bitfield s_g32 = {8,8,0};
-static struct fb_bitfield s_b32 = {0,8,0};
-//static VO_DEV VoDev = SAMPLE_VO_DEV_DHD0;
 VO_DEV Sample_Common_Sys::m_FbVoDev = SAMPLE_VO_DEV_DHD0;
 VO_DEV Sample_Common_Sys::m_FbVoLayer = 0;
 
-//HI_S32 g_s32VBSource = 0;
-//VB_POOL g_ahVbPool[VB_MAX_POOLS] ;//= {[0 ... (VB_MAX_POOLS-1)] = VB_INVALID_POOLID};
+
 
 
 #if 0
@@ -234,53 +228,21 @@ END1:
 }
 
 #endif
-//struct vdec_attr{
-//    VDEC_CHN_ATTR_S stVdecChnAttr[VDEC_MAX_CHN_NUM];
-//    VdecThreadParam stVdecSend[VDEC_MAX_CHN_NUM];
-//    //VPSS_GRP_ATTR_S stVpssGrpAttr[VDEC_MAX_CHN_NUM];
-//    pthread_t   VdecThread[2*VDEC_MAX_CHN_NUM];
 
-
-//};
 
 Sample_Common_Sys::Sample_Common_Sys()
 {
 #if 1
     HI_S32 s32Ret = HI_SUCCESS;
-    HI_U32 i;
-    //pthread_t phifb0 = -1;
-
-    //PTHREAD_HIFB_SAMPLE_INFO stInfo0;
-//    HI_U32 u32PicWidth         = WIDTH;
-//    HI_U32 u32PicHeight        = HEIGHT;
+//    HI_U32 i;
     SIZE_S  stSize;
 
-
-    VO_PUB_ATTR_S stPubAttr;
-    VO_VIDEO_LAYER_ATTR_S stLayerAttr;
-    HI_U32 u32VoFrmRate;
-
     VB_CONF_S       stVbConf;
-//    VB_CONF_S       stModVbConf;
-    //HI_U32 u32BlkSize;
-
     struct fb_var_screeninfo stVarInfo;
     HI_CHAR file[12] = "/dev/fb0";
-    //PTHREAD_HIFB_SAMPLE_INFO *pstInfo;
-    //FILE *fp;
     HI_BOOL bEnable;
     HIFB_DDRZONE_S stDDRZonePara;
     HIFB_LAYER_INFO_S stLayerinfo;
-
-    HI_U32 u32VdCnt = 1, u32GrpCnt = 1;
-    VDEC_CHN_ATTR_S stVdecChnAttr[VDEC_MAX_CHN_NUM];
-    //VdecThreadParam stVdecSend[VDEC_MAX_CHN_NUM];
-    VPSS_GRP_ATTR_S stVpssGrpAttr[VDEC_MAX_CHN_NUM];
-    SIZE_S stRotateSize;
-    //HIFB_BUFFER_S stCanvasBuf;
-    //HI_CHAR *pcBuf;
-    //HI_S32 i = 0;
-    //struct vdec_attr vdec;
 
     stSize.u32Width = HD_WIDTH;
     stSize.u32Height = HD_HEIGHT;
@@ -291,16 +253,6 @@ Sample_Common_Sys::Sample_Common_Sys()
      step  1: init variable
     ******************************************/
     memset(&stVbConf,0,sizeof(VB_CONF_S));
-    //memset(&stModVbConf,0,sizeof(VB_CONF_S));
-
-//    u32BlkSize = CEILING_2_POWER(u32PicWidth,SAMPLE_SYS_ALIGN_WIDTH)\
-//        * CEILING_2_POWER(u32PicHeight,SAMPLE_SYS_ALIGN_WIDTH) *2;
-
-//    stVbConf.u32MaxPoolCnt = 128;
-
-//    stVbConf.astCommPool[0].u32BlkSize = u32BlkSize;
-//    stVbConf.astCommPool[0].u32BlkCnt =  6;
-
     /******************************************
      step 2: mpp system init.
     ******************************************/
@@ -310,43 +262,7 @@ Sample_Common_Sys::Sample_Common_Sys()
         SAMPLE_PRT("system init failed with %d!\n", s32Ret);
         goto SAMPLE_HIFB_NoneBufMode_0;
     }
-#if 1
-    /************************************************
-      init mod common VB
-    *************************************************/
-    if(nullptr != m_Sys_Vdec){
-//        SAMPLE_COMM_VDEC_ModCommPoolConf(&stModVbConf, PT_H264, &stSize, u32VdCnt, HI_FALSE);
-//        s32Ret = SAMPLE_COMM_VDEC_InitModCommVb(&stModVbConf);
-//        if(s32Ret != HI_SUCCESS)
-//        {
-//            SAMPLE_PRT("init mod common vb fail for %#x!\n", s32Ret);
-//            goto SAMPLE_HIFB_NoneBufMode_0;
-//        }
 
-        /************************************************
-        step3:  start VDEC
-        *************************************************/
-//        m_Sys_Vdec->SAMPLE_COMM_VDEC_ChnAttr(u32VdCnt, &stVdecChnAttr[0], PT_H264, &stSize);
-//        s32Ret = m_Sys_Vdec->SAMPLE_COMM_VDEC_Start(u32VdCnt, &stVdecChnAttr[0],nullptr);
-//        if(s32Ret != HI_SUCCESS)
-//        {
-//            SAMPLE_PRT("start VDEC fail for %#x!\n", s32Ret);
-//            goto END2;
-//        }
-
-        /************************************************
-        step4:  start VPSS
-        *************************************************/
-//        stRotateSize.u32Width = stRotateSize.u32Height = MAX2(stSize.u32Width, stSize.u32Height);
-//        SAMPLE_COMM_VDEC_VpssGrpAttr(u32GrpCnt, &stVpssGrpAttr[0], &stRotateSize);
-//        s32Ret = SAMPLE_COMM_VPSS_Start(u32GrpCnt, &stRotateSize, 2, &stVpssGrpAttr[0]);
-//        if(s32Ret != HI_SUCCESS)
-//        {
-//            SAMPLE_PRT("start VPSS fail for %#x!\n", s32Ret);
-//            goto END3;
-//        }
-    }
-#endif
     /******************************************
      step 3:  start vo hd0.
     *****************************************/
@@ -363,48 +279,22 @@ Sample_Common_Sys::Sample_Common_Sys()
         SAMPLE_PRT("BindGraphicLayer failed with 0x%x!\n", s32Ret);
         goto SAMPLE_HIFB_NoneBufMode_0;
     }
-    stPubAttr.enIntfSync = VO_OUTPUT_1080P60;
-    stPubAttr.enIntfType = VO_INTF_VGA;
-    stPubAttr.u32BgColor = 0xFF;
+    m_stPubAttr.enIntfSync = VO_OUTPUT_1080P60;
+    m_stPubAttr.enIntfType = VO_INTF_VGA;
+    m_stPubAttr.u32BgColor = 0xFF;
 
-    stLayerAttr.bClusterMode = HI_FALSE;
-    stLayerAttr.bDoubleFrame = HI_FALSE;
-    stLayerAttr.enPixFormat = PIXEL_FORMAT_YUV_SEMIPLANAR_420;
-
-    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_GetWH(stPubAttr.enIntfSync,&stSize.u32Width,\
-        &stSize.u32Height,&u32VoFrmRate);
-    if (HI_SUCCESS != s32Ret)
-    {
-        SAMPLE_PRT("get vo wh failed with %d!\n", s32Ret);
-        goto SAMPLE_HIFB_NoneBufMode_0;
-    }
-    memcpy(&stLayerAttr.stImageSize,&stSize,sizeof(stSize));
-
-    stLayerAttr.u32DispFrmRt = 30 ;
-    stLayerAttr.stDispRect.s32X = 0;
-    stLayerAttr.stDispRect.s32Y = 0;
-    stLayerAttr.stDispRect.u32Width = stSize.u32Width;
-    stLayerAttr.stDispRect.u32Height = stSize.u32Height;
-
-    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartDev(m_FbVoDev, &stPubAttr);
+    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartDev(&m_stPubAttr);
     if (HI_SUCCESS != s32Ret)
     {
         SAMPLE_PRT("start vo dev failed with %d!\n", s32Ret);
-        goto SAMPLE_HIFB_NoneBufMode_0;
-    }
-
-    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartLayer(m_FbVoLayer, &stLayerAttr);
-    if (HI_SUCCESS != s32Ret)
-    {
-        SAMPLE_PRT("start vo layer failed with %d!\n", s32Ret);
         goto SAMPLE_HIFB_NoneBufMode_1;
     }
 
-    if (stPubAttr.enIntfType & VO_INTF_HDMI)
+    if (m_stPubAttr.enIntfType & VO_INTF_HDMI)
     {
 
 #ifndef HI_FPGA
-        s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_HdmiStart(stPubAttr.enIntfSync);
+        s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_HdmiStart(m_stPubAttr.enIntfSync);
         if (HI_SUCCESS != s32Ret)
         {
             SAMPLE_PRT("start HDMI failed with %d!\n", s32Ret);
@@ -412,39 +302,6 @@ Sample_Common_Sys::Sample_Common_Sys()
         }
 #endif
     }
-
-//    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartChn(m_FbVoLayer, VO_MODE_1MUX);
-//    if(s32Ret != HI_SUCCESS)
-//    {
-//        SAMPLE_PRT("vdec bind vpss fail for %#x!\n", s32Ret);
-//        goto END4_4;
-//    }
-
-    /************************************************
-    step6:  VDEC bind VPSS
-    *************************************************/
-//    for(i=0; i<u32GrpCnt; i++)
-//    {
-//        s32Ret = SAMPLE_COMM_VDEC_BindVpss(i, i);
-//        if(s32Ret != HI_SUCCESS)
-//        {
-//            SAMPLE_PRT("vdec bind vpss fail for %#x!\n", s32Ret);
-//            goto END5;
-//        }
-//    }
-
-    /************************************************
-    step7:  VPSS bind VO
-    *************************************************/
-//    for(i=0; i<u32GrpCnt; i++)
-//    {
-//        s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_BindVpss(m_FbVoLayer, i, i, VPSS_CHN0);
-//        if(s32Ret != HI_SUCCESS)
-//        {
-//            SAMPLE_PRT("vpss bind vo fail for %#x!\n", s32Ret);
-//            goto END6;
-//        }
-//    }
 
 
     /* 1. open framebuffer device overlay 0 */
@@ -522,47 +379,16 @@ Sample_Common_Sys::Sample_Common_Sys()
         goto SAMPLE_HIFB_NoneBufMode_2;
     }
 
-//    pthread_t Vdec_Thread;
-//    pthread_create(&Vdec_Thread, 0, vdec_stream, (HI_VOID *)&stVdecChnAttr[0]);
-
     Sys_init_Sucess = s32Ret;
     qDebug("Sample_Common_Sys init sucess\n");
 
     return ;
 
-//END6:
-//    for(i=0; i<u32GrpCnt; i++)
-//    {
-//        s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_UnBindVpss(m_FbVoLayer, i, i, VPSS_CHN0);
-//        if(s32Ret != HI_SUCCESS)
-//        {
-//            SAMPLE_PRT("vpss unbind vo fail for %#x!\n", s32Ret);
-//        }
-//    }
-
-//END5:
-//    for(i=0; i<u32GrpCnt; i++)
-//    {
-//        s32Ret = SAMPLE_COMM_VDEC_UnBindVpss(i, i);
-//        if(s32Ret != HI_SUCCESS)
-//        {
-//            SAMPLE_PRT("vdec unbind vpss fail for %#x!\n", s32Ret);
-//        }
-//    }
-
-
-//END4_4:
-//    m_Sys_Vo.SAMPLE_COMM_VO_StopChn(m_FbVoLayer, VO_MODE_4MUX);
 
 SAMPLE_HIFB_NoneBufMode_2:
     m_Sys_Vo.SAMPLE_COMM_VO_StopLayer(m_FbVoLayer);
 SAMPLE_HIFB_NoneBufMode_1:
-    m_Sys_Vo.SAMPLE_COMM_VO_StopDev(m_FbVoDev);
-//END3:
-//    SAMPLE_COMM_VPSS_Stop(u32GrpCnt, VPSS_CHN0);
-
-//END2:
-//    m_Sys_Vdec->SAMPLE_COMM_VDEC_Stop(u32VdCnt);
+    m_Sys_Vo.SAMPLE_COMM_VO_StopDev();
 SAMPLE_HIFB_NoneBufMode_0:
     SAMPLE_COMM_SYS_Exit();
 
@@ -574,10 +400,14 @@ SAMPLE_HIFB_NoneBufMode_0:
 #endif
 }
 
+//HI_BOOL Sample_Common_Sys::SYS_INIT_ISSUCESS()
+//{
+//    return (Sys_init_Sucess > 0 ? HI_TRUE : HI_FALSE);
+//}
 void *vdec_stream(void *argv)
 {
 
-    HI_U32 Vdec_Chn = 4;
+    HI_U32 Vdec_Chn = 9;
     //VDEC_CHN_ATTR_S stVdecChnAttr[VDEC_MAX_CHN_NUM];
     VdecThreadParam stVdecSend[VDEC_MAX_CHN_NUM];
     //VPSS_GRP_ATTR_S stVpssGrpAttr[VDEC_MAX_CHN_NUM];
@@ -597,9 +427,9 @@ void *vdec_stream(void *argv)
     /***  set the rotational angle of decode pic  ***/
 
     /***  control the send stream thread and get luma info thread  ***/
-    //SAMPLE_COMM_VDEC_CmdCtrl(1, &stVdecSend[0]);
-    printf("enter key\n");
-    getchar();
+    SAMPLE_COMM_VDEC_CmdCtrl(1, &stVdecSend[0]);
+//    printf("enter key\n");
+//    getchar();
 
     SAMPLE_COMM_VDEC_StopSendStream(Vdec_Chn, &stVdecSend[0], &VdecThread[0]);
 
@@ -609,15 +439,16 @@ void *vdec_stream(void *argv)
 HI_S32 Sample_Common_Sys::VdecTest()
 {
     HI_S32 i;
-    HI_S32 Vdec_Chn = 4;
+    HI_S32 Vdec_Chn = 9;
     HI_S32 s32Ret;
     VDEC_CHN_ATTR_S stVdecChnAttr[VDEC_MAX_CHN_NUM];
     SIZE_S  stSize;
     VPSS_GRP_ATTR_S stVpssGrpAttr = {0};
+    VO_VIDEO_LAYER_ATTR_S stLayerAttr;
     SAMPLE_RC_E enRcMode= SAMPLE_RC_CBR;
     HI_U32 u32Profile = 0;
     VIDEO_NORM_E gs_enNorm_venc = VIDEO_ENCODING_MODE_NTSC;
-
+    HI_U32 u32VoFrmRate;
     VB_CONF_S       stModVbConf;
     SIZE_S stRotateSize;
 //    MPP_CHN_S stSrcChn;
@@ -629,8 +460,8 @@ HI_S32 Sample_Common_Sys::VdecTest()
     m_Sys_Vdec = new Sample_Common_Vdec(Vdec_Chn,1,0);
 
     printf("init CommonPool\n");
-    SAMPLE_COMM_VDEC_ModCommPoolConf(&stModVbConf, PT_H264, &stSize, Vdec_Chn, HI_FALSE);
-    s32Ret = SAMPLE_COMM_VDEC_InitModCommVb(&stModVbConf);
+    m_Sys_Vdec->SAMPLE_COMM_VDEC_ModCommPoolConf(&stModVbConf, PT_H264, &stSize, Vdec_Chn, HI_FALSE);
+    s32Ret = m_Sys_Vdec->SAMPLE_COMM_VDEC_InitModCommVb(&stModVbConf);
     if(s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("init mod common vb fail for %#x!\n", s32Ret);
@@ -665,6 +496,34 @@ HI_S32 Sample_Common_Sys::VdecTest()
     }
 
     printf("start vo\n");
+
+    stLayerAttr.bClusterMode = HI_FALSE;
+    stLayerAttr.bDoubleFrame = HI_FALSE;
+    stLayerAttr.enPixFormat = PIXEL_FORMAT_YUV_SEMIPLANAR_420;
+
+    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_GetWH(m_stPubAttr.enIntfSync,&stSize.u32Width,\
+        &stSize.u32Height,&u32VoFrmRate);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("get vo wh failed with %d!\n", s32Ret);
+        goto END4_4;
+    }
+    memcpy(&stLayerAttr.stImageSize,&stSize,sizeof(stSize));
+
+    stLayerAttr.u32DispFrmRt = 30 ;
+    stLayerAttr.stDispRect.s32X = 0;
+    stLayerAttr.stDispRect.s32Y = 0;
+    stLayerAttr.stDispRect.u32Width = stSize.u32Width;
+    stLayerAttr.stDispRect.u32Height = stSize.u32Height;
+
+    s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartLayer(m_FbVoLayer, &stLayerAttr);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("start vo layer failed with %d!\n", s32Ret);
+        goto END4_4;
+    }
+
+
     s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartChn(m_FbVoLayer, VO_MODE_9MUX);
     if(s32Ret != HI_SUCCESS)
     {
@@ -697,7 +556,7 @@ HI_S32 Sample_Common_Sys::VdecTest()
 
 
     }
-
+#if 0
     //venc
     printf("start venc h264\n");
     m_Sys_Venc[0] = new Sample_Common_Venc();
@@ -741,6 +600,8 @@ HI_S32 Sample_Common_Sys::VdecTest()
         SAMPLE_PRT("Start Venc failed!\n");
 //        goto END_VENC_1080P_CLASSIC_4;
     }
+
+#endif
 
     pthread_t Vdec_Thread;
     pthread_create(&Vdec_Thread, 0, vdec_stream, (HI_VOID *)&stVdecChnAttr[0]);
@@ -1544,7 +1405,7 @@ HI_S32 Sample_Common_Sys::SAMPLE_COMM_SYS_Init(VB_CONF_S *pstVbConf)
     stVbConf.u32MaxPoolCnt = 128;
     stVbConf.astCommPool[0].u32BlkSize = CEILING_2_POWER(u32PicWidth,SAMPLE_SYS_ALIGN_WIDTH)\
                                                 * CEILING_2_POWER(u32PicHeight,SAMPLE_SYS_ALIGN_WIDTH) *2;;
-    stVbConf.astCommPool[0].u32BlkCnt =  64;
+    stVbConf.astCommPool[0].u32BlkCnt =  16;
 
 
     HI_MPI_SYS_Exit();
@@ -1591,78 +1452,6 @@ HI_S32 Sample_Common_Sys::SAMPLE_COMM_SYS_Init(VB_CONF_S *pstVbConf)
     if (HI_SUCCESS != s32Ret)
     {
         SAMPLE_PRT("HI_MPI_SYS_Init failed!\n");
-        return HI_FAILURE;
-    }
-
-    return HI_SUCCESS;
-}
-
-HI_VOID	Sample_Common_Sys::SAMPLE_COMM_VDEC_ModCommPoolConf(VB_CONF_S *pstModVbConf,
-    PAYLOAD_TYPE_E enType, SIZE_S *pstSize, HI_S32 s32ChnNum, HI_BOOL bCompress)
-{
-    HI_S32 PicSize, PmvSize;
-
-    memset(pstModVbConf, 0, sizeof(VB_CONF_S));
-    pstModVbConf->u32MaxPoolCnt = 2;
-
-    VB_PIC_BLK_SIZE(pstSize->u32Width, pstSize->u32Height, enType, PicSize);
-    /***********vdec compressed vb needs header****************/
-    pstModVbConf->astCommPool[0].u32BlkSize = PicSize;
-    pstModVbConf->astCommPool[0].u32BlkCnt  = 5*s32ChnNum;
-
-    /* NOTICE:
-    1. if the VDEC channel is H264 channel and support to decode B frame, then you should allocate PmvBuffer
-    2. if the VDEC channel is MPEG4 channel, then you should allocate PmvBuffer.
-    */
-    if(PT_H265 == enType)
-    {
-        VB_PMV_BLK_SIZE(pstSize->u32Width, pstSize->u32Height, enType, PmvSize);
-        pstModVbConf->astCommPool[1].u32BlkSize = PmvSize;
-        pstModVbConf->astCommPool[1].u32BlkCnt  = 5*s32ChnNum;
-    }
-}
-
-HI_S32	Sample_Common_Sys::SAMPLE_COMM_VDEC_InitModCommVb(VB_CONF_S *pstModVbConf)
-{
-    HI_S32 i;
-    HI_S32 s32Ret;
-
-    HI_MPI_VB_ExitModCommPool(VB_UID_VDEC);
-
-    if(0 == m_Sys_Vdec->g_s32VBSource)
-    {
-        CHECK_RET(HI_MPI_VB_SetModPoolConf(VB_UID_VDEC, pstModVbConf), "HI_MPI_VB_SetModPoolConf");
-        CHECK_RET(HI_MPI_VB_InitModCommPool(VB_UID_VDEC), "HI_MPI_VB_InitModCommPool");
-    }
-    else if (2 == m_Sys_Vdec->g_s32VBSource)
-    {
-        if (pstModVbConf->u32MaxPoolCnt > VB_MAX_POOLS)
-        {
-            printf("vb pool num(%d) is larger than VB_MAX_POOLS. \n", pstModVbConf->u32MaxPoolCnt);
-            return HI_FAILURE;
-        }
-        for (i = 0; i < pstModVbConf->u32MaxPoolCnt; i++)
-        {
-            if (pstModVbConf->astCommPool[i].u32BlkSize && pstModVbConf->astCommPool[i].u32BlkCnt)
-            {
-                m_Sys_Vdec->g_ahVbPool[i] = HI_MPI_VB_CreatePool(pstModVbConf->astCommPool[i].u32BlkSize,
-                    pstModVbConf->astCommPool[i].u32BlkCnt, NULL);
-                if (VB_INVALID_POOLID == m_Sys_Vdec->g_ahVbPool[i])
-                    goto fail;
-            }
-        }
-        return HI_SUCCESS;
-
-    fail:
-        for (;i>=0;i--)
-        {
-            if (VB_INVALID_POOLID != m_Sys_Vdec->g_ahVbPool[i])
-            {
-                s32Ret = HI_MPI_VB_DestroyPool(m_Sys_Vdec->g_ahVbPool[i]);
-                HI_ASSERT(HI_SUCCESS == s32Ret);
-                m_Sys_Vdec->g_ahVbPool[i] = VB_INVALID_POOLID;
-            }
-        }
         return HI_FAILURE;
     }
 

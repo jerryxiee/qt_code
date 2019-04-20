@@ -348,3 +348,75 @@ HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_MemConfig(HI_VOID)
 
     return HI_SUCCESS;
 }
+
+HI_VOID	Sample_Common_Vdec::SAMPLE_COMM_VDEC_ModCommPoolConf(VB_CONF_S *pstModVbConf,
+    PAYLOAD_TYPE_E enType, SIZE_S *pstSize, HI_S32 s32ChnNum, HI_BOOL bCompress)
+{
+    HI_S32 PicSize, PmvSize;
+
+    memset(pstModVbConf, 0, sizeof(VB_CONF_S));
+    pstModVbConf->u32MaxPoolCnt = 2;
+
+    VB_PIC_BLK_SIZE(pstSize->u32Width, pstSize->u32Height, enType, PicSize);
+    /***********vdec compressed vb needs header****************/
+    pstModVbConf->astCommPool[0].u32BlkSize = PicSize;
+    pstModVbConf->astCommPool[0].u32BlkCnt  = 5*s32ChnNum;
+
+    /* NOTICE:
+    1. if the VDEC channel is H264 channel and support to decode B frame, then you should allocate PmvBuffer
+    2. if the VDEC channel is MPEG4 channel, then you should allocate PmvBuffer.
+    */
+    if(PT_H265 == enType)
+    {
+        VB_PMV_BLK_SIZE(pstSize->u32Width, pstSize->u32Height, enType, PmvSize);
+        pstModVbConf->astCommPool[1].u32BlkSize = PmvSize;
+        pstModVbConf->astCommPool[1].u32BlkCnt  = 5*s32ChnNum;
+    }
+}
+
+HI_S32	Sample_Common_Vdec::SAMPLE_COMM_VDEC_InitModCommVb(VB_CONF_S *pstModVbConf)
+{
+    HI_S32 i;
+    HI_S32 s32Ret;
+
+    HI_MPI_VB_ExitModCommPool(VB_UID_VDEC);
+
+    if(0 == g_s32VBSource)
+    {
+        CHECK_RET(HI_MPI_VB_SetModPoolConf(VB_UID_VDEC, pstModVbConf), "HI_MPI_VB_SetModPoolConf");
+        CHECK_RET(HI_MPI_VB_InitModCommPool(VB_UID_VDEC), "HI_MPI_VB_InitModCommPool");
+    }
+    else if (2 == g_s32VBSource)
+    {
+        if (pstModVbConf->u32MaxPoolCnt > VB_MAX_POOLS)
+        {
+            printf("vb pool num(%d) is larger than VB_MAX_POOLS. \n", pstModVbConf->u32MaxPoolCnt);
+            return HI_FAILURE;
+        }
+        for (i = 0; i < pstModVbConf->u32MaxPoolCnt; i++)
+        {
+            if (pstModVbConf->astCommPool[i].u32BlkSize && pstModVbConf->astCommPool[i].u32BlkCnt)
+            {
+                g_ahVbPool[i] = HI_MPI_VB_CreatePool(pstModVbConf->astCommPool[i].u32BlkSize,
+                    pstModVbConf->astCommPool[i].u32BlkCnt, nullptr);
+                if (VB_INVALID_POOLID == g_ahVbPool[i])
+                    goto fail;
+            }
+        }
+        return HI_SUCCESS;
+
+    fail:
+        for (;i>=0;i--)
+        {
+            if (VB_INVALID_POOLID != g_ahVbPool[i])
+            {
+                s32Ret = HI_MPI_VB_DestroyPool(g_ahVbPool[i]);
+                HI_ASSERT(HI_SUCCESS == s32Ret);
+                g_ahVbPool[i] = VB_INVALID_POOLID;
+            }
+        }
+        return HI_FAILURE;
+    }
+
+    return HI_SUCCESS;
+}

@@ -33,16 +33,18 @@ class Sample_Common_Vio
 {
 public:
     Sample_Common_Vio();
+    Sample_Common_Vio(VO_DEV VoDev,VO_LAYER VoLayer);
     //Sample_Common_Vio();
     Sample_Common_Vio(Sample_Common_Vio &);
     Sample_Common_Vio & operator = (const Sample_Common_Vio & Sample_Vo);
 
 
-    HI_S32 SAMPLE_COMM_VO_StartDev(VO_DEV VoDev, VO_PUB_ATTR_S *pstPubAttr);
-    HI_S32 SAMPLE_COMM_VO_StopDev(VO_DEV VoDev);
+    HI_S32 SAMPLE_COMM_VO_StartDev(VO_PUB_ATTR_S *pstPubAttr);
+    HI_S32 SAMPLE_COMM_VO_StopDev();
     HI_S32 SAMPLE_COMM_VO_StartLayer(VO_LAYER VoLayer,const VO_VIDEO_LAYER_ATTR_S *pstLayerAttr);
     HI_S32 SAMPLE_COMM_VO_StopLayer(VO_LAYER VoLayer);
     HI_S32 SAMPLE_COMM_VO_StartChn(VO_LAYER VoLayer, SAMPLE_VO_MODE_E enMode);
+    HI_S32 SAMPLE_COMM_VO_SetMode(VO_LAYER VoLayer, SAMPLE_VO_MODE_E enMode);
     HI_S32 SAMPLE_COMM_VO_StopChn(VO_LAYER VoLayer, SAMPLE_VO_MODE_E enMode);
    // HI_S32 SAMPLE_COMM_Vpss_BindVpss(VPSS_GRP VpssDestGrp,VO_CHN VoChn,VPSS_GRP VpssSrcGrp,VPSS_CHN VpssChn);
     HI_S32 SAMPLE_COMM_VO_BindVpss(VO_LAYER VoLayer,VO_CHN VoChn,VPSS_GRP VpssGrp,VPSS_CHN VpssChn);
@@ -52,7 +54,7 @@ public:
     HI_S32 SAMPLE_COMM_VO_HdmiStart(VO_INTF_SYNC_E enIntfSync);
     HI_S32 SAMPLE_COMM_VO_HdmiStop(HI_VOID);
     HI_S32 SAMPLE_COMM_VO_GetWH(VO_INTF_SYNC_E enIntfSync, HI_U32 *pu32W,HI_U32 *pu32H, HI_U32 *pu32Frm);
-    HI_S32 SAMPLE_COMM_VO_MemConfig(VO_DEV VoDev, HI_CHAR *pcMmzName);
+    HI_S32 SAMPLE_COMM_VO_MemConfig(HI_CHAR *pcMmzName);
 
     VI_DEV SAMPLE_COMM_VI_GetDev(SAMPLE_VI_MODE_E enViMode, VI_CHN ViChn);
     HI_S32 SAMPLE_COMM_VI_StartDev(VI_DEV ViDev, SAMPLE_VI_MODE_E enViMode);
@@ -89,6 +91,7 @@ private:
     HI_S32 SAMPLE_COMM_VI_Mode2Size(SAMPLE_VI_MODE_E enViMode, VIDEO_NORM_E enNorm, RECT_S *pstCapRect, SIZE_S *pstDestSize);
 
 private:
+    SAMPLE_VO_MODE_E m_enVoMode;
     static HI_HDMI_CALLBACK_FUNC_S stCallbackFunc;
     static HDMI_ARGS_S      stHdmiArgs;
 
@@ -97,11 +100,12 @@ public:
     Sample_Common_Vpss *m_ViBindVpss;
 //    HI_U32 m_u32PicWidth;
 //    HI_U32 m_u32PicHeight;
-//    VO_DEV m_VoDev;
+    VO_DEV m_VoDev;
+    VO_LAYER m_VoLayer;
 //    VO_CHN m_VoChn;
 //    VPSS_GRP m_VpssDestGrp;
 //    VPSS_CHN m_VpssChn;
-//    VO_LAYER m_VoLayer;
+
 //    VO_PUB_ATTR_S m_stPubAttr;
 //    VO_VIDEO_LAYER_ATTR_S m_stLayerAttr;
 

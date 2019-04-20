@@ -160,14 +160,23 @@ VI_DEV_ATTR_S DEV_ATTR_7441_BT1120_STANDARD_BASE =
 HI_HDMI_CALLBACK_FUNC_S Sample_Common_Vio::stCallbackFunc = {nullptr,nullptr};
 HDMI_ARGS_S      Sample_Common_Vio::stHdmiArgs = {HI_HDMI_ID_0};
 
-Sample_Common_Vio::Sample_Common_Vio()
+Sample_Common_Vio::Sample_Common_Vio():
+    m_enVoMode(VO_MODE_1MUX),m_VoDev(SAMPLE_VO_DEV_DHD0),m_VoLayer(SAMPLE_VO_LAYER_VHD0)
 {
 
 }
 
+Sample_Common_Vio::Sample_Common_Vio(VO_DEV VoDev,VO_LAYER VoLayer):
+    m_enVoMode(VO_MODE_1MUX),m_VoDev(VoDev),m_VoLayer(VoLayer)
+{
+
+}
 Sample_Common_Vio::Sample_Common_Vio(Sample_Common_Vio &Sample_Vo)
 {
 
+    this->m_VoDev        = Sample_Vo.m_VoDev;
+    this->m_VoLayer      = Sample_Vo.m_VoLayer;
+    this->m_enVoMode     = Sample_Vo.m_enVoMode;
     this->stCallbackFunc = Sample_Vo.stCallbackFunc;
     this->stHdmiArgs     = Sample_Vo.stHdmiArgs;
 }
@@ -177,6 +186,9 @@ Sample_Common_Vio & Sample_Common_Vio::operator=(const Sample_Common_Vio &Sample
     if(this == &Sample_Vo)
         return *this;
 
+    m_VoDev        = Sample_Vo.m_VoDev;
+    m_VoLayer      = Sample_Vo.m_VoLayer;
+    m_enVoMode     = Sample_Vo.m_enVoMode;
     stCallbackFunc = Sample_Vo.stCallbackFunc;
     stHdmiArgs     = Sample_Vo.stHdmiArgs;
 
@@ -221,14 +233,14 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VO_GetWH(VO_INTF_SYNC_E enIntfSync, HI_U32
 /******************************************************************************
 * function : Set system memory location
 ******************************************************************************/
-HI_S32 Sample_Common_Vio::SAMPLE_COMM_VO_MemConfig(VO_DEV VoDev, HI_CHAR *pcMmzName)
+HI_S32 Sample_Common_Vio::SAMPLE_COMM_VO_MemConfig( HI_CHAR *pcMmzName)
 {
     HI_S32 s32Ret = HI_SUCCESS;
     MPP_CHN_S stMppChnVO;
 
     /* config vo dev */
     stMppChnVO.enModId  = HI_ID_VOU;
-    stMppChnVO.s32DevId = VoDev;
+    stMppChnVO.s32DevId = m_VoDev;
     stMppChnVO.s32ChnId = 0;
     s32Ret = HI_MPI_SYS_SetMemConf(&stMppChnVO, pcMmzName);
     if (s32Ret)
@@ -240,18 +252,18 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VO_MemConfig(VO_DEV VoDev, HI_CHAR *pcMmzN
     return HI_SUCCESS;
 }
 
-HI_S32 Sample_Common_Vio::SAMPLE_COMM_VO_StartDev(VO_DEV VoDev, VO_PUB_ATTR_S *pstPubAttr)
+HI_S32 Sample_Common_Vio::SAMPLE_COMM_VO_StartDev(VO_PUB_ATTR_S *pstPubAttr)
 {
     HI_S32 s32Ret = HI_SUCCESS;
 
-    s32Ret = HI_MPI_VO_SetPubAttr(VoDev, pstPubAttr);
+    s32Ret = HI_MPI_VO_SetPubAttr(m_VoDev, pstPubAttr);
     if (s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("failed with %#x!\n", s32Ret);
         return HI_FAILURE;
     }
 
-    s32Ret = HI_MPI_VO_Enable(VoDev);
+    s32Ret = HI_MPI_VO_Enable(m_VoDev);
     if (s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("failed with %#x!\n", s32Ret);
@@ -261,11 +273,11 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VO_StartDev(VO_DEV VoDev, VO_PUB_ATTR_S *p
     return s32Ret;
 }
 
-HI_S32 Sample_Common_Vio::SAMPLE_COMM_VO_StopDev(VO_DEV VoDev)
+HI_S32 Sample_Common_Vio::SAMPLE_COMM_VO_StopDev()
 {
     HI_S32 s32Ret = HI_SUCCESS;
 
-    s32Ret = HI_MPI_VO_Disable(VoDev);
+    s32Ret = HI_MPI_VO_Disable(m_VoDev);
     if (s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("failed with %#x!\n", s32Ret);
@@ -374,6 +386,44 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VO_StartChn(VO_LAYER VoLayer, SAMPLE_VO_MO
             return HI_FAILURE;
         }
     }
+
+    m_enVoMode = enMode;
+
+    return HI_SUCCESS;
+}
+
+HI_S32 Sample_Common_Vio::SAMPLE_COMM_VO_SetMode(VO_LAYER VoLayer, SAMPLE_VO_MODE_E enMode)
+{
+    HI_S32 s32Ret;
+
+    s32Ret= HI_MPI_VO_SetAttrBegin(VoLayer);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start VO failed!\n");
+        return HI_FAILURE;
+    }
+
+    s32Ret = SAMPLE_COMM_VO_StopChn(VoLayer, m_enVoMode);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start VO failed!\n");
+        return HI_FAILURE;
+    }
+
+    s32Ret = SAMPLE_COMM_VO_StartChn(VoLayer, enMode);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start VO failed!\n");
+        return HI_FAILURE;
+    }
+    s32Ret= HI_MPI_VO_SetAttrEnd(VoLayer);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start VO failed!\n");
+        return HI_FAILURE;
+    }
+
+
     return HI_SUCCESS;
 }
 
