@@ -126,8 +126,8 @@ extern "C"{
 //add
 #define AI_DEV 1
 #define AO_DEV 0
-#define WIDTH                  1920
-#define HEIGHT                 1080
+#define WIDTH                  1280
+#define HEIGHT                 720
 #define GRAPHICS_LAYER_HC0 3
 #define GRAPHICS_LAYER_G0  0
 #define GRAPHICS_LAYER_G1  1
@@ -158,8 +158,8 @@ extern "C"{
 #define SAMPLE_SYS_ALIGN_WIDTH  16		
 #define VO_BKGRD_BLUE           0x0000FF
 
-#define HD_WIDTH                1920
-#define HD_HEIGHT               1080
+#define HD_WIDTH                1280
+#define HD_HEIGHT               720
 #define _4K_WIDTH                3840
 #define _4K_HEIGHT               2160
 

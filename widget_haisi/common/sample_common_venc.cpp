@@ -1445,7 +1445,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Stop()
     /******************************************
      step 1:  Stop Recv Pictures
     ******************************************/
-    m_Venc_MaxTab[m_Venc_Chn] = 1;
+    m_Venc_MaxTab[m_Venc_Chn] = 0;
     s32Ret = HI_MPI_VENC_StopRecvPic(m_Venc_Chn);
     if (HI_SUCCESS != s32Ret)
     {

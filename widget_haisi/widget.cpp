@@ -14,6 +14,42 @@ Widget::Widget(QWidget *parent) :
     this->resize(1920,1080);
     load_qml = false;
 
+    firstChannel = new QAction("1st chn",this);
+    firstChannel->setCheckable(true);
+    connect(firstChannel, SIGNAL(triggered()), this, SLOT(firstChannelSlot()));
+    firstChannel1 = new QAction("2st chn",this);
+    firstChannel1->setCheckable(true);
+    connect(firstChannel1, SIGNAL(triggered()), this, SLOT(firstChannelSlot1()));
+    firstChannel2 = new QAction("3st chn",this);
+    firstChannel2->setCheckable(true);
+    connect(firstChannel2, SIGNAL(triggered()), this, SLOT(firstChannelSlot2()));
+    firstChannel3 = new QAction("4st chn",this);
+    firstChannel3->setCheckable(true);
+    connect(firstChannel3, SIGNAL(triggered()), this, SLOT(firstChannelSlot3()));
+    firstChannel4 = new QAction("5st chn",this);
+    firstChannel4->setCheckable(true);
+    connect(firstChannel4, SIGNAL(triggered()), this, SLOT(firstChannelSlot4()));
+    firstChannel5 = new QAction("6st chn",this);
+    firstChannel5->setCheckable(true);
+    connect(firstChannel5, SIGNAL(triggered()), this, SLOT(firstChannelSlot5()));
+
+    channels = new QActionGroup(this);
+    channels->addAction(firstChannel);
+    channels->addAction(firstChannel1);
+    channels->addAction(firstChannel2);
+    channels->addAction(firstChannel3);
+
+    sections = new QActionGroup(this);
+    sections->addAction(firstChannel4);
+    sections->addAction(firstChannel5);
+
+
+//    addAction(new QAction("1W",this));
+//    addAction(new QAction("4W",this));
+//    addAction(new QAction("9W",this));
+
+//    setContextMenuPolicy(Qt::ActionsContextMenu);
+
 //    m_quickWidget = new QQuickWidget();
 //    m_quickWidget = new QQuickWidget(this);//this基类为QWidget
 //    m_quickWidget->move(0,0);
@@ -28,6 +64,7 @@ Widget::Widget(QWidget *parent) :
 
 Widget::~Widget()
 {
+    qDebug()<<"exit widget";
     delete ui;
 }
 
@@ -100,30 +137,67 @@ void Widget::paintEvent(QPaintEvent *event)
 }
 
 
-void Widget::mousePressEvent(QMouseEvent * event)
-{
-    qDebug()<<event->pos();
-    if(event->button() == Qt::RightButton){
-        qDebug("press right ");
-        if(!load_qml){
-            load_qml = true;
-            qDebug("load main.qml");
-            m_quickWidget = new QQuickWidget(this);//this基类为QWidget
-            m_quickWidget->move(0,0);
-            m_quickWidget->resize(1280,720);
-            m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-            QUrl source("qrc:/main.qml");
-            m_quickWidget->setSource(source);
-            m_quickWidget->show();
-        }
-    }else if(event->button() == Qt::LeftButton){
-        qDebug("press left ");
-        if(load_qml){
-            load_qml = false;
-            qDebug("unload main.qml");
-            m_quickWidget->deleteLater();
-            delete m_quickWidget;
-        }
+//void Widget::mousePressEvent(QMouseEvent * event)
+//{
+//    SAMPLE_VO_MODE_E enVoMode = VO_MODE_9MUX;
+//    qDebug()<<event->pos();
+//    if(event->button() == Qt::RightButton){
+//        qDebug("press right ");
+//        if(!load_qml){
+//            load_qml = true;
+//            qDebug("load main.qml");
 
-    }
+////            process = new QProcess();
+////            process->start("/nfsroot/quck_test");
+//            m_quickWidget = new QQuickWidget(this);//this基类为QWidget
+//            m_quickWidget->move(0,0);
+//            m_quickWidget->resize(1280,720);
+//            m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+//            QUrl source("qrc:/main.qml");
+//            m_quickWidget->setSource(source);
+//            m_quickWidget->show();
+//        }
+//    }else if(event->button() == Qt::LeftButton){
+//        qDebug("press left ");
+//        if(load_qml){
+//            load_qml = false;
+//            qDebug("unload main.qml");
+////            process->kill();
+////            delete  process;
+//            m_quickWidget->deleteLater();
+//            delete m_quickWidget;
+//        }
+
+//    }else {
+//        qDebug()<<"send emit set vo_mode"<<endl;
+//        emit Set_VoMode(enVoMode);
+//    }
+//}
+
+void Widget::contextMenuEvent(QContextMenuEvent* e)
+{
+    mainmenu = new QMenu();
+
+    onemenu = mainmenu->addMenu("one menu");
+    onemenu->addAction(firstChannel);
+    onemenu->addAction(firstChannel1);
+    onemenu->addAction(firstChannel2);
+    onemenu->addAction(firstChannel3);
+    mainmenu->addSeparator();
+
+    twomenu = mainmenu->addMenu("two menu");
+    twomenu->addAction(firstChannel4);
+    twomenu->addAction(firstChannel5);
+    mainmenu->addSeparator();
+
+    mainmenu->addAction(firstChannel4);
+
+    mainmenu->exec(e->globalPos());
+//    mainmenu->move(cursor().pos());
+//    mainmenu->show();
+
+
+    delete mainmenu;
+    mainmenu = nullptr;
+
 }

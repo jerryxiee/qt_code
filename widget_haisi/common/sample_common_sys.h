@@ -12,7 +12,7 @@ class Sample_Common_Sys : public QObject
 {
     Q_OBJECT
 public:
-    explicit Sample_Common_Sys();
+    explicit Sample_Common_Sys(QObject *parent = nullptr);
     ~Sample_Common_Sys();
 
     HI_S32 SAMPLE_SYS_SetReg(HI_U32 u32Addr, HI_U32 u32Value);
@@ -21,7 +21,7 @@ public:
     HI_S32 SAMPLE_COMM_SYS_MemConfig(HI_VOID);
     HI_S32 SAMPLE_COMM_SYS_Init(VB_CONF_S *pstVbConf);
     HI_S32 SAMPLE_COMM_SYS_Payload2FilePostfix(PAYLOAD_TYPE_E enPayload, HI_CHAR* szFilePostfix);
-    HI_VOID SAMPLE_COMM_SYS_Exit(void);
+    static HI_VOID SAMPLE_COMM_SYS_Exit(void);
 //    HI_BOOL SYS_INIT_ISSUCESS();
 
     static HI_S32 SAMPLE_COMM_SYS_GetPicSize(VIDEO_NORM_E enNorm, PIC_SIZE_E enPicSize, SIZE_S *pstSize);
@@ -49,8 +49,8 @@ public:
     VPSS_GRP m_VpssDestGrp;
     VPSS_CHN m_VpssChn;
     //VO_LAYER m_FbVoLayer;
-    VO_PUB_ATTR_S m_stFbPubAttr;
-    VO_PUB_ATTR_S m_stPubAttr;
+//    VO_PUB_ATTR_S m_stFbPubAttr;
+    static VO_PUB_ATTR_S m_stPubAttr;
     VO_VIDEO_LAYER_ATTR_S m_stFbLayerAttr;
     HI_S32 Sys_init_Sucess;
 

@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.3
 
 Rectangle {
     id:mainwidow
+    visible: true
     color: "blue"
     width: 800;height: 600
 

@@ -41,16 +41,19 @@ public:
 
     HI_S32 SAMPLE_COMM_VO_StartDev(VO_PUB_ATTR_S *pstPubAttr);
     HI_S32 SAMPLE_COMM_VO_StopDev();
-    HI_S32 SAMPLE_COMM_VO_StartLayer(VO_LAYER VoLayer,const VO_VIDEO_LAYER_ATTR_S *pstLayerAttr);
-    HI_S32 SAMPLE_COMM_VO_StopLayer(VO_LAYER VoLayer);
-    HI_S32 SAMPLE_COMM_VO_StartChn(VO_LAYER VoLayer, SAMPLE_VO_MODE_E enMode);
-    HI_S32 SAMPLE_COMM_VO_SetMode(VO_LAYER VoLayer, SAMPLE_VO_MODE_E enMode);
-    HI_S32 SAMPLE_COMM_VO_StopChn(VO_LAYER VoLayer, SAMPLE_VO_MODE_E enMode);
+    HI_S32 SAMPLE_COMM_VO_StartLayer(const VO_VIDEO_LAYER_ATTR_S *pstLayerAttr);
+    HI_S32 SAMPLE_COMM_VO_StopLayer();
+    HI_S32 SAMPLE_COMM_VO_StartChn(SAMPLE_VO_MODE_E enMode);
+    HI_S32 SAMPLE_COMM_VO_StartChn(VO_CHN VoChn,RECT_S &pos);
+    HI_S32 SAMPLE_COMM_VO_SetMode(SAMPLE_VO_MODE_E enMode);
+    HI_S32 SAMPLE_COMM_VO_SetChnDispPos(VO_CHN VoChn, const POINT_S *pstDispPos);
+    HI_S32 SAMPLE_COMM_VO_StopChn();
+    HI_S32 SAMPLE_COMM_VO_StopChn(VO_CHN VoChn);
    // HI_S32 SAMPLE_COMM_Vpss_BindVpss(VPSS_GRP VpssDestGrp,VO_CHN VoChn,VPSS_GRP VpssSrcGrp,VPSS_CHN VpssChn);
-    HI_S32 SAMPLE_COMM_VO_BindVpss(VO_LAYER VoLayer,VO_CHN VoChn,VPSS_GRP VpssGrp,VPSS_CHN VpssChn);
-    HI_S32 SAMPLE_COMM_VO_UnBindVpss(VO_LAYER VoLayer,VO_CHN VoChn,VPSS_GRP VpssGrp,VPSS_CHN VpssChn);
-    HI_S32 SAMPLE_COMM_VO_BindVi(VO_LAYER VoLayer, VO_CHN VoChn, VI_CHN ViChn);
-    HI_S32 SAMPLE_COMM_VO_UnBindVi(VO_LAYER VoLayer, VO_CHN VoChn);
+    HI_S32 SAMPLE_COMM_VO_BindVpss(VO_CHN VoChn,VPSS_GRP VpssGrp,VPSS_CHN VpssChn);
+    HI_S32 SAMPLE_COMM_VO_UnBindVpss(VO_CHN VoChn,VPSS_GRP VpssGrp,VPSS_CHN VpssChn);
+    HI_S32 SAMPLE_COMM_VO_BindVi(VO_CHN VoChn, VI_CHN ViChn);
+    HI_S32 SAMPLE_COMM_VO_UnBindVi(VO_CHN VoChn);
     HI_S32 SAMPLE_COMM_VO_HdmiStart(VO_INTF_SYNC_E enIntfSync);
     HI_S32 SAMPLE_COMM_VO_HdmiStop(HI_VOID);
     HI_S32 SAMPLE_COMM_VO_GetWH(VO_INTF_SYNC_E enIntfSync, HI_U32 *pu32W,HI_U32 *pu32H, HI_U32 *pu32Frm);
@@ -62,10 +65,10 @@ public:
         SAMPLE_VI_MODE_E enViMode, SAMPLE_VI_CHN_SET_E enViChnSet);
     HI_S32 SAMPLE_COMM_VI_Start(SAMPLE_VI_MODE_E enViMode, VIDEO_NORM_E enNorm);
     HI_S32 SAMPLE_COMM_VI_Stop(SAMPLE_VI_MODE_E enViMode);
-    HI_S32 SAMPLE_COMM_VI_BindVpss(SAMPLE_VI_MODE_E enViMode, HI_U32 *Vpss_GrpTab, HI_S32 Vpss_nGrp);
-    HI_S32 SAMPLE_COMM_VI_UnBindVpss(SAMPLE_VI_MODE_E enViMode,HI_U32 *Vpss_GrpTab, HI_S32 Vpss_nGrp);
-    HI_S32 SAMPLE_COMM_VI_BindVo(VI_CHN ViChn, VO_LAYER VoLayer, VO_CHN VoChn);
-    HI_S32 SAMPLE_COMM_VI_UnBindVo(VI_CHN ViChn, VO_LAYER VoLayer, VO_CHN VoChn);
+    HI_S32 SAMPLE_COMM_VI_BindVpss(SAMPLE_VI_MODE_E enViMode, VPSS_GRP *Vpss_GrpTab, HI_S32 Vpss_nGrp);
+    HI_S32 SAMPLE_COMM_VI_UnBindVpss(SAMPLE_VI_MODE_E enViMode,VPSS_GRP *Vpss_GrpTab, HI_S32 Vpss_nGrp);
+    HI_S32 SAMPLE_COMM_VI_BindVo(VI_CHN ViChn, VO_CHN VoChn);
+    HI_S32 SAMPLE_COMM_VI_UnBindVo(VI_CHN ViChn,VO_CHN VoChn);
 //    HI_VOID SAMPLE_COMM_VI_ReadFrame(FILE * fp, HI_U8 * pY, HI_U8 * pU, HI_U8 * pV, HI_U32 width, HI_U32 height, HI_U32 stride, HI_U32 stride2);
 //    HI_S32 SAMPLE_COMM_VI_PlanToSemi(HI_U8 *pY, HI_S32 yStride,
 //                           HI_U8 *pU, HI_S32 uStride,

@@ -25,7 +25,7 @@ private:
 public:
     HI_U32 m_Grp_Num;
     HI_U32 m_Chn_Num;
-    HI_U32 m_Grp_Tab[VPSS_MAX_GRP_NUM];
+    VPSS_GRP m_Grp_Tab[VPSS_MAX_GRP_NUM];
     VPSS_GRP_ATTR_S *m_pstVpssGrpAttr = nullptr;
 
 
