@@ -7,7 +7,11 @@
 #include <QMouseEvent>
 #include <QProcess>
 #include <QMenu>
+#include <QPainter>
+#include <QList>
+#ifdef arm
 #include "common/sample_comm.h"
+#endif
 
 namespace Ui {
 class Widget;
@@ -28,35 +32,40 @@ protected:
     void contextMenuEvent(QContextMenuEvent* e);
 
 signals:
-    void Set_VoMode(SAMPLE_VO_MODE_E &enVoMode);
+//    void Set_VoMode(SAMPLE_VO_MODE_E &enVoMode);
 
 private slots:
-    void firstChannelSlot(){ qDebug()<<"1";}
-    void firstChannelSlot1(){ qDebug()<<"1";}
-    void firstChannelSlot2(){ qDebug()<<"1";}
-    void firstChannelSlot3(){ qDebug()<<"1";}
-    void firstChannelSlot4(){ qDebug()<<"1";}
-    void firstChannelSlot5(){ qDebug()<<"1";}
+    void onMainMenuSlot();
+    void onExitVoSlot();
+    void onOneWinShow(){ qDebug()<<"1";}
+    void onTwoWinShow(){ qDebug()<<"1";}
+    void onThrWinShow(){ qDebug()<<"1";}
+    void onForWinShow(){ qDebug()<<"1";}
+    void onFivWinShow();
+    void onSixWinShow();
+    void onSevWinShow();
+    void onEigWinShow();
+    void onNiWinShow();
     //void on_pushButton_clicked();
 
 private:
+    const int VI_CNT = 9;
     QProcess *process;
-    bool load_qml;
+    QPainter painter;
+    bool mload_qml;
     QQuickWidget* m_quickWidget;
     QQuickView * m_quckView;
     Ui::Widget *ui;
     QQmlApplicationEngine engine;
-    QMenu *mainmenu;
-    QMenu *onemenu;
-    QMenu *twomenu;
-    QAction *firstChannel;
-    QAction *firstChannel1;
-    QAction *firstChannel2;
-    QAction *firstChannel3;
-    QAction *firstChannel4;
-    QAction *firstChannel5;
-    QActionGroup   *channels;
-    QActionGroup   *sections;
+    QMenu *mMenu;
+    QMenu *mOneMenu;
+    QMenu *mTwoMenu;
+    QAction *mBack;
+    QAction *mExit_Vo;
+    QList<QAction *> mOneMenuAct;
+    QList<QAction *> mTwoMenuAct;
+    QActionGroup   *mOneActionGrp;
+    QActionGroup   *mTwoActionGrp;
 
 
 

@@ -282,7 +282,7 @@ Sample_Common_Sys::Sample_Common_Sys(QObject *parent):QObject(parent)
     }
     m_stPubAttr.enIntfSync = VO_OUTPUT_720P50;
     m_stPubAttr.enIntfType = VO_INTF_VGA;
-    m_stPubAttr.u32BgColor = 0xFF;
+    m_stPubAttr.u32BgColor = 0x0;
 
     s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartDev(&m_stPubAttr);
     if (HI_SUCCESS != s32Ret)

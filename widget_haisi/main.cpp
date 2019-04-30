@@ -6,8 +6,10 @@
 #include <QString>
 #include <signal.h>
 
+#ifdef arm
 #include "common/sample_common_sys.h"
-#include "vedc/vio.h"
+#include "video/vio.h"
+#endif
 
 
 void sign(int signal)
@@ -19,6 +21,7 @@ void sign(int signal)
 int main(int argc, char *argv[])
 {
     int ret;
+#ifdef arm
     Sample_Common_Sys sys_init;
     Vio vio;
 
@@ -31,6 +34,9 @@ int main(int argc, char *argv[])
     vio.Vo_Start();
     vio.Vi_Venc_Start();
     vio.start();
+    QObject::connect(&vio,SIGNAL(VistatusChanged(VI_CHN)),&vio,SLOT(onChangeStatus(VI_CHN)));
+    QObject::connect(&vio,SIGNAL(MakeNewFile(VI_CHN)),&vio,SLOT(onMakeNewFile(VI_CHN)));
+#endif
 
 //    sys_init.VdecTest();
 //    sys_init.Vio_8_1080P_Test();
@@ -57,11 +63,12 @@ int main(int argc, char *argv[])
 
     Widget w;
     w.show();
-
-    vio.start_timer();
     signal(SIGINT,sign);
+#ifdef arm
+    vio.start_timer();
+#endif
 
-    QObject::connect(&w,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&vio,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
+//    QObject::connect(&w,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&vio,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
 //    QObject::connect(&a,SIGNAL(finished()),&vio,SLOT(onfinish()));
 
 //    QQmlApplicationEngine engine;
@@ -69,9 +76,11 @@ int main(int argc, char *argv[])
 //    if (engine.rootObjects().isEmpty())
 //        return -1;
     ret = a.exec();
+#ifdef arm
     vio.Venc_exit();
     vio.wait();
     qDebug()<<"exit main";
     QThread::sleep(2);
+#endif
     return ret;
 }

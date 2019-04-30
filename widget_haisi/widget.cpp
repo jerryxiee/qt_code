@@ -1,69 +1,73 @@
 #include "widget.h"
 #include "ui_widget.h"
-
-#include <QPainter>
+#include <QString>
 #include <QRect>
 #include <QBrush>
 #include <QFont>
+#include <QtMath>
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget)
 {
     ui->setupUi(this);
-    this->resize(1920,1080);
-    load_qml = false;
+    this->resize(1280,720);
+    mload_qml = false;
 
-    firstChannel = new QAction("1st chn",this);
-    firstChannel->setCheckable(true);
-    connect(firstChannel, SIGNAL(triggered()), this, SLOT(firstChannelSlot()));
-    firstChannel1 = new QAction("2st chn",this);
-    firstChannel1->setCheckable(true);
-    connect(firstChannel1, SIGNAL(triggered()), this, SLOT(firstChannelSlot1()));
-    firstChannel2 = new QAction("3st chn",this);
-    firstChannel2->setCheckable(true);
-    connect(firstChannel2, SIGNAL(triggered()), this, SLOT(firstChannelSlot2()));
-    firstChannel3 = new QAction("4st chn",this);
-    firstChannel3->setCheckable(true);
-    connect(firstChannel3, SIGNAL(triggered()), this, SLOT(firstChannelSlot3()));
-    firstChannel4 = new QAction("5st chn",this);
-    firstChannel4->setCheckable(true);
-    connect(firstChannel4, SIGNAL(triggered()), this, SLOT(firstChannelSlot4()));
-    firstChannel5 = new QAction("6st chn",this);
-    firstChannel5->setCheckable(true);
-    connect(firstChannel5, SIGNAL(triggered()), this, SLOT(firstChannelSlot5()));
+    mMenu = new QMenu();
+    mBack = new QAction("主菜单",this);
+//    mBack->setCheckable(true);
+    connect(mBack, SIGNAL(triggered()), this, SLOT(onMainMenuSlot()));
+    mExit_Vo = new QAction("返回",this);
+//    mExit_Vo->setCheckable(true);
+    connect(mExit_Vo, SIGNAL(triggered()), this, SLOT(onExitVoSlot()));
 
-    channels = new QActionGroup(this);
-    channels->addAction(firstChannel);
-    channels->addAction(firstChannel1);
-    channels->addAction(firstChannel2);
-    channels->addAction(firstChannel3);
+    mOneMenu = new QMenu("单窗口",this);
+    mTwoMenu = new QMenu("多窗口",this);
+    mOneActionGrp = new QActionGroup(this);
+//    mTwoActionGrp = new QActionGroup(this);
+    for(int i = 0;i < VI_CNT; i++){
+        mOneMenuAct.append(new QAction(QString::number(i+1)+"Chn",this));
+        mOneMenuAct[i]->setCheckable(true);
+        mOneActionGrp->addAction(mOneMenuAct[i]);
+        mOneMenu->addAction(mOneMenuAct[i]);
+    }
+    for(int i = 0; i < qSqrt(VI_CNT);i++){
+        mTwoMenuAct.append(new QAction(QString::number((i+1)*(i+1))+"Win(s)",this));
+        mTwoMenuAct[i]->setCheckable(true);
+        mOneActionGrp->addAction(mTwoMenuAct[i]);
+        mTwoMenu->addAction(mTwoMenuAct[i]);
+    }
 
-    sections = new QActionGroup(this);
-    sections->addAction(firstChannel4);
-    sections->addAction(firstChannel5);
+    m_quickWidget = new QQuickWidget(this);//this基类为QWidget
+    m_quickWidget->move(0,0);
+    m_quickWidget->resize(1280,720);
+    m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    m_quickWidget->setHidden(true);
+    QUrl source("qrc:/main.qml");
+    m_quickWidget->setSource(source);
 
-
-//    addAction(new QAction("1W",this));
-//    addAction(new QAction("4W",this));
-//    addAction(new QAction("9W",this));
-
-//    setContextMenuPolicy(Qt::ActionsContextMenu);
-
-//    m_quickWidget = new QQuickWidget();
-//    m_quickWidget = new QQuickWidget(this);//this基类为QWidget
-//    m_quickWidget->move(0,0);
-//    m_quickWidget->resize(200,200);
-//    m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-//    QUrl source("qrc:/main.qml");
-//    m_quickWidget->setSource(source);
-
-
-    //this->setWindowOpacity(0.2);
 }
 
 Widget::~Widget()
 {
+
+    delete mMenu;
+    delete mOneMenu;
+    delete mTwoMenu;
+    delete mOneActionGrp;
+//    delete mTwoActionGrp;
+    delete mBack;
+    delete mExit_Vo;
+    delete m_quickWidget;
+    for(int i = 0;i < mOneMenuAct.count(); i++){
+        delete mOneMenuAct[i];
+        mOneMenuAct.removeAt(i);
+    }
+    for(int i = 0; i < mTwoMenuAct.count();i++){
+        delete mTwoMenuAct[i];
+        mTwoMenuAct.removeAt(i);
+    }
     qDebug()<<"exit widget";
     delete ui;
 }
@@ -74,7 +78,8 @@ void Widget::paintEvent(QPaintEvent *event)
     QPainter painter(this);// 创建QPainter一个对象
 
     painter.setCompositionMode( QPainter::CompositionMode_Clear );
-    painter.fillRect( 0, 0, 1920, 1080, Qt::SolidPattern );
+    painter.fillRect( 0, 0, 1280, 720, Qt::SolidPattern );
+//    painter.fillRect( 200, 200, 200, 200, Qt::SolidPattern );
 
     /*// 画一条直线
     QPen pen;
@@ -143,7 +148,7 @@ void Widget::paintEvent(QPaintEvent *event)
 //    qDebug()<<event->pos();
 //    if(event->button() == Qt::RightButton){
 //        qDebug("press right ");
-//        if(!load_qml){
+//        if(!mload_qml){
 //            load_qml = true;
 //            qDebug("load main.qml");
 
@@ -159,7 +164,7 @@ void Widget::paintEvent(QPaintEvent *event)
 //        }
 //    }else if(event->button() == Qt::LeftButton){
 //        qDebug("press left ");
-//        if(load_qml){
+//        if(mload_qml){
 //            load_qml = false;
 //            qDebug("unload main.qml");
 ////            process->kill();
@@ -176,28 +181,46 @@ void Widget::paintEvent(QPaintEvent *event)
 
 void Widget::contextMenuEvent(QContextMenuEvent* e)
 {
-    mainmenu = new QMenu();
 
-    onemenu = mainmenu->addMenu("one menu");
-    onemenu->addAction(firstChannel);
-    onemenu->addAction(firstChannel1);
-    onemenu->addAction(firstChannel2);
-    onemenu->addAction(firstChannel3);
-    mainmenu->addSeparator();
+    mMenu->clear();
 
-    twomenu = mainmenu->addMenu("two menu");
-    twomenu->addAction(firstChannel4);
-    twomenu->addAction(firstChannel5);
-    mainmenu->addSeparator();
+    mMenu->addAction(mBack);
+    mMenu->addMenu(mOneMenu);
+    mMenu->addMenu(mTwoMenu);
+    mMenu->addAction(mExit_Vo);
 
-    mainmenu->addAction(firstChannel4);
 
-    mainmenu->exec(e->globalPos());
-//    mainmenu->move(cursor().pos());
+//    onemenu = mainmenu->addMenu("one menu");
+//    onemenu->addAction(firstChannel);
+//    onemenu->addAction(firstChannel1);
+//    onemenu->addAction(firstChannel2);
+//    onemenu->addAction(firstChannel3);
+//    mainmenu->addSeparator();
+
+//    twomenu = mainmenu->addMenu("two menu");
+//    twomenu->addAction(firstChannel4);
+//    twomenu->addAction(firstChannel5);
+//    mainmenu->addSeparator();
+
+//    mainmenu->addAction(firstChannel4);
+
+    mMenu->exec(e->globalPos());
 //    mainmenu->show();
 
+}
 
-    delete mainmenu;
-    mainmenu = nullptr;
+void Widget::onMainMenuSlot()
+{
+    if(!mload_qml){
+        mload_qml = true;
+        m_quickWidget->setHidden(false);
+    }
+}
 
+void Widget::onExitVoSlot()
+{
+    if(mload_qml){
+        mload_qml = false;
+        m_quickWidget->setHidden(true);
+    }
 }

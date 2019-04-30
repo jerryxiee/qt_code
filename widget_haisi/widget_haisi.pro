@@ -24,51 +24,37 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
+DEFINES += arm
+
 SOURCES += \
         main.cpp \
-        widget.cpp \
-    common/sample_common_sys.cpp \
-    common/loadbmp.c \
-    common/sample_comm_vdec.c \
-    common/sample_comm_venc.c \
-    common/sample_common_vpss.cpp \
-    common/sample_common_vdec.cpp \
-    common/sample_common_vio.cpp \
-    common/sample_common_venc.cpp \
-    vedc/vio.cpp \
-    vedc/venc.cpp
+        widget.cpp
 
 HEADERS += \
-        widget.h \
-    common/loadbmp.h \
-    common/sample_comm.h \
-    common/sample_common_sys.h \
-    common/sample_common_vpss.h \
-    common/sample_common_vdec.h \
-    common/sample_common_vio.h \
-    common/sample_common_venc.h \
-    vio/vio.h \
-    vedc/vio.h \
-    vedc/venc.h
-
-FORMS += \
-        widget.ui
-
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
-
-DISTFILES +=
-
-RESOURCES += \
-    resources.qrc
+        widget.h
 
 
-HEADERS += \
-    common/sample_comm.h \
-    common/loadbmp.h \
-    common/sample_common_sys.h
+if(contains(DEFINES,arm)){
+SOURCES +=common/sample_common_sys.cpp \
+            common/loadbmp.c \
+            common/sample_comm_vdec.c \
+            common/sample_comm_venc.c \
+            common/sample_common_vpss.cpp \
+            common/sample_common_vdec.cpp \
+            common/sample_common_vio.cpp \
+            common/sample_common_venc.cpp \
+            video/venc.cpp \
+            video/vio.cpp
+
+HEADERS +=common/loadbmp.h \
+            common/sample_comm.h \
+            common/sample_common_sys.h \
+            common/sample_common_vpss.h \
+            common/sample_common_vdec.h \
+            common/sample_common_vio.h \
+            common/sample_common_venc.h \
+            video/venc.h \
+            video/vio.h
 
 INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
                 /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/include \
@@ -90,3 +76,45 @@ LIBS += /usr/lib/libmpi.so \
         /usr/lib/libpciv.so \
         /usr/lib/libaacenc.so \
         /usr/lib/libaacdec.so
+
+    message("arm platform")
+}else{
+    message("other platform")
+}
+
+FORMS += \
+        widget.ui
+
+# Default rules for deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target
+
+DISTFILES +=
+
+RESOURCES += \
+    resources.qrc
+
+#if(contains(DEFINES,arm)){
+
+#INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
+#                /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/include \
+#                /home/abhw/Qt5.9.7/projects/hisi_test/common  \
+#                /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/nvp6134_ex \
+#                /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/tlv320aic31
+
+#LIBS += -lpthread
+
+#LIBS += /usr/lib/libmpi.so \
+#        /usr/lib/libhdmi.so \
+#        /usr/lib/libjpeg.so  \
+#        /usr/lib/libVoiceEngine.so \
+#        /usr/lib/libupvqe.so  \
+#        /usr/lib/libdnvqe.so  \
+#        /usr/lib/libtde.so \
+#        /usr/lib/libive.so \
+#        /usr/lib/libmd.so \
+#        /usr/lib/libpciv.so \
+#        /usr/lib/libaacenc.so \
+#        /usr/lib/libaacdec.so
+#}

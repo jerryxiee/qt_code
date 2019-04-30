@@ -1,7 +1,5 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>images/background.png</file>
-        <file>images/background.jpeg</file>
     </qresource>
 </RCC>
