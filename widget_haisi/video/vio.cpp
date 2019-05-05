@@ -365,13 +365,13 @@ HI_BOOL Vio::Vo_Stop(VO_CHN Vo_Chn)
     if(Vo_Chn >= 0){
         return m_Vio.SAMPLE_COMM_VO_StopChn(Vo_Chn) > 0 ? HI_TRUE:HI_TRUE;
     }
-    for(i = 0; i < m_ViChnCnt; i++){
-        m_Vio.SAMPLE_COMM_VO_UnBindVpss(i,m_pVpss->m_Grp_Tab[i],m_VoBindVpss);
-    }
+//    for(i = 0; i < m_ViChnCnt; i++){
+//        m_Vio.SAMPLE_COMM_VO_UnBindVpss(i,m_pVpss->m_Grp_Tab[i],m_VoBindVpss);
+//    }
 
     m_Vio.SAMPLE_COMM_VO_StopChn();
 
-    m_Vio.SAMPLE_COMM_VO_StopLayer();
+//    m_Vio.SAMPLE_COMM_VO_StopLayer();
 
     return HI_TRUE;
 }
@@ -445,6 +445,19 @@ void Vio::onSet_VoMode(SAMPLE_VO_MODE_E &enVoMode)
 {
     //qDebug()<<"get vo_mode:"<<enVoMode<<endl;
     Vo_SetMode(enVoMode);
+}
+
+void Vio::onDispChnToWin(QMap<VO_CHN,RECT_S> &ChnAttr)
+{
+    QMap<VO_CHN,RECT_S>::iterator i;
+
+    Vo_Stop(-1);
+    for(i = ChnAttr.begin();i != ChnAttr.end();i++){
+        Vo_Start(i.key(),i.value());
+        qDebug()<<"channel:"<<i.key();
+    }
+
+
 }
 
 void Vio::Set_VencAttr(PAYLOAD_TYPE_E enType,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32Profile)

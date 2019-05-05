@@ -6,10 +6,10 @@
 #include <QString>
 #include <signal.h>
 
-#ifdef arm
+//#ifdef arm
 #include "common/sample_common_sys.h"
 #include "video/vio.h"
-#endif
+//#endif
 
 
 void sign(int signal)
@@ -30,10 +30,10 @@ int main(int argc, char *argv[])
     }
     qDebug("system init sucess! dgf\n");
 
-    vio.Vi_Start();
-    vio.Vo_Start();
-    vio.Vi_Venc_Start();
-    vio.start();
+//    vio.Vi_Start();
+//    vio.Vo_Start();
+//    vio.Vi_Venc_Start();
+//    vio.start();
     QObject::connect(&vio,SIGNAL(VistatusChanged(VI_CHN)),&vio,SLOT(onChangeStatus(VI_CHN)));
     QObject::connect(&vio,SIGNAL(MakeNewFile(VI_CHN)),&vio,SLOT(onMakeNewFile(VI_CHN)));
 #endif
@@ -65,10 +65,16 @@ int main(int argc, char *argv[])
     w.show();
     signal(SIGINT,sign);
 #ifdef arm
+    vio.Vi_Start();
+    vio.Vo_Start();
+    vio.Vi_Venc_Start();
+    vio.start();
     vio.start_timer();
+    QObject::connect(&w,SIGNAL(ChnDispToWinSignal(QMap<VO_CHN, RECT_S> &)),&vio,SLOT(onDispChnToWin(QMap<VO_CHN, RECT_S> &)));
+    QObject::connect(&w,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&vio,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
 #endif
 
-//    QObject::connect(&w,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&vio,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
+//
 //    QObject::connect(&a,SIGNAL(finished()),&vio,SLOT(onfinish()));
 
 //    QQmlApplicationEngine engine;

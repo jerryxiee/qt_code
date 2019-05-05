@@ -45,6 +45,7 @@ public:
     HI_S32 SAMPLE_COMM_VO_StopLayer();
     HI_S32 SAMPLE_COMM_VO_StartChn(SAMPLE_VO_MODE_E enMode);
     HI_S32 SAMPLE_COMM_VO_StartChn(VO_CHN VoChn,RECT_S &pos);
+    HI_S32 SAMPLE_COMM_VO_StartChn(SAMPLE_VO_MODE_E enMode,VO_CHN StartChn);
     HI_S32 SAMPLE_COMM_VO_SetMode(SAMPLE_VO_MODE_E enMode);
     HI_S32 SAMPLE_COMM_VO_SetChnDispPos(VO_CHN VoChn, const POINT_S *pstDispPos);
     HI_S32 SAMPLE_COMM_VO_StopChn();

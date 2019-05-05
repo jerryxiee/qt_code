@@ -31,7 +31,14 @@ SOURCES += \
         widget.cpp
 
 HEADERS += \
-        widget.h
+        widget.h \
+        common/sample_comm.h
+
+INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
+                /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/include \
+                /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/nvp6134_ex \
+                /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/tlv320aic31
+
 
 
 if(contains(DEFINES,arm)){
@@ -47,7 +54,6 @@ SOURCES +=common/sample_common_sys.cpp \
             video/vio.cpp
 
 HEADERS +=common/loadbmp.h \
-            common/sample_comm.h \
             common/sample_common_sys.h \
             common/sample_common_vpss.h \
             common/sample_common_vdec.h \
@@ -55,12 +61,6 @@ HEADERS +=common/loadbmp.h \
             common/sample_common_venc.h \
             video/venc.h \
             video/vio.h
-
-INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
-                /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/include \
-                /home/abhw/Qt5.9.7/projects/hisi_test/common  \
-                /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/nvp6134_ex \
-                /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/tlv320aic31
 
 LIBS += -lpthread
 
