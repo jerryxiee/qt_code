@@ -6,9 +6,9 @@ import QtQuick.Layouts 1.3
 Rectangle {
     id:mainwidow
     visible: true
-//    color: "blue"
+    color: "black"
     width: 1280;height: 720
-
+//    opacity: 0.5
 
 
     MouseArea{
@@ -26,22 +26,51 @@ Rectangle {
         }
     }
 
-    Image {
-        id: back
-        anchors.fill: parent
-        source: "images/background.png"
-    }
-    Button{
-        id:button
-        anchors.centerIn: parent
-        text: "button"
-        onClicked: {
-            mainwidow.opacity -= 0.1
-            if(mainwidow.opacity < 0)
-                mainwidow.opacity = 1
-        }
 
+//    Image {
+//        id: back
+//        anchors.fill: parent
+//        source: "images/background.png"
+//    }
+
+    Rectangle{
+        id:rect
+        width: mainwidow.width
+        height: 48
+        color: "black"
+        Row{
+            Button{
+                id:backbutton
+                anchors.left : rect.left
+
+            }
+
+            Text {
+                id: maintext
+                color: "white"
+                font.pixelSize: 32
+                text: qsTr("主菜单")
+                anchors.centerIn: rect.Center
+            }
+
+            Button{
+                id:homebutton
+                anchors.right: rect.right
+
+            }
+        }
     }
+//    Button{
+//        id:button
+//        anchors.centerIn: parent
+//        text: "button"
+//        onClicked: {
+////            mainwidow.opacity -= 0.1
+////            if(mainwidow.opacity < 0)
+////                mainwidow.opacity = 1
+//        }
+
+//    }
 
 
 

@@ -5,7 +5,7 @@
 #include <QDateTime>
 #include <QString>
 #include <signal.h>
-
+#include <QFontDatabase>
 //#ifdef arm
 #include "common/sample_common_sys.h"
 #include "video/vio.h"

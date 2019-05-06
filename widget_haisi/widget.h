@@ -2,7 +2,6 @@
 #define WIDGET_H
 
 #include <QWidget>
-#include <QtQuickWidgets>
 #include <QEvent>
 #include <QMouseEvent>
 #include <QProcess>
@@ -10,6 +9,9 @@
 #include <QPainter>
 #include <QList>
 #include <QPushButton>
+#include <QStackedWidget>
+//#include <QQuickWidget>
+#include "windows/mainwindow.h"
 //#ifdef arm
 #include "common/sample_comm.h"
 //#endif
@@ -67,10 +69,9 @@ private:
     QProcess *process;
     QPainter painter;
     bool mload_qml;
-    QQuickWidget* m_quickWidget;
-    QQuickView * m_quckView;
+    QStackedWidget *mStackWidget;
+    MainWindow *mMainWindow;
     Ui::Widget *ui;
-    QQmlApplicationEngine engine;
     QMenu *mMenu;
     QMenu *mOneMenu;
     QMenu *mTwoMenu;

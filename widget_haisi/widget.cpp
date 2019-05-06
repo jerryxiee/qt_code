@@ -7,6 +7,7 @@
 #include <QtMath>
 #include <QPixmap>
 #include <QMap>
+#include <QDebug>
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -88,6 +89,15 @@ Widget::Widget(QWidget *parent) :
 
 
 
+    mStackWidget = new QStackedWidget(this);
+    mMainWindow = new MainWindow(this);
+    mMainWindow->move(0,0);
+
+    mStackWidget->addWidget(mMainWindow);
+
+    mStackWidget->resize(this->width(),this->height());
+//    mStackWidget->hide();
+
 //    m_quickWidget = new QQuickWidget(this);//this基类为QWidget
 //    m_quickWidget->move(0,0);
 //    m_quickWidget->resize(1280,720);
@@ -100,7 +110,8 @@ Widget::Widget(QWidget *parent) :
 
 Widget::~Widget()
 {
-
+    delete mLeftButton;
+    delete mRightButton;
     delete mMenu;
     delete mOneMenu;
     delete mTwoMenu;
@@ -108,6 +119,9 @@ Widget::~Widget()
 //    delete mTwoActionGrp;
     delete mBack;
     delete mExit_Vo;
+    delete mMainWindow;
+    delete mStackWidget;
+
 //    delete m_quickWidget;
     for(int i = 0;i < mOneMenuAct.count(); i++){
         delete mOneMenuAct[i];
@@ -261,6 +275,7 @@ void Widget::mouseDoubleClickEvent(QMouseEvent *event)
 
 void Widget::onMainMenuSlot()
 {
+    mStackWidget->show();
 //    if(!mload_qml){
 //        mload_qml = true;
 //        m_quickWidget->setHidden(false);
@@ -293,6 +308,7 @@ void Widget::on4MuxModeSlot()
 
 void Widget::on9MuxModeSlot()
 {
+    mStackWidget->hide();
     mVo_Index = 0;
     mVoMode = VO_MODE_9MUX;
     DispToWin(mVo_Index,8);
@@ -320,7 +336,7 @@ void Widget::DispToWin(int StartChn,int count)
     for(int i = 0;i < count;i++){
 
         pos.s32X       = (this->width()/s32Square) * (i%s32Square);
-        pos.s32Y       = (this->height()/s32Square) * (i/s32Square) ;
+        pos.s32Y       = (this->height()/s32Square) * (i/s32Square);
         pos.u32Height  = this->height()/s32Square ;
         pos.u32Width   = this->width()/s32Square;
         index = mVo_Index+i;

@@ -15,5 +15,6 @@
         <file>images/back.png</file>
         <file>images/right1.png</file>
         <file>images/back1.png</file>
+        <file>sources/fonts/my.ttf</file>
     </qresource>
 </RCC>

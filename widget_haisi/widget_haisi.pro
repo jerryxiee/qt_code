@@ -24,15 +24,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
-DEFINES += arm
+#DEFINES += arm
 
 SOURCES += \
         main.cpp \
-        widget.cpp
+        widget.cpp \
+    windows/mainwindow.cpp
 
 HEADERS += \
         widget.h \
-        common/sample_comm.h
+        common/sample_comm.h \
+    windows/mainwindow.h
 
 INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
                 /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/include \
