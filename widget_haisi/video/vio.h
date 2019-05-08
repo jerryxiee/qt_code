@@ -53,6 +53,7 @@ public slots:
     void onChangeStatus(VI_CHN ViChn);
     void onMakeNewFile(VI_CHN ViChn);
     void onDispChnToWin(QMap<VO_CHN, RECT_S> &);
+    void onStopVoSlot();
 
 signals:
     void VistatusChanged(VI_CHN ViChn);

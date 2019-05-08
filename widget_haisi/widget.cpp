@@ -11,14 +11,21 @@
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::Widget)
+    ui(new Ui::Widget),mMainWin(true)
 {
     ui->setupUi(this);
     this->resize(1280,720);
 #ifndef arm
     this->setWindowOpacity(1);
 #endif
-    mload_qml = false;
+
+    mVideoExit = new QPushButton(tr("返回"),this);
+    mVideoExit->setFixedSize(48,32);
+    mVideoExit->move(this->width()-mVideoExit->width()*2,mVideoExit->height());
+    connect(mVideoExit,SIGNAL(clicked()),this,SLOT(onVideoExitClickSlot()));
+    mVideoExit->hide();
+//    mVideoExit->setFlat(true);
+
 
     mMenu = new QMenu();
     mBack = new QAction("主菜单",this);
@@ -63,7 +70,8 @@ Widget::Widget(QWidget *parent) :
     QIcon icon(":/images/back.png");
 
     mLeftButton = new QPushButton("",this);
-    mLeftButton->setIcon(icon);
+    mLeftButton->setStyleSheet("QPushButton:hover{border-image: url(:/images/back.png);}""QPushButton:pressed{border-image: url(:/images/back.png);}");
+//    mLeftButton->setIcon(icon);
     mLeftButton->resize(100,100);
     mLeftButton->setGeometry(0,(this->height() - mLeftButton->height())/2,mLeftButton->width(),mLeftButton->height());
     mLeftButton->setIconSize(QSize(mLeftButton->width()-10,mLeftButton->height()-10));
@@ -76,7 +84,8 @@ Widget::Widget(QWidget *parent) :
 
     icon = QIcon(":/images/back1.png");
     mRightButton = new QPushButton("",this);
-    mRightButton->setIcon(icon);
+    mRightButton->setStyleSheet("QPushButton:hover{border-image: url(:/images/back1.png);}""QPushButton:pressed{border-image: url(:/images/back1.png);}");
+//    mRightButton->setIcon(icon);
     mRightButton->resize(100,100);
     mRightButton->setGeometry(this->width() - mLeftButton->width(),(this->height() - mLeftButton->height())/2,mLeftButton->width(),mLeftButton->height());
     mRightButton->setIconSize(QSize(mLeftButton->width()-10,mLeftButton->height()-10));
@@ -90,13 +99,14 @@ Widget::Widget(QWidget *parent) :
 
 
     mStackWidget = new QStackedWidget(this);
-    mMainWindow = new MainWindow(this);
+    mMainWindow = new MainWindow;
     mMainWindow->move(0,0);
+    connect(mMainWindow,SIGNAL(VideoDispSignal(QString &)),this,SLOT(onVideoDispSlot(QString &)));
 
     mStackWidget->addWidget(mMainWindow);
 
     mStackWidget->resize(this->width(),this->height());
-//    mStackWidget->hide();
+    mStackWidget->hide();
 
 //    m_quickWidget = new QQuickWidget(this);//this基类为QWidget
 //    m_quickWidget->move(0,0);
@@ -120,17 +130,21 @@ Widget::~Widget()
     delete mBack;
     delete mExit_Vo;
     delete mMainWindow;
-    delete mStackWidget;
-
+//    if(mStackWidget)
+//        delete mStackWidget;
+//    qDebug()<<"exit mStackWidget";
+#ifdef arm
+    mVdec.wait();
+#endif
 //    delete m_quickWidget;
-    for(int i = 0;i < mOneMenuAct.count(); i++){
-        delete mOneMenuAct[i];
-        mOneMenuAct.removeAt(i);
-    }
-    for(int i = 0; i < mTwoMenuAct.count();i++){
-        delete mTwoMenuAct[i];
-        mTwoMenuAct.removeAt(i);
-    }
+//    for(int i = 0;i < mOneMenuAct.count(); i++){
+//        delete mOneMenuAct[i];
+//        mOneMenuAct.removeAt(i);
+//    }
+//    for(int i = 0; i < mTwoMenuAct.count();i++){
+//        delete mTwoMenuAct[i];
+//        mTwoMenuAct.removeAt(i);
+//    }
     qDebug()<<"exit widget";
     delete ui;
 }
@@ -142,10 +156,12 @@ void Widget::paintEvent(QPaintEvent *event)
 //    QPen pen;
     QFont font;
 
-#ifdef arm
-    painter.setCompositionMode( QPainter::CompositionMode_Clear );
-    painter.fillRect( 0, 0, 1280, 720, Qt::SolidPattern );
-#endif
+//#ifdef arm
+    if(mMainWin){
+        painter.setCompositionMode( QPainter::CompositionMode_Clear );
+        painter.fillRect( 0, 0, 1280, 720, Qt::SolidPattern );
+    }
+//#endif
 //    pen.setColor(Qt::red);
 //    QString text = "无信号";
 //    font.setPixelSize(24);
@@ -273,9 +289,36 @@ void Widget::mouseDoubleClickEvent(QMouseEvent *event)
 
 }
 
+void Widget::onVideoExitClickSlot()
+{
+    mMainWin = false;
+    mVideoExit->hide();
+    mStackWidget->show();
+#ifdef arm
+    mVdec.Stop_Vdec();
+#endif
+}
+
+void Widget::onVideoDispSlot(QString &filepath)
+{
+    QByteArray filename = filepath.toLatin1();
+
+    qDebug()<<"onVideoDispSlot filename: "<<filepath;
+    mMainWin = true;
+    mRightButton->hide();
+    mLeftButton->hide();
+    mStackWidget->hide();
+    mVideoExit->show();
+#ifdef arm
+    mVdec.Start_Vdec(filename.data());
+#endif
+}
+
 void Widget::onMainMenuSlot()
 {
+    mMainWin = false;
     mStackWidget->show();
+    emit StopVoSignal();
 //    if(!mload_qml){
 //        mload_qml = true;
 //        m_quickWidget->setHidden(false);

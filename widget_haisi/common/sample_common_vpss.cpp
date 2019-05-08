@@ -172,6 +172,7 @@ HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_Start(HI_U32 u32GrpIndex, SIZE_S *ps
     }
 
 
+//    SAMPLE_PRT("HI_MPI_VPSS_CreateGrp\n");
 //    for(i=0; i<s32GrpCnt; i++)
 //    {
 //        VpssGrp = i;
@@ -237,6 +238,7 @@ HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_Start(HI_U32 u32GrpIndex, SIZE_S *ps
         }
 
   //  }
+//        SAMPLE_PRT("SAMPLE_COMM_VPSS_Start sucess group:%d\n",u32GrpIndex);
     return HI_SUCCESS;
 }
 

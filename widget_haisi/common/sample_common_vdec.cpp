@@ -46,7 +46,7 @@ Sample_Common_Vdec::Sample_Common_Vdec():
     m_Vdec_MaxTab[Vdec_ChnIndex] = 1;
     m_Vdec_Tab[0] = Vdec_ChnIndex;
 
-    printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
+//    printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
 }
 
 Sample_Common_Vdec::Sample_Common_Vdec(HI_S32 s32ChnNum,HI_S32 s32VpssChnNum ,HI_S32 s32VBSource):
@@ -134,6 +134,27 @@ HI_VOID	Sample_Common_Vdec::SAMPLE_COMM_VDEC_ChnAttr(HI_S32 s32ChnNum,
         }
     }
 
+}
+
+HI_BOOL Sample_Common_Vdec::SAMPLE_COMM_VDEC_GetPayload_Type(char* szFilePostfix,PAYLOAD_TYPE_E *enPayload)
+{
+    if(strcmp(szFilePostfix,".h264") == 0){
+        *enPayload = PT_H264;
+    }else if(strcmp(szFilePostfix,".h265") == 0){
+        *enPayload = PT_H265;
+    }else if(strcmp(szFilePostfix,".jpg") == 0){
+        *enPayload = PT_JPEG;
+    }else if(strcmp(szFilePostfix,".mjp") == 0){
+        *enPayload = PT_MJPEG;
+    }else if(strcmp(szFilePostfix,".mp4") == 0){
+        *enPayload = PT_MP4VIDEO;
+    }else{
+        SAMPLE_PRT("payload type err!\n");
+        return HI_FALSE;
+    }
+
+
+    return HI_TRUE;
 }
 
 HI_VOID	Sample_Common_Vdec::SAMPLE_COMM_VDEC_SetChnAttr(HI_S32 s32ChnIndex,VDEC_CHN_ATTR_S *pstVdecChnAttr)

@@ -24,7 +24,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
-#DEFINES += arm
+DEFINES += arm
 
 SOURCES += \
         main.cpp \
@@ -53,7 +53,8 @@ SOURCES +=common/sample_common_sys.cpp \
             common/sample_common_vio.cpp \
             common/sample_common_venc.cpp \
             video/venc.cpp \
-            video/vio.cpp
+            video/vio.cpp \
+            video/vdec.cpp
 
 HEADERS +=common/loadbmp.h \
             common/sample_common_sys.h \
@@ -62,7 +63,8 @@ HEADERS +=common/loadbmp.h \
             common/sample_common_vio.h \
             common/sample_common_venc.h \
             video/venc.h \
-            video/vio.h
+            video/vio.h \
+            video/vdec.h
 
 LIBS += -lpthread
 

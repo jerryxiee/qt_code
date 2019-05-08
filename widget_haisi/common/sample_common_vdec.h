@@ -38,6 +38,8 @@ public:
     HI_VOID	SAMPLE_COMM_VDEC_ModCommPoolConf(VB_CONF_S *pstModVbConf,PAYLOAD_TYPE_E enType, SIZE_S *pstSize, HI_S32 s32ChnNum, HI_BOOL bCompress);
     HI_S32	SAMPLE_COMM_VDEC_InitModCommVb(VB_CONF_S *pstModVbConf);
 
+    static HI_BOOL SAMPLE_COMM_VDEC_GetPayload_Type(char* szFilePostfix,PAYLOAD_TYPE_E *enPayload);
+
 
 public:
     HI_U32 m_Vdec_ChnNum;

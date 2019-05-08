@@ -14,6 +14,10 @@
 #include "windows/mainwindow.h"
 //#ifdef arm
 #include "common/sample_comm.h"
+#ifdef arm
+#include <video/vdec.h>
+#endif
+
 //#endif
 
 namespace Ui {
@@ -39,9 +43,12 @@ protected:
 signals:
     void Set_VoMode(SAMPLE_VO_MODE_E &enVoMode);
     void ChnDispToWinSignal(QMap<VO_CHN, RECT_S> &);
+    void StopVoSignal();
 
 private:
     void DispToWin(int Chn, int count);
+public slots:
+    void onVideoDispSlot(QString &filepath);
 
 private slots:
     void onMainMenuSlot();
@@ -59,12 +66,14 @@ private slots:
     void on9MuxModeSlot();
     void onLeftButtonClickSlot();
     void onRightButtonClickSlot();
+    void onVideoExitClickSlot();
 //    void onNiWinShow();
     //void on_pushButton_clicked();
 
 private:
     const int VI_CNT = 8;
     int mVo_Index;
+    bool mMainWin;
     SAMPLE_VO_MODE_E mVoMode;
     QProcess *process;
     QPainter painter;
@@ -83,6 +92,10 @@ private:
     QActionGroup   *mTwoActionGrp;
     QPushButton *mLeftButton;
     QPushButton *mRightButton;
+    QPushButton *mVideoExit;
+#ifdef arm
+    Vdec mVdec;
+#endif
 
 
 

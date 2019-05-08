@@ -355,7 +355,11 @@ END_1:
 
 HI_BOOL Vio::Vo_Start(VO_CHN Vo_Chn, RECT_S &pos)
 {
-    return m_Vio.SAMPLE_COMM_VO_StartChn(Vo_Chn,pos) > 0 ? HI_TRUE:HI_TRUE;
+
+    if(m_Vio.SAMPLE_COMM_VO_StartChn(Vo_Chn,pos) < 0){
+        return HI_FALSE;
+    }
+    return (m_Vio.SAMPLE_COMM_VO_BindVpss(Vo_Chn,m_pVpss->m_Grp_Tab[Vo_Chn],m_VoBindVpss)) < 0 ?HI_FALSE:HI_TRUE;
 }
 
 HI_BOOL Vio::Vo_Stop(VO_CHN Vo_Chn)
@@ -363,11 +367,12 @@ HI_BOOL Vio::Vo_Stop(VO_CHN Vo_Chn)
     HI_S32 i;
 
     if(Vo_Chn >= 0){
+        m_Vio.SAMPLE_COMM_VO_UnBindVpss(Vo_Chn,m_pVpss->m_Grp_Tab[Vo_Chn],m_VoBindVpss);
         return m_Vio.SAMPLE_COMM_VO_StopChn(Vo_Chn) > 0 ? HI_TRUE:HI_TRUE;
     }
-//    for(i = 0; i < m_ViChnCnt; i++){
-//        m_Vio.SAMPLE_COMM_VO_UnBindVpss(i,m_pVpss->m_Grp_Tab[i],m_VoBindVpss);
-//    }
+    for(i = 0; i < m_ViChnCnt; i++){
+        m_Vio.SAMPLE_COMM_VO_UnBindVpss(i,m_pVpss->m_Grp_Tab[i],m_VoBindVpss);
+    }
 
     m_Vio.SAMPLE_COMM_VO_StopChn();
 
@@ -378,6 +383,12 @@ HI_BOOL Vio::Vo_Stop(VO_CHN Vo_Chn)
 HI_S32 Vio::Vo_SetMode(SAMPLE_VO_MODE_E enVoMode)
 {
     return m_Vio.SAMPLE_COMM_VO_SetMode(enVoMode);
+}
+
+void Vio::onStopVoSlot()
+{
+    Vo_Stop(-1);
+    qDebug()<<"stop vo";
 }
 
 HI_BOOL Vio::Vi_Start()

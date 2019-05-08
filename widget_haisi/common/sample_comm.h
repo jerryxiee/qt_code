@@ -53,7 +53,7 @@
 
 #include "loadbmp.h"
 
-#define FILE_NAME_LEN               64
+#define FILE_NAME_LEN               128
 
 #ifdef __cplusplus
 #if __cplusplus
