@@ -24,16 +24,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
-DEFINES += arm
+#DEFINES += arm
 
 SOURCES += \
         main.cpp \
         widget.cpp \
+    windows/playvideo.cpp \
     windows/mainwindow.cpp
 
 HEADERS += \
         widget.h \
         common/sample_comm.h \
+    windows/playvideo.h \
     windows/mainwindow.h
 
 INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
@@ -46,8 +48,6 @@ INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
 if(contains(DEFINES,arm)){
 SOURCES +=common/sample_common_sys.cpp \
             common/loadbmp.c \
-            common/sample_comm_vdec.c \
-            common/sample_comm_venc.c \
             common/sample_common_vpss.cpp \
             common/sample_common_vdec.cpp \
             common/sample_common_vio.cpp \

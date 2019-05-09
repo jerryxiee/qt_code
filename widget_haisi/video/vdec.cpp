@@ -46,16 +46,11 @@ HI_BOOL Vdec::Start_Vdec(char *filename)
 {
     char* filetype = nullptr;
     HI_S32 s32Ret;
-//    VDEC_CHN_ATTR_S stVdecChnAttr;
     SIZE_S  stSize;
-//    VPSS_GRP_ATTR_S stVpssGrpAttr = {0};
-//    HI_U32 u32VoFrmRate;
     VB_CONF_S       stModVbConf;
     SIZE_S stRotateSize;
     PAYLOAD_TYPE_E enType;
     RECT_S pos;
-//    MPP_CHN_S stSrcChn;
-//    MPP_CHN_S stDestChn;
     VdecThreadParam stVdecParam;
 
     memset(&stVdecParam,0x0,sizeof(VdecThreadParam));

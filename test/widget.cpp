@@ -5,6 +5,8 @@
 #include <QRect>
 #include <QBrush>
 #include <QFile>
+#include <QStringList>
+
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -13,15 +15,25 @@ Widget::Widget(QWidget *parent) :
     ui->setupUi(this);
     this->resize(1280,720);
     mainmenu = new QMenu();
+
+    AnimationButton * but = new AnimationButton(this);
+    connect(but,SIGNAL(clicked()),this,SLOT(onClickedSlot()));
+    but->resize(100,100);
+//    but->setText("but");
+    but->setWindowOpacity(0.5);
+    but->setImage(":/images/back.png");
+
 //    this->setWindowOpacity(0.5);
+//    setWindowFlag(Qt::CustomizeWindowHint,true);
+//    setWindowFlag(Qt::FramelessWindowHint,true);
 
-    mStackWidget = new QStackedWidget(this);
-    testwidget = new TestWidget(this);
-    testwidget->move(0,0);
+//    mStackWidget = new QStackedWidget(this);
+//    testwidget = new TestWidget(this);
+//    testwidget->move(0,0);
 
-    mStackWidget->addWidget(testwidget);
+//    mStackWidget->addWidget(testwidget);
 
-    mStackWidget->resize(1280,720);
+//    mStackWidget->resize(1280,720);
 //    mStackWidget->hide();
 //    timer = new QTimer();
 
@@ -37,7 +49,92 @@ Widget::Widget(QWidget *parent) :
 //    connect(mFileWatch,SIGNAL(fileChanged(QString)),this,SLOT(changestatus(QString)));
 //    connect(mFileWatch,SIGNAL(directoryChanged(QString)),this,SLOT(changestatus(QString)));
 
+//        mFileModel = new QFileSystemModel;
+//        mFileModel->setRootPath(QDir::currentPath());
+
+
+//        mTreeView = new QTreeView(this);
+//        mTreeView->setModel(mFileModel);
+//        mTreeView->setColumnWidth(0,200);
+//        mTreeView->setRootIndex(mFileModel->index("/home/abhw"));
+
+//        QPushButton *mkdirButton = new QPushButton(tr("Make Directory..."), this);
+//        QPushButton *rmButton = new QPushButton(tr("Remove"), this);
+//        QHBoxLayout *buttonLayout = new QHBoxLayout;
+//        buttonLayout->addWidget(mkdirButton);
+//        buttonLayout->addWidget(rmButton);
+
+//        QVBoxLayout *layout = new QVBoxLayout;
+//        layout->addWidget(mTreeView);
+//        layout->addLayout(buttonLayout);
+
+//        setLayout(layout);
+//        setWindowTitle("File System Model");
+
+//        connect(mkdirButton, SIGNAL(clicked()),
+//                this, SLOT(mkdir()));
+//        connect(rmButton, SIGNAL(clicked()),
+//                this, SLOT(rm()));
+
+//    fileLineEdit = new QLineEdit(tr("/"));
+//    fileListWidget = new QListWidget;
+//    mainLayout = new QVBoxLayout(this);
+//    mainLayout->addWidget(fileLineEdit);
+//    mainLayout->addWidget(fileListWidget);
+//    connect(fileLineEdit,SIGNAL(returnPressed()),this,SLOT(slotShow(QDir)));
+//    connect(fileListWidget,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(slotDirShow(QListWidgetItem*)));
+//    QString root = "/";    //可以更改盘符
+//    QDir rootDir(root);
+//    QStringList string;
+//    string<<"*";
+//    QFileInfoList list = rootDir.entryInfoList(string,QDir::AllEntries | QDir::NoDotAndDotDot);
+//    showFileInfoList(list);
+
+
 }
+
+void Widget::onClickedSlot()
+{
+    qDebug()<<"press";
+}
+
+void Widget::slotShow(QDir dir)
+{
+    QStringList string;
+    string<<"*";
+    QFileInfoList list = dir.entryInfoList(string, QDir::AllEntries | QDir::NoDotAndDotDot , QDir::DirsFirst);
+    showFileInfoList(list);
+}
+
+void Widget::showFileInfoList(QFileInfoList list)
+{
+    fileListWidget->clear();
+    for(unsigned int i=0; i<list.count() ;i++){
+        QFileInfo tmpFileInfo = list.at(i);
+        if(tmpFileInfo.isDir()){
+//            QIcon icon("dir.png");
+            QString fileName = tmpFileInfo.fileName();
+            QListWidgetItem *tmp = new QListWidgetItem(/*icon,*/ fileName);
+            fileListWidget->addItem(tmp);
+        }else if(tmpFileInfo.isFile()){
+//            QIcon icon("file.png");
+            QString fileName = tmpFileInfo.fileName();
+            QListWidgetItem *tmp = new QListWidgetItem(/*icon,*/ fileName);
+            fileListWidget->addItem(tmp);
+        }
+    }
+}
+
+void Widget::slotDirShow(QListWidgetItem *item)
+{
+    QString str = item->text();
+    QDir dir;
+    dir.setPath(fileLineEdit->text());
+    dir.cd(str);
+    fileLineEdit->setText(dir.absolutePath());
+    slotShow(dir);
+}
+
 
 void Widget::onMakefile()
 {
@@ -105,7 +202,9 @@ void Widget::contextMenuEvent(QContextMenuEvent* e)
 void Widget::paintEvent(QPaintEvent *event)
 {
 
-//    QPainter painter(this);// 创建QPainter一个对象
+    QPainter painter(this);// 创建QPainter一个对象
+
+//    painter.setOpacity(0.3);
 
 //    painter.setCompositionMode( QPainter::CompositionMode_Clear );
 //    painter.fillRect( 0, 0, 1280, 7200, Qt::SolidPattern );

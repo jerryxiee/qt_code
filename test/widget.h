@@ -10,6 +10,16 @@
 #include <QMenu>
 #include "testwidget.h"
 #include <QFileSystemWatcher>
+#include <QFileSystemModel>
+#include <QTreeView>
+#include <QStandardItemModel>
+#include <QFileInfoList>
+
+#include <QListWidgetItem>
+#include <QDir>
+#include <QLineEdit>
+#include <QVBoxLayout>
+#include "animationbutton.h"
 
 namespace Ui {
 class Widget;
@@ -22,6 +32,7 @@ class Widget : public QWidget
 public:
     explicit Widget(QWidget *parent = nullptr);
     ~Widget();
+    void showFileInfoList(QFileInfoList list);
 
     void paintEvent(QPaintEvent *event);
 
@@ -31,9 +42,13 @@ protected:
 
 public slots:
         void changestatus(const QString &path);
+        void slotShow(QDir dir);
+        void slotDirShow(QListWidgetItem *item);
+
 private slots:
     void onMakefile();
     void ExitSlot();
+    void onClickedSlot();
 private:
     const QString watchfile = "file";
     TestWidget *testwidget;
@@ -43,6 +58,12 @@ private:
     QStackedWidget *mStackWidget;
     Ui::Widget *ui;
     QFileSystemWatcher * mFileWatch;
+    QFileSystemModel *mFileModel;
+    QTreeView *mTreeView;
+
+    QLineEdit *fileLineEdit;
+    QListWidget *fileListWidget;
+    QVBoxLayout *mainLayout;
 };
 
 #endif // WIDGET_H

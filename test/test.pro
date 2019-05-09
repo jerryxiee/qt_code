@@ -24,16 +24,64 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
+#DEFINES += arm
+
 SOURCES += \
         widget.cpp \
     main.cpp \
     thread_test.cpp \
-    testwidget.cpp
+    testwidget.cpp \
+    animationbutton.cpp
+
 
 HEADERS += \
         widget.h \
     thread_test.h \
-    testwidget.h
+    testwidget.h \
+    animationbutton.h
+
+INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
+                /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/include \
+                /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/nvp6134_ex \
+                /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/tlv320aic31
+
+
+if(contains(DEFINES,arm)){
+SOURCES +=common/sample_common_sys.cpp \
+    common/sample_common_vdec.cpp \
+    common/sample_common_venc.cpp \
+    common/sample_common_vio.cpp \
+    common/sample_common_vpss.cpp \
+    common/loadbmp.c
+
+HEADERS +=common/loadbmp.h \
+    common/sample_comm.h \
+    common/sample_common_sys.h \
+    common/sample_common_vdec.h \
+    common/sample_common_venc.h \
+    common/sample_common_vio.h \
+    common/sample_common_vpss.h
+
+
+LIBS += -lpthread
+
+LIBS += /usr/lib/libmpi.so \
+        /usr/lib/libhdmi.so \
+        /usr/lib/libjpeg.so  \
+        /usr/lib/libVoiceEngine.so \
+        /usr/lib/libupvqe.so  \
+        /usr/lib/libdnvqe.so  \
+        /usr/lib/libtde.so \
+        /usr/lib/libive.so \
+        /usr/lib/libmd.so \
+        /usr/lib/libpciv.so \
+        /usr/lib/libaacenc.so \
+        /usr/lib/libaacdec.so
+
+    message("arm platform")
+}else{
+    message("other platform")
+}
 
 FORMS += \
         widget.ui

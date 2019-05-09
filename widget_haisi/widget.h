@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QStackedWidget>
 //#include <QQuickWidget>
+#include "windows/playvideo.h"
 #include "windows/mainwindow.h"
 //#ifdef arm
 #include "common/sample_comm.h"
@@ -47,6 +48,7 @@ signals:
 
 private:
     void DispToWin(int Chn, int count);
+    void InitWin();
 public slots:
     void onVideoDispSlot(QString &filepath);
 
@@ -79,6 +81,7 @@ private:
     QPainter painter;
     bool mload_qml;
     QStackedWidget *mStackWidget;
+    PlayVideo *mPlayVideo;
     MainWindow *mMainWindow;
     Ui::Widget *ui;
     QMenu *mMenu;
@@ -93,7 +96,9 @@ private:
     QPushButton *mLeftButton;
     QPushButton *mRightButton;
     QPushButton *mVideoExit;
+    bool mVdecOn;
 #ifdef arm
+
     Vdec mVdec;
 #endif
 

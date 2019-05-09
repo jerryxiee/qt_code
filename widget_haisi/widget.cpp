@@ -11,7 +11,7 @@
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::Widget),mMainWin(true)
+    ui(new Ui::Widget),mMainWin(true),mVdecOn(false)
 {
     ui->setupUi(this);
     this->resize(1280,720);
@@ -27,7 +27,7 @@ Widget::Widget(QWidget *parent) :
 //    mVideoExit->setFlat(true);
 
 
-    mMenu = new QMenu();
+    mMenu = new QMenu(this);
     mBack = new QAction("主菜单",this);
 //    mBack->setCheckable(true);
     connect(mBack, SIGNAL(triggered()), this, SLOT(onMainMenuSlot()));
@@ -98,16 +98,8 @@ Widget::Widget(QWidget *parent) :
 
 
 
-    mStackWidget = new QStackedWidget(this);
-    mMainWindow = new MainWindow;
-    mMainWindow->move(0,0);
-    connect(mMainWindow,SIGNAL(VideoDispSignal(QString &)),this,SLOT(onVideoDispSlot(QString &)));
 
-    mStackWidget->addWidget(mMainWindow);
-
-    mStackWidget->resize(this->width(),this->height());
-    mStackWidget->hide();
-
+    InitWin();
 //    m_quickWidget = new QQuickWidget(this);//this基类为QWidget
 //    m_quickWidget->move(0,0);
 //    m_quickWidget->resize(1280,720);
@@ -118,18 +110,34 @@ Widget::Widget(QWidget *parent) :
 
 }
 
+void Widget::InitWin()
+{
+    mStackWidget = new QStackedWidget(this);
+    mMainWindow = new MainWindow;
+
+    mStackWidget->addWidget(mMainWindow);
+
+    mPlayVideo = new PlayVideo;
+    connect(mPlayVideo,SIGNAL(VideoDispSignal(QString &)),this,SLOT(onVideoDispSlot(QString &)));
+
+    mStackWidget->addWidget(mPlayVideo);
+    mStackWidget->resize(this->width(),this->height());
+    mStackWidget->hide();
+    qDebug()<<"mPlayVideo index:"<< mStackWidget->indexOf(mPlayVideo)<<"current index:"<<mStackWidget->currentIndex();
+}
+
 Widget::~Widget()
 {
-    delete mLeftButton;
-    delete mRightButton;
-    delete mMenu;
-    delete mOneMenu;
-    delete mTwoMenu;
-    delete mOneActionGrp;
+//    delete mLeftButton;
+//    delete mRightButton;
+//    delete mMenu;
+//    delete mOneMenu;
+//    delete mTwoMenu;
+//    delete mOneActionGrp;
 //    delete mTwoActionGrp;
-    delete mBack;
-    delete mExit_Vo;
-    delete mMainWindow;
+//    delete mBack;
+//    delete mExit_Vo;
+    delete mPlayVideo;
 //    if(mStackWidget)
 //        delete mStackWidget;
 //    qDebug()<<"exit mStackWidget";
@@ -273,14 +281,16 @@ void Widget::paintEvent(QPaintEvent *event)
 void Widget::contextMenuEvent(QContextMenuEvent* e)
 {
 
-    mMenu->clear();
+    if(!mVdecOn){
+        mMenu->clear();
 
-    mMenu->addAction(mBack);
-    mMenu->addMenu(mOneMenu);
-    mMenu->addMenu(mTwoMenu);
-    mMenu->addAction(mExit_Vo);
+        mMenu->addAction(mBack);
+        mMenu->addMenu(mOneMenu);
+        mMenu->addMenu(mTwoMenu);
+        mMenu->addAction(mExit_Vo);
 
-    mMenu->exec(e->globalPos());
+        mMenu->exec(e->globalPos());
+    }
 
 }
 
@@ -292,6 +302,7 @@ void Widget::mouseDoubleClickEvent(QMouseEvent *event)
 void Widget::onVideoExitClickSlot()
 {
     mMainWin = false;
+    mVdecOn = false;
     mVideoExit->hide();
     mStackWidget->show();
 #ifdef arm
@@ -305,6 +316,7 @@ void Widget::onVideoDispSlot(QString &filepath)
 
     qDebug()<<"onVideoDispSlot filename: "<<filepath;
     mMainWin = true;
+    mVdecOn = true;
     mRightButton->hide();
     mLeftButton->hide();
     mStackWidget->hide();
@@ -351,6 +363,7 @@ void Widget::on4MuxModeSlot()
 
 void Widget::on9MuxModeSlot()
 {
+    mMainWin = true;
     mStackWidget->hide();
     mVo_Index = 0;
     mVoMode = VO_MODE_9MUX;
