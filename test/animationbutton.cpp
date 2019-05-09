@@ -1,6 +1,7 @@
 #include "animationbutton.h"
 #include <QPainter>
 #include <QDebug>
+#include <QStyleOption>
 
 AnimationButton::AnimationButton(QWidget *parent) : QWidget(parent)
 {
@@ -11,6 +12,7 @@ AnimationButton::AnimationButton(QWidget *parent) : QWidget(parent)
     oldWidth = 0;
     oldHeight = 0;
 
+//    this->setStyleSheet("background-color:black;");
 
     enterAnimation = new QPropertyAnimation(this, "");
     enterAnimation->setStartValue(0);
@@ -72,9 +74,11 @@ void AnimationButton::leaveEvent(QEvent *)
 
 
 
-void AnimationButton::paintEvent(QPaintEvent *)
+void AnimationButton::paintEvent(QPaintEvent *event)
 
 {
+    Q_UNUSED(event);
+
     if (image.isEmpty()) {
         return;
     }
@@ -82,6 +86,12 @@ void AnimationButton::paintEvent(QPaintEvent *)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setOpacity(0.2);
+
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(Qt::black);
+        painter.drawRect(rect());
+
+
 
 
     QPixmap pix(image);
@@ -106,6 +116,7 @@ void AnimationButton::enterImageChanged(QVariant index)
 
 {
     int i = index.toInt();
+    qDebug()<<"enter i="<<i;
 
     targetWidth = pixWidth + i * 5;
     targetHeight = pixHeight + i * 5;
@@ -117,6 +128,7 @@ void AnimationButton::leaveImageChanged(QVariant index)
 
 {
     int i = index.toInt();
+    qDebug()<<"i="<<i;
 
     targetWidth = pixWidth - i * 5;
     targetHeight = pixWidth - i * 5;

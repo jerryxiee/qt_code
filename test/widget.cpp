@@ -204,7 +204,7 @@ void Widget::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);// 创建QPainter一个对象
 
-//    painter.setOpacity(0.3);
+//    painter.setOpacity(0);
 
 //    painter.setCompositionMode( QPainter::CompositionMode_Clear );
 //    painter.fillRect( 0, 0, 1280, 7200, Qt::SolidPattern );
