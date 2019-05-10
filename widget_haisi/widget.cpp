@@ -113,9 +113,9 @@ Widget::Widget(QWidget *parent) :
 void Widget::InitWin()
 {
     mStackWidget = new QStackedWidget(this);
-//    mMainWindow = new MainWindow;
+    mMainWindow = new MainWindow;
 
-//    mStackWidget->addWidget(mMainWindow);
+    mStackWidget->addWidget(mMainWindow);
 
     mPlayVideo = new PlayVideo;
     connect(mPlayVideo,SIGNAL(VideoDispSignal(QString &)),this,SLOT(onVideoDispSlot(QString &)));
@@ -141,7 +141,7 @@ Widget::~Widget()
 //    if(mStackWidget)
 //        delete mStackWidget;
 //    qDebug()<<"exit mStackWidget";
-#ifdef arm
+#ifndef LUNUX_WIN
     mVdec.wait();
 #endif
 //    delete m_quickWidget;
@@ -305,7 +305,7 @@ void Widget::onVideoExitClickSlot()
     mVdecOn = false;
     mVideoExit->hide();
     mStackWidget->show();
-#ifdef arm
+#ifndef LUNUX_WIN
     mVdec.Stop_Vdec();
 #endif
 }
@@ -321,7 +321,7 @@ void Widget::onVideoDispSlot(QString &filepath)
     mLeftButton->hide();
     mStackWidget->hide();
     mVideoExit->show();
-#ifdef arm
+#ifndef LUNUX_WIN
     mVdec.Start_Vdec(filename.data());
 #endif
 }

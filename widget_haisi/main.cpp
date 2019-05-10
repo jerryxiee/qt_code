@@ -6,7 +6,7 @@
 #include <QString>
 #include <signal.h>
 #include <QFontDatabase>
-//#ifdef arm
+//#ifndef LUNUX_WIN
 #include "common/sample_common_sys.h"
 #include "video/vio.h"
 //#endif
@@ -21,7 +21,7 @@ void sign(int signal)
 int main(int argc, char *argv[])
 {
     int ret;
-#ifdef arm
+#ifndef LUNUX_WIN
     Sample_Common_Sys sys_init;
     Vio vio;
 
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     Widget w;
     w.show();
     signal(SIGINT,sign);
-#ifdef arm
+#ifndef LUNUX_WIN
     vio.Vi_Start();
     vio.Vo_Start();
     vio.Vi_Venc_Start();
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 //    if (engine.rootObjects().isEmpty())
 //        return -1;
     ret = a.exec();
-#ifdef arm
+#ifndef LUNUX_WIN
     vio.Venc_exit();
     vio.wait();
     qDebug()<<"exit main";

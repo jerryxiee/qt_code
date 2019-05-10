@@ -24,19 +24,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
-DEFINES += arm
+greaterThan(QT_VERSION, 5.9):DEFINES += LUNUX_WIN
 
 SOURCES += \
         main.cpp \
         widget.cpp \
     windows/playvideo.cpp \
-    windows/mainwindow.cpp
+    windows/mainwindow.cpp \
+    windows/CustomControls/animationbutton.cpp
 
 HEADERS += \
         widget.h \
         common/sample_comm.h \
     windows/playvideo.h \
-    windows/mainwindow.h
+    windows/mainwindow.h \
+    windows/CustomControls/animationbutton.h
 
 INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
                 /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/include \
@@ -45,7 +47,9 @@ INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
 
 
 
-if(contains(DEFINES,arm)){
+if(contains(DEFINES,LUNUX_WIN)){
+        message("linux platform")
+}else{
 SOURCES +=common/sample_common_sys.cpp \
             common/loadbmp.c \
             common/sample_common_vpss.cpp \
@@ -82,8 +86,7 @@ LIBS += /usr/lib/libmpi.so \
         /usr/lib/libaacdec.so
 
     message("arm platform")
-}else{
-    message("other platform")
+
 }
 
 FORMS += \

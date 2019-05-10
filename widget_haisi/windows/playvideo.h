@@ -8,7 +8,7 @@
 #include <QPushButton>
 #include <QFileSystemModel>
 #include <QTreeView>
-#ifdef arm
+#ifndef LUNUX_WIN
 #include <video/vdec.h>
 #endif
 
@@ -44,7 +44,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
-#ifdef arm
+#ifndef LUNUX_WIN
 //    Vdec mVdec;
 #endif
     enum { absoluteFileNameRole = Qt::UserRole + 1 };

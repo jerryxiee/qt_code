@@ -13,9 +13,9 @@
 //#include <QQuickWidget>
 #include "windows/playvideo.h"
 #include "windows/mainwindow.h"
-//#ifdef arm
+//#ifndef LUNUX_WIN
 #include "common/sample_comm.h"
-#ifdef arm
+#ifndef LUNUX_WIN
 #include <video/vdec.h>
 #endif
 
@@ -97,8 +97,7 @@ private:
     QPushButton *mRightButton;
     QPushButton *mVideoExit;
     bool mVdecOn;
-#ifdef arm
-
+#ifndef LUNUX_WIN
     Vdec mVdec;
 #endif
 
