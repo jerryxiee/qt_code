@@ -33,8 +33,8 @@ private:
     const VO_CHN VDEC_VO = 0;
 
     Sample_Common_Vio m_Vdec_Vio;
-    Sample_Common_Vpss *m_pVpss;
-    Sample_Common_Vdec *m_pVdec;
+    Sample_Common_Vpss *m_pVpss = nullptr;
+    Sample_Common_Vdec *m_pVdec = nullptr;
     VdecThreadParam m_Thread_Attr;
     bool m_Vdec_Run;
 };

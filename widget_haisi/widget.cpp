@@ -113,9 +113,9 @@ Widget::Widget(QWidget *parent) :
 void Widget::InitWin()
 {
     mStackWidget = new QStackedWidget(this);
-    mMainWindow = new MainWindow;
+//    mMainWindow = new MainWindow;
 
-    mStackWidget->addWidget(mMainWindow);
+//    mStackWidget->addWidget(mMainWindow);
 
     mPlayVideo = new PlayVideo;
     connect(mPlayVideo,SIGNAL(VideoDispSignal(QString &)),this,SLOT(onVideoDispSlot(QString &)));
@@ -137,7 +137,7 @@ Widget::~Widget()
 //    delete mTwoActionGrp;
 //    delete mBack;
 //    delete mExit_Vo;
-    delete mPlayVideo;
+//    delete mPlayVideo;
 //    if(mStackWidget)
 //        delete mStackWidget;
 //    qDebug()<<"exit mStackWidget";

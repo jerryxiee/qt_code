@@ -95,6 +95,7 @@ Sample_Common_Vpss::~Sample_Common_Vpss()
     for(int i = 0;i < m_Grp_Num;i++){
         m_Grp_MaxTable[m_Grp_Tab[i]] = 0;
     }
+    printf("exit %s\n",__FUNCTION__);
 
 }
 HI_BOOL Sample_Common_Vpss::SAMPLE_COMM_VPSS_CreatIsSucess()

@@ -13,10 +13,13 @@ Vdec::Vdec(QObject *parent) : QThread(parent)
 
 Vdec::~Vdec()
 {
-    if(m_pVdec)
+    qDebug("enter %s:%d",__FUNCTION__,__LINE__);
+    if(m_pVdec){
         delete m_pVdec;
-    if(m_pVpss)
+    }
+    if(m_pVpss){
         delete m_pVpss;
+    }
 
 
 }

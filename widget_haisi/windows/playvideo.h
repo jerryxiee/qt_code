@@ -45,7 +45,7 @@ protected:
 
 private:
 #ifdef arm
-    Vdec mVdec;
+//    Vdec mVdec;
 #endif
     enum { absoluteFileNameRole = Qt::UserRole + 1 };
 

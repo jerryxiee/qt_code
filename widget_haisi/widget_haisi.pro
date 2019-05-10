@@ -24,7 +24,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
-#DEFINES += arm
+DEFINES += arm
 
 SOURCES += \
         main.cpp \
