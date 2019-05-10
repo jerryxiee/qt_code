@@ -10,6 +10,7 @@
 #include <QList>
 #include <QPushButton>
 #include <QStackedWidget>
+#include "windows/CustomControls/animationbutton.h"
 //#include <QQuickWidget>
 #include "windows/playvideo.h"
 #include "windows/mainwindow.h"
@@ -93,8 +94,8 @@ private:
     QList<QAction *> mTwoMenuAct;
     QActionGroup   *mOneActionGrp;
     QActionGroup   *mTwoActionGrp;
-    QPushButton *mLeftButton;
-    QPushButton *mRightButton;
+    AnimationButton *mLeftButton;
+    AnimationButton *mRightButton;
     QPushButton *mVideoExit;
     bool mVdecOn;
 #ifndef LUNUX_WIN

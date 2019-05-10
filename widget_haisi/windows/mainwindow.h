@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QPushButton>
+#include "CustomControls/animationbutton.h"
 
 class MainWindow : public QWidget
 {

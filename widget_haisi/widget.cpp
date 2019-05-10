@@ -67,37 +67,63 @@ Widget::Widget(QWidget *parent) :
 
 //    QPixmap *pixmap = new QPixmap(260, 260);
 //    pixmap->load("images/back@2x.png");
-    QIcon icon(":/images/back.png");
+//    QIcon icon(":/images/back.png");
 
-    mLeftButton = new QPushButton("",this);
-    mLeftButton->setStyleSheet("QPushButton:hover{border-image: url(:/images/back.png);}""QPushButton:pressed{border-image: url(:/images/back.png);}");
-//    mLeftButton->setIcon(icon);
+//    mLeftButton = new QPushButton("",this);
+//    mLeftButton->setStyleSheet("QPushButton:hover{border-image: url(:/images/back.png);}""QPushButton:pressed{border-image: url(:/images/back.png);}");
+////    mLeftButton->setIcon(icon);
+//    mLeftButton->resize(100,100);
+//    mLeftButton->setGeometry(0,(this->height() - mLeftButton->height())/2,mLeftButton->width(),mLeftButton->height());
+//    mLeftButton->setIconSize(QSize(mLeftButton->width()-10,mLeftButton->height()-10));
+//    mLeftButton->setWindowOpacity(0);
+//    mLeftButton->setFlat(true);
+////    mLeftButton->setHidden(true);
+////    mLeftButton->setStyleSheet("background-color:transparent");
+//    connect(mLeftButton,SIGNAL(clicked()),this,SLOT(onLeftButtonClickSlot()));
+
+
+//    icon = QIcon(":/images/back1.png");
+//    mRightButton = new QPushButton("",this);
+//    mRightButton->setStyleSheet("QPushButton:hover{border-image: url(:/images/back1.png);}""QPushButton:pressed{border-image: url(:/images/back1.png);}");
+////    mRightButton->setIcon(icon);
+//    mRightButton->resize(100,100);
+//    mRightButton->setGeometry(this->width() - mLeftButton->width(),(this->height() - mLeftButton->height())/2,mLeftButton->width(),mLeftButton->height());
+//    mRightButton->setIconSize(QSize(mLeftButton->width()-10,mLeftButton->height()-10));
+//    mRightButton->setWindowOpacity(0);
+//    mRightButton->setFlat(true);
+//    connect(mRightButton,SIGNAL(clicked()),this,SLOT(onRightButtonClickSlot()));
+
+////    mRightButton->setHidden(true);
+
+
+
+    mLeftButton = new AnimationButton(this);
+//    connect(but,SIGNAL(clicked()),this,SLOT(onClickedSlot()));
     mLeftButton->resize(100,100);
+    mLeftButton->setText("but");
+    mLeftButton->setDuration(200);
+    mLeftButton->setValue(0,20);
+    mLeftButton->setOpacity(0.3);
+//    but->setWindowOpacity(0.5);
+    mLeftButton->setImage(":/images/back.png");
+    mLeftButton->setImageSize(90,90);
+//    mLeftButton->hide();
     mLeftButton->setGeometry(0,(this->height() - mLeftButton->height())/2,mLeftButton->width(),mLeftButton->height());
-    mLeftButton->setIconSize(QSize(mLeftButton->width()-10,mLeftButton->height()-10));
-    mLeftButton->setWindowOpacity(0);
-    mLeftButton->setFlat(true);
-//    mLeftButton->setHidden(true);
-//    mLeftButton->setStyleSheet("background-color:transparent");
-    connect(mLeftButton,SIGNAL(clicked()),this,SLOT(onLeftButtonClickSlot()));
 
 
-    icon = QIcon(":/images/back1.png");
-    mRightButton = new QPushButton("",this);
-    mRightButton->setStyleSheet("QPushButton:hover{border-image: url(:/images/back1.png);}""QPushButton:pressed{border-image: url(:/images/back1.png);}");
-//    mRightButton->setIcon(icon);
+    mRightButton = new AnimationButton(this);
+//    connect(but,SIGNAL(clicked()),this,SLOT(onClickedSlot()));
+    mRightButton->move(100,100);
     mRightButton->resize(100,100);
-    mRightButton->setGeometry(this->width() - mLeftButton->width(),(this->height() - mLeftButton->height())/2,mLeftButton->width(),mLeftButton->height());
-    mRightButton->setIconSize(QSize(mLeftButton->width()-10,mLeftButton->height()-10));
-    mRightButton->setWindowOpacity(0);
-    mRightButton->setFlat(true);
-    connect(mRightButton,SIGNAL(clicked()),this,SLOT(onRightButtonClickSlot()));
-
+    mRightButton->setText("but");
+    mRightButton->setDuration(200);
+    mRightButton->setValue(0,20);
+    mRightButton->setOpacity(0.3);
+//    but->setWindowOpacity(0.5);
+    mRightButton->setImage(":/images/back1.png");
+    mRightButton->setImageSize(90,90);
+    mRightButton->setGeometry(this->width() - mRightButton->width(),(this->height() - mRightButton->height())/2,mRightButton->width(),mRightButton->height());
 //    mRightButton->setHidden(true);
-
-
-
-
 
     InitWin();
 //    m_quickWidget = new QQuickWidget(this);//this基类为QWidget
@@ -317,8 +343,8 @@ void Widget::onVideoDispSlot(QString &filepath)
     qDebug()<<"onVideoDispSlot filename: "<<filepath;
     mMainWin = true;
     mVdecOn = true;
-    mRightButton->hide();
-    mLeftButton->hide();
+    mRightButton->setHidden(true);
+    mLeftButton->setHidden(true);
     mStackWidget->hide();
     mVideoExit->show();
 #ifndef LUNUX_WIN
@@ -329,6 +355,9 @@ void Widget::onVideoDispSlot(QString &filepath)
 void Widget::onMainMenuSlot()
 {
     mMainWin = false;
+    mRightButton->setHidden(true);
+    mLeftButton->setHidden(true);
+
     mStackWidget->show();
     emit StopVoSignal();
 //    if(!mload_qml){

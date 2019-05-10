@@ -4,34 +4,47 @@
 
 AnimationButton::AnimationButton(QWidget *parent) : QWidget(parent)
 {
-    mEnter = false;
-    pixWidth = 0;
-    pixHeight = 0;
-    oldWidth = 0;
-    oldHeight = 0;
 
-//    this->setStyleSheet("background-color:black;");
+    Init();
+}
+
+AnimationButton::AnimationButton(QString &text,QWidget *parent) : QWidget(parent)
+{
+    this->mtext = text;
+    Init();
+}
+
+void AnimationButton::Init()
+{
+    mEnter = false;
+    mpixWidth = 0;
+    mpixHeight = 0;
+    moldWidth = 0;
+    moldHeight = 0;
+    msticopacity = 1;
+    mStartValue = 0;
+    mEndValue = 0;
+    mDuration = 0;
+    menterIndex = -1;
 
     enterAnimation = new QPropertyAnimation(this, "");
-    enterAnimation->setStartValue(0);
-    enterAnimation->setEndValue(5);
-    enterAnimation->setDuration(200);
+//    enterAnimation->setStartValue(0);
+//    enterAnimation->setEndValue(5);
+//    enterAnimation->setDuration(200);
     connect(enterAnimation, SIGNAL(valueChanged(QVariant)), this, SLOT(onEnterImageChangedSlot(QVariant)));
 
-
     leaveAnimation = new QPropertyAnimation(this, "");
-    leaveAnimation->setStartValue(0);
-    leaveAnimation->setEndValue(5);
-    leaveAnimation->setDuration(200);
+//    leaveAnimation->setStartValue(0);
+//    leaveAnimation->setEndValue(5);
+//    leaveAnimation->setDuration(200);
     connect(leaveAnimation, SIGNAL(valueChanged(QVariant)), this, SLOT(onLeaveImageChangedSlot(QVariant)));
-
 }
 
 void AnimationButton::mousePressEvent(QMouseEvent * event)
 {
     if(event->button() == Qt::LeftButton){
         emit clicked();
-        qDebug()<<targetWidth<<"  "<<targetHeight;
+        qDebug()<<mtargetWidth<<"  "<<mtargetHeight;
     }
 
 }
@@ -42,11 +55,14 @@ void AnimationButton::enterEvent(QEvent *)
 
     mEnter = true;
 
-    pixWidth = pixWidth - 25;
+//    mpixWidth = mpixWidth;
 
-    pixHeight = pixHeight - 25;
-
-    enterAnimation->start();
+//    mpixHeight = mpixHeight;
+    enterAnimation->setStartValue(mStartValue);
+    enterAnimation->setEndValue(mEndValue);
+    enterAnimation->setDuration(mDuration);
+    if(mDuration > 0)
+        enterAnimation->start();
 
 }
 
@@ -55,14 +71,15 @@ void AnimationButton::enterEvent(QEvent *)
 void AnimationButton::leaveEvent(QEvent *)
 
 {
-
     mEnter = false;
+    mpixWidth = moldWidth;
 
-    pixWidth = oldWidth;
-
-    pixHeight = oldHeight;
-
-    leaveAnimation->start();
+    mpixHeight = moldHeight;
+    leaveAnimation->setStartValue(mStartValue);
+    leaveAnimation->setEndValue(mEndValue);
+    leaveAnimation->setDuration(mDuration);
+    if(mDuration > 0)
+        leaveAnimation->start();
 
 }
 
@@ -73,53 +90,64 @@ void AnimationButton::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
 
-    if (image.isEmpty()) {
-        return;
-    }
+//    if (image.isEmpty()) {
+//        return;
+//    }
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setOpacity(0.2);
+
 
 //        painter.setPen(Qt::NoPen);
 //        painter.setBrush(Qt::black);
 //        painter.drawRect(rect());
 
-    QPixmap pix(image);
-    pix = pix.scaled(targetWidth, targetHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-    if(mEnter)
-        painter.setOpacity(1);
-    int pixX = rect().center().x() - targetWidth / 2;
-    int pixY = rect().center().y() - targetHeight / 2/* - 10*/;
-    QPoint point(pixX, pixY);
-    painter.drawPixmap(point, pix);
-    painter.drawText(QRectF(0, height() - 20, width(), 20), Qt::AlignCenter, text);
+    if (!mimage.isEmpty()) {
+        QPixmap pix(mimage);
+        pix = pix.scaled(mtargetWidth, mtargetHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        painter.setOpacity(msticopacity);
+        if(mEnter)
+            painter.setOpacity(1);
+        int pixX = rect().center().x() - mtargetWidth / 2;
+        int pixY = rect().center().y() - mtargetHeight / 2/* - 10*/;
+        QPoint point(pixX, pixY);
+        painter.drawPixmap(point, pix);
+    }
+    painter.drawText(QRectF((width() - mfontWidth)/2, (height() - mfontHeight)/2, mfontWidth, mfontHeight), Qt::AlignCenter, mtext);
 
 }
-
-
 
 void AnimationButton::onEnterImageChangedSlot(QVariant index)
-
 {
     int i = index.toInt();
-    qDebug()<<"enter i="<<i;
-
-    targetWidth = pixWidth + i * 5;
-    targetHeight = pixHeight + i * 5;
+//    qDebug()<<"mtargetWidth="<<mtargetWidth<<"menterIndex"<<menterIndex;
+    mtargetWidth += i;
+    if(mtargetWidth > width()){
+        mtargetWidth = width();
+    }
+    mtargetHeight += i;
+    if(mtargetHeight > height()){
+        mtargetHeight = height();
+    }
     update();
 }
-
 
 void AnimationButton::onLeaveImageChangedSlot(QVariant index)
 
 {
     int i = index.toInt();
-    qDebug()<<"i="<<i;
+//    qDebug()<<"mtargetWidth="<<mtargetWidth<<"menterIndex"<<menterIndex;
 
-    targetWidth = pixWidth - i * 5;
-    targetHeight = pixWidth - i * 5;
+    mtargetWidth -= i;
+    if(mtargetWidth < mpixWidth){
+        mtargetWidth = mpixWidth;
+    }
+    mtargetHeight -= i;
+    if(mtargetHeight < mpixHeight){
+        mtargetHeight = mpixHeight;
+    }
+
+
     update();
 
 }
@@ -130,23 +158,59 @@ void AnimationButton::setImage(QString image)
 
 {
 
-    this->image = image;
+    this->mimage = image;
     QPixmap pix(image);
-    pixWidth = pix.width();
-    pixHeight = pix.height();
-    oldWidth = pixWidth;
-    oldHeight = pixHeight;
-    targetWidth = pixWidth - 25;
-    targetHeight = pixHeight - 25;
+    mpixWidth = pix.width();
+    mpixHeight = pix.height();
+    moldWidth = mpixWidth;
+    moldHeight = mpixHeight;
+    mtargetWidth = mpixWidth;
+    mtargetHeight = mpixHeight;
     update();
 }
 
-
 void AnimationButton::setText(QString text)
-
 {
-    this->text = text;
+    QFontMetrics metric(this->font());
+
+    this->mtext = text;
+    mfontWidth = metric.width(text);
+    mfontHeight = metric.height();
     update();
 
+}
+
+void AnimationButton::setImageSize(QSize &size)
+{
+    mpixWidth = size.width();
+    mpixHeight = size.height();
+    moldWidth = mpixWidth;
+    moldHeight = mpixHeight;
+    mtargetWidth = mpixWidth;
+    mtargetHeight = mpixHeight;
+}
+
+void AnimationButton::setImageSize(int width,int height)
+{
+    mpixWidth = width;
+    mpixHeight = height;
+    moldWidth = mpixWidth;
+    moldHeight = mpixHeight;
+    mtargetWidth = mpixWidth;
+    mtargetHeight = mpixHeight;
+}
+void AnimationButton::setOpacity(qreal opacity)
+{
+    msticopacity = opacity;
+}
+
+void AnimationButton::setDuration(int msecs)
+{
+    mDuration = msecs;
+}
+void AnimationButton::setValue(int startVal,int endVal)
+{
+    mStartValue = startVal;
+    mEndValue = endVal;
 }
 
