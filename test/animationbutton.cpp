@@ -16,14 +16,14 @@ AnimationButton::AnimationButton(QWidget *parent) : QWidget(parent)
 
     enterAnimation = new QPropertyAnimation(this, "");
     enterAnimation->setStartValue(0);
-    enterAnimation->setEndValue(5);
+    enterAnimation->setEndValue(10);
     enterAnimation->setDuration(200);
     connect(enterAnimation, SIGNAL(valueChanged(QVariant)), this, SLOT(enterImageChanged(QVariant)));
 
 
     leaveAnimation = new QPropertyAnimation(this, "");
     leaveAnimation->setStartValue(0);
-    leaveAnimation->setEndValue(5);
+    leaveAnimation->setEndValue(10);
     leaveAnimation->setDuration(200);
     connect(leaveAnimation, SIGNAL(valueChanged(QVariant)), this, SLOT(leaveImageChanged(QVariant)));
 

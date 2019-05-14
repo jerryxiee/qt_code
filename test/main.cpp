@@ -19,7 +19,7 @@
 #include <iostream>
 #include <string.h>
 #include "thread_test.h"
-#ifdef arm
+#ifndef LUNUX_WIN
 #include "common/sample_common_sys.h"
 #endif
 
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 {
     int ret;
 
-#ifdef arm
+#ifndef LUNUX_WIN
     Sample_Common_Sys sys_init;
 
     if(sys_init.Sys_init_Sucess < 0){

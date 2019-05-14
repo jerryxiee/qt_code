@@ -36,6 +36,9 @@ public:
 
     void paintEvent(QPaintEvent *event);
 
+    Q_INVOKABLE void test(QString str);
+
+
 protected:
     void mousePressEvent(QMouseEvent * event);
         void contextMenuEvent(QContextMenuEvent* e);
@@ -44,12 +47,14 @@ public slots:
         void changestatus(const QString &path);
         void slotShow(QDir dir);
         void slotDirShow(QListWidgetItem *item);
+        void onHidQmlSlot();
 
 private slots:
     void onMakefile();
     void ExitSlot();
     void onClickedSlot();
 private:
+    QQuickWidget* m_quickWidget;
     const QString watchfile = "file";
     TestWidget *testwidget;
     QTimer *timer;
