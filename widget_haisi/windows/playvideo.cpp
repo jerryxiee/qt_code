@@ -25,6 +25,33 @@ PlayVideo::PlayVideo(QWidget *parent) : QWidget(parent),mVdecStart(false)
     QFont font("SimSun",12,50);
 #if 1
 
+//    QPushButton *mBackButton1 = new QPushButton(tr("back"));
+//    mBackButton1->setFont(font);
+//    QPushButton *mHomeButton2 = new QPushButton(tr("home"));
+//    mHomeButton2->setFont(font);
+
+    AnimationButton *mBackButton = new AnimationButton;
+    mBackButton->resize(40,40);
+    mBackButton->move(0,0);
+    mBackButton->setDuration(0);
+    mBackButton->setImage(":/images/back.png");
+    mBackButton->setImageSize(40,40);
+
+
+    AnimationButton *mHomeButton = new AnimationButton;
+    mHomeButton->resize(40,40);
+
+    mHomeButton->setDuration(0);
+    mHomeButton->setImage(":/images/home.png");
+    mHomeButton->setImageSize(40,40);
+
+    QHBoxLayout *ToolButtonLayout = new QHBoxLayout;
+//    ToolButtonLayout->addWidget(mBackButton1);
+//    ToolButtonLayout->addWidget(mHomeButton2);
+    ToolButtonLayout->addWidget(mBackButton);
+    ToolButtonLayout->addWidget(mHomeButton);
+    ToolButtonLayout->setSpacing(1280 - mHomeButton->width() - mBackButton->width());
+
 
     QComboBox *FondTypeBox = new QComboBox;
     FondTypeBox->setFont(font);
@@ -71,16 +98,16 @@ PlayVideo::PlayVideo(QWidget *parent) : QWidget(parent),mVdecStart(false)
     QGridLayout *ButGrpLayout = new QGridLayout;
     ButGrpLayout->setHorizontalSpacing(30);
     ButGrpLayout->setVerticalSpacing(20);
-    QPushButton *FindButton = new QPushButton(tr("查询"), this);
+    QPushButton *FindButton = new QPushButton(tr("查询"));
     FindButton->setFont(font);
     connect(FindButton,SIGNAL(clicked()),this,SLOT(onFindButtonClickedSlot()));
-    QPushButton *WatchdButton = new QPushButton(tr("浏览"), this);
+    QPushButton *WatchdButton = new QPushButton(tr("浏览"));
     WatchdButton->setFont(font);
     connect(WatchdButton,SIGNAL(clicked()),this,SLOT(onWatchdButtonClickedSlot()));
-    QPushButton *OpenButton = new QPushButton(tr("打开"), this);
+    QPushButton *OpenButton = new QPushButton(tr("打开"));
     OpenButton->setFont(font);
     connect(OpenButton,SIGNAL(clicked()),this,SLOT(onOpenButtonClickedSlot()));
-    QPushButton *CloseButton = new QPushButton(tr("关闭"), this);
+    QPushButton *CloseButton = new QPushButton(tr("关闭"));
     CloseButton->setFont(font);
     connect(CloseButton,SIGNAL(clicked()),this,SLOT(onCloseButtonClickedSlot()));
     ButGrpLayout->addWidget(WatchdButton,0,0);
@@ -167,7 +194,15 @@ PlayVideo::PlayVideo(QWidget *parent) : QWidget(parent),mVdecStart(false)
     MainLayout->addLayout(layout);
     MainLayout->setStretchFactor(findlayout,1);
     MainLayout->setStretchFactor(layout,4);
-    setLayout(MainLayout);
+
+//    setLayout(MainLayout);
+
+    QVBoxLayout *Windowlayout = new QVBoxLayout;
+    Windowlayout->addLayout(ToolButtonLayout);
+    Windowlayout->addLayout(MainLayout);
+    Windowlayout->setStretchFactor(ToolButtonLayout,1);
+    Windowlayout->setStretchFactor(MainLayout,20);
+    setLayout(Windowlayout);
 
 #endif
 

@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QFileSystemModel>
 #include <QTreeView>
+#include "windows/CustomControls/animationbutton.h"
 #ifndef LUNUX_WIN
 #include <video/vdec.h>
 #endif

@@ -54,6 +54,7 @@ public slots:
     void onVideoDispSlot(QString &filepath);
 
 private slots:
+    void onHidQmlSlot();
     void onMainMenuSlot();
 //    void onExitVoSlot();
     void onOneWinShowSlot();
@@ -81,6 +82,7 @@ private:
     QProcess *process;
     QPainter painter;
     bool mload_qml;
+    QQuickWidget* mQuickWidget = nullptr;
     QStackedWidget *mStackWidget;
     PlayVideo *mPlayVideo;
     MainWindow *mMainWindow;

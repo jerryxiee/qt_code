@@ -44,7 +44,7 @@ void AnimationButton::mousePressEvent(QMouseEvent * event)
 {
     if(event->button() == Qt::LeftButton){
         emit clicked();
-        qDebug()<<mtargetWidth<<"  "<<mtargetHeight;
+//        qDebug()<<mtargetWidth<<"  "<<mtargetHeight;
     }
 
 }
@@ -58,11 +58,12 @@ void AnimationButton::enterEvent(QEvent *)
 //    mpixWidth = mpixWidth;
 
 //    mpixHeight = mpixHeight;
-    enterAnimation->setStartValue(mStartValue);
-    enterAnimation->setEndValue(mEndValue);
-    enterAnimation->setDuration(mDuration);
-    if(mDuration > 0)
+    if(mDuration > 0){
+        enterAnimation->setStartValue(mStartValue);
+        enterAnimation->setEndValue(mEndValue);
+        enterAnimation->setDuration(mDuration);
         enterAnimation->start();
+    }
 
 }
 
@@ -74,12 +75,13 @@ void AnimationButton::leaveEvent(QEvent *)
     mEnter = false;
     mpixWidth = moldWidth;
 
-    mpixHeight = moldHeight;
-    leaveAnimation->setStartValue(mStartValue);
-    leaveAnimation->setEndValue(mEndValue);
-    leaveAnimation->setDuration(mDuration);
-    if(mDuration > 0)
+    if(mDuration > 0){
+        mpixHeight = moldHeight;
+        leaveAnimation->setStartValue(mStartValue);
+        leaveAnimation->setEndValue(mEndValue);
+        leaveAnimation->setDuration(mDuration);
         leaveAnimation->start();
+    }
 
 }
 

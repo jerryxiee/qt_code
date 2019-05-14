@@ -107,7 +107,7 @@ Widget::Widget(QWidget *parent) :
 //    but->setWindowOpacity(0.5);
     mLeftButton->setImage(":/images/back.png");
     mLeftButton->setImageSize(90,90);
-//    mLeftButton->hide();
+    mLeftButton->hide();
     mLeftButton->setGeometry(0,(this->height() - mLeftButton->height())/2,mLeftButton->width(),mLeftButton->height());
 
 
@@ -123,25 +123,29 @@ Widget::Widget(QWidget *parent) :
     mRightButton->setImage(":/images/back1.png");
     mRightButton->setImageSize(90,90);
     mRightButton->setGeometry(this->width() - mRightButton->width(),(this->height() - mRightButton->height())/2,mRightButton->width(),mRightButton->height());
-//    mRightButton->setHidden(true);
+    mRightButton->setHidden(true);
 
     InitWin();
-//    m_quickWidget = new QQuickWidget(this);//this基类为QWidget
-//    m_quickWidget->move(0,0);
-//    m_quickWidget->resize(1280,720);
-//    m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-//    m_quickWidget->setHidden(true);
-//    QUrl source("qrc:/main.qml");
-//    m_quickWidget->setSource(source);
+    mQuickWidget = new QQuickWidget(this);//this基类为QWidget
+    mQuickWidget->move(0,0);
+    mQuickWidget->resize(this->width(),this->height());
+    mQuickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mQuickWidget->setHidden(true);
+    QUrl source("qrc:/qml/main.qml");
+    mQuickWidget->setSource(source);
+    QObject *pRoot = (QObject*)mQuickWidget->rootObject();
+    if(pRoot){
+        connect(pRoot,SIGNAL(hidqmlsignal()),this,SLOT(onHidQmlSlot()));
+    }
 
 }
 
 void Widget::InitWin()
 {
     mStackWidget = new QStackedWidget(this);
-    mMainWindow = new MainWindow;
+//    mMainWindow = new MainWindow;
 
-    mStackWidget->addWidget(mMainWindow);
+//    mStackWidget->addWidget(mMainWindow);
 
     mPlayVideo = new PlayVideo;
     connect(mPlayVideo,SIGNAL(VideoDispSignal(QString &)),this,SLOT(onVideoDispSlot(QString &)));
@@ -320,6 +324,13 @@ void Widget::contextMenuEvent(QContextMenuEvent* e)
 
 }
 
+void Widget::onHidQmlSlot()
+{
+    mQuickWidget->setHidden(true);
+    on9MuxModeSlot();
+}
+
+
 void Widget::mouseDoubleClickEvent(QMouseEvent *event)
 {
 
@@ -358,7 +369,8 @@ void Widget::onMainMenuSlot()
     mRightButton->setHidden(true);
     mLeftButton->setHidden(true);
 
-    mStackWidget->show();
+    mQuickWidget->show();
+//    mStackWidget->show();
     emit StopVoSignal();
 //    if(!mload_qml){
 //        mload_qml = true;
@@ -429,7 +441,13 @@ void Widget::DispToWin(int StartChn,int count)
         qDebug()<<"display channel:"<<StartChn<<"height"<<pos.u32Height<<"width"<<pos.u32Width;
     }
 
-
+    if(s32Square < 3){
+        mRightButton->show();
+        mLeftButton->show();
+    }else{
+        mRightButton->hide();
+        mLeftButton->hide();
+    }
     emit ChnDispToWinSignal(ChnPos);
 }
 

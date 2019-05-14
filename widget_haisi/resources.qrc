@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>main.qml</file>
         <file>images/background.png</file>
         <file>images/background.jpeg</file>
         <file>images/right.png</file>
@@ -16,5 +15,11 @@
         <file>images/right1.png</file>
         <file>images/back1.png</file>
         <file>sources/fonts/my.ttf</file>
+        <file>qml/Launcher.qml</file>
+        <file>qml/MyButton.qml</file>
+        <file>qml/NaviButton.qml</file>
+        <file>qml/video.qml</file>
+        <file>images/video.jpg</file>
+        <file>qml/main.qml</file>
     </qresource>
 </RCC>
