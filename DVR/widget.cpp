@@ -87,9 +87,9 @@ void Widget::InitMenuButtom()
 
 
     mLeftButton = new AnimationButton(this);
-//    connect(but,SIGNAL(clicked()),this,SLOT(onClickedSlot()));
+    connect(mLeftButton,SIGNAL(clicked()),this,SLOT(onLeftButtonClickSlot()));
     mLeftButton->resize(100,100);
-    mLeftButton->setText("but");
+//    mLeftButton->setText("but");
     mLeftButton->setDuration(200);
     mLeftButton->setValue(0,20);
     mLeftButton->setOpacity(0.3);
@@ -101,10 +101,10 @@ void Widget::InitMenuButtom()
 
 
     mRightButton = new AnimationButton(this);
-//    connect(but,SIGNAL(clicked()),this,SLOT(onClickedSlot()));
+    connect(mRightButton,SIGNAL(clicked()),this,SLOT(onRightButtonClickSlot()));
     mRightButton->move(100,100);
     mRightButton->resize(100,100);
-    mRightButton->setText("but");
+//    mRightButton->setText("but");
     mRightButton->setDuration(200);
     mRightButton->setValue(0,20);
     mRightButton->setOpacity(0.3);
