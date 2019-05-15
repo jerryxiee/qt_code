@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QtQml>
 #include <QThread>
 #include <QMutex>
 #include <QMutexLocker>
@@ -19,6 +20,7 @@
 #include <iostream>
 #include <string.h>
 #include "thread_test.h"
+#include "sources/model/mytableviewmodel.h"
 #ifndef LUNUX_WIN
 #include "common/sample_common_sys.h"
 #endif
@@ -46,9 +48,16 @@ int main(int argc, char *argv[])
 
 #endif
 
+    qmlRegisterType<MyTableViewModel>("MyTableViewModel", 1, 0, "MyTableViewModel");
     QApplication a(argc, argv);
     Widget w;
     w.show();
+
+//    QQmlApplicationEngine engine;
+
+//    engine.load(QUrl(QStringLiteral("qrc:/qml/test.qml")));
+//    if (engine.rootObjects().isEmpty())
+//        return -1;
 
     signal(SIGINT,sign);
 

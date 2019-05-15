@@ -21,5 +21,6 @@
         <file>qml/NaviButton.qml</file>
         <file>images/video.jpg</file>
         <file>qml/video.qml</file>
+        <file>qml/test.qml</file>
     </qresource>
 </RCC>

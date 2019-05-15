@@ -6,6 +6,8 @@
 #include <QBrush>
 #include <QFile>
 #include <QStringList>
+#include "sources/model/mymodel.h"
+
 
 
 Widget::Widget(QWidget *parent) :
@@ -41,8 +43,12 @@ Widget::Widget(QWidget *parent) :
     m_quickWidget->resize(1280,720);
     m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
 //    m_quickWidget->setHidden(true);
-    QUrl source("qrc:/qml/main.qml");
+    QUrl source("qrc:/qml/test.qml");
     m_quickWidget->setSource(source);
+
+
+//    MyTableViewModel tablemodel;
+
 
     QObject *pRoot = (QObject*)m_quickWidget->rootObject();
     if(pRoot){
@@ -51,6 +57,7 @@ Widget::Widget(QWidget *parent) :
     QQmlContext *context = (QQmlContext *)m_quickWidget->rootContext();
     if(context){
         context->setContextProperty("test",this);
+
     }
 
 //    timer = new QTimer();
