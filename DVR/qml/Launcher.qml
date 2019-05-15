@@ -13,9 +13,9 @@ Rectangle {
             page:"qrc:/qml/video.qml"
         }
         ListElement{
-            name:"video1"
+            name:"widgetvideo1"
             icon:"qrc:/images/video.jpg"
-            page:"qrc:/qml/test.qml"
+            page:""
         }
 //        ListElement{name:"video1";icon:"qrc:images/1.png"}
     }
@@ -27,6 +27,7 @@ Rectangle {
         height: parent.height - 200
         anchors.margins: 20
         anchors.bottomMargin: 80
+        anchors.rightMargin: 20
 
 //        anchors.fill: parent
 

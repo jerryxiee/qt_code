@@ -1,12 +1,8 @@
 import QtQuick 2.0
-import QtQuick.Window 2.0
 import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.0
 import MyTableViewModel 1.0
 
-//Window{
 Rectangle {
-
     MyTableViewModel {
         id:dataModel
         roles: ["name","gender","na"]
@@ -23,12 +19,10 @@ Rectangle {
         TableViewColumn { role: "gender"; title: "修改时间";width: 100}
         TableViewColumn { role: "na"; title: "文件大小";width: 100}
 
-        onDoubleClicked: {
+//        onDoubleClicked: {
 
-        }
+//        }
 
 
     }
-
-
 }

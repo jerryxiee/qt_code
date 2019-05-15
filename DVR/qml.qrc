@@ -1,0 +1,25 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/video.qml</file>
+        <file>qml/NaviButton.qml</file>
+        <file>qml/MyButton.qml</file>
+        <file>qml/main.qml</file>
+        <file>qml/Launcher.qml</file>
+        <file>images/video.jpg</file>
+        <file>images/right1.png</file>
+        <file>images/right.png</file>
+        <file>images/right.jpg</file>
+        <file>images/left.png</file>
+        <file>images/home@4x.png</file>
+        <file>images/home@3x.png</file>
+        <file>images/home@2x.png</file>
+        <file>images/home.png</file>
+        <file>images/background.png</file>
+        <file>images/background.jpeg</file>
+        <file>images/back@4x.png</file>
+        <file>images/back@3x.png</file>
+        <file>images/back@2x.png</file>
+        <file>images/back1.png</file>
+        <file>images/back.png</file>
+    </qresource>
+</RCC>

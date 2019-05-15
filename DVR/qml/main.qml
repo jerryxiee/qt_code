@@ -20,11 +20,9 @@ Rectangle {
             onClicked: {
                 if(mouse.button === Qt.LeftButton){
                     console.log("left")
-                    test.test("test123")
                 }else if(mouse.button === Qt.RightButton){
                     console.log("right")
                 }else{
-
                     hidqmlsignal()
                 }
 
@@ -47,7 +45,11 @@ Rectangle {
             imageheight: 40
             imagewidth: 40
 
-            onClicked: stackview.pop()
+            onClicked: {
+                console.log("back start")
+                stackview.pop()
+                console.log("back end")
+            }
         }
 
         Text {
@@ -67,7 +69,10 @@ Rectangle {
             imageheight: 40
             imagewidth: 40
 
-            onClicked: stackview.pop(null)
+            onClicked: {
+                hidqmlsignal()
+                stackview.pop(null)
+            }
         }
 
 

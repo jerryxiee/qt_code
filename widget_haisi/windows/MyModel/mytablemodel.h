@@ -1,22 +1,16 @@
-#ifndef MYTABLEVIEWMODEL_H
-#define MYTABLEVIEWMODEL_H
+#ifndef MYTABLEMODEL_H
+#define MYTABLEMODEL_H
 
 #include <QObject>
 #include <QAbstractTableModel>
-#include <QDir>
-#include <QStack>
 
-class MyTableViewModel : public QAbstractTableModel
+class MyTableModel : public QAbstractTableModel
 {
     Q_OBJECT
     Q_PROPERTY(QStringList roles READ roles WRITE setRoles)
 public:
-    explicit MyTableViewModel(QObject *parent = nullptr);
-    ~MyTableViewModel();
-
-    void showFileInfoList(QFileInfoList list);
-    void onShowSlot(QDir dir);
-    void onDirShowSlot(QString &filename);
+    explicit MyTableModel(QObject *parent = nullptr);
+    ~MyTableModel();
 
     QVariant data(const QModelIndex &index, int role) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -31,9 +25,8 @@ signals:
 private:
     QList<QVariantList> m_data;
     QStringList m_roleList;
-    QString mCurrentPath;
-    QStack <QString> mPath;
 
 };
 
 #endif // MYTABLEVIEWMODEL_H
+

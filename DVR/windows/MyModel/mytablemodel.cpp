@@ -1,14 +1,9 @@
-#include "mytableviewmodel.h"
+#include "mytablemodel.h"
 #include <QDebug>
 #include <QDateTimeEdit>
+//#include <QThread>
 
-//MyTableViewModel::MyTableViewModel(QObject *parent) : QObject(parent)
-//{
-
-//}
-
-
-MyTableViewModel::MyTableViewModel(QObject *parent):
+MyTableModel::MyTableModel(QObject *parent):
     QAbstractTableModel(parent)
 {
     QVariantList list1;
@@ -41,13 +36,13 @@ MyTableViewModel::MyTableViewModel(QObject *parent):
     showFileInfoList(list);
 }
 
-MyTableViewModel::~MyTableViewModel()
+MyTableModel::~MyTableModel()
 {
-    qDebug()<<"exit ~MyTableViewModel";
-
+    qDebug()<<"~MyTableModel exit";
 }
 
-void MyTableViewModel::onShowSlot(QDir dir)
+#if 1
+void MyTableModel::onShowSlot(QDir dir)
 {
     QStringList string;
     string<<"*";
@@ -55,7 +50,7 @@ void MyTableViewModel::onShowSlot(QDir dir)
     showFileInfoList(list);
 }
 
-void MyTableViewModel::showFileInfoList(QFileInfoList list)
+void MyTableModel::showFileInfoList(QFileInfoList list)
 {
 //    mFileTabWidget->setRowCount(0);
 //    mFileTabWidget->clearContents();
@@ -102,7 +97,7 @@ void MyTableViewModel::showFileInfoList(QFileInfoList list)
     }
 }
 
-void MyTableViewModel::onDirShowSlot(QString &filename)
+void MyTableModel::onDirShowSlot(QString &filename)
 {
     qDebug()<<"enter slotDirShow";
 //    QString str = item->text();
@@ -116,9 +111,9 @@ void MyTableViewModel::onDirShowSlot(QString &filename)
     onShowSlot(dir);
 }
 
+#endif
 
-
-void MyTableViewModel::refrushModel()
+void MyTableModel::refrushModel()
 {
      beginResetModel();
      endResetModel();
@@ -126,13 +121,13 @@ void MyTableViewModel::refrushModel()
 //     emit updateCount(this->rowCount(QModelIndex()));
  }
 
-int MyTableViewModel::rowCount(const QModelIndex &parent) const
+int MyTableModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return m_data.size();
 }
 
-int MyTableViewModel::columnCount(const QModelIndex &parent) const
+int MyTableModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     if(m_data.isEmpty())
@@ -141,10 +136,10 @@ int MyTableViewModel::columnCount(const QModelIndex &parent) const
 }
 
 
-QVariant MyTableViewModel::data(const QModelIndex &index, int role) const
+QVariant MyTableModel::data(const QModelIndex &index, int role) const
 {
-    qDebug(">>>>>>>%s%d",__FUNCTION__,__LINE__);
-    qDebug()<<role;
+//    qDebug(">>>>>>>%s%d",__FUNCTION__,__LINE__);
+//    qDebug()<<role;
     if (role == Qt::DisplayRole) {
         return m_data[index.row()].at(index.column());
     }
@@ -157,24 +152,25 @@ QVariant MyTableViewModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-QStringList MyTableViewModel::roles() const
+QStringList MyTableModel::roles() const
 {
-    qDebug(">>>>>>>%s%d",__FUNCTION__,__LINE__);
+//    qDebug(">>>>>>>%s%d",__FUNCTION__,__LINE__);
     return m_roleList;
 }
 
-void MyTableViewModel::setRoles(const QStringList roles)
+
+void MyTableModel::setRoles(const QStringList roles)
 {
-    qDebug(">>>>>>>%s%d",__FUNCTION__,__LINE__);
+//    qDebug(">>>>>>>%s%d",__FUNCTION__,__LINE__);
     if(!roles.isEmpty())
     {
         m_roleList = roles;
     }
 }
 
-QHash<int, QByteArray> MyTableViewModel::roleNames() const
+QHash<int, QByteArray> MyTableModel::roleNames() const
 {
-    qDebug(">>>>>>>%s%d",__FUNCTION__,__LINE__);
+//    qDebug(">>>>>>>%s%d",__FUNCTION__,__LINE__);
     QHash<int, QByteArray> roles;
     for(int i = 0;i < m_roleList.size();i++)
     {
@@ -182,5 +178,4 @@ QHash<int, QByteArray> MyTableViewModel::roleNames() const
     }
     return roles;
 }
-
 
