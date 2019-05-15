@@ -12,6 +12,7 @@ Rectangle {
 //    opacity: 0.2
 
     signal hidqmlsignal()
+    signal videoDispSignal(string filename)
     property string title
 
     MouseArea{
@@ -46,9 +47,11 @@ Rectangle {
             imagewidth: 40
 
             onClicked: {
-                console.log("back start")
-                stackview.pop()
-                console.log("back end")
+                if(stackview.depth > 1){
+                    stackview.pop()
+                }else{
+                    hidqmlsignal()
+                }
             }
         }
 

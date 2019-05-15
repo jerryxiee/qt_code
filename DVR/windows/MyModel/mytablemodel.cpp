@@ -6,22 +6,22 @@
 MyTableModel::MyTableModel(QObject *parent):
     QAbstractTableModel(parent)
 {
-    QVariantList list1;
-    list1.push_back("ceshi1");
-    list1.push_back("nan");
-    list1.push_back("nan");
-    QVariantList list2;
-    list2.push_back("ceshi2");
-    list2.push_back("nv");
-    list2.push_back("nv");
-    QVariantList list3;
-    list3.push_back("na");
-    list3.push_back("na");
-    list3.push_back("na");
+//    QVariantList list1;
+//    list1.push_back("ceshi1");
+//    list1.push_back("nan");
+//    list1.push_back("nan");
+//    QVariantList list2;
+//    list2.push_back("ceshi2");
+//    list2.push_back("nv");
+//    list2.push_back("nv");
+//    QVariantList list3;
+//    list3.push_back("na");
+//    list3.push_back("na");
+//    list3.push_back("na");
 
-    m_data.push_back(list1);
-    m_data.push_back(list2);
-    m_data.push_back(list3);
+//    m_data.push_back(list1);
+//    m_data.push_back(list2);
+//    m_data.push_back(list3);
 
 #ifndef LUNUX_WIN
     QDir rootDir("/mnt/sda1/venc/");
@@ -41,7 +41,6 @@ MyTableModel::~MyTableModel()
     qDebug()<<"~MyTableModel exit";
 }
 
-#if 1
 void MyTableModel::onShowSlot(QDir dir)
 {
     QStringList string;
@@ -95,6 +94,7 @@ void MyTableModel::showFileInfoList(QFileInfoList list)
 //            fileListWidget->addItem(tmp);
 //        }
     }
+    refrushModel();
 }
 
 void MyTableModel::onDirShowSlot(QString &filename)
@@ -111,7 +111,29 @@ void MyTableModel::onDirShowSlot(QString &filename)
     onShowSlot(dir);
 }
 
-#endif
+void MyTableModel::oncellDoubleClickedSlot(int row,int column)
+{
+//    QTableWidgetItem * item1 = new QTableWidgetItem;
+//    item1 = mFileTabWidget->item(row,0);
+    QString text = m_data[row].at(column).toString();
+    QString filename = mCurrentPath+"/"+text;
+    QFileInfo fileinfo(filename);
+
+    if(fileinfo.isFile()){
+        qDebug()<<"display:"<<filename;
+        mFileName = filename;
+        emit fileNameChanged();
+    }else{
+        onDirShowSlot(text);
+    }
+
+    qDebug()<<"testSlot"<<filename;
+}
+
+QString MyTableModel::name() const
+{
+    return mFileName;
+}
 
 void MyTableModel::refrushModel()
 {
@@ -139,7 +161,7 @@ int MyTableModel::columnCount(const QModelIndex &parent) const
 QVariant MyTableModel::data(const QModelIndex &index, int role) const
 {
 //    qDebug(">>>>>>>%s%d",__FUNCTION__,__LINE__);
-//    qDebug()<<role;
+    qDebug()<<role;
     if (role == Qt::DisplayRole) {
         return m_data[index.row()].at(index.column());
     }

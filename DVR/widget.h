@@ -44,7 +44,7 @@ private:
     void InitMenuButtom();
 
 public slots:
-    void onVideoDispSlot(QString &filepath);
+    void onVideoDispSlot(QString filepath);
 
 private slots:
     void onHidQmlSlot();

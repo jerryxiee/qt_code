@@ -20,6 +20,7 @@ Widget::Widget(QWidget *parent) :
     QObject *pRoot = (QObject*)mQuickWidget->rootObject();
     if(pRoot){
         connect(pRoot,SIGNAL(hidqmlsignal()),this,SLOT(onHidQmlSlot()));
+        connect(pRoot,SIGNAL(videoDispSignal(QString)),this,SLOT(onVideoDispSlot(QString)));
     }
 
     InitMenuButtom();
@@ -163,12 +164,13 @@ void Widget::onVideoExitClickSlot()
     mMainWin = false;
     mVdecOn = false;
     mVideoExit->hide();
+    mQuickWidget->show();
 #ifndef LUNUX_WIN
     mVdec.Stop_Vdec();
 #endif
 }
 
-void Widget::onVideoDispSlot(QString &filepath)
+void Widget::onVideoDispSlot(QString filepath)
 {
     QByteArray filename = filepath.toLatin1();
 
@@ -177,6 +179,7 @@ void Widget::onVideoDispSlot(QString &filepath)
     mVdecOn = true;
     mRightButton->setHidden(true);
     mLeftButton->setHidden(true);
+    mQuickWidget->setHidden(true);
     mVideoExit->show();
 #ifndef LUNUX_WIN
     mVdec.Start_Vdec(filename.data());
