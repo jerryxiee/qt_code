@@ -34,7 +34,8 @@ SOURCES += \
     testwidget.cpp \
     animationbutton.cpp \
     sources/model/mymodel.cpp \
-    sources/model/mytableviewmodel.cpp
+    sources/model/mytableviewmodel.cpp \
+    qmlsignal.cpp
 
 
 HEADERS += \
@@ -43,7 +44,8 @@ HEADERS += \
     testwidget.h \
     animationbutton.h \
     sources/model/mymodel.h \
-    sources/model/mytableviewmodel.h
+    sources/model/mytableviewmodel.h \
+    qmlsignal.h
 
 INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
                 /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/include \

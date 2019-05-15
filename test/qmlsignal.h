@@ -10,6 +10,7 @@ public:
     explicit qmlSignal(QObject *parent = nullptr);
 
 signals:
+    void testSignal();
 
 public slots:
 };

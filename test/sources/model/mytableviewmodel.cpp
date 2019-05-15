@@ -11,22 +11,22 @@
 MyTableViewModel::MyTableViewModel(QObject *parent):
     QAbstractTableModel(parent)
 {
-    QVariantList list1;
-    list1.push_back("ceshi1");
-    list1.push_back("nan");
-    list1.push_back("nan");
-    QVariantList list2;
-    list2.push_back("ceshi2");
-    list2.push_back("nv");
-    list2.push_back("nv");
-    QVariantList list3;
-    list3.push_back("na");
-    list3.push_back("na");
-    list3.push_back("na");
+//    QVariantList list1;
+//    list1.push_back("ceshi1");
+//    list1.push_back("nan");
+//    list1.push_back("nan");
+//    QVariantList list2;
+//    list2.push_back("ceshi2");
+//    list2.push_back("nv");
+//    list2.push_back("nv");
+//    QVariantList list3;
+//    list3.push_back("na");
+//    list3.push_back("na");
+//    list3.push_back("na");
 
-    m_data.push_back(list1);
-    m_data.push_back(list2);
-    m_data.push_back(list3);
+//    m_data.push_back(list1);
+//    m_data.push_back(list2);
+//    m_data.push_back(list3);
 
 #ifndef LUNUX_WIN
     QDir rootDir("/mnt/sda1/venc/");
@@ -100,6 +100,8 @@ void MyTableViewModel::showFileInfoList(QFileInfoList list)
 //            fileListWidget->addItem(tmp);
 //        }
     }
+    refrushModel();
+
 }
 
 void MyTableViewModel::onDirShowSlot(QString &filename)
@@ -117,6 +119,30 @@ void MyTableViewModel::onDirShowSlot(QString &filename)
 }
 
 
+void MyTableViewModel::oncellDoubleClickedSlot(int row,int column)
+{
+//    QTableWidgetItem * item1 = new QTableWidgetItem;
+//    item1 = mFileTabWidget->item(row,0);
+    QString text = m_data[row].at(column).toString();
+    QString filename = mCurrentPath+"/"+text;
+    QFileInfo fileinfo(filename);
+
+    if(fileinfo.isFile()){
+        qDebug()<<"display:"<<filename;
+//        emit videoDispSignal(filename);
+        mFileName = filename;
+        emit dispVideo();
+    }else{
+        onDirShowSlot(text);
+    }
+
+    qDebug()<<"testSlot"<<filename;
+}
+
+QString MyTableViewModel::name() const
+{
+    return mFileName;
+}
 
 void MyTableViewModel::refrushModel()
 {

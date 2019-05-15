@@ -21,6 +21,7 @@
 #include <string.h>
 #include "thread_test.h"
 #include "sources/model/mytableviewmodel.h"
+#include "qmlsignal.h"
 #ifndef LUNUX_WIN
 #include "common/sample_common_sys.h"
 #endif
@@ -49,6 +50,7 @@ int main(int argc, char *argv[])
 #endif
 
     qmlRegisterType<MyTableViewModel>("MyTableViewModel", 1, 0, "MyTableViewModel");
+
     QApplication a(argc, argv);
     Widget w;
     w.show();
