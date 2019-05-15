@@ -6,6 +6,7 @@
 #include <QString>
 #include <signal.h>
 #include <QFontDatabase>
+#include "windows/MyModel/mytablemodel.h"
 //#ifndef LUNUX_WIN
 #include "common/sample_common_sys.h"
 #include "video/vio.h"
@@ -60,6 +61,7 @@ int main(int argc, char *argv[])
         a.setFont(fontThis);
         }
     }
+    qmlRegisterType<MyTableModel>("MyTableViewModel", 1, 0, "MyTableViewModel");
 
     Widget w;
     w.show();

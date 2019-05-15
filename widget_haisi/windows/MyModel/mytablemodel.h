@@ -3,6 +3,9 @@
 
 #include <QObject>
 #include <QAbstractTableModel>
+#include <QFileInfoList>
+#include <QDir>
+#include <QStack>
 
 class MyTableModel : public QAbstractTableModel
 {
@@ -12,6 +15,11 @@ public:
     explicit MyTableModel(QObject *parent = nullptr);
     ~MyTableModel();
 
+    void showFileInfoList(QFileInfoList list);
+    void onShowSlot(QDir dir);
+    void onDirShowSlot(QString &filename);
+
+
     QVariant data(const QModelIndex &index, int role) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -20,11 +28,14 @@ public:
     QStringList roles() const;
     void setRoles(const QStringList roles);
     void refrushModel();
+
 signals:
     void dataChanged();
 private:
     QList<QVariantList> m_data;
     QStringList m_roleList;
+    QString mCurrentPath;
+    QStack <QString> mPath;
 
 };
 

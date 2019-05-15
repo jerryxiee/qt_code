@@ -45,7 +45,11 @@ Rectangle {
             imageheight: 40
             imagewidth: 40
 
-            onClicked: stackview.pop()
+            onClicked: {
+                console.log("back start")
+                stackview.pop()
+                console.log("back end")
+            }
         }
 
         Text {

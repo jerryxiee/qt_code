@@ -31,14 +31,16 @@ SOURCES += \
         widget.cpp \
     windows/playvideo.cpp \
     windows/mainwindow.cpp \
-    windows/CustomControls/animationbutton.cpp
+    windows/CustomControls/animationbutton.cpp \
+    windows/MyModel/mytablemodel.cpp
 
 HEADERS += \
         widget.h \
         common/sample_comm.h \
     windows/playvideo.h \
     windows/mainwindow.h \
-    windows/CustomControls/animationbutton.h
+    windows/CustomControls/animationbutton.h \
+    windows/MyModel/mytablemodel.h
 
 INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
                 /home/abhw/haisi/hi3531/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/include \

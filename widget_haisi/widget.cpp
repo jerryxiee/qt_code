@@ -18,7 +18,7 @@ Widget::Widget(QWidget *parent) :
 #ifndef arm
     this->setWindowOpacity(1);
 #endif
-
+#if 1
     mVideoExit = new QPushButton(tr("返回"),this);
     mVideoExit->setFixedSize(48,32);
     mVideoExit->move(this->width()-mVideoExit->width()*2,mVideoExit->height());
@@ -65,37 +65,6 @@ Widget::Widget(QWidget *parent) :
     connect(mTwoMenuAct[1],SIGNAL(triggered()),this,SLOT(on4MuxModeSlot()));
     connect(mTwoMenuAct[2],SIGNAL(triggered()),this,SLOT(on9MuxModeSlot()));
 
-//    QPixmap *pixmap = new QPixmap(260, 260);
-//    pixmap->load("images/back@2x.png");
-//    QIcon icon(":/images/back.png");
-
-//    mLeftButton = new QPushButton("",this);
-//    mLeftButton->setStyleSheet("QPushButton:hover{border-image: url(:/images/back.png);}""QPushButton:pressed{border-image: url(:/images/back.png);}");
-////    mLeftButton->setIcon(icon);
-//    mLeftButton->resize(100,100);
-//    mLeftButton->setGeometry(0,(this->height() - mLeftButton->height())/2,mLeftButton->width(),mLeftButton->height());
-//    mLeftButton->setIconSize(QSize(mLeftButton->width()-10,mLeftButton->height()-10));
-//    mLeftButton->setWindowOpacity(0);
-//    mLeftButton->setFlat(true);
-////    mLeftButton->setHidden(true);
-////    mLeftButton->setStyleSheet("background-color:transparent");
-//    connect(mLeftButton,SIGNAL(clicked()),this,SLOT(onLeftButtonClickSlot()));
-
-
-//    icon = QIcon(":/images/back1.png");
-//    mRightButton = new QPushButton("",this);
-//    mRightButton->setStyleSheet("QPushButton:hover{border-image: url(:/images/back1.png);}""QPushButton:pressed{border-image: url(:/images/back1.png);}");
-////    mRightButton->setIcon(icon);
-//    mRightButton->resize(100,100);
-//    mRightButton->setGeometry(this->width() - mLeftButton->width(),(this->height() - mLeftButton->height())/2,mLeftButton->width(),mLeftButton->height());
-//    mRightButton->setIconSize(QSize(mLeftButton->width()-10,mLeftButton->height()-10));
-//    mRightButton->setWindowOpacity(0);
-//    mRightButton->setFlat(true);
-//    connect(mRightButton,SIGNAL(clicked()),this,SLOT(onRightButtonClickSlot()));
-
-////    mRightButton->setHidden(true);
-
-
 
     mLeftButton = new AnimationButton(this);
 //    connect(but,SIGNAL(clicked()),this,SLOT(onClickedSlot()));
@@ -126,11 +95,13 @@ Widget::Widget(QWidget *parent) :
     mRightButton->setHidden(true);
 
     InitWin();
+#endif
+
     mQuickWidget = new QQuickWidget(this);//this基类为QWidget
     mQuickWidget->move(0,0);
     mQuickWidget->resize(this->width(),this->height());
     mQuickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    mQuickWidget->setHidden(true);
+//    mQuickWidget->setHidden(true);
     QUrl source("qrc:/qml/main.qml");
     mQuickWidget->setSource(source);
     QObject *pRoot = (QObject*)mQuickWidget->rootObject();
