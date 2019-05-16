@@ -12,6 +12,7 @@ class MyTableModel : public QAbstractTableModel
     Q_OBJECT
     Q_PROPERTY(QStringList roles READ roles WRITE setRoles)
     Q_PROPERTY(QString name READ name NOTIFY fileNameChanged)
+    Q_PROPERTY(QString mCurrentPath READ pathname NOTIFY pathChanged)
 public:
     explicit MyTableModel(QObject *parent = nullptr);
     ~MyTableModel();
@@ -20,6 +21,7 @@ public:
     void onShowSlot(QDir dir);
     void onDirShowSlot(QString &filename);
     Q_INVOKABLE void oncellDoubleClickedSlot(int row,int column);
+    Q_INVOKABLE void onBackButtonClickedSlot();
 
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -31,10 +33,12 @@ public:
     void setRoles(const QStringList roles);
     void refrushModel();
     QString name() const;
+    QString pathname() const;
 
 signals:
     void dataChanged();
     void fileNameChanged();
+    void pathChanged();
 private:
     QList<QVariantList> m_data;
     QStringList m_roleList;

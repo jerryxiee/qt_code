@@ -6,22 +6,6 @@
 MyTableModel::MyTableModel(QObject *parent):
     QAbstractTableModel(parent)
 {
-//    QVariantList list1;
-//    list1.push_back("ceshi1");
-//    list1.push_back("nan");
-//    list1.push_back("nan");
-//    QVariantList list2;
-//    list2.push_back("ceshi2");
-//    list2.push_back("nv");
-//    list2.push_back("nv");
-//    QVariantList list3;
-//    list3.push_back("na");
-//    list3.push_back("na");
-//    list3.push_back("na");
-
-//    m_data.push_back(list1);
-//    m_data.push_back(list2);
-//    m_data.push_back(list3);
 
 #ifndef LUNUX_WIN
     QDir rootDir("/mnt/sda1/venc/");
@@ -51,48 +35,21 @@ void MyTableModel::onShowSlot(QDir dir)
 
 void MyTableModel::showFileInfoList(QFileInfoList list)
 {
-//    mFileTabWidget->setRowCount(0);
-//    mFileTabWidget->clearContents();
     m_data.clear();
     qDebug()<<"list.count ="<<list.count();
     for(unsigned int i=0; i<list.count() ;i++){
         QFileInfo tmpFileInfo = list.at(i);
-//        if(tmpFileInfo.isDir()){
-//            QIcon icon("dir.png");
-            QString fileName = tmpFileInfo.fileName();
-            QVariantList list1;
-            list1.push_back(fileName);
+        QString fileName = tmpFileInfo.fileName();
+        QVariantList list1;
+        list1.push_back(fileName);
 
-//            QTableWidgetItem *name = new QTableWidgetItem(/*icon,*/ fileName);
-//            name->setFlags(name->flags() ^ Qt::ItemIsEditable);
-////            name->setData(absoluteFileNameRole,fileName);
+        QDateTime time = tmpFileInfo.lastModified();
+        list1.push_back(time.toString("yyyy-MM-dd-hh-mm-ss"));
 
-            QDateTime time = tmpFileInfo.lastModified();
-            list1.push_back(time.toString("yyyy-MM-dd-hh-mm-ss"));
-//            QTableWidgetItem *modfilytime = new QTableWidgetItem(/*icon,*/ time.toString("yyyy-MM-dd-hh-mm-ss"));
-//            modfilytime->setFlags(modfilytime->flags() ^ Qt::ItemIsEditable);
+        const qint64 size = tmpFileInfo.size();
+        list1.push_back(tr("%1 KB").arg(int((size + 1023) / 1024)));
 
-            const qint64 size = tmpFileInfo.size();
-            list1.push_back(tr("%1 KB").arg(int((size + 1023) / 1024)));
-
-            m_data.push_back(list1);
-
-//            QTableWidgetItem *sizeItem = new QTableWidgetItem(tr("%1 KB")
-//                                                 .arg(int((size + 1023) / 1024)));
-//            sizeItem->setFlags(sizeItem->flags() ^ Qt::ItemIsEditable);
-
-//            int row = mFileTabWidget->rowCount();
-//            mFileTabWidget->insertRow(row);
-//            mFileTabWidget->setItem(row, 0, name);
-//            mFileTabWidget->setItem(row, 1, modfilytime);
-//            mFileTabWidget->setItem(row, 2, sizeItem);
-//        }
-//        else if(tmpFileInfo.isFile()){
-////            QIcon icon("file.png");
-//            QString fileName = tmpFileInfo.fileName();
-//            QListWidgetItem *tmp = new QListWidgetItem(/*icon,*/ fileName);
-//            fileListWidget->addItem(tmp);
-//        }
+        m_data.push_back(list1);
     }
     refrushModel();
 }
@@ -100,21 +57,32 @@ void MyTableModel::showFileInfoList(QFileInfoList list)
 void MyTableModel::onDirShowSlot(QString &filename)
 {
     qDebug()<<"enter slotDirShow";
-//    QString str = item->text();
     QDir dir;
     dir.setPath(mCurrentPath);
     mPath.push(mCurrentPath);
     dir.cd(filename);
     mCurrentPath = dir.absolutePath();
-//    mMainLab->setText(mCurrentPath);
 
+    emit pathChanged();
     onShowSlot(dir);
+}
+
+void MyTableModel::onBackButtonClickedSlot()
+{
+    QDir dir;
+
+    if(!mPath.isEmpty()){
+        mCurrentPath = mPath.pop();
+        dir.setPath(mCurrentPath);
+        onShowSlot(dir);
+        emit pathChanged();
+         qDebug()<<"mCurrentPath"<<mCurrentPath;
+    }
+
 }
 
 void MyTableModel::oncellDoubleClickedSlot(int row,int column)
 {
-//    QTableWidgetItem * item1 = new QTableWidgetItem;
-//    item1 = mFileTabWidget->item(row,0);
     QString text = m_data[row].at(column).toString();
     QString filename = mCurrentPath+"/"+text;
     QFileInfo fileinfo(filename);
@@ -133,6 +101,10 @@ void MyTableModel::oncellDoubleClickedSlot(int row,int column)
 QString MyTableModel::name() const
 {
     return mFileName;
+}
+QString MyTableModel::pathname() const
+{
+    return mCurrentPath;
 }
 
 void MyTableModel::refrushModel()
@@ -161,7 +133,7 @@ int MyTableModel::columnCount(const QModelIndex &parent) const
 QVariant MyTableModel::data(const QModelIndex &index, int role) const
 {
 //    qDebug(">>>>>>>%s%d",__FUNCTION__,__LINE__);
-    qDebug()<<role;
+//    qDebug()<<role;
     if (role == Qt::DisplayRole) {
         return m_data[index.row()].at(index.column());
     }
