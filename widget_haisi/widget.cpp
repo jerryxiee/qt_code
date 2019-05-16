@@ -101,7 +101,7 @@ Widget::Widget(QWidget *parent) :
     mQuickWidget->move(0,0);
     mQuickWidget->resize(this->width(),this->height());
     mQuickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-//    mQuickWidget->setHidden(true);
+    mQuickWidget->setHidden(true);
     QUrl source("qrc:/qml/main.qml");
     mQuickWidget->setSource(source);
     QObject *pRoot = (QObject*)mQuickWidget->rootObject();
@@ -123,7 +123,7 @@ void Widget::InitWin()
 
     mStackWidget->addWidget(mPlayVideo);
     mStackWidget->resize(this->width(),this->height());
-    mStackWidget->hide();
+//    mStackWidget->hide();
     qDebug()<<"mPlayVideo index:"<< mStackWidget->indexOf(mPlayVideo)<<"current index:"<<mStackWidget->currentIndex();
 }
 
@@ -166,10 +166,10 @@ void Widget::paintEvent(QPaintEvent *event)
     QFont font;
 
 //#ifdef arm
-    if(mMainWin){
-        painter.setCompositionMode( QPainter::CompositionMode_Clear );
-        painter.fillRect( 0, 0, 1280, 720, Qt::SolidPattern );
-    }
+//    if(mMainWin){
+//        painter.setCompositionMode( QPainter::CompositionMode_Clear );
+//        painter.fillRect( 0, 0, 1280, 720, Qt::SolidPattern );
+//    }
 //#endif
 //    pen.setColor(Qt::red);
 //    QString text = "无信号";

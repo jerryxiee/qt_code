@@ -28,67 +28,50 @@ Rectangle {
         anchors.margins: 20
         anchors.bottomMargin: 80
         anchors.rightMargin: 20
+        anchors.leftMargin: 20
 
 //        anchors.fill: parent
 
-        cellHeight: 120;cellWidth: 120
+        cellHeight: 150;cellWidth: 150
         model: model
         delegate: mydelegate
 
-//        highlight: Rectangle{color: "lightsteelblue";radius: 5}
-//        focus: true
+        highlight: Rectangle{color: "lightsteelblue";radius: 5}
+        focus: true
     }
 
     Component{
         id:mydelegate
 
         Rectangle{
-            width: grid.cellWidth
-            height: grid.cellHeight
+            width: 100
+            height: 100
 
+            NaviButton {
+                id:mavibut
+                text: name
+                enabled: true
+                imageSource: icon
+                anchors.fill: parent
+                imageheight: 80
+                imagewidth: 80
 
-//            Column{
-//            AbstractButton{
-//                anchors.fill: parent
-                NaviButton {
-                    id:mavibut
-                    text: name
-                    enabled: true
-                    imageSource: icon
-                    anchors.fill: parent
-                    imageheight: grid.cellHeight - 20
-                    imagewidth: grid.cellWidth - 20
-
-                    onClicked: {
-                        console.log("imageheight=%d",imageheight)
-                        if(grid.currentItem){
-                            console.log(Qt.resolvedUrl(page));
-                            launcher(text,Qt.resolvedUrl(page))
-                        }
+                onClicked: {
+                    if(grid.currentItem){
+                        console.log(Qt.resolvedUrl(page));
+                        launcher(text,Qt.resolvedUrl(page))
                     }
                 }
-
-//                Image{
-//                    source: icon
-//                    anchors.horizontalCenter: parent.horizontalCenter
-//                    width: grid.cellWidth
-//                    height: grid.cellHeight
-////                    sourceSize.width: parent.availableWidth
-////                    sourceSize.height: parent.availableHeight
-
-//                }
-//                onClicked: console.log("click")
-//            }
-                Text{
-                    id:winname
-                    text: name
-                    anchors.horizontalCenter: mavibut.horizontalCenter
-                    anchors.top: mavibut.bottom
-//                    anchors.horizontalCenter: parent.horizontalCenter
-//                    anchors.bottom: parent.bottom
-                }
             }
-//        }
+
+            Text{
+                id:winname
+                text: name
+                font.pixelSize: 16
+                anchors.horizontalCenter: mavibut.horizontalCenter
+                anchors.bottom: mavibut.bottom
+            }
+        }
     }
 
 }

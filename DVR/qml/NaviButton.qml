@@ -7,6 +7,7 @@ AbstractButton {
 
 //    property int edge: Qt.TopEdge
     property alias imageSource: image.source
+    property alias imageRotation: image.rotation
     property int imagewidth
     property int imageheight
 
@@ -16,7 +17,10 @@ AbstractButton {
         sourceSize { width: imagewidth; height: imageheight } // ### TODO: resize the image
     }
 
+//    onPressed:butbackground.color = "#808080"
+
     background: Rectangle {
+        id:butbackground
         height: button.height
         width: button.width
 //        radius: width / 2

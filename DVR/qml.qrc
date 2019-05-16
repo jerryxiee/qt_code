@@ -21,5 +21,6 @@
         <file>images/back@2x.png</file>
         <file>images/back1.png</file>
         <file>images/back.png</file>
+        <file>images/left1.png</file>
     </qresource>
 </RCC>
