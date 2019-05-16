@@ -5,7 +5,7 @@
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::Widget),mVdecOn(false)
+    ui(new Ui::Widget),mVdecOn(false),mMainWin(true)
 {
     ui->setupUi(this);
     this->resize(1280,720);
@@ -134,7 +134,7 @@ void Widget::paintEvent(QPaintEvent *event)
 void Widget::contextMenuEvent(QContextMenuEvent* e)
 {
 
-    if(!mVdecOn){
+    if(!(mVdecOn | !mMainWin)){
         mMenu->clear();
 
         mMenu->addAction(mBack);
