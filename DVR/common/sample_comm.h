@@ -158,8 +158,8 @@ extern "C"{
 #define SAMPLE_SYS_ALIGN_WIDTH  16		
 #define VO_BKGRD_BLUE           0x0000FF
 
-#define HD_WIDTH                1280
-#define HD_HEIGHT               720
+#define HD_WIDTH                1920
+#define HD_HEIGHT               1080
 #define _4K_WIDTH                3840
 #define _4K_HEIGHT               2160
 

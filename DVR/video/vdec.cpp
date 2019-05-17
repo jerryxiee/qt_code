@@ -58,8 +58,8 @@ HI_BOOL Vdec::Start_Vdec(char *filename)
 
     memset(&stVdecParam,0x0,sizeof(VdecThreadParam));
 
-    stSize.u32Width = HD_WIDTH;
-    stSize.u32Height = HD_HEIGHT;
+    stSize.u32Width = WIDTH;
+    stSize.u32Height = HEIGHT;
 
     filetype = Get_FileType(filename);
     if(!filetype){
@@ -106,8 +106,8 @@ HI_BOOL Vdec::Start_Vdec(char *filename)
 
     pos.s32X = 0;
     pos.s32Y = 0;
-    pos.u32Height = HD_HEIGHT;
-    pos.u32Width = HD_WIDTH;
+    pos.u32Height = HEIGHT;
+    pos.u32Width = WIDTH;
     s32Ret = m_Vdec_Vio.SAMPLE_COMM_VO_StartChn(VDEC_VO,pos);
     if(s32Ret != HI_SUCCESS)
     {

@@ -19,7 +19,9 @@ extern "C" {
 
 #include "sample_comm.h"
 
-VIDEO_NORM_E gs_enNorm_venc = VIDEO_ENCODING_MODE_NTSC;
+VIDEO_NORM_E gs_enNorm_venc = VIDEO_ENCODING_MODE_PAL;
+SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_720P;
+PIC_SIZE_E enSize[3] = {PIC_HD720, PIC_HD720, PIC_D1};
 
 /******************************************************************************
 * function : show usage
@@ -78,14 +80,14 @@ void SAMPLE_VENC_StreamHandleSig(HI_S32 signo)
 
 
 ******************************************************************************/
-HI_S32 SAMPLE_VENC_NORMALP_CLASSIC(HI_VOID)
+HI_S32 SAMPLE_VENC_NORMALP_CLASSIC(HI_U32 u32Profile)
 {
     PAYLOAD_TYPE_E enPayLoad[2]= {PT_H265, PT_H264};
-    PIC_SIZE_E enSize[2] = {PIC_HD1080, PIC_HD1080};
-	HI_U32 u32Profile = 0;
+//    PIC_SIZE_E enSize[2] = {PIC_HD1080, PIC_HD1080};
+//	HI_U32 u32Profile = 0;
 	
     VB_CONF_S stVbConf;
-	SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
+//	SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
     HI_S32 s32VpssGrpCnt = 8;
     
     VPSS_GRP VpssGrp;
@@ -334,17 +336,17 @@ END_VENC_1080P_CLASSIC_0:	//system exit
 
 
 ******************************************************************************/
-HI_S32 SAMPLE_VENC_SMARTP_CLASSIC(HI_VOID)
+HI_S32 SAMPLE_VENC_SMARTP_CLASSIC(HI_U32 u32Profile)
 {
     PAYLOAD_TYPE_E enPayLoad[2]= {PT_H265, PT_H264};
-    PIC_SIZE_E enSize[2] = {PIC_HD1080, PIC_HD1080};	
+//    PIC_SIZE_E enSize[2] = {PIC_HD1080, PIC_HD1080};
 	VENC_GOP_ATTR_S stGopAttr;
 	VENC_GOP_MODE_E enGopMode[2] = {VENC_GOPMODE_SMARTP,VENC_GOPMODE_SMARTP};
-	HI_U32 u32Profile = 0;
+//	HI_U32 u32Profile = 0;
 	
 	VB_CONF_S stVbConf;
 	
-	SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
+//	SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
     HI_S32 s32VpssGrpCnt = 8;
     
 	
@@ -454,25 +456,25 @@ HI_S32 SAMPLE_VENC_SMARTP_CLASSIC(HI_VOID)
 	printf("\t a) avbr.\n");
 	printf("\t f) fixQp\n");
 	printf("please input choose rc mode!\n");
-	c = (char)getchar();
-	switch(c)
-	{
-		case 'c':
-			enRcMode = SAMPLE_RC_CBR;
-			break;
-		case 'v':
-			enRcMode = SAMPLE_RC_VBR;
-			break;
-		case 'a':
-			enRcMode = SAMPLE_RC_AVBR;
-			break;			
-		case 'f':
-			enRcMode = SAMPLE_RC_FIXQP;
-			break;
-		default:
-			printf("rc mode! is invaild!\n");
-			goto END_VENC_1080P_CLASSIC_3;
-	}
+//	c = (char)getchar();
+//	switch(c)
+//	{
+//		case 'c':
+//			enRcMode = SAMPLE_RC_CBR;
+//			break;
+//		case 'v':
+//			enRcMode = SAMPLE_RC_VBR;
+//			break;
+//		case 'a':
+//			enRcMode = SAMPLE_RC_AVBR;
+//			break;
+//		case 'f':
+//			enRcMode = SAMPLE_RC_FIXQP;
+//			break;
+//		default:
+//			printf("rc mode! is invaild!\n");
+//			goto END_VENC_1080P_CLASSIC_3;
+//	}
 
 	/*** enSize[0] **/
 	if(s32ChnNum >= 1)
@@ -588,16 +590,16 @@ END_VENC_1080P_CLASSIC_0:	//system exit
 * function :   function DUALP :  H.265@1080@30fps+H.264@1080@30fps
 
 ******************************************************************************/
-HI_S32 SAMPLE_VENC_DUALP_CLASSIC(HI_VOID)
+HI_S32 SAMPLE_VENC_DUALP_CLASSIC(HI_U32 u32Profile)
 {
     PAYLOAD_TYPE_E enPayLoad[2]= {PT_H265,PT_H264};
-    PIC_SIZE_E enSize[2] = {PIC_HD1080, PIC_HD1080};
+//    PIC_SIZE_E enSize[2] = {PIC_HD1080, PIC_HD1080};
 	VENC_GOP_ATTR_S stGopAttr;
 	VENC_GOP_MODE_E enGopMode[2] = {VENC_GOPMODE_DUALP,VENC_GOPMODE_DUALP};
-	HI_U32 u32Profile = 0;
+//	HI_U32 u32Profile = 0;
 	
     VB_CONF_S stVbConf;
-	SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
+//	SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
     HI_S32 s32VpssGrpCnt = 8;
 
     
@@ -702,25 +704,26 @@ HI_S32 SAMPLE_VENC_DUALP_CLASSIC(HI_VOID)
 	printf("\t a) avbr.\n");	
     printf("\t f) fixQp\n");
     printf("please input choose rc mode!\n");
-    c = (char)getchar();
-    switch(c)
-    {
-        case 'c':
-            enRcMode = SAMPLE_RC_CBR;
-            break;
-        case 'v':
-            enRcMode = SAMPLE_RC_VBR;
-            break;
-		case 'a':
-			enRcMode = SAMPLE_RC_AVBR;
-			break;			
-        case 'f':
-            enRcMode = SAMPLE_RC_FIXQP;
-            break;
-        default:
-            printf("rc mode! is invaild!\n");
-            goto END_VENC_1080P_CLASSIC_3;
-    }
+//    c = (char)getchar();
+//    c = (char)getchar();
+//    switch(c)
+//    {
+//        case 'c':
+//            enRcMode = SAMPLE_RC_CBR;
+//            break;
+//        case 'v':
+//            enRcMode = SAMPLE_RC_VBR;
+//            break;
+//		case 'a':
+//			enRcMode = SAMPLE_RC_AVBR;
+//			break;
+//        case 'f':
+//            enRcMode = SAMPLE_RC_FIXQP;
+//            break;
+//        default:
+//            printf("rc mode! is invaild!\n");
+//            goto END_VENC_1080P_CLASSIC_3;
+//    }
 
 	/*** enSize[0] **/
 	if(s32ChnNum >= 1)
@@ -837,16 +840,16 @@ END_VENC_1080P_CLASSIC_0:	//system exit
 * function :   function DUALP :  H.265@1080@30fps+H.264@1080@30fps
 
 ******************************************************************************/
-HI_S32 SAMPLE_VENC_DUALPP_CLASSIC(HI_VOID)
+HI_S32 SAMPLE_VENC_DUALPP_CLASSIC(HI_U32 u32Profile)
 {
     PAYLOAD_TYPE_E enPayLoad[2]= {PT_H265,PT_H264};
-    PIC_SIZE_E enSize[2] = {PIC_HD1080, PIC_HD1080};
+//    PIC_SIZE_E enSize[2] = {PIC_HD1080, PIC_HD1080};
 	VENC_GOP_ATTR_S stGopAttr;
 	VENC_GOP_MODE_E enGopMode[2] = {VENC_GOPMODE_DUALP,VENC_GOPMODE_DUALP};
-	HI_U32 u32Profile = 0;
+//	HI_U32 u32Profile = 0;
 	
     VB_CONF_S stVbConf;
-    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
+//    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
     HI_S32 s32VpssGrpCnt = 8;
     
     VPSS_GRP VpssGrp;
@@ -952,25 +955,25 @@ HI_S32 SAMPLE_VENC_DUALPP_CLASSIC(HI_VOID)
 	printf("\t a) avbr.\n");
     printf("\t f) fixQp\n");
     printf("please input choose rc mode!\n");
-    c = (char)getchar();
-    switch(c)
-    {
-        case 'c':
-            enRcMode = SAMPLE_RC_CBR;
-            break;
-        case 'v':
-            enRcMode = SAMPLE_RC_VBR;
-            break;
-		case 'a':
-			enRcMode = SAMPLE_RC_AVBR;
-			break;			
-        case 'f':
-            enRcMode = SAMPLE_RC_FIXQP;
-            break;
-        default:
-            printf("rc mode! is invaild!\n");
-            goto END_VENC_1080P_CLASSIC_3;
-    }
+//    c = (char)getchar();
+//    switch(c)
+//    {
+//        case 'c':
+//            enRcMode = SAMPLE_RC_CBR;
+//            break;
+//        case 'v':
+//            enRcMode = SAMPLE_RC_VBR;
+//            break;
+//		case 'a':
+//			enRcMode = SAMPLE_RC_AVBR;
+//			break;
+//        case 'f':
+//            enRcMode = SAMPLE_RC_FIXQP;
+//            break;
+//        default:
+//            printf("rc mode! is invaild!\n");
+//            goto END_VENC_1080P_CLASSIC_3;
+//    }
 
 	/*** enSize[0] **/
 	if(s32ChnNum >= 1)
@@ -1085,18 +1088,18 @@ END_VENC_1080P_CLASSIC_0:	//system exit
 * function BgModel :  H.265@1080@30fps+H.265@1080@30fps
 
 ******************************************************************************/
-HI_S32 SAMPLE_VENC_BgModel_CLASSIC(HI_VOID)
+HI_S32 SAMPLE_VENC_BgModel_CLASSIC(HI_U32 u32Profile)
 {
     PAYLOAD_TYPE_E enPayLoad[2]= {PT_H265, PT_H265};
-    PIC_SIZE_E enSize[2] = {PIC_HD1080, PIC_HD1080};	
+//    PIC_SIZE_E enSize[2] = {PIC_HD1080, PIC_HD1080};
 	VENC_GOP_ATTR_S stGopAttr;
 	VENC_GOP_MODE_E enGopMode[2] = {VENC_GOPMODE_SMARTP,VENC_GOPMODE_SMARTP};
-	HI_U32 u32Profile = 0;
+//	HI_U32 u32Profile = 0;
 	
 	VB_CONF_S stVbConf;
 	
 	HI_BOOL bEnableEnSmartP=HI_TRUE;
-	SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
+//	SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
     HI_S32 s32VpssGrpCnt = 8;
     
 	
@@ -1206,25 +1209,25 @@ HI_S32 SAMPLE_VENC_BgModel_CLASSIC(HI_VOID)
 	printf("\t a) avbr.\n");
 	printf("\t f) fixQp\n");
 	printf("please input choose rc mode!\n");
-	c = (char)getchar();
-	switch(c)
-	{
-		case 'c':
-			enRcMode = SAMPLE_RC_CBR;
-			break;
-		case 'v':
-			enRcMode = SAMPLE_RC_VBR;
-			break;
-		case 'a':
-			enRcMode = SAMPLE_RC_AVBR;
-			break;			
-		case 'f':
-			enRcMode = SAMPLE_RC_FIXQP;
-			break;
-		default:
-			printf("rc mode! is invaild!\n");
-			goto END_VENC_1080P_CLASSIC_3;
-	}
+//	c = (char)getchar();
+//	switch(c)
+//	{
+//		case 'c':
+//			enRcMode = SAMPLE_RC_CBR;
+//			break;
+//		case 'v':
+//			enRcMode = SAMPLE_RC_VBR;
+//			break;
+//		case 'a':
+//			enRcMode = SAMPLE_RC_AVBR;
+//			break;
+//		case 'f':
+//			enRcMode = SAMPLE_RC_FIXQP;
+//			break;
+//		default:
+//			printf("rc mode! is invaild!\n");
+//			goto END_VENC_1080P_CLASSIC_3;
+//	}
 
 	/*** enSize[0] **/
 	if(s32ChnNum >= 1)
@@ -1349,14 +1352,14 @@ END_VENC_1080P_CLASSIC_0:	//system exit
 /******************************************************************************
 * function :  H264 P refurbish I macro block/I slice,normal@1080+I macro block@1080+Islice @1080
 ******************************************************************************/
-HI_S32 SAMPLE_VENC_IntraRefresh_CLASSIC(HI_VOID)
+HI_S32 SAMPLE_VENC_IntraRefresh_CLASSIC(HI_U32 u32Profile)
 {
     PAYLOAD_TYPE_E enPayLoad[2]= {PT_H265, PT_H264};
-    PIC_SIZE_E enSize[2] = {PIC_HD1080, PIC_HD1080};	
-	HI_U32 u32Profile = 0;
+//    PIC_SIZE_E enSize[2] = {PIC_HD1080, PIC_HD1080};
+//	HI_U32 u32Profile = 0;
 	
     VB_CONF_S stVbConf;
-    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
+//    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
     HI_S32 s32VpssGrpCnt = 8;
     
     VPSS_GRP VpssGrp;
@@ -1461,25 +1464,25 @@ HI_S32 SAMPLE_VENC_IntraRefresh_CLASSIC(HI_VOID)
 	printf("\t a) avbr.\n");
     printf("\t f) fixQp\n");
     printf("please input choose rc mode!\n");
-    c = (char)getchar();
-    switch(c)
-    {
-        case 'c':
-            enRcMode = SAMPLE_RC_CBR;
-            break;
-        case 'v':
-            enRcMode = SAMPLE_RC_VBR;
-            break;
-		case 'a':
-			enRcMode = SAMPLE_RC_AVBR;
-			break;			
-        case 'f':
-            enRcMode = SAMPLE_RC_FIXQP;
-            break;
-        default:
-            printf("rc mode! is invaild!\n");
-            goto END_VENC_1080P_CLASSIC_3;
-    }
+//    c = (char)getchar();
+//    switch(c)
+//    {
+//        case 'c':
+//            enRcMode = SAMPLE_RC_CBR;
+//            break;
+//        case 'v':
+//            enRcMode = SAMPLE_RC_VBR;
+//            break;
+//		case 'a':
+//			enRcMode = SAMPLE_RC_AVBR;
+//			break;
+//        case 'f':
+//            enRcMode = SAMPLE_RC_FIXQP;
+//            break;
+//        default:
+//            printf("rc mode! is invaild!\n");
+//            goto END_VENC_1080P_CLASSIC_3;
+//    }
 
 	/*** enSize[0] **/
 	if(s32ChnNum >= 1)
@@ -1608,14 +1611,14 @@ END_VENC_1080P_CLASSIC_0:	//system exit
 /******************************************************************************
 * function :  1 chn 1080p MJPEG encode and 1 chn 1080p JPEG snap
 ******************************************************************************/
-HI_S32 SAMPLE_VENC_1080P_MJPEG_JPEG(HI_VOID)
+HI_S32 SAMPLE_VENC_1080P_MJPEG_JPEG(HI_U32 u32Profile)
 {
     PAYLOAD_TYPE_E enPayLoad = PT_MJPEG;
-    PIC_SIZE_E enSize[2] = {PIC_HD1080,PIC_HD1080};
-    HI_U32 u32Profile = 0;
+//    PIC_SIZE_E enSize[2] = {PIC_HD1080,PIC_HD1080};
+//    HI_U32 u32Profile = 0;
 
     VB_CONF_S stVbConf;
-    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
+//    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
     HI_S32 s32VpssGrpCnt = 8;
 
 
@@ -1810,14 +1813,14 @@ END_VENC_MJPEG_JPEG_0:	//system exit
 
 
 
-HI_S32 SAMPLE_VENC_ROIBG_CLASSIC(HI_VOID)
+HI_S32 SAMPLE_VENC_ROIBG_CLASSIC(HI_U32 u32Profile)
 {
     PAYLOAD_TYPE_E enPayLoad[2] = {PT_H264,PT_H265};
-    PIC_SIZE_E enSize[3] = {PIC_HD1080, PIC_HD1080, PIC_D1};
-    HI_U32 u32Profile = 0;
+//    PIC_SIZE_E enSize[3] = {PIC_HD1080, PIC_HD1080, PIC_D1};
+//    HI_U32 u32Profile = 0;
 
     VB_CONF_S stVbConf;
-    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
+//    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
     HI_S32 s32VpssGrpCnt = 8;
 
     VPSS_GRP VpssGrp;
@@ -2083,11 +2086,11 @@ END_VENC_1080P_CLASSIC_0:	//system exit
 HI_S32 SAMPLE_VENC_SVC_H264(HI_VOID)
 {
     PAYLOAD_TYPE_E enPayLoad = PT_H264;
-    PIC_SIZE_E enSize[3] = {PIC_HD1080, PIC_HD1080, PIC_HD1080};
+//    PIC_SIZE_E enSize[3] = {PIC_HD1080, PIC_HD1080, PIC_HD1080};
     HI_U32 u32Profile = 3;/* Svc-t */
 
     VB_CONF_S stVbConf;
-    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
+//    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
     HI_S32 s32VpssGrpCnt = 8;
 
 
@@ -2284,55 +2287,59 @@ END_VENC_1080P_CLASSIC_0:	//system exit
 int venc_main(int argc, char *argv[])
 {
     HI_S32 s32Ret;
-//    if ( (argc < 2) || (1 != strlen(argv[1])))
-//    {
-//        SAMPLE_VENC_Usage(argv[0]);
-//        return HI_FAILURE;
-//    }
+    HI_U32 u32Profile = 0;
+    if ( (argc < 2) || (1 != strlen(argv[1])))
+    {
+        SAMPLE_VENC_Usage(argv[0]);
+        return HI_FAILURE;
+    }
 	
+    u32Profile = atoi(argv[2]);
+
+    printf("u32Profile = %d\n",u32Profile);
 
     signal(SIGINT, SAMPLE_VENC_HandleSig);
     signal(SIGTERM, SAMPLE_VENC_HandleSig);
 
-    s32Ret = SAMPLE_VENC_NORMALP_CLASSIC();
-//    switch (*argv[1])
-//    {
-//        case '0':/* H.264@NormalP@1080p@30fps+H.265NormalP@1080p@30fps*/
-//            s32Ret = SAMPLE_VENC_NORMALP_CLASSIC();
-//            break;
+//    s32Ret = SAMPLE_VENC_NORMALP_CLASSIC();
+    switch (*argv[1])
+    {
+        case '0':/* H.264@NormalP@1080p@30fps+H.265NormalP@1080p@30fps*/
+            s32Ret = SAMPLE_VENC_NORMALP_CLASSIC(u32Profile);
+            break;
 			
-//		case '1':/*H.264@DualP@1080p@30fps + H.265@SmartP@1080p@30fps*/
-//    		s32Ret = SAMPLE_VENC_SMARTP_CLASSIC();
-//            break;
+        case '1':/*H.264@DualP@1080p@30fps + H.265@SmartP@1080p@30fps*/
+            s32Ret = SAMPLE_VENC_SMARTP_CLASSIC(u32Profile);
+            break;
 			
-//		case '2':/*H.264@SmartP@1080p@30fps + H.265@DualP@1080p@30fps*/
-//			s32Ret = SAMPLE_VENC_DUALP_CLASSIC();
-//			break;
+        case '2':/*H.264@SmartP@1080p@30fps + H.265@DualP@1080p@30fps*/
+            s32Ret = SAMPLE_VENC_DUALP_CLASSIC(u32Profile);
+            break;
 			
-//		case '3':/* H.265@1080@30fps+H.265@1080@30fps */
-//            s32Ret = SAMPLE_VENC_DUALPP_CLASSIC();
-//            break;
-//        case '4':/* H.264@NormalP@1080p@30fps@P_Islice + H.265@NormalP@1080p@30fps@P_Islice*/
-//            s32Ret = SAMPLE_VENC_BgModel_CLASSIC();
-//            break;
-//        case '5':/* H.264@NormalP@1080p@30fps@P_Islice + H.265@NormalP@1080p@30fps@P_Islice*/
-//            s32Ret = SAMPLE_VENC_IntraRefresh_CLASSIC();
-//            break;
+        case '3':/* H.265@1080@30fps+H.265@1080@30fps */
+            s32Ret = SAMPLE_VENC_DUALPP_CLASSIC(u32Profile);
+            break;
+        case '4':/* H.264@NormalP@1080p@30fps@P_Islice + H.265@NormalP@1080p@30fps@P_Islice*/
+            s32Ret = SAMPLE_VENC_BgModel_CLASSIC(u32Profile);
+            break;
+        case '5':/* H.264@NormalP@1080p@30fps@P_Islice + H.265@NormalP@1080p@30fps@P_Islice*/
+            s32Ret = SAMPLE_VENC_IntraRefresh_CLASSIC(u32Profile);
+            break;
 			
-//		case '6':/* 1*1080p mjpeg encode + 1*1080p jpeg  */
-//            s32Ret = SAMPLE_VENC_1080P_MJPEG_JPEG();
-//            break;
-//        case '7':/* H.264@NormalP@1080p@30fps@RoiBgFrameRate+ H.265@NormalP@1080p@30fps@RoiBgFrameRate*/
-//            s32Ret = SAMPLE_VENC_ROIBG_CLASSIC();
-//            break;
-//		case '8':/* H.264 Svc-t */
+        case '6':/* 1*1080p mjpeg encode + 1*1080p jpeg  */
+            s32Ret = SAMPLE_VENC_1080P_MJPEG_JPEG(u32Profile);
+            break;
+        case '7':/* H.264@NormalP@1080p@30fps@RoiBgFrameRate+ H.265@NormalP@1080p@30fps@RoiBgFrameRate*/
+            s32Ret = SAMPLE_VENC_ROIBG_CLASSIC(u32Profile);
+            break;
+        case '8':/* H.264 Svc-t */
 //            s32Ret = SAMPLE_VENC_SVC_H264();
-//            break;
-//        default:
-//            printf("the index is invaild!\n");
-//            SAMPLE_VENC_Usage(argv[0]);
-//            return HI_FAILURE;
-//    }
+            break;
+        default:
+            printf("the index is invaild!\n");
+            SAMPLE_VENC_Usage(argv[0]);
+            return HI_FAILURE;
+    }
 
     if (HI_SUCCESS == s32Ret)
     { printf("program exit normally!\n"); }

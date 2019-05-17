@@ -88,8 +88,8 @@ Rectangle {
         height: parent.height - y
         initialItem: Launcher{
             onLauncher: {
-                console.log(titlename.substring(0,6))
-                if(titlename.substring(0,6) == "widget"){
+                console.log(flag)
+                if(flag == "widget"){
                     console.log("widget")
                 }else{
                     title = titlename

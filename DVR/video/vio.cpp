@@ -398,6 +398,14 @@ HI_BOOL Vio::Vi_Start()
     VPSS_GRP_ATTR_S stGrpAttr;
 
 
+    /*** Start AD ***/
+    s32Ret = m_Vio.SAMPLE_COMM_VI_ADStart(enViMode, enNorm);
+    if (HI_SUCCESS !=s32Ret)
+    {
+        SAMPLE_PRT("Start AD failed!\n");
+        return HI_FALSE;
+    }
+
     s32Ret = m_Vio.SAMPLE_COMM_VI_Start(enViMode, enNorm);
     if (HI_SUCCESS != s32Ret)
     {

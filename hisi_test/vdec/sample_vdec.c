@@ -168,7 +168,7 @@ static HI_VOID VDEC_RELEASE_USERPIC(VDEC_USERPIC_S* pstUserPic)
 }
 
 #if 1
-HI_S32 SAMPLE_VDEC_PIP(HI_VOID)
+HI_S32 SAMPLE_VDEC_PIP(char *pStreamFileName)
 {
     VB_CONF_S stVbConf, stModVbConf;
     HI_S32 i, s32Ret = HI_SUCCESS;
@@ -428,7 +428,7 @@ END1:
 
 #endif
 
-HI_S32 SAMPLE_VDEC_H264(HI_VOID)
+HI_S32 SAMPLE_VDEC_H264(char *pStreamFileName)
 {
     VB_CONF_S stVbConf, stModVbConf;
     HI_S32 i, s32Ret = HI_SUCCESS;
@@ -442,8 +442,8 @@ HI_S32 SAMPLE_VDEC_H264(HI_VOID)
     VO_VIDEO_LAYER_ATTR_S stVoLayerAttr;
     HI_U32 u32VdCnt = 9, u32GrpCnt = 9;
     pthread_t   VdecThread[2*VDEC_MAX_CHN_NUM];
-    VIDEO_NORM_E gs_enNorm_venc = VIDEO_ENCODING_MODE_NTSC;
-    SAMPLE_RC_E enRcMode= SAMPLE_RC_CBR;
+//    VIDEO_NORM_E gs_enNorm_venc = VIDEO_ENCODING_MODE_PAL;
+//    SAMPLE_RC_E enRcMode= SAMPLE_RC_CBR;
 
     stSize.u32Width = HD_WIDTH;
     stSize.u32Height = HD_HEIGHT;
@@ -573,58 +573,59 @@ HI_S32 SAMPLE_VDEC_H264(HI_VOID)
             goto END6;
         }
     }
-    int envenc;
-    printf("enter key to start venc\n");
-    scanf("%d",&envenc);
-    if(envenc){
-        s32Ret = SAMPLE_COMM_VENC_Start(0, PT_H264,\
-                                       gs_enNorm_venc,PIC_HD1080 , enRcMode,0);
-        if (HI_SUCCESS != s32Ret)
-        {
-            SAMPLE_PRT("Start Venc failed!\n");
-    //        goto END_VENC_1080P_CLASSIC_4;
-        }
 
-        s32Ret = SAMPLE_COMM_VENC_BindVpss(0, 0, 1);
-        if (HI_SUCCESS != s32Ret)
-        {
-            SAMPLE_PRT("Start Venc failed!\n");
-    //        goto END_VENC_1080P_CLASSIC_4;
-        }
+//    int envenc;
+//    printf("enter key to start venc\n");
+//    scanf("%d",&envenc);
+//    if(envenc){
+//        s32Ret = SAMPLE_COMM_VENC_Start(0, PT_H264,\
+//                                       gs_enNorm_venc,PIC_HD1080 , enRcMode,0);
+//        if (HI_SUCCESS != s32Ret)
+//        {
+//            SAMPLE_PRT("Start Venc failed!\n");
+//    //        goto END_VENC_1080P_CLASSIC_4;
+//        }
 
-        s32Ret = SAMPLE_COMM_VENC_Start(1, PT_H265,\
-                                       gs_enNorm_venc,PIC_HD1080 , enRcMode,0);
-        if (HI_SUCCESS != s32Ret)
-        {
-            SAMPLE_PRT("Start Venc failed!\n");
-    //        goto END_VENC_1080P_CLASSIC_4;
-        }
+//        s32Ret = SAMPLE_COMM_VENC_BindVpss(0, 0, 1);
+//        if (HI_SUCCESS != s32Ret)
+//        {
+//            SAMPLE_PRT("Start Venc failed!\n");
+//    //        goto END_VENC_1080P_CLASSIC_4;
+//        }
 
-        s32Ret = SAMPLE_COMM_VENC_BindVpss(1, 1, 1);
-        if (HI_SUCCESS != s32Ret)
-        {
-            SAMPLE_PRT("Start Venc failed!\n");
-    //        goto END_VENC_1080P_CLASSIC_4;
-        }
+//        s32Ret = SAMPLE_COMM_VENC_Start(1, PT_H265,\
+//                                       gs_enNorm_venc,PIC_HD1080 , enRcMode,0);
+//        if (HI_SUCCESS != s32Ret)
+//        {
+//            SAMPLE_PRT("Start Venc failed!\n");
+//    //        goto END_VENC_1080P_CLASSIC_4;
+//        }
+
+//        s32Ret = SAMPLE_COMM_VENC_BindVpss(1, 1, 1);
+//        if (HI_SUCCESS != s32Ret)
+//        {
+//            SAMPLE_PRT("Start Venc failed!\n");
+//    //        goto END_VENC_1080P_CLASSIC_4;
+//        }
 
 
-        /******************************************
-         step 6: stream venc process -- get stream, then save it to file.
-        ******************************************/
-        s32Ret = SAMPLE_COMM_VENC_StartGetStream(2);
-        if (HI_SUCCESS != s32Ret)
-        {
-            SAMPLE_PRT("Start Venc failed!\n");
-    //        goto END_VENC_1080P_CLASSIC_4;
-        }
+//        /******************************************
+//         step 6: stream venc process -- get stream, then save it to file.
+//        ******************************************/
+//        s32Ret = SAMPLE_COMM_VENC_StartGetStream(2);
+//        if (HI_SUCCESS != s32Ret)
+//        {
+//            SAMPLE_PRT("Start Venc failed!\n");
+//    //        goto END_VENC_1080P_CLASSIC_4;
+//        }
 
-    }
+//    }
 
 
     /************************************************
     step8:  send stream to VDEC
     *************************************************/
-    SAMPLE_COMM_VDEC_ThreadParam(u32VdCnt, &stVdecSend[0], &stVdecChnAttr[0], SAMPLE_1080P_H264_PATH);
+    SAMPLE_COMM_VDEC_ThreadParam(u32VdCnt, &stVdecSend[0], &stVdecChnAttr[0], pStreamFileName);
     SAMPLE_COMM_VDEC_StartSendStream(u32VdCnt, &stVdecSend[0], &VdecThread[0]);
 
     /***  get the stat info of luma pix  ***/
@@ -711,7 +712,7 @@ END1:
 }
 
 #if 1
-HI_S32 SAMPLE_VDEC_VdhH265(HI_VOID)
+HI_S32 SAMPLE_VDEC_VdhH265(char *pStreamFileName)
 {
     VB_CONF_S stVbConf, stModVbConf;
     HI_S32 i, s32Ret = HI_SUCCESS;
@@ -899,7 +900,7 @@ HI_S32 SAMPLE_VDEC_VdhH265(HI_VOID)
     /************************************************
     step8:  send stream to VDEC
     *************************************************/
-    SAMPLE_COMM_VDEC_ThreadParam(u32GrpCnt, &stVdecSend[0], &stVdecChnAttr[0], SAMPLE_1080P_H265_PATH);
+    SAMPLE_COMM_VDEC_ThreadParam(u32GrpCnt, &stVdecSend[0], &stVdecChnAttr[0], pStreamFileName);
     SAMPLE_COMM_VDEC_StartSendStream(u32GrpCnt, &stVdecSend[0], &VdecThread[0]);
 
     /***  get the stat info of luma pix  ***/
@@ -959,7 +960,7 @@ END1:
 
 
 
-HI_S32 SAMPLE_VDEC_VdhMpeg4(HI_VOID)
+HI_S32 SAMPLE_VDEC_VdhMpeg4(char *pStreamFileName)
 {
     VB_CONF_S stVbConf, stModVbConf;
     HI_S32 i, s32ChnNum, s32Ret = HI_SUCCESS;
@@ -1120,7 +1121,7 @@ HI_S32 SAMPLE_VDEC_VdhMpeg4(HI_VOID)
     /************************************************
     step8:  send stream to VDEC
     *************************************************/
-    SAMPLE_COMM_VDEC_ThreadParam(s32ChnNum, &stVdecSend[0], &stVdecChnAttr[0], SAMPLE_1080P_MPEG4_PATH);
+    SAMPLE_COMM_VDEC_ThreadParam(s32ChnNum, &stVdecSend[0], &stVdecChnAttr[0], pStreamFileName);
     SAMPLE_COMM_VDEC_StartSendStream(s32ChnNum, &stVdecSend[0], &VdecThread[0]);
 
     /***  get the stat info of luma pix  ***/
@@ -1211,7 +1212,7 @@ END1:
     return	s32Ret;
 }
 
-HI_S32 SAMPLE_VDEC_JpegDecoding(HI_VOID)
+HI_S32 SAMPLE_VDEC_JpegDecoding(char *pStreamFileName)
 {
     VB_CONF_S stVbConf, stModVbConf;
     HI_S32 i, s32ChnNum, s32Ret = HI_SUCCESS;
@@ -1358,7 +1359,7 @@ HI_S32 SAMPLE_VDEC_JpegDecoding(HI_VOID)
     /************************************************
     step8:  send stream to VDEC
     *************************************************/
-    SAMPLE_COMM_VDEC_ThreadParam(s32ChnNum, &stVdecSend[0], &stVdecChnAttr[0], SAMPLE_1080P_JPEG_PATH);
+    SAMPLE_COMM_VDEC_ThreadParam(s32ChnNum, &stVdecSend[0], &stVdecChnAttr[0], pStreamFileName);
     SAMPLE_COMM_VDEC_StartSendStream(s32ChnNum, &stVdecSend[0], &VdecThread[0]);
 
     /***  get the stat info of luma pix  ***/
@@ -1423,6 +1424,9 @@ int vdec_main(int argc, char *argv[])
     HI_CHAR ch;
     HI_BOOL bExit = HI_FALSE;
 
+    if(argc < 2){
+            printf("please enter file name !(%s name)\n",argv[0]);
+    }
     signal(SIGINT, SAMPLE_VDEC_HandleSig);
     signal(SIGTERM, SAMPLE_VDEC_HandleSig);
 
@@ -1443,27 +1447,27 @@ int vdec_main(int argc, char *argv[])
         {
             case '0':
             {
-                SAMPLE_VDEC_H264();
+                SAMPLE_VDEC_H264(argv[1]);
                 break;
             }
             case '1':
             {
-                SAMPLE_VDEC_VdhH265();
+                SAMPLE_VDEC_VdhH265(argv[1]);
                 break;
             }
             case '2':
             {
-                SAMPLE_VDEC_VdhMpeg4();
+                SAMPLE_VDEC_VdhMpeg4(argv[1]);
                 break;
             }
             case '3':
             {
-                SAMPLE_VDEC_JpegDecoding();
+                SAMPLE_VDEC_JpegDecoding(argv[1]);
                 break;
             }
             case '4':  /* H264 -> VPSS -> VO(HD PIP PAUSE STEP)*/
             {
-                SAMPLE_VDEC_PIP();
+                SAMPLE_VDEC_PIP(argv[1]);
                 break;
             }
             case 'q':

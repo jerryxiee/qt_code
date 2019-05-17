@@ -3125,7 +3125,7 @@ void* SAMPLE_RGN_VdecSendStream(void* p)
 {
 	VDEC_STREAM_S stStream;
 	VDEC_SENDPARAM_S *pstSendParam;
-	char sFileName[50], sFilePostfix[20] = ".h264";
+    char sFileName[50], sFilePostfix[20] = ".h264";
 	FILE* fp = NULL;
 	HI_S32 s32Ret;
 	//struct timeval *ptv;
@@ -4934,7 +4934,7 @@ int region_main(int argc, char *argv[])
             continue;
         }
         getchar();
-        switch (ch)
+        switch (*argv[1])
         {
             case '0': /* VPSS VDEC->VPSS(OSD+COVER)->VO 1080P30 */
             {

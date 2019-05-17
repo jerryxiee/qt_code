@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
         if (strList.count() > 0)
         {
         QFont fontThis(strList.at(0));
-        fontThis.setPointSize(9);
+        fontThis.setPointSize(12);
         a.setFont(fontThis);
         }
     }

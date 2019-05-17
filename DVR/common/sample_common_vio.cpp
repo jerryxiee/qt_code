@@ -1125,7 +1125,7 @@ HI_S32 Sample_Common_Vio::SAMPLE_TW2960_CfgV(VIDEO_NORM_E enVideoMode,VI_WORK_MO
 }
 
 
-HI_S32 Sample_Common_Vio::SAMPLE_NVP6134_CfgV(VIDEO_NORM_E enVideoMode,VI_WORK_MODE_E enWorkMode)
+HI_S32 Sample_Common_Vio::SAMPLE_NVP6134_CfgV(SAMPLE_VI_MODE_E enViMode, VIDEO_NORM_E enVideoMode, VI_WORK_MODE_E enWorkMode)
 {
 #ifndef HI_FPGA
     int fd, i,j;
@@ -1168,24 +1168,46 @@ HI_S32 Sample_Common_Vio::SAMPLE_NVP6134_CfgV(VIDEO_NORM_E enVideoMode,VI_WORK_M
             }
             break;
         case VI_WORK_MODE_1Multiplex:
-            for(i=0;i<chip_cnt*4;i++)
-            {
-                schnmode.ch = i;
-                schnmode.vformat = video_mode;
-                schnmode.chmode = NVP6134_VI_720P_2530;//NVP6134_VI_1080P_2530;
-                ioctl(fd, IOC_VDEC_SET_CHNMODE, &schnmode);
-            }
-            for(i=0;i<chip_cnt;i++)
-            {
-                for(j=0;j<4;j++)
+            if(enViMode == SAMPLE_VI_MODE_8_720P){
+                for(i=0;i<chip_cnt*4;i++)
                 {
-                    optmode.chipsel = i;
-                    optmode.portsel = j;
-                    optmode.portmode = NVP6134_OUTMODE_1MUX_HD;//NVP6134_OUTMODE_1MUX_FHD;
-                    optmode.chid = j;
-                    ioctl(fd, IOC_VDEC_SET_OUTPORTMODE, &optmode);
+                    schnmode.ch = i;
+                    schnmode.vformat = video_mode;
+                    schnmode.chmode = NVP6134_VI_720P_2530;//NVP6134_VI_1080P_2530;
+                    ioctl(fd, IOC_VDEC_SET_CHNMODE, &schnmode);
                 }
+                for(i=0;i<chip_cnt;i++)
+                {
+                    for(j=0;j<4;j++)
+                    {
+                        optmode.chipsel = i;
+                        optmode.portsel = j;
+                        optmode.portmode = NVP6134_OUTMODE_1MUX_HD;//NVP6134_OUTMODE_1MUX_FHD;
+                        optmode.chid = j;
+                        ioctl(fd, IOC_VDEC_SET_OUTPORTMODE, &optmode);
+                    }
 
+                }
+            }else if(enViMode == SAMPLE_VI_MODE_8_1080P){
+                for(i=0;i<chip_cnt*4;i++)
+                {
+                    schnmode.ch = i;
+                    schnmode.vformat = video_mode;
+                    schnmode.chmode = NVP6134_VI_1080P_2530;
+                    ioctl(fd, IOC_VDEC_SET_CHNMODE, &schnmode);
+                }
+                for(i=0;i<chip_cnt;i++)
+                {
+                    for(j=0;j<4;j++)
+                    {
+                        optmode.chipsel = i;
+                        optmode.portsel = j;
+                        optmode.portmode = NVP6134_OUTMODE_1MUX_FHD;
+                        optmode.chid = j;
+                        ioctl(fd, IOC_VDEC_SET_OUTPORTMODE, &optmode);
+                    }
+
+                }
             }
             break;
         case VI_WORK_MODE_2Multiplex:
@@ -1327,7 +1349,7 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_ADStart(SAMPLE_VI_MODE_E enViMode, VIDE
         case SAMPLE_VI_MODE_8_720P:
         case SAMPLE_VI_MODE_8_1080P:
             enWorkMode= VI_WORK_MODE_1Multiplex;
-            s32Ret = SAMPLE_NVP6134_CfgV(enNorm, enWorkMode);
+            s32Ret = SAMPLE_NVP6134_CfgV(enViMode,enNorm, enWorkMode);
             if (s32Ret != HI_SUCCESS)
             {
                 SAMPLE_PRT("SAMPLE_NVP6134_CfgV failed with %#x!\n",\
@@ -1566,12 +1588,12 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_Start(SAMPLE_VI_MODE_E enViMode, VIDEO_
     }
 
     /*** Start AD ***/
-    s32Ret = SAMPLE_COMM_VI_ADStart(enViMode, enNorm);
-    if (HI_SUCCESS !=s32Ret)
-    {
-        SAMPLE_PRT("Start AD failed!\n");
-        return HI_FAILURE;
-    }
+//    s32Ret = SAMPLE_COMM_VI_ADStart(enViMode, enNorm);
+//    if (HI_SUCCESS !=s32Ret)
+//    {
+//        SAMPLE_PRT("Start AD failed!\n");
+//        return HI_FAILURE;
+//    }
 
     /*** Start VI Dev ***/
     for(i=0; i<stViParam.s32ViDevCnt; i++)
@@ -1620,6 +1642,79 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_Start(SAMPLE_VI_MODE_E enViMode, VIDEO_
     }
 
     return HI_SUCCESS;
+}
+
+HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_Start(VI_CHN ViChn,SAMPLE_VI_MODE_E enViMode, VIDEO_NORM_E enNorm)
+{
+    VI_DEV ViDev;
+    VI_CHN Chn;
+//    HI_S32 i;
+    HI_S32 s32Ret;
+    SAMPLE_VI_PARAM_S stViParam;
+    SIZE_S stTargetSize;
+    RECT_S stCapRect;
+    VI_CHN_BIND_ATTR_S stChnBindAttr;
+
+    /*** get parameter from Sample_Vi_Mode ***/
+    s32Ret = SAMPLE_COMM_VI_Mode2Param(enViMode, &stViParam);
+    if (HI_SUCCESS !=s32Ret)
+    {
+        SAMPLE_PRT("vi get param failed!\n");
+        return HI_FAILURE;
+    }
+    s32Ret = SAMPLE_COMM_VI_Mode2Size(enViMode, enNorm, &stCapRect, &stTargetSize);
+    if (HI_SUCCESS !=s32Ret)
+    {
+        SAMPLE_PRT("vi get size failed!\n");
+        return HI_FAILURE;
+    }
+
+    /*** Start VI Dev ***/
+
+    ViDev = ViChn * stViParam.s32ViDevInterval;
+    s32Ret = SAMPLE_COMM_VI_StartDev(ViDev, enViMode);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("SAMPLE_COMM_VI_StartDev failed with %#x\n", s32Ret);
+        return HI_FAILURE;
+    }
+
+
+    /*** Start VI Chn ***/
+
+    Chn = ViChn * stViParam.s32ViChnInterval;
+
+    if (SAMPLE_VI_MODE_16_1080P == enViMode
+     || SAMPLE_VI_MODE_16_720P == enViMode)
+    {
+        /* When in the 16x1080p mode, bind chn 2,6,10,14 to way1 is needed */
+        if (Chn%4 != 0)
+        {
+            s32Ret = HI_MPI_VI_GetChnBind(Chn, &stChnBindAttr);
+            if (HI_ERR_VI_FAILED_NOTBIND == s32Ret)
+            {
+                stChnBindAttr.ViDev = Chn/4;
+                stChnBindAttr.ViWay = 1;
+                s32Ret = HI_MPI_VI_BindChn(Chn, &stChnBindAttr);
+                if (HI_SUCCESS != s32Ret)
+                {
+                    SAMPLE_PRT("call HI_MPI_VI_BindChn failed with %#x\n", s32Ret);
+                    return HI_FAILURE;
+                }
+            }
+        }
+
+
+        s32Ret = SAMPLE_COMM_VI_StartChn(Chn, &stCapRect, &stTargetSize, enViMode, VI_CHN_SET_NORMAL);
+        if (HI_SUCCESS != s32Ret)
+        {
+            SAMPLE_PRT("call SAMPLE_COMM_VI_StarChn failed with %#x\n", s32Ret);
+            return HI_FAILURE;
+        }
+    }
+
+    return HI_SUCCESS;
+
 }
 /*****************************************************************************
 * function : stop vi accroding to product type

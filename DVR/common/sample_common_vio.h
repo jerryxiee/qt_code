@@ -61,10 +61,9 @@ public:
     HI_S32 SAMPLE_COMM_VO_MemConfig(HI_CHAR *pcMmzName);
 
     VI_DEV SAMPLE_COMM_VI_GetDev(SAMPLE_VI_MODE_E enViMode, VI_CHN ViChn);
-    HI_S32 SAMPLE_COMM_VI_StartDev(VI_DEV ViDev, SAMPLE_VI_MODE_E enViMode);
-    HI_S32 SAMPLE_COMM_VI_StartChn(VI_CHN ViChn, RECT_S *pstCapRect, SIZE_S *pstTarSize,
-        SAMPLE_VI_MODE_E enViMode, SAMPLE_VI_CHN_SET_E enViChnSet);
+    HI_S32 SAMPLE_COMM_VI_ADStart(SAMPLE_VI_MODE_E enViMode, VIDEO_NORM_E enNorm);
     HI_S32 SAMPLE_COMM_VI_Start(SAMPLE_VI_MODE_E enViMode, VIDEO_NORM_E enNorm);
+    HI_S32 SAMPLE_COMM_VI_Start(VI_CHN ViChn,SAMPLE_VI_MODE_E enViMode, VIDEO_NORM_E enNorm);
     HI_S32 SAMPLE_COMM_VI_Stop(SAMPLE_VI_MODE_E enViMode);
     HI_S32 SAMPLE_COMM_VI_BindVpss(SAMPLE_VI_MODE_E enViMode, VPSS_GRP *Vpss_GrpTab, HI_S32 Vpss_nGrp);
     HI_S32 SAMPLE_COMM_VI_UnBindVpss(SAMPLE_VI_MODE_E enViMode,VPSS_GRP *Vpss_GrpTab, HI_S32 Vpss_nGrp);
@@ -87,12 +86,15 @@ private:
 
     HI_VOID SAMPLE_COMM_VI_SetMask(VI_DEV ViDev, VI_DEV_ATTR_S *pstDevAttr);
     HI_S32 SAMPLE_TP2823_CfgV(VIDEO_NORM_E enVideoMode,VI_WORK_MODE_E enWorkMode);
-    HI_S32 SAMPLE_NVP6134_CfgV(VIDEO_NORM_E enVideoMode,VI_WORK_MODE_E enWorkMode);
+    HI_S32 SAMPLE_NVP6134_CfgV(SAMPLE_VI_MODE_E enViMode,VIDEO_NORM_E enVideoMode,VI_WORK_MODE_E enWorkMode);
     HI_S32 SAMPLE_TW2960_CfgV(VIDEO_NORM_E enVideoMode,VI_WORK_MODE_E enWorkMode);
     HI_S32 SAMPLE_TW2865_CfgV(VIDEO_NORM_E enVideoMode,VI_WORK_MODE_E enWorkMode);
     HI_S32 SAMPLE_COMM_VI_Mode2Param(SAMPLE_VI_MODE_E enViMode, SAMPLE_VI_PARAM_S *pstViParam);
-    HI_S32 SAMPLE_COMM_VI_ADStart(SAMPLE_VI_MODE_E enViMode, VIDEO_NORM_E enNorm);
+
     HI_S32 SAMPLE_COMM_VI_Mode2Size(SAMPLE_VI_MODE_E enViMode, VIDEO_NORM_E enNorm, RECT_S *pstCapRect, SIZE_S *pstDestSize);
+    HI_S32 SAMPLE_COMM_VI_StartDev(VI_DEV ViDev, SAMPLE_VI_MODE_E enViMode);
+    HI_S32 SAMPLE_COMM_VI_StartChn(VI_CHN ViChn, RECT_S *pstCapRect, SIZE_S *pstTarSize,
+        SAMPLE_VI_MODE_E enViMode, SAMPLE_VI_CHN_SET_E enViChnSet);
 
 private:
     SAMPLE_VO_MODE_E m_enVoMode;

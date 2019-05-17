@@ -4,16 +4,18 @@ import QtQuick.Controls 1.2
 Rectangle {
     id:mainItem
 
-    signal launcher(string titlename,string page)
+    signal launcher(string flag ,string titlename,string page)
     ListModel{
         id:model
         ListElement{
+            flag:"qml"
             name:"video"
             icon:"qrc:/images/video.jpg"
             page:"qrc:/qml/video.qml"
         }
         ListElement{
-            name:"widgetvideo1"
+            flag:"widget"
+            name:"Setting"
             icon:"qrc:/images/video.jpg"
             page:""
         }
@@ -58,8 +60,7 @@ Rectangle {
 
                 onClicked: {
                     if(grid.currentItem){
-                        console.log(Qt.resolvedUrl(page));
-                        launcher(text,Qt.resolvedUrl(page))
+                        launcher(flag,text,Qt.resolvedUrl(page))
                     }
                 }
             }

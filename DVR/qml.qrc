@@ -22,5 +22,6 @@
         <file>images/back1.png</file>
         <file>images/back.png</file>
         <file>images/left1.png</file>
+        <file>qml/setting/Setting.qml</file>
     </qresource>
 </RCC>
