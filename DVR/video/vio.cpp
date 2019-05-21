@@ -494,8 +494,8 @@ HI_S32 Vio::Vi_Venc_Start()
 
     for(i = 0;i < m_ViChnCnt;i++){
         m_pVenc[i] = new Sample_Common_Venc();
-        s32Ret = m_pVenc[i]->SAMPLE_COMM_VENC_Start(m_enType,\
-                                       enNorm, m_enSize, m_enRcMode,m_u32Profile);
+        m_pVenc[i]->SAMPLE_COMM_VENC_SetAttr(m_enType,enNorm, m_enSize, m_enRcMode,m_u32Profile);
+        s32Ret = m_pVenc[i]->SAMPLE_COMM_VENC_Start();
         if (HI_SUCCESS != s32Ret)
         {
             SAMPLE_PRT("Start Venc failed!\n");

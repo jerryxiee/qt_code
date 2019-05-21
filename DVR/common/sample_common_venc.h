@@ -19,7 +19,8 @@ public:
     HI_S32 SAMPLE_COMM_VDEC_UnBindVenc(VDEC_CHN VdChn);
     HI_S32 SAMPLE_COMM_VENC_GetGopAttr(VENC_GOP_MODE_E enGopMode,VENC_GOP_ATTR_S *pstGopAttr,VIDEO_NORM_E enNorm);
 
-    HI_S32 SAMPLE_COMM_VENC_Start(PAYLOAD_TYPE_E enType, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32  u32Profile);
+    HI_S32 SAMPLE_COMM_VENC_SetAttr(PAYLOAD_TYPE_E enType, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32  u32Profile);
+    HI_S32 SAMPLE_COMM_VENC_Start();
     HI_S32 SAMPLE_COMM_VENC_StartEx(PAYLOAD_TYPE_E enType, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32  u32Profile, VENC_GOP_ATTR_S *pstGopAttr);
     HI_S32 SAMPLE_COMM_VENC_Stop();
 
@@ -40,6 +41,12 @@ public:
 private:
     const HI_U8 g_SOI[2] = {0xFF, 0xD8};
     const HI_U8 g_EOI[2] = {0xFF, 0xD9};
+
+    PAYLOAD_TYPE_E m_enType;
+    VIDEO_NORM_E m_enNorm;
+    PIC_SIZE_E m_enSize;
+    SAMPLE_RC_E m_enRcMode;
+    HI_U32  m_u32Profile;
 
     static HI_U32 m_Venc_MaxTab[VENC_MAX_CHN_NUM];
 };

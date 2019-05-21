@@ -14,10 +14,10 @@ Rectangle {
             page:"qrc:/qml/video.qml"
         }
         ListElement{
-            flag:"widget"
+            flag:"qml"
             name:"Setting"
-            icon:"qrc:/images/video.jpg"
-            page:""
+            icon:"qrc:/qml/setting/images/settings.png"
+            page:"qrc:/qml/setting/Setting.qml"
         }
 //        ListElement{name:"video1";icon:"qrc:images/1.png"}
     }

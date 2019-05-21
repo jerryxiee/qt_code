@@ -23,5 +23,15 @@
         <file>images/back.png</file>
         <file>images/left1.png</file>
         <file>qml/setting/Setting.qml</file>
+        <file>qml/setting/images/bluetooth.png</file>
+        <file>qml/setting/images/bluetooth@2x.png</file>
+        <file>qml/setting/images/brightness.png</file>
+        <file>qml/setting/images/brightness@2x.png</file>
+        <file>qml/setting/images/contrast.png</file>
+        <file>qml/setting/images/contrast@2x.png</file>
+        <file>qml/setting/images/settings.png</file>
+        <file>qml/setting/images/settings@2x.png</file>
+        <file>qml/setting/images/wifi.png</file>
+        <file>qml/setting/images/wifi@2x.png</file>
     </qresource>
 </RCC>
