@@ -37,6 +37,7 @@ Rectangle {
         width: parent.width
         height: 40
 
+
         NaviButton {
             id: backButton
 

@@ -43,7 +43,7 @@ Widget::Widget(QWidget *parent) :
     m_quickWidget->resize(1280,720);
     m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
 //    m_quickWidget->setHidden(true);
-    QUrl source("qrc:/qml/main.qml");
+    QUrl source("qrc:/qml/test.qml");
     m_quickWidget->setSource(source);
 
 

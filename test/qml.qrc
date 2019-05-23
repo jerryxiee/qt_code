@@ -22,5 +22,9 @@
         <file>images/video.jpg</file>
         <file>qml/video.qml</file>
         <file>qml/test.qml</file>
+        <file>qml/ComboBoxButton.qml</file>
+        <file>qml/Mycombobox.qml</file>
+        <file>qml/Controls/MyComboBox.qml</file>
+        <file>qml/Controls/images/bullet_dn.png</file>
     </qresource>
 </RCC>
