@@ -3,6 +3,7 @@ import QtQuick.Controls 1.2
 
 Rectangle {
     id:mainItem
+    color: "#212126"
 
     signal launcher(string flag ,string titlename,string page)
     ListModel{
@@ -69,6 +70,7 @@ Rectangle {
                 id:winname
                 text: name
                 font.pixelSize: 16
+//                color:"white"
                 anchors.horizontalCenter: mavibut.horizontalCenter
                 anchors.bottom: mavibut.bottom
             }

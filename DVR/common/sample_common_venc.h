@@ -19,9 +19,11 @@ public:
     HI_S32 SAMPLE_COMM_VDEC_UnBindVenc(VDEC_CHN VdChn);
     HI_S32 SAMPLE_COMM_VENC_GetGopAttr(VENC_GOP_MODE_E enGopMode,VENC_GOP_ATTR_S *pstGopAttr,VIDEO_NORM_E enNorm);
 
-    HI_S32 SAMPLE_COMM_VENC_SetAttr(PAYLOAD_TYPE_E enType, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32  u32Profile);
+    HI_S32 SAMPLE_COMM_VENC_SetAttr(PAYLOAD_TYPE_E enType, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode,HI_U32 u32BitRate, HI_U32  u32Profile);
     HI_S32 SAMPLE_COMM_VENC_Start();
     HI_S32 SAMPLE_COMM_VENC_StartEx(PAYLOAD_TYPE_E enType, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32  u32Profile, VENC_GOP_ATTR_S *pstGopAttr);
+    HI_S32 SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode,HI_U32 u32BitRate, HI_U32  u32Profile);
+    HI_S32 SAMPLE_COMM_VENC_GetChnAttr(VENC_CHN VeChn, VENC_CHN_ATTR_S*pstAttr);
     HI_S32 SAMPLE_COMM_VENC_Stop();
 
     static HI_S32 SAMPLE_COMM_VENC_GetFilePostfix(PAYLOAD_TYPE_E enPayload, char* szFilePostfix);
@@ -47,6 +49,7 @@ private:
     PIC_SIZE_E m_enSize;
     SAMPLE_RC_E m_enRcMode;
     HI_U32  m_u32Profile;
+    HI_U32 m_u32BitRate;
 
     static HI_U32 m_Venc_MaxTab[VENC_MAX_CHN_NUM];
 };

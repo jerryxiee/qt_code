@@ -51,132 +51,222 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.1
+import "qrc:/qml/Controls"
 
 Item {
+    id:record
     width: parent.width
     height: parent.height
+    property int fontpixelSize : 32
 
-    property real progress: 0
-    SequentialAnimation on progress {
-        loops: Animation.Infinite
-        running: true
-        NumberAnimation {
-            from: 0
-            to: 1
-            duration: 3000
-        }
-        NumberAnimation {
-            from: 1
-            to: 0
-            duration: 3000
-        }
-    }
 
-    Column {
-        spacing: 40
-        anchors.centerIn: parent
+//Column{
+    Row{
+//        anchors.left: parent.left
+//        anchors.top: parent.top
+//        anchors.leftMargin:200
+//        anchors.margins:50
+        anchors.centerIn: record
+        spacing:150
+        Column{
 
-        Button {
-            text: "Press me"
-            style: touchStyle
-        }
-
-        Button {
-            style: touchStyle
-            text: "Press me too"
-        }
-
-        Button {
-            anchors.margins: 20
-            style: touchStyle
-            text: "Don't press me"
-            onClicked: if (stackView) stackView.pop()
-        }
-
-        Row {
-            spacing: 20
-            Switch {
-                style: switchStyle
+            spacing:10
+            Text{
+                id:setchn
+                text:qsTr("通道选择")
+                color:"white"
+                font.pixelSize: fontpixelSize
             }
-            Switch {
-                style: switchStyle
+            Text{
+                id:setStream
+                text:qsTr("码流选择")
+                color:"white"
+                font.pixelSize: fontpixelSize
             }
+            Text{
+                id:setStreamType
+                text:qsTr("码流类型")
+                color:"white"
+                font.pixelSize: fontpixelSize
+            }
+            Text{
+                id: resolution
+                text:qsTr("分辨率")
+                color:"white"
+                font.pixelSize: fontpixelSize
+            }
+            Text{
+                id: bitRateTypr
+                text:qsTr("码率类型")
+                color:"white"
+                font.pixelSize: fontpixelSize
+            }
+            Text{
+                id: imageQuality
+                text:qsTr("图像质量")
+                color:"white"
+                font.pixelSize: fontpixelSize
+            }
+
+            Text{
+                id: frameRate
+                text:qsTr("视频帧率")
+                color:"white"
+                font.pixelSize: fontpixelSize
+            }
+            Text{
+                id: bitRate
+                text:qsTr("码流设置")
+                color:"white"
+                font.pixelSize: fontpixelSize
+            }
+            Text{
+                id: recordPlay
+                text:qsTr("录像时间配置")
+                color:"white"
+                font.pixelSize: fontpixelSize
+            }
+
+            Text{
+                id: otherSet
+                text:qsTr("其他配置")
+                color:"white"
+                font.pixelSize: fontpixelSize
+            }
+
+
         }
-
-    }
-
-    Component {
-        id: touchStyle
-        ButtonStyle {
-            panel: Item {
-                implicitHeight: 50
-                implicitWidth: 320
-                BorderImage {
-                    anchors.fill: parent
-                    antialiasing: true
-                    border.bottom: 8
-                    border.top: 8
-                    border.left: 8
-                    border.right: 8
-                    anchors.margins: control.pressed ? -4 : 0
-                    source: control.pressed ? "../images/button_pressed.png" : "../images/button_default.png"
-                    Text {
-                        text: control.text
-                        anchors.centerIn: parent
-                        color: "white"
-                        font.pixelSize: 23
-                        renderType: Text.NativeRendering
-                    }
+        Column{
+            spacing:10
+            ComboBox{
+                id:setchnBox
+                height:setchn.height
+                model: ListModel{
+                    ListElement{text:qsTr("模拟通道0")}
+                    ListElement{text:qsTr("模拟通道1")}
+                    ListElement{text:qsTr("模拟通道2")}
+                    ListElement{text:qsTr("模拟通道3")}
+                    ListElement{text:qsTr("模拟通道4")}
+                    ListElement{text:qsTr("模拟通道5")}
+                    ListElement{text:qsTr("模拟通道6")}
+                    ListElement{text:qsTr("模拟通道7")}
                 }
             }
+
+            ComboBox{
+                id:setStreamBox
+                height:setchn.height
+                model: ListModel{
+                    ListElement{text:qsTr("主码流")}
+                    ListElement{text:qsTr("子码流")}
+
+                }
+            }
+
+            ComboBox{
+                id:setStreamTypeBox
+                height:setchn.height
+                model: ListModel{
+                    ListElement{text:qsTr("视频流")}
+                    ListElement{text:qsTr("复合流")}
+
+                }
+            }
+            ComboBox{
+                id:resolutionBox
+                height:setchn.height
+                model: ListModel{
+                    ListElement{text:qsTr("720P")}
+                    ListElement{text:qsTr("CIF")}
+
+                }
+            }
+            ComboBox{
+                id:bitRateTyprBox
+                height:setchn.height
+                model: ListModel{
+                    ListElement{text:qsTr("变码率")}
+                    ListElement{text:qsTr("定码率")}
+
+                }
+            }
+
+            ComboBox{
+                id:imageQualityBox
+                height:setchn.height
+                model: ListModel{
+                    ListElement{text:qsTr("低等")}
+                    ListElement{text:qsTr("中等")}
+                    ListElement{text:qsTr("高等")}
+
+                }
+            }
+
+            ComboBox{
+                id:frameRateBox
+                height:setchn.height
+                editable : true
+                model: ListModel{
+                    ListElement{text:qsTr("15")}
+                    ListElement{text:qsTr("20")}
+                    ListElement{text:qsTr("25")}
+                }
+            }
+
+            ComboBox{
+                id:bitRateBox
+                height:setchn.height
+                editable : true
+                model: ListModel{
+                    ListElement{text:qsTr("2048")}
+                    ListElement{text:qsTr("1024")}
+
+                }
+            }
+
+        }
+
+//        Row{
+//            anchors.bottom:parent.bottom
+//            anchors.right:parent.right
+//            width:parent.width
+//            height:40
+
+//            Button{
+//                anchors.bottom:parent.bottom
+//                anchors.right:parent.right
+//                text:qsTr("应用")
+//            }
+//        }
+    }
+
+//    Row{
+//        Button{
+//            anchors.bottom:record.bottom
+//            anchors.right:record.right
+//            text:qsTr("应用")
+//        }
+
+//    }
+//}
+    Button{
+        width:60
+        height:40
+        anchors.bottom:record.bottom
+        anchors.rightMargin:300
+        anchors.right:record.right
+        anchors.bottomMargin:40
+        text:qsTr("应用")
+
+        onClicked:{
+            console.log(frameRateBox.currentText);
+            console.log(frameRateBox.editText)
         }
     }
 
-    Component {
-        id: switchStyle
-        SwitchStyle {
 
-            groove: Rectangle {
-                implicitHeight: 50
-                implicitWidth: 152
-                Rectangle {
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.bottom: parent.bottom
-                    width: parent.width/2 - 2
-                    height: 20
-                    anchors.margins: 2
-                    color: control.checked ? "#468bb7" : "#222"
-                    Behavior on color {ColorAnimation {}}
-                    Text {
-                        font.pixelSize: 23
-                        color: "white"
-                        anchors.centerIn: parent
-                        text: "ON"
-                    }
-                }
-                Item {
-                    width: parent.width/2
-                    height: parent.height
-                    anchors.right: parent.right
-                    Text {
-                        font.pixelSize: 23
-                        color: "white"
-                        anchors.centerIn: parent
-                        text: "OFF"
-                    }
-                }
-                color: "#222"
-                border.color: "#444"
-                border.width: 2
-            }
-            handle: Rectangle {
-                width: parent.parent.width/2
-                height: control.height
-                color: "#444"
-                border.color: "#555"
-                border.width: 2
-            }
-        }
-    }
+
+
+
+
 }

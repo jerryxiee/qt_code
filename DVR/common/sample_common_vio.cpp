@@ -1716,6 +1716,72 @@ HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_Start(VI_CHN ViChn,SAMPLE_VI_MODE_E enV
     return HI_SUCCESS;
 
 }
+
+HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_SetFrameDepth(VI_CHN ViChn, HI_U32 u32Depth)
+{
+    HI_S32 s32ret;
+
+    s32ret = HI_MPI_VI_SetFrameDepth(ViChn, u32Depth);
+    if (HI_SUCCESS != s32ret)
+    {
+        printf("set max depth err:0x%x\n", s32ret);
+        return s32ret;
+    }
+
+    return HI_SUCCESS;
+
+}
+
+HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_GetFrame(VI_CHN ViChn, VIDEO_FRAME_INFO_S *pstFrameInfom,HI_S32 s32MilliSec)
+{
+    HI_S32 s32ret;
+
+    s32ret = HI_MPI_VI_GetFrame(ViChn, pstFrameInfom,s32MilliSec);
+    if (HI_SUCCESS != s32ret)
+    {
+        printf("get vi frame err:0x%x\n", s32ret);
+        return s32ret;
+    }
+
+    return HI_SUCCESS;
+
+}
+
+HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_VI_ReleaseFrame(VI_CHN ViChn, VIDEO_FRAME_INFO_S*pstFrameInfo)
+{
+    HI_S32 s32ret;
+
+    s32ret = HI_MPI_VI_ReleaseFrame(ViChn, pstFrameInfo);
+    if (HI_SUCCESS != s32ret)
+    {
+        printf("get vi frame err:0x%x\n", s32ret);
+        return s32ret;
+    }
+
+    return HI_SUCCESS;
+}
+
+HI_S32 Sample_Common_Vio::SAMPLE_COMM_VI_GetChnLuma(SAMPLE_VI_MODE_E enViMode,VI_CHN ViChn, VI_CHN_LUM_S *pstLuma)
+{
+    HI_S32 s32Ret;
+    SAMPLE_VI_PARAM_S stViParam;
+
+    s32Ret = SAMPLE_COMM_VI_Mode2Param(enViMode, &stViParam);
+    if (HI_SUCCESS !=s32Ret)
+    {
+        SAMPLE_PRT("vi get param failed!\n");
+        return HI_FAILURE;
+    }
+
+    s32Ret = HI_MPI_VI_GetChnLuma(ViChn*stViParam.s32ViChnInterval,pstLuma);
+    if (HI_SUCCESS != s32Ret){
+        SAMPLE_PRT("HI_MPI_VI_GetChnLuma(%d) failed with %#x!\n", ViChn*stViParam.s32ViChnInterval,s32Ret);
+        return HI_FAILURE;
+    }
+
+
+    return HI_SUCCESS;
+}
 /*****************************************************************************
 * function : stop vi accroding to product type
 *****************************************************************************/

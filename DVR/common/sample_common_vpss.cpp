@@ -313,7 +313,12 @@ HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_SetChnMod(VPSS_GRP VpssGrpIndex, VPS
     {
         return s32Ret;
     }
-    HI_MPI_VPSS_SetDepth(m_Grp_Tab[VpssGrpIndex],VpssChn,u32Depth);
+    s32Ret = HI_MPI_VPSS_SetDepth(m_Grp_Tab[VpssGrpIndex],VpssChn,u32Depth);
+    if(s32Ret != HI_SUCCESS)
+    {
+        return s32Ret;
+    }
 
 
+    return HI_SUCCESS;
 }

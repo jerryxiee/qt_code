@@ -61,8 +61,9 @@ signals:
 public:
     const SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_720P;
     const VIDEO_NORM_E enNorm = VIDEO_ENCODING_MODE_PAL;
-    const VPSS_CHN m_VoBindVpss = VPSS_CHN0;
-    const VPSS_CHN m_VencBindVpss = VPSS_CHN1;
+    const VPSS_CHN m_VoBindVpss = VPSS_CHN2;
+    const VPSS_CHN m_VencBindVpss = VPSS_CHN0;   //主码流绑定到通道0
+    const VPSS_CHN m_ChildVencBindVpss = VPSS_CHN1;  //子码流绑定到通道1
 
     VI_CHN m_ViChnCnt;
     Sample_Common_Vio m_Vio;

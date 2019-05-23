@@ -33,5 +33,16 @@
         <file>qml/setting/images/settings@2x.png</file>
         <file>qml/setting/images/wifi.png</file>
         <file>qml/setting/images/wifi@2x.png</file>
+        <file>qml/setting/SetDelegate.qml</file>
+        <file>qml/setting/images/navigation_next_item.png</file>
+        <file>qml/setting/images/navigation_previous_item.png</file>
+        <file>qml/setting/content/ListPage.qml</file>
+        <file>qml/setting/content/ProgressBarPage.qml</file>
+        <file>qml/setting/content/SliderPage.qml</file>
+        <file>qml/setting/content/TabBarPage.qml</file>
+        <file>qml/setting/content/TextInputPage.qml</file>
+        <file>qml/setting/content/RecordSet.qml</file>
+        <file>qml/Controls/MyComboBox.qml</file>
+        <file>qml/Controls/images/bullet_dn.png</file>
     </qresource>
 </RCC>

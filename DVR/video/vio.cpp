@@ -223,7 +223,7 @@ void Vio::onTimeHander()
     bool status;
 
     for(i = 0; i < m_ViChnCnt;i++){
-        s32Ret = HI_MPI_VI_GetChnLuma(i*4,&stLuma);
+        s32Ret = m_Vio.SAMPLE_COMM_VI_GetChnLuma(enViMode,i, &stLuma);
         if (HI_SUCCESS != s32Ret){
             SAMPLE_PRT("HI_MPI_VI_GetChnLuma(%d) failed with %#x!\n", i,s32Ret);
         }
@@ -494,7 +494,7 @@ HI_S32 Vio::Vi_Venc_Start()
 
     for(i = 0;i < m_ViChnCnt;i++){
         m_pVenc[i] = new Sample_Common_Venc();
-        m_pVenc[i]->SAMPLE_COMM_VENC_SetAttr(m_enType,enNorm, m_enSize, m_enRcMode,m_u32Profile);
+        m_pVenc[i]->SAMPLE_COMM_VENC_SetAttr(m_enType,enNorm, m_enSize, m_enRcMode,0,m_u32Profile);
         s32Ret = m_pVenc[i]->SAMPLE_COMM_VENC_Start();
         if (HI_SUCCESS != s32Ret)
         {

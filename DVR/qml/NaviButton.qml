@@ -25,7 +25,7 @@ AbstractButton {
         width: button.width
 //        radius: width / 2
         border.color: "red"
-//        color: "blue"
+        color: button.press ?"#222" : "transparent"
 
 //        anchors.horizontalCenter: button.horizontalCenter
 //        anchors.top: edge === Qt.BottomEdge ? button.top : undefined

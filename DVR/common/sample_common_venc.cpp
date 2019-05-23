@@ -564,14 +564,190 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SaveFile(FILE* pFd, VENC_STREAM_BUF_
 //    return HI_SUCCESS;
 //}
 
-HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetAttr(PAYLOAD_TYPE_E enType, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32  u32Profile)
+HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetAttr(PAYLOAD_TYPE_E enType, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_U32  u32Profile)
 {
     m_enType = enType;
     m_enNorm = enNorm;
     m_enSize = enSize;
     m_enRcMode = enRcMode;
     m_u32Profile = u32Profile;
+    m_u32BitRate = u32BitRate;
 
+    return HI_SUCCESS;
+
+}
+
+HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode,HI_U32 u32BitRate, HI_U32  u32Profile)
+{
+    HI_S32 s32Ret;
+    VENC_CHN_ATTR_S stVencChnAttr;
+
+
+    SIZE_S stPicSize;
+
+    s32Ret = HI_MPI_VENC_GetChnAttr(m_Venc_Chn, &stVencChnAttr);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT(" HI_MPI_VENC_GetChnAttr failed!\n");
+        return HI_FAILURE;
+    }
+    s32Ret = Sample_Common_Sys::SAMPLE_COMM_SYS_GetPicSize(m_enNorm, enSize, &stPicSize);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Get picture size failed!\n");
+        return HI_FAILURE;
+    }
+
+    switch (stVencChnAttr.stVeAttr.enType)
+    {
+        case PT_H264:
+        {
+            stVencChnAttr.stVeAttr.stAttrH264e.u32PicWidth = stPicSize.u32Width;/*the picture width*/
+            stVencChnAttr.stVeAttr.stAttrH264e.u32PicHeight = stPicSize.u32Height;/*the picture height*/
+            stVencChnAttr.stVeAttr.stAttrH264e.u32BufSize  = stPicSize.u32Width * stPicSize.u32Height * 2;/*stream buffer size*/
+            stVencChnAttr.stVeAttr.stAttrH264e.u32Profile  = u32Profile;/*0: baseline; 1:MP; 2:HP;  3:svc_t */
+            if (SAMPLE_RC_CBR == enRcMode)
+            {
+                if(u32BitRate != 0){
+                    stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+                    stVencChnAttr.stRcAttr.stAttrH264Cbr.u32BitRate = u32BitRate;
+                }
+
+
+            }
+            else if (SAMPLE_RC_FIXQP == enRcMode)
+            {
+                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264FIXQP;
+
+            }
+            else if (SAMPLE_RC_VBR == enRcMode)
+            {
+                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264VBR;
+
+                if(u32BitRate != 0){
+                    stVencChnAttr.stRcAttr.stAttrH264Vbr.u32MaxBitRate = u32BitRate;
+                }
+
+            }
+            else if (SAMPLE_RC_AVBR == enRcMode)
+            {
+                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264AVBR;
+
+                if(u32BitRate != 0){
+                    stVencChnAttr.stRcAttr.stAttrH264AVbr.u32MaxBitRate = u32BitRate;
+                }
+
+            }
+            else
+            {
+                return HI_FAILURE;
+            }
+            m_enRcMode = enRcMode;
+        }
+        break;
+        case PT_MJPEG:
+        {
+
+            stVencChnAttr.stVeAttr.stAttrMjpege.u32PicWidth = stPicSize.u32Width;
+            stVencChnAttr.stVeAttr.stAttrMjpege.u32PicHeight = stPicSize.u32Height;
+            stVencChnAttr.stVeAttr.stAttrMjpege.u32BufSize = stPicSize.u32Width * stPicSize.u32Height * 3;
+
+
+            if (SAMPLE_RC_FIXQP == enRcMode)
+            {
+                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_MJPEGFIXQP;
+            }
+            else if (SAMPLE_RC_CBR == enRcMode)
+            {
+                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_MJPEGCBR;
+
+                if(u32BitRate != 0){
+                    stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = u32BitRate;
+                }
+            }
+            else if (SAMPLE_RC_VBR == enRcMode)
+            {
+                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_MJPEGVBR;
+
+                if(u32BitRate != 0){
+                    stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = u32BitRate;
+                }
+            }
+            else
+            {
+                SAMPLE_PRT("cann't support other mode in this version!\n");
+                return HI_FAILURE;
+            }
+        }
+        break;
+        case PT_JPEG:
+            stVencChnAttr.stVeAttr.stAttrJpege.u32PicWidth  = stPicSize.u32Width;
+            stVencChnAttr.stVeAttr.stAttrJpege.u32PicHeight = stPicSize.u32Height;
+            stVencChnAttr.stVeAttr.stAttrJpege.u32BufSize   = stPicSize.u32Width * stPicSize.u32Height * 3;
+
+            break;
+        case PT_H265:
+        {
+            stVencChnAttr.stVeAttr.stAttrH265e.u32PicWidth = stPicSize.u32Width;/*the picture width*/
+            stVencChnAttr.stVeAttr.stAttrH265e.u32PicHeight = stPicSize.u32Height;/*the picture height*/
+            stVencChnAttr.stVeAttr.stAttrH265e.u32BufSize  = stPicSize.u32Width * stPicSize.u32Height * 2;/*stream buffer size*/
+            stVencChnAttr.stVeAttr.stAttrH265e.u32Profile = 0;
+
+
+            if (SAMPLE_RC_CBR == enRcMode)
+            {
+                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265CBR;
+
+                if(u32BitRate != 0){
+                    stVencChnAttr.stRcAttr.stAttrH265Cbr.u32BitRate = u32BitRate;
+                }
+
+            }
+            else if (SAMPLE_RC_FIXQP == enRcMode)
+            {
+                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265FIXQP;
+
+            }
+            else if (SAMPLE_RC_VBR == enRcMode)
+            {
+                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265VBR;
+                if(u32BitRate != 0){
+                    stVencChnAttr.stRcAttr.stAttrH265Vbr.u32MaxBitRate = u32BitRate;
+                }
+            }
+            else if (SAMPLE_RC_AVBR == enRcMode)
+            {
+                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265AVBR;
+
+                if(u32BitRate != 0){
+                    stVencChnAttr.stRcAttr.stAttrH264AVbr.u32MaxBitRate = u32BitRate;
+                }
+            }
+            else
+            {
+                return HI_FAILURE;
+            }
+        }
+        break;
+        default:
+            return HI_ERR_VENC_NOT_SUPPORT;
+    }
+
+    s32Ret = HI_MPI_VENC_SetChnAttr(m_Venc_Chn, &stVencChnAttr);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT(" HI_MPI_VENC_GetChnAttr failed!\n");
+        return HI_FAILURE;
+    }
+
+
+    m_enSize = enSize;
+    m_enRcMode = enRcMode;
+    m_u32Profile = u32Profile;
+    m_u32BitRate = u32BitRate;
+
+
+    return HI_SUCCESS;
 }
 /******************************************************************************
 * funciton : Start venc stream mode (h264, mjpeg)
@@ -629,31 +805,35 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stH264Cbr.u32StatTime       = 1; /* stream rate statics time(s) */
                 stH264Cbr.u32SrcFrmRate      = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30; /* input (vi) frame rate */
                 stH264Cbr.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30; /* target frame rate */
-                switch (m_enSize)
-                {
-                    case PIC_QCIF:
-                        stH264Cbr.u32BitRate = 256; /* average bit rate */
-                        break;
-                    case PIC_QVGA:    /* 320 * 240 */
-                    case PIC_CIF:
-                        stH264Cbr.u32BitRate = 512;
-                        break;
-                    case PIC_D1:
-                    case PIC_VGA:	   /* 640 * 480 */
-                        stH264Cbr.u32BitRate = 1024 * 2;
-                        break;
-                    case PIC_HD720:   /* 1280 * 720 */
-                        stH264Cbr.u32BitRate = 1024 * 2;
-                        break;
-                    case PIC_HD1080:  /* 1920 * 1080 */
-                        stH264Cbr.u32BitRate = 1024 * 4;
-                        break;
-                    case PIC_UHD4K:
-                        stH264Cbr.u32BitRate = 1024 * 8;
-                        break;
-                    default :
-                        stH264Cbr.u32BitRate = 1024 * 4;
-                        break;
+                if(m_u32BitRate == 0){
+                    switch (m_enSize)
+                    {
+                        case PIC_QCIF:
+                            stH264Cbr.u32BitRate = 256; /* average bit rate */
+                            break;
+                        case PIC_QVGA:    /* 320 * 240 */
+                        case PIC_CIF:
+                            stH264Cbr.u32BitRate = 512;
+                            break;
+                        case PIC_D1:
+                        case PIC_VGA:	   /* 640 * 480 */
+                            stH264Cbr.u32BitRate = 1024 * 2;
+                            break;
+                        case PIC_HD720:   /* 1280 * 720 */
+                            stH264Cbr.u32BitRate = 1024 * 2;
+                            break;
+                        case PIC_HD1080:  /* 1920 * 1080 */
+                            stH264Cbr.u32BitRate = 1024 * 4;
+                            break;
+                        case PIC_UHD4K:
+                            stH264Cbr.u32BitRate = 1024 * 8;
+                            break;
+                        default :
+                            stH264Cbr.u32BitRate = 1024 * 4;
+                            break;
+                    }
+                }else{
+                    stH264Cbr.u32BitRate = m_u32BitRate;
                 }
                 stH264Cbr.u32FluctuateLevel = 1; /* average bit rate */
                 memcpy(&stVencChnAttr.stRcAttr.stAttrH264Cbr, &stH264Cbr, sizeof(VENC_ATTR_H264_CBR_S));
@@ -679,31 +859,35 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stH264Vbr.u32MinQp = 10;
                 stH264Vbr.u32MinIQp = 10;
                 stH264Vbr.u32MaxQp = 40;
-                switch (m_enSize)
-                {
-                    case PIC_QCIF:
-                        stH264Vbr.u32MaxBitRate = 256 * 3; /* average bit rate */
-                        break;
-                    case PIC_QVGA:    /* 320 * 240 */
-                    case PIC_CIF:
-                        stH264Vbr.u32MaxBitRate = 512 * 3;
-                        break;
-                    case PIC_D1:
-                    case PIC_VGA:	   /* 640 * 480 */
-                        stH264Vbr.u32MaxBitRate = 1024 * 2;
-                        break;
-                    case PIC_HD720:   /* 1280 * 720 */
-                        stH264Vbr.u32MaxBitRate = 1024 * 3;
-                        break;
-                    case PIC_HD1080:  /* 1920 * 1080 */
-                        stH264Vbr.u32MaxBitRate = 1024 * 4;
-                        break;
-                    case PIC_UHD4K:
-                        stH264Vbr.u32MaxBitRate = 1024 * 8;
-                        break;
-                    default :
-                        stH264Vbr.u32MaxBitRate = 1024 * 4;
-                        break;
+                if(m_u32BitRate == 0){
+                    switch (m_enSize)
+                    {
+                        case PIC_QCIF:
+                            stH264Vbr.u32MaxBitRate = 256 * 3; /* average bit rate */
+                            break;
+                        case PIC_QVGA:    /* 320 * 240 */
+                        case PIC_CIF:
+                            stH264Vbr.u32MaxBitRate = 512 * 3;
+                            break;
+                        case PIC_D1:
+                        case PIC_VGA:	   /* 640 * 480 */
+                            stH264Vbr.u32MaxBitRate = 1024 * 2;
+                            break;
+                        case PIC_HD720:   /* 1280 * 720 */
+                            stH264Vbr.u32MaxBitRate = 1024 * 3;
+                            break;
+                        case PIC_HD1080:  /* 1920 * 1080 */
+                            stH264Vbr.u32MaxBitRate = 1024 * 4;
+                            break;
+                        case PIC_UHD4K:
+                            stH264Vbr.u32MaxBitRate = 1024 * 8;
+                            break;
+                        default :
+                            stH264Vbr.u32MaxBitRate = 1024 * 4;
+                            break;
+                    }
+                }else{
+                    stH264Vbr.u32MaxBitRate = m_u32BitRate;
                 }
                 memcpy(&stVencChnAttr.stRcAttr.stAttrH264Vbr, &stH264Vbr, sizeof(VENC_ATTR_H264_VBR_S));
             }
@@ -714,31 +898,35 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stH264AVbr.u32StatTime = 1;
                 stH264AVbr.u32SrcFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH264AVbr.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
-                switch (m_enSize)
-                {
-                    case PIC_QCIF:
-                        stH264AVbr.u32MaxBitRate = 256 * 3; /* average bit rate */
-                        break;
-                    case PIC_QVGA:    /* 320 * 240 */
-                    case PIC_CIF:
-                        stH264AVbr.u32MaxBitRate = 512 * 3;
-                        break;
-                    case PIC_D1:
-                    case PIC_VGA:	   /* 640 * 480 */
-                        stH264AVbr.u32MaxBitRate = 1024 * 2;
-                        break;
-                    case PIC_HD720:   /* 1280 * 720 */
-                        stH264AVbr.u32MaxBitRate = 1024 * 3;
-                        break;
-                    case PIC_HD1080:  /* 1920 * 1080 */
-                        stH264AVbr.u32MaxBitRate = 1024 * 4;
-                        break;
-                    case PIC_UHD4K:
-                        stH264AVbr.u32MaxBitRate = 1024 * 8;
-                        break;
-                    default :
-                        stH264AVbr.u32MaxBitRate = 1024 * 4;
-                        break;
+                if(m_u32BitRate == 0){
+                    switch (m_enSize)
+                    {
+                        case PIC_QCIF:
+                            stH264AVbr.u32MaxBitRate = 256 * 3; /* average bit rate */
+                            break;
+                        case PIC_QVGA:    /* 320 * 240 */
+                        case PIC_CIF:
+                            stH264AVbr.u32MaxBitRate = 512 * 3;
+                            break;
+                        case PIC_D1:
+                        case PIC_VGA:	   /* 640 * 480 */
+                            stH264AVbr.u32MaxBitRate = 1024 * 2;
+                            break;
+                        case PIC_HD720:   /* 1280 * 720 */
+                            stH264AVbr.u32MaxBitRate = 1024 * 3;
+                            break;
+                        case PIC_HD1080:  /* 1920 * 1080 */
+                            stH264AVbr.u32MaxBitRate = 1024 * 4;
+                            break;
+                        case PIC_UHD4K:
+                            stH264AVbr.u32MaxBitRate = 1024 * 8;
+                            break;
+                        default :
+                            stH264AVbr.u32MaxBitRate = 1024 * 4;
+                            break;
+                    }
+                }else{
+                    stH264AVbr.u32MaxBitRate = m_u32BitRate;
                 }
                 memcpy(&stVencChnAttr.stRcAttr.stAttrH264AVbr, &stH264AVbr, sizeof(VENC_ATTR_H264_AVBR_S));
             }
@@ -773,28 +961,32 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32SrcFrmRate      = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stVencChnAttr.stRcAttr.stAttrMjpegeCbr.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32FluctuateLevel = 1;
-                switch (m_enSize)
-                {
-                    case PIC_QCIF:
-                        stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = 384 * 3; /* average bit rate */
-                        break;
-                    case PIC_QVGA:    /* 320 * 240 */
-                    case PIC_CIF:
-                        stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = 768 * 3;
-                        break;
-                    case PIC_D1:
-                    case PIC_VGA:	   /* 640 * 480 */
-                        stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = 1024 * 3 * 3;
-                        break;
-                    case PIC_HD720:   /* 1280 * 720 */
-                        stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = 1024 * 5 * 3;
-                        break;
-                    case PIC_HD1080:  /* 1920 * 1080 */
-                        stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = 1024 * 10 * 3;
-                        break;
-                    default :
-                        stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = 1024 * 10 * 3;
-                        break;
+                if(m_u32BitRate == 0){
+                    switch (m_enSize)
+                    {
+                        case PIC_QCIF:
+                            stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = 384 * 3; /* average bit rate */
+                            break;
+                        case PIC_QVGA:    /* 320 * 240 */
+                        case PIC_CIF:
+                            stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = 768 * 3;
+                            break;
+                        case PIC_D1:
+                        case PIC_VGA:	   /* 640 * 480 */
+                            stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = 1024 * 3 * 3;
+                            break;
+                        case PIC_HD720:   /* 1280 * 720 */
+                            stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = 1024 * 5 * 3;
+                            break;
+                        case PIC_HD1080:  /* 1920 * 1080 */
+                            stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = 1024 * 10 * 3;
+                            break;
+                        default :
+                            stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = 1024 * 10 * 3;
+                            break;
+                    }
+                }else{
+                    stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = m_u32BitRate;
                 }
             }
             else if (SAMPLE_RC_VBR == m_enRcMode)
@@ -805,28 +997,32 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stVencChnAttr.stRcAttr.stAttrMjpegeVbr.fr32DstFrmRate = 5;
                 stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MinQfactor = 50;
                 stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxQfactor = 95;
-                switch (m_enSize)
-                {
-                    case PIC_QCIF:
-                        stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = 256 * 3; /* average bit rate */
-                        break;
-                    case PIC_QVGA:    /* 320 * 240 */
-                    case PIC_CIF:
-                        stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = 512 * 3;
-                        break;
-                    case PIC_D1:
-                    case PIC_VGA:	   /* 640 * 480 */
-                        stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = 1024 * 2 * 3;
-                        break;
-                    case PIC_HD720:   /* 1280 * 720 */
-                        stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = 1024 * 3 * 3;
-                        break;
-                    case PIC_HD1080:  /* 1920 * 1080 */
-                        stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = 1024 * 6 * 3;
-                        break;
-                    default :
-                        stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = 1024 * 4 * 3;
-                        break;
+                if(m_u32BitRate == 0){
+                    switch (m_enSize)
+                    {
+                        case PIC_QCIF:
+                            stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = 256 * 3; /* average bit rate */
+                            break;
+                        case PIC_QVGA:    /* 320 * 240 */
+                        case PIC_CIF:
+                            stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = 512 * 3;
+                            break;
+                        case PIC_D1:
+                        case PIC_VGA:	   /* 640 * 480 */
+                            stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = 1024 * 2 * 3;
+                            break;
+                        case PIC_HD720:   /* 1280 * 720 */
+                            stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = 1024 * 3 * 3;
+                            break;
+                        case PIC_HD1080:  /* 1920 * 1080 */
+                            stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = 1024 * 6 * 3;
+                            break;
+                        default :
+                            stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = 1024 * 4 * 3;
+                            break;
+                    }
+                }else{
+                    stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = m_u32BitRate;
                 }
             }
             else
@@ -870,28 +1066,32 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stH265Cbr.u32StatTime       = 1; /* stream rate statics time(s) */
                 stH265Cbr.u32SrcFrmRate      = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30; /* input (vi) frame rate */
                 stH265Cbr.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30; /* target frame rate */
-                switch (m_enSize)
-                {
-                    case PIC_QCIF:
-                        stH265Cbr.u32BitRate = 256; /* average bit rate */
-                        break;
-                    case PIC_QVGA:    /* 320 * 240 */
-                    case PIC_CIF:
-                        stH265Cbr.u32BitRate = 512;
-                        break;
-                    case PIC_D1:
-                    case PIC_VGA:	   /* 640 * 480 */
-                        stH265Cbr.u32BitRate = 1024 * 2;
-                        break;
-                    case PIC_HD720:   /* 1280 * 720 */
-                        stH265Cbr.u32BitRate = 1024 * 3;
-                        break;
-                    case PIC_HD1080:  /* 1920 * 1080 */
-                        stH265Cbr.u32BitRate = 1024 * 4;
-                        break;
-                    default :
-                        stH265Cbr.u32BitRate = 1024 * 4;
-                        break;
+                if(m_u32BitRate == 0){
+                    switch (m_enSize)
+                    {
+                        case PIC_QCIF:
+                            stH265Cbr.u32BitRate = 256; /* average bit rate */
+                            break;
+                        case PIC_QVGA:    /* 320 * 240 */
+                        case PIC_CIF:
+                            stH265Cbr.u32BitRate = 512;
+                            break;
+                        case PIC_D1:
+                        case PIC_VGA:	   /* 640 * 480 */
+                            stH265Cbr.u32BitRate = 1024 * 2;
+                            break;
+                        case PIC_HD720:   /* 1280 * 720 */
+                            stH265Cbr.u32BitRate = 1024 * 3;
+                            break;
+                        case PIC_HD1080:  /* 1920 * 1080 */
+                            stH265Cbr.u32BitRate = 1024 * 4;
+                            break;
+                        default :
+                            stH265Cbr.u32BitRate = 1024 * 4;
+                            break;
+                    }
+                }else{
+                    stH265Cbr.u32BitRate = m_u32BitRate;
                 }
                 stH265Cbr.u32FluctuateLevel = 1; /* average bit rate */
                 memcpy(&stVencChnAttr.stRcAttr.stAttrH265Cbr, &stH265Cbr, sizeof(VENC_ATTR_H265_CBR_S));
@@ -917,28 +1117,32 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stH265Vbr.u32MinQp  = 10;
                 stH265Vbr.u32MinIQp = 10;
                 stH265Vbr.u32MaxQp  = 40;
-                switch (m_enSize)
-                {
-                    case PIC_QCIF:
-                        stH265Vbr.u32MaxBitRate = 256 * 3; /* average bit rate */
-                        break;
-                    case PIC_QVGA:    /* 320 * 240 */
-                    case PIC_CIF:
-                        stH265Vbr.u32MaxBitRate = 512 * 3;
-                        break;
-                    case PIC_D1:
-                    case PIC_VGA:	   /* 640 * 480 */
-                        stH265Vbr.u32MaxBitRate = 1024 * 2;
-                        break;
-                    case PIC_HD720:   /* 1280 * 720 */
-                        stH265Vbr.u32MaxBitRate = 1024 * 3;
-                        break;
-                    case PIC_HD1080:  /* 1920 * 1080 */
-                        stH265Vbr.u32MaxBitRate = 1024 * 6;
-                        break;
-                    default :
-                        stH265Vbr.u32MaxBitRate = 1024 * 4;
-                        break;
+                if(m_u32BitRate == 0){
+                    switch (m_enSize)
+                    {
+                        case PIC_QCIF:
+                            stH265Vbr.u32MaxBitRate = 256 * 3; /* average bit rate */
+                            break;
+                        case PIC_QVGA:    /* 320 * 240 */
+                        case PIC_CIF:
+                            stH265Vbr.u32MaxBitRate = 512 * 3;
+                            break;
+                        case PIC_D1:
+                        case PIC_VGA:	   /* 640 * 480 */
+                            stH265Vbr.u32MaxBitRate = 1024 * 2;
+                            break;
+                        case PIC_HD720:   /* 1280 * 720 */
+                            stH265Vbr.u32MaxBitRate = 1024 * 3;
+                            break;
+                        case PIC_HD1080:  /* 1920 * 1080 */
+                            stH265Vbr.u32MaxBitRate = 1024 * 6;
+                            break;
+                        default :
+                            stH265Vbr.u32MaxBitRate = 1024 * 4;
+                            break;
+                    }
+                }else{
+                    stH265Vbr.u32MaxBitRate = m_u32BitRate;
                 }
                 memcpy(&stVencChnAttr.stRcAttr.stAttrH265Vbr, &stH265Vbr, sizeof(VENC_ATTR_H265_VBR_S));
             }
@@ -949,31 +1153,35 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stH265AVbr.u32StatTime = 1;
                 stH265AVbr.u32SrcFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH265AVbr.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
-                switch (m_enSize)
-                {
-                    case PIC_QCIF:
-                        stH265AVbr.u32MaxBitRate = 256 * 3; /* average bit rate */
-                        break;
-                    case PIC_QVGA:    /* 320 * 240 */
-                    case PIC_CIF:
-                        stH265AVbr.u32MaxBitRate = 512 * 3;
-                        break;
-                    case PIC_D1:
-                    case PIC_VGA:	   /* 640 * 480 */
-                        stH265AVbr.u32MaxBitRate = 1024 * 2;
-                        break;
-                    case PIC_HD720:   /* 1280 * 720 */
-                        stH265AVbr.u32MaxBitRate = 1024 * 3;
-                        break;
-                    case PIC_HD1080:  /* 1920 * 1080 */
-                        stH265AVbr.u32MaxBitRate = 1024 * 4;
-                        break;
-                    case PIC_UHD4K:
-                        stH265AVbr.u32MaxBitRate = 1024 * 8;
-                        break;
-                    default :
-                        stH265AVbr.u32MaxBitRate = 1024 * 4;
-                        break;
+                if(m_u32BitRate == 0){
+                    switch (m_enSize)
+                    {
+                        case PIC_QCIF:
+                            stH265AVbr.u32MaxBitRate = 256 * 3; /* average bit rate */
+                            break;
+                        case PIC_QVGA:    /* 320 * 240 */
+                        case PIC_CIF:
+                            stH265AVbr.u32MaxBitRate = 512 * 3;
+                            break;
+                        case PIC_D1:
+                        case PIC_VGA:	   /* 640 * 480 */
+                            stH265AVbr.u32MaxBitRate = 1024 * 2;
+                            break;
+                        case PIC_HD720:   /* 1280 * 720 */
+                            stH265AVbr.u32MaxBitRate = 1024 * 3;
+                            break;
+                        case PIC_HD1080:  /* 1920 * 1080 */
+                            stH265AVbr.u32MaxBitRate = 1024 * 4;
+                            break;
+                        case PIC_UHD4K:
+                            stH265AVbr.u32MaxBitRate = 1024 * 8;
+                            break;
+                        default :
+                            stH265AVbr.u32MaxBitRate = 1024 * 4;
+                            break;
+                    }
+                }else{
+                    stH265AVbr.u32MaxBitRate = m_u32BitRate;
                 }
                 memcpy(&stVencChnAttr.stRcAttr.stAttrH264AVbr, &stH265AVbr, sizeof(VENC_ATTR_H265_AVBR_S));
             }

@@ -8,12 +8,13 @@ Rectangle {
     visible: true
 //    width: 800
 //    height: 600
-//    color: "blue"
+    color: "#212126"
 //    opacity: 0.2
 
     signal hidqmlsignal()
     signal videoDispSignal(string filename)
     property string title
+
 
     MouseArea{
             anchors.fill: parent
@@ -35,6 +36,7 @@ Rectangle {
         id:maintool
         width: parent.width
         height: 40
+        color: "#555555"
 
         NaviButton {
             id: backButton
@@ -60,6 +62,7 @@ Rectangle {
             text: stackview.depth > 1 ? title:qsTr("主菜单")
             anchors.centerIn: maintool
             font.pixelSize: 24
+            color:"white"
         }
 
         NaviButton {
