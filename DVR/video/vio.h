@@ -17,6 +17,7 @@
 
 
 #include "common/sample_common_sys.h"
+#include <video/vdec.h>
 
 class Vio :public QThread
 {
@@ -25,7 +26,7 @@ public:
     explicit Vio(QObject *parent = nullptr);
     Vio(VI_CHN ViChnCnt,SAMPLE_VO_MODE_E enVoMode);
     ~Vio();
-    HI_BOOL Vi_Start();
+    HI_BOOL Vi_Start(VIDEO_NORM_E enNorm);
     HI_BOOL Vi_stop();
     HI_BOOL Vo_Start();
     HI_BOOL Vo_Start(VO_CHN Vo_Chn,RECT_S &pos);
@@ -60,7 +61,7 @@ signals:
     void MakeNewFile(VI_CHN ViChn);
 public:
     const SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_720P;
-    const VIDEO_NORM_E enNorm = VIDEO_ENCODING_MODE_PAL;
+//    const VIDEO_NORM_E enNorm = VIDEO_ENCODING_MODE_PAL;
     const VPSS_CHN m_VoBindVpss = VPSS_CHN2;
     const VPSS_CHN m_VencBindVpss = VPSS_CHN0;   //主码流绑定到通道0
     const VPSS_CHN m_ChildVencBindVpss = VPSS_CHN1;  //子码流绑定到通道1
@@ -85,6 +86,7 @@ private:
     const HI_U32 LUMCONST = 14745600;
     const HI_U32 MAXSIZE = 1024*1024*1024;
 
+    VIDEO_NORM_E m_enNorm;
     PAYLOAD_TYPE_E m_enType;
     PIC_SIZE_E m_enSize;
     SAMPLE_RC_E m_enRcMode;
@@ -98,6 +100,7 @@ private:
     HI_BOOL m_ViStatusChanged;
     HI_S32 m_maxfd;
     QFileSystemWatcher *m_ViDetect;
+//    Vdec mVdec;
 //    FILE* m_pFile[VENC_MAX_CHN_NUM];
 //    array <FILE*,VENC_MAX_CHN_NUM> m_pFile;
 

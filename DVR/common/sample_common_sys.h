@@ -39,6 +39,7 @@ private:
     const struct fb_bitfield s_r32 = {16,8,0};
     const struct fb_bitfield s_g32 = {8,8,0};
     const struct fb_bitfield s_b32 = {0,8,0};
+    const HI_CHAR *CONFIG_PATH = "/usr/dvr_config/";
 
     static VO_DEV m_FbVoDev;
     static VO_LAYER m_FbVoLayer;

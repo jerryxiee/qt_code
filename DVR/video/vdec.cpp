@@ -45,7 +45,7 @@ char* Vdec::Get_FileType(char *filename)
     return filetype;
 }
 
-HI_BOOL Vdec::Start_Vdec(char *filename)
+HI_BOOL Vdec::Start_Vdec(char *filename, VPSS_GRP VpssGrp, VPSS_CHN VpssChn)
 {
     char* filetype = nullptr;
     HI_S32 s32Ret;
@@ -86,15 +86,17 @@ HI_BOOL Vdec::Start_Vdec(char *filename)
 
     m_pVdec->SAMPLE_COMM_VDEC_SetChnAttr(0,&m_stVdecChnAttr);
 
-    stRotateSize.u32Width = stRotateSize.u32Height = MAX2(m_stVdecChnAttr.u32PicWidth, m_stVdecChnAttr.u32PicHeight);
-    m_pVpss= new Sample_Common_Vpss(1,1,&stRotateSize,nullptr);
-    if(!m_pVpss){
-        printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
-        return HI_FALSE;
-    }else if( HI_FALSE == m_pVpss->SAMPLE_COMM_VPSS_CreatIsSucess()){
+    if(VpssGrp < 0){
+        stRotateSize.u32Width = stRotateSize.u32Height = MAX2(m_stVdecChnAttr.u32PicWidth, m_stVdecChnAttr.u32PicHeight);
+        m_pVpss= new Sample_Common_Vpss(1,1,&stRotateSize,nullptr);
+        if(!m_pVpss){
+            printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
+            return HI_FALSE;
+        }else if( HI_FALSE == m_pVpss->SAMPLE_COMM_VPSS_CreatIsSucess()){
 
-        printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
-        goto END1;
+            printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
+            goto END1;
+        }
     }
 
     s32Ret = m_pVdec->SAMPLE_COMM_VDEC_Start(1);
@@ -104,24 +106,28 @@ HI_BOOL Vdec::Start_Vdec(char *filename)
         goto END2;
     }
 
-    pos.s32X = 0;
-    pos.s32Y = 0;
-    pos.u32Height = HEIGHT;
-    pos.u32Width = WIDTH;
-    s32Ret = m_Vdec_Vio.SAMPLE_COMM_VO_StartChn(VDEC_VO,pos);
-    if(s32Ret != HI_SUCCESS)
-    {
-        SAMPLE_PRT("start vo fail for %#x!\n", s32Ret);
-        goto END3;
-    }
+    if(VpssGrp < 0){
+        pos.s32X = 0;
+        pos.s32Y = 0;
+        pos.u32Height = HEIGHT;
+        pos.u32Width = WIDTH;
+        s32Ret = m_Vdec_Vio.SAMPLE_COMM_VO_StartChn(VDEC_VO,pos);
+        if(s32Ret != HI_SUCCESS)
+        {
+            SAMPLE_PRT("start vo fail for %#x!\n", s32Ret);
+            goto END3;
+        }
 
-    m_pVdec->SAMPLE_COMM_VDEC_BindVpss(m_pVdec->m_Vdec_Tab[0],m_pVpss->m_Grp_Tab[0],0);
+        m_pVdec->SAMPLE_COMM_VDEC_BindVpss(m_pVdec->m_Vdec_Tab[0],m_pVpss->m_Grp_Tab[0],0);
 
-    s32Ret = m_Vdec_Vio.SAMPLE_COMM_VO_BindVpss(VDEC_VO, m_pVpss->m_Grp_Tab[0], VPSS_CHN0);
-    if(s32Ret != HI_SUCCESS)
-    {
-        SAMPLE_PRT("vpss bind vo fail for %#x!\n", s32Ret);
-        goto END4;
+        s32Ret = m_Vdec_Vio.SAMPLE_COMM_VO_BindVpss(VDEC_VO, m_pVpss->m_Grp_Tab[0], VPSS_CHN0);
+        if(s32Ret != HI_SUCCESS)
+        {
+            SAMPLE_PRT("vpss bind vo fail for %#x!\n", s32Ret);
+            goto END4;
+        }
+    }else{
+        m_pVdec->SAMPLE_COMM_VDEC_BindVpss(m_pVdec->m_Vdec_Tab[0],VpssGrp,VpssChn);
     }
 
     sprintf(stVdecParam.cFileName, filename);
@@ -223,6 +229,7 @@ void Vdec::run()
      m_Vdec_Run = true;
     while (m_Vdec_Run)
     {
+        usleep(20000);
         if (m_Thread_Attr.eCtrlSinal == VDEC_CTRL_STOP)
         {
 //            break;

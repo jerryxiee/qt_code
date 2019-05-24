@@ -7,6 +7,7 @@
 #include <QMenu>
 #include <QPushButton>
 #include "windows/CustomControls/animationbutton.h"
+#include "video/videocontrol.h"
 //#ifndef LUNUX_WIN
 #include "common/sample_comm.h"
 #ifndef LUNUX_WIN
@@ -87,6 +88,7 @@ private:
     AnimationButton *mRightButton;
     QPushButton *mVideoExit;
     bool mVdecOn;
+    VideoControl videoControl;
 #ifndef LUNUX_WIN
     Vdec mVdec;
 #endif

@@ -14,7 +14,7 @@ public:
     ~Vdec();
 
     void Set_VdecAttr(VdecThreadParam &VdecAttr);
-    HI_BOOL Start_Vdec(char *filename);
+    HI_BOOL Start_Vdec(char *filename,VPSS_GRP VpssGrp,VPSS_CHN VpssChn);
     void Stop_Vdec();
 
 private:

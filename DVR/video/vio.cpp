@@ -391,7 +391,7 @@ void Vio::onStopVoSlot()
     qDebug()<<"stop vo";
 }
 
-HI_BOOL Vio::Vi_Start()
+HI_BOOL Vio::Vi_Start(VIDEO_NORM_E enNorm)
 {
     HI_S32 s32Ret = HI_SUCCESS;
     SIZE_S stSize;
@@ -437,12 +437,16 @@ HI_BOOL Vio::Vi_Start()
     if(HI_FALSE == m_pVpss->SAMPLE_COMM_VPSS_CreatIsSucess()){
         goto END_VPSS_START;
     }
+    #if 1
     s32Ret = m_Vio.SAMPLE_COMM_VI_BindVpss(enViMode,m_pVpss->m_Grp_Tab,m_ViChnCnt);
     if (HI_SUCCESS != s32Ret)
     {
         SAMPLE_PRT("Vi bind Vpss failed!\n");
         goto END_BIND_VPSS;
     }
+    #else
+    mVdec.Start_Vdec("/nfsroot/test.h265",m_pVpss->m_Grp_Tab[0],m_VoBindVpss);
+    #endif
 
     return HI_TRUE;
 

@@ -23,6 +23,13 @@ Widget::Widget(QWidget *parent) :
         connect(pRoot,SIGNAL(videoDispSignal(QString)),this,SLOT(onVideoDispSlot(QString)));
     }
 
+#ifndef LUNUX_WIN
+    videoControl.videoStart();
+    QObject::connect(this,SIGNAL(ChnDispToWinSignal(QMap<VO_CHN, RECT_S> &)),&videoControl,SLOT(onDispChnToWin(QMap<VO_CHN, RECT_S> &)));
+    QObject::connect(this,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&videoControl,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
+    QObject::connect(this,SIGNAL(StopVoSignal()),&videoControl,SLOT(onStopVoSlot()));
+#endif
+
     InitMenuButtom();
 
 }
@@ -182,7 +189,7 @@ void Widget::onVideoDispSlot(QString filepath)
     mQuickWidget->setHidden(true);
     mVideoExit->show();
 #ifndef LUNUX_WIN
-    mVdec.Start_Vdec(filename.data());
+    mVdec.Start_Vdec(filename.data(),-1,-1);
 #endif
 }
 

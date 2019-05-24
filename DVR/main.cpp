@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     int ret;
 #ifndef LUNUX_WIN
     Sample_Common_Sys sys_init;
-    Vio vio;
+//    Vio vio;
 
     if(sys_init.Sys_init_Sucess < 0){
         return -1;
@@ -35,8 +35,8 @@ int main(int argc, char *argv[])
 //    vio.Vo_Start();
 //    vio.Vi_Venc_Start();
 //    vio.start();
-    QObject::connect(&vio,SIGNAL(VistatusChanged(VI_CHN)),&vio,SLOT(onChangeStatus(VI_CHN)));
-    QObject::connect(&vio,SIGNAL(MakeNewFile(VI_CHN)),&vio,SLOT(onMakeNewFile(VI_CHN)));
+//    QObject::connect(&vio,SIGNAL(VistatusChanged(VI_CHN)),&vio,SLOT(onChangeStatus(VI_CHN)));
+//    QObject::connect(&vio,SIGNAL(MakeNewFile(VI_CHN)),&vio,SLOT(onMakeNewFile(VI_CHN)));
 #endif
 
 
@@ -64,20 +64,20 @@ int main(int argc, char *argv[])
 
     signal(SIGINT,sign);
 #ifndef LUNUX_WIN
-    vio.Vi_Start();
-    vio.Vo_Start();
-    vio.Vi_Venc_Start();
-    vio.start();
-    vio.start_timer();
-    QObject::connect(&w,SIGNAL(ChnDispToWinSignal(QMap<VO_CHN, RECT_S> &)),&vio,SLOT(onDispChnToWin(QMap<VO_CHN, RECT_S> &)));
-    QObject::connect(&w,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&vio,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
-    QObject::connect(&w,SIGNAL(StopVoSignal()),&vio,SLOT(onStopVoSlot()));
+//    vio.Vi_Start();
+//    vio.Vo_Start();
+//    vio.Vi_Venc_Start();
+//    vio.start();
+//    vio.start_timer();
+//    QObject::connect(&w,SIGNAL(ChnDispToWinSignal(QMap<VO_CHN, RECT_S> &)),&vio,SLOT(onDispChnToWin(QMap<VO_CHN, RECT_S> &)));
+//    QObject::connect(&w,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&vio,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
+//    QObject::connect(&w,SIGNAL(StopVoSignal()),&vio,SLOT(onStopVoSlot()));
 #endif
 
     ret = a.exec();
 #ifndef LUNUX_WIN
-    vio.Venc_exit();
-    vio.wait();
+//    vio.Venc_exit();
+//    vio.wait();
     qDebug()<<"exit main";
     QThread::sleep(2);
 #endif

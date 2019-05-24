@@ -15,6 +15,7 @@
 #include <math.h>
 #include <signal.h>
 #include "hifb.h"
+#include <QDir>
 
 VO_DEV Sample_Common_Sys::m_FbVoDev = SAMPLE_VO_DEV_DHD0;
 VO_DEV Sample_Common_Sys::m_FbVoLayer = 0;
@@ -37,6 +38,13 @@ Sample_Common_Sys::Sample_Common_Sys(QObject *parent):QObject(parent)
 
     stSize.u32Width = WIDTH;
     stSize.u32Height = HEIGHT;
+
+    QDir dir(CONFIG_PATH);
+    if(!dir.exists()){
+        if(!dir.mkpath(CONFIG_PATH)){
+            SAMPLE_PRT("mkpath %s failed\n",CONFIG_PATH);
+        }
+    }
 
 
     qDebug("Sample_Common_Sys init enter\n");
