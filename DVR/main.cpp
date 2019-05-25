@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     }
     qDebug("system init sucess! dgf\n");
 
-//    vio.Vi_Start();
+//    vio.Vi_Start(VIDEO_ENCODING_MODE_PAL);
 //    vio.Vo_Start();
 //    vio.Vi_Venc_Start();
 //    vio.start();
@@ -64,11 +64,11 @@ int main(int argc, char *argv[])
 
     signal(SIGINT,sign);
 #ifndef LUNUX_WIN
-//    vio.Vi_Start();
+//    vio.Vi_Start(VIDEO_ENCODING_MODE_PAL);
 //    vio.Vo_Start();
 //    vio.Vi_Venc_Start();
 //    vio.start();
-//    vio.start_timer();
+////    vio.start_timer();
 //    QObject::connect(&w,SIGNAL(ChnDispToWinSignal(QMap<VO_CHN, RECT_S> &)),&vio,SLOT(onDispChnToWin(QMap<VO_CHN, RECT_S> &)));
 //    QObject::connect(&w,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&vio,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
 //    QObject::connect(&w,SIGNAL(StopVoSignal()),&vio,SLOT(onStopVoSlot()));

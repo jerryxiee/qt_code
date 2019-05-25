@@ -1,6 +1,7 @@
 #include "widget.h"
 #include "ui_widget.h"
 #include <QDebug>
+#include <QtQml>
 #include <QtMath>
 
 Widget::Widget(QWidget *parent) :
@@ -22,12 +23,17 @@ Widget::Widget(QWidget *parent) :
         connect(pRoot,SIGNAL(hidqmlsignal()),this,SLOT(onHidQmlSlot()));
         connect(pRoot,SIGNAL(videoDispSignal(QString)),this,SLOT(onVideoDispSlot(QString)));
     }
+    QQmlContext *context = mQuickWidget->rootContext();
+    if(context){
+        context->setContextProperty("VideoControl",&mvideoControl);
+    }
+
 
 #ifndef LUNUX_WIN
-    videoControl.videoStart();
-    QObject::connect(this,SIGNAL(ChnDispToWinSignal(QMap<VO_CHN, RECT_S> &)),&videoControl,SLOT(onDispChnToWin(QMap<VO_CHN, RECT_S> &)));
-    QObject::connect(this,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&videoControl,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
-    QObject::connect(this,SIGNAL(StopVoSignal()),&videoControl,SLOT(onStopVoSlot()));
+    mvideoControl.videoStart();
+    QObject::connect(this,SIGNAL(ChnDispToWinSignal(QMap<VO_CHN, RECT_S> &)),&mvideoControl,SLOT(onDispChnToWin(QMap<VO_CHN, RECT_S> &)));
+    QObject::connect(this,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&mvideoControl,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
+    QObject::connect(this,SIGNAL(StopVoSignal()),&mvideoControl,SLOT(onStopVoSlot()));
 #endif
 
     InitMenuButtom();

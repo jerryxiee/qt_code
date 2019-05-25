@@ -50,7 +50,7 @@ Vio::Vio(VI_CHN ViChnCnt, SAMPLE_VO_MODE_E enVoMode):m_ViChnCnt(ViChnCnt),m_enVo
 
 void Vio::start_timer()
 {
-    m_timer = new QTimer();
+    m_timer = new QTimer(this);
     connect(m_timer,SIGNAL(timeout()),this,SLOT(onTimeHander()));
     m_timer->start(TIMEOUT);
 }
@@ -398,6 +398,7 @@ HI_BOOL Vio::Vi_Start(VIDEO_NORM_E enNorm)
     VPSS_GRP_ATTR_S stGrpAttr;
 
 
+    m_enNorm = enNorm;
     /*** Start AD ***/
     s32Ret = m_Vio.SAMPLE_COMM_VI_ADStart(enViMode, enNorm);
     if (HI_SUCCESS !=s32Ret)
@@ -448,6 +449,7 @@ HI_BOOL Vio::Vi_Start(VIDEO_NORM_E enNorm)
     mVdec.Start_Vdec("/nfsroot/test.h265",m_pVpss->m_Grp_Tab[0],m_VoBindVpss);
     #endif
 
+//    start_timer();
     return HI_TRUE;
 
 END_BIND_VPSS:
@@ -498,7 +500,7 @@ HI_S32 Vio::Vi_Venc_Start()
 
     for(i = 0;i < m_ViChnCnt;i++){
         m_pVenc[i] = new Sample_Common_Venc();
-        m_pVenc[i]->SAMPLE_COMM_VENC_SetAttr(m_enType,enNorm, m_enSize, m_enRcMode,0,m_u32Profile);
+        m_pVenc[i]->SAMPLE_COMM_VENC_SetAttr(m_enType,m_enNorm, m_enSize, m_enRcMode,0,m_u32Profile);
         s32Ret = m_pVenc[i]->SAMPLE_COMM_VENC_Start();
         if (HI_SUCCESS != s32Ret)
         {

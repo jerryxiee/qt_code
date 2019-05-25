@@ -88,7 +88,7 @@ private:
     AnimationButton *mRightButton;
     QPushButton *mVideoExit;
     bool mVdecOn;
-    VideoControl videoControl;
+    VideoControl mvideoControl;
 #ifndef LUNUX_WIN
     Vdec mVdec;
 #endif

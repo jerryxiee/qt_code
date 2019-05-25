@@ -259,6 +259,8 @@ Item {
         text:qsTr("应用")
 
         onClicked:{
+            VideoControl.setVencAttr(setchnBox.currentText,setStreamBox.currentText,setStreamTypeBox.currentText,resolutionBox.currentText
+                                     ,bitRateTyprBox.currentText,imageQualityBox.currentText,frameRateBox.currentText,bitRateBox.currentText)
             console.log(frameRateBox.currentText);
             console.log(frameRateBox.editText)
         }
