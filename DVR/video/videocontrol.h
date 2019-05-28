@@ -99,6 +99,13 @@ public slots:
 private:
     QString vencToString(QString attr,QVariant &variant);
     QVariant stringToVenc(QString &str);
+    const QString VENC_Open = "open";
+    const QString VENC_StreamType = "StreamType";
+    const QString VENC_EnSize = "enSize";
+    const QString VENC_EnRcMode  = "enRcMode";
+    const QString VENC_Profile = "Profile";
+    const QString VENC_FrameRate = "FrameRate";
+    const QString VENC_BitRate = "BitRate";
 
 
 public:
@@ -120,6 +127,8 @@ private:
 
 #ifndef LUNUX_WIN
     const HI_CHAR * VIO_CONFIG_PATH = "/usr/dvr_config/video.ini";
+
+    VIDEO_NORM_E m_enNorm;
     Vio vio;
 //    Vdec mVdec;
 #else

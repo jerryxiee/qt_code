@@ -17,7 +17,7 @@ FocusScope {
     property color backgroundColor: "transparent"
     property int borderWidth: 2
     property int textSize: 24
-    property int radius: 5
+    property int radius: 0
     property int margin: 0
     property int currentIndex:0
     Rectangle {
@@ -80,6 +80,7 @@ FocusScope {
                 onClicked: {
                     console.log(listView.model.get(0).name)
                     console.log(index)
+                    console.log("listView.currentIndex "+listView.currentSection)
                     currentIndex = index
 //                    label.text = comtext.text
                     listBackground.visible = false
@@ -103,7 +104,7 @@ FocusScope {
         anchors{top: buttonRectangle.bottom; left: buttonRectangle.left;}
         width: parent.width
         height:listView.count > 3 ?parent.height*3:parent.height*listView.count
-//        color: "#FF000000"
+        color: container.backgroundColor
         radius: buttonRectangle.radius
         border{width: container.borderWidth; color: container.borderColor}
         ListView {
@@ -117,7 +118,7 @@ FocusScope {
 //                radius: 5;
 //            }
             onCurrentIndexChanged: {
-                console.log(currentIndex)
+                console.log("cur "+currentIndex)
 
 //                delegatelistview.model=listModel.get(currentIndex).attributes;
             }
@@ -134,8 +135,8 @@ FocusScope {
 //            }
 
 //        }
-        Behavior on height { NumberAnimation {property: "height"; duration: 200 }
-        }
+//        Behavior on height { NumberAnimation {property: "height"; duration: 200 }
+//        }
     }
 }
 

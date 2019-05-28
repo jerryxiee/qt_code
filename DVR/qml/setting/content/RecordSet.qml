@@ -66,7 +66,10 @@ Item {
 //        anchors.top: parent.top
 //        anchors.leftMargin:200
 //        anchors.margins:50
-        anchors.centerIn: record
+        anchors.top: record.top
+        anchors.topMargin:50
+        anchors.horizontalCenter: record.horizontalCenter
+//        anchors.centerIn: record
         spacing:150
         Column{
 
@@ -249,21 +252,43 @@ Item {
 
 //    }
 //}
-    Button{
-        width:60
-        height:40
-        anchors.bottom:record.bottom
-        anchors.rightMargin:300
-        anchors.right:record.right
-        anchors.bottomMargin:40
-        text:qsTr("应用")
+    Rectangle{
+        width: record.width
+        height: 40
+        color: "#333333"
+        anchors.bottom: record.bottom
 
-        onClicked:{
-            VideoControl.setVencAttr(setchnBox.currentText,setStreamBox.currentText,setStreamTypeBox.currentText,resolutionBox.currentText
-                                     ,bitRateTyprBox.currentText,imageQualityBox.currentText,frameRateBox.currentText,bitRateBox.currentText)
-            console.log(frameRateBox.currentText);
-            console.log(frameRateBox.editText)
+        Button{
+            id:recordsure
+            width:120
+            height:40
+//            anchors.bottom:record.bottom
+            anchors.rightMargin:400
+            anchors.right:parent.right
+//            anchors.bottomMargin:40
+            text:qsTr("应用")
+
+            onClicked:{
+                VideoControl.setVencAttr(setchnBox.currentText,setStreamBox.currentText,setStreamTypeBox.currentText,resolutionBox.currentText
+                                         ,bitRateTyprBox.currentText,imageQualityBox.currentText,frameRateBox.currentText,bitRateBox.currentText)
+            }
         }
+
+        Button{
+            id:recordcancel
+            width:120
+            height:40
+//            anchors.bottom:record.bottom
+            anchors.leftMargin:10
+            anchors.left:recordsure.right
+//            anchors.bottomMargin:40
+            text:qsTr("取消")
+
+            onClicked:{
+                stackview.pop()
+            }
+        }
+
     }
 
 

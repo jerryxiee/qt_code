@@ -9,12 +9,16 @@ import "Controls/"
 //Window{
 Rectangle {
 
+    color:"black"
+
 
     MyComboBox {
         id: comboBoxButton
 //        text:qsTr("text")
         model:fruitModel
-        currentIndex:1
+        backgroundColor:"black"
+        textColor:"white"
+//        currentIndex:0
 //        anchors.fill: parent;
 //        text: typeof(listModel) == "undefined"? "":typeof( listModel.get(currentIndex).attributes)=="undefined"?listModel.get(comboBox.currentIndex).name:listModel.get(currentIndex).attributes.get(currentIndex2).description
 //        textSize: parent.height-4

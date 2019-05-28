@@ -11,14 +11,7 @@ VideoControl::VideoControl(QObject *parent) : QObject(parent)
     loadVideoConfig();
 
     connect(this,SIGNAL(vencAttrChanged(VI_CHN,HI_U32)),this,SLOT(onVencAttrChangedSlot(VI_CHN,HI_U32)));
-//    QVariant test;
-//    QString str("PIC_CIF");
-//    test.setValue(PIC_CIF);
 
-//    qDebug()<<"QVariant test "+vencToString("enSize", test);
-
-//    test = stringToVenc(str);
-//    qDebug("%x\n",test.value<PIC_SIZE_E>());
 }
 
 VideoControl::~VideoControl()
@@ -85,6 +78,7 @@ QString VideoControl::vencToString(QString attr, QVariant &variant)
 QVariant VideoControl::stringToVenc(QString &str)
 {
     QVariant ret;
+
 
     if(str == "false"){
         ret.setValue(HI_FALSE);
@@ -291,7 +285,6 @@ HI_BOOL VideoControl::loadVideoConfig()
     QString result;
     for(HI_U32 n = 0;n < 2;n++){
         for(int i = 0 ;i < vicnt;i++){
-
             result = vioConfig->value("Channel"+QString::number(i)+"/stream"+QString::number(n)+"/open").toString();
             if(result == "false"){
                 vencAttr.mopen = HI_FALSE;
@@ -528,7 +521,7 @@ HI_BOOL VideoControl::videoStart()
 {
 #ifndef LUNUX_WIN
 
-    vio.Vi_Start(VIDEO_ENCODING_MODE_PAL);
+    vio.Vi_Start(VIDEO_ENCODING_MODE_AUTO);
     vio.Vo_Start();
     vio.Vi_Venc_Start();
     vio.start();
