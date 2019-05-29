@@ -3,7 +3,7 @@ import QtQuick.Controls 1.2
 
 Rectangle {
     id:mainItem
-    color: "#212126"
+//    color: "#212126"
 
     signal launcher(string flag ,string titlename,string page)
     ListModel{
@@ -18,7 +18,7 @@ Rectangle {
             flag:"qml"
             name:"Setting"
             icon:"qrc:/qml/setting/images/settings.png"
-            page:"qrc:/qml/setting/Setting.qml"
+            page:"qrc:/qml/setting/Setting1.qml"
         }
 //        ListElement{name:"video1";icon:"qrc:images/1.png"}
     }

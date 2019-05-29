@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 1.2
 
 Item {
+    id:setting
     ListModel {
         id: pageModel
         ListElement {
@@ -24,9 +25,12 @@ Item {
         model: pageModel
         anchors.fill: parent
         delegate: SetDelegate {
+            height:50
             text: title
             onClicked: {
                 console.log(Qt.resolvedUrl(page))
+                console.log("width "+setting.width)
+                console.log("height "+setting.height)
                 stackview.push(Qt.resolvedUrl(page))
             }
         }

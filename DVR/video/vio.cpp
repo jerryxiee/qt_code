@@ -513,7 +513,7 @@ HI_S32 Vio::Set_VencAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,
         SAMPLE_PRT("Get picture size failed!\n");
         return HI_FAILURE;
     }
-
+    //根据编码图像大小设置VPSS输出大小
     stVpssMode.u32Width = stPicSize.u32Width;
     stVpssMode.u32Height = stPicSize.u32Height;
 

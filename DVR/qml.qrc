@@ -44,5 +44,7 @@
         <file>qml/setting/content/RecordSet.qml</file>
         <file>qml/Controls/MyComboBox.qml</file>
         <file>qml/Controls/images/bullet_dn.png</file>
+        <file>qml/setting/Setting1.qml</file>
+        <file>qml/setting/SetDelegate1.qml</file>
     </qresource>
 </RCC>

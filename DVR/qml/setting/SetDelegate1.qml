@@ -13,7 +13,7 @@ Item {
     Rectangle {
         id:back
         anchors.fill: parent
-//        color: "#11ffffff"
+//        color: mouse.pressed ? "red":"white"
         visible: mouse.pressed
     }
 
@@ -35,12 +35,12 @@ Item {
         color: "#424246"
     }
 
-    Image {
-        anchors.right: parent.right
-        anchors.rightMargin: 20
-        anchors.verticalCenter: parent.verticalCenter
-        source: "images/navigation_next_item.png"
-    }
+//    Image {
+//        anchors.right: parent.right
+//        anchors.rightMargin: 20
+//        anchors.verticalCenter: parent.verticalCenter
+//        source: "images/navigation_next_item.png"
+//    }
 
     MouseArea {
         id: mouse
