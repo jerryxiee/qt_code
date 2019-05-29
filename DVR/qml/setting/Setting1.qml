@@ -3,6 +3,7 @@ import QtQuick 2.0
 Rectangle {
     id:setparent
 
+    property bool press: false
 
     Item {
         id: setSelect
@@ -30,12 +31,15 @@ Rectangle {
             id:listview
     //                keyNavigationWraps:true
             model: pageModel
+            clip: true
+            highlight: Rectangle { color: "#00CED1" }
             anchors.fill: parent
             delegate: SetDelegate1 {
                 height:50
                 text: title
+//                backgroundcolor: ListView.isCurrentItem?"#157efb":"#53d769"
                 onClicked: {
-                    backgroundcolor = "blue"
+                    ListView.view.currentIndex = index
                     console.log(index)
                     console.log(Qt.resolvedUrl(page))
 //                    stackview.push(Qt.resolvedUrl(page))
