@@ -287,6 +287,10 @@ HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_Stop()
 
     return HI_SUCCESS;
 }
+HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_GetChnMod(VPSS_GRP VpssGrpIndex,VPSS_CHN VpssChn,VPSS_CHN_MODE_S *pstVpssMode)
+{
+    return HI_MPI_VPSS_GetChnMode(m_Grp_Tab[VpssGrpIndex],VpssChn,pstVpssMode);
+}
 
 HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_SetChnMod(VPSS_GRP VpssGrpIndex, VPSS_CHN VpssChn, VPSS_CHN_MODE_S *pstVpssMode, HI_U32 u32Depth)
 {

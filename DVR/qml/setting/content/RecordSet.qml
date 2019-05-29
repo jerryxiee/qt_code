@@ -188,8 +188,8 @@ Item {
                 id:bitRateTyprBox
                 height:setchn.height
                 model: ListModel{
-                    ListElement{text:qsTr("变码率")}
                     ListElement{text:qsTr("定码率")}
+                    ListElement{text:qsTr("变码率")}
 
                 }
             }

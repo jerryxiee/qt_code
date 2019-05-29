@@ -11,7 +11,7 @@
 //#ifndef LUNUX_WIN
 #include "common/sample_comm.h"
 #ifndef LUNUX_WIN
-#include <video/vdec.h>
+#include <video/videoplay.h>
 #endif
 
 
@@ -90,7 +90,7 @@ private:
     bool mVdecOn;
     VideoControl mvideoControl;
 #ifndef LUNUX_WIN
-    Vdec mVdec;
+    VideoPlay mVdec;
 #endif
 
 };

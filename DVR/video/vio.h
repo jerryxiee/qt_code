@@ -17,7 +17,7 @@
 
 
 #include "common/sample_common_sys.h"
-#include <video/vdec.h>
+#include <video/videoplay.h>
 
 class Vio :public QThread
 {
@@ -34,8 +34,10 @@ public:
     HI_S32 Vo_SetMode(SAMPLE_VO_MODE_E enVoMode);
     void start_timer();
 
-    void Set_VencAttr(PAYLOAD_TYPE_E enType,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32Profile);
+    HI_S32 Set_VencAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32BitRate,HI_FR32 frmRate,HI_U32 u32Profile);
     HI_S32 Vi_Venc_Start();
+    HI_S32 Vi_Venc_Start(VI_CHN ViChnCnt, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_FR32 frmRate, HI_U32 u32Profile);
+    HI_S32 Vi_Venc_Stop(VI_CHN ViChnCnt);
     HI_BOOL Venc_CreatNewFile(VI_CHN ViChn);
     HI_BOOL Venc_Save_file_Stop(VI_CHN ViChn);
     HI_S32 Venc_exit();
@@ -84,7 +86,7 @@ private:
     const HI_CHAR *VENC_PATH = "/mnt/sda1/venc";
     const HI_S32 TIMEOUT = 1000*1;
     const HI_U32 LUMCONST = 14745600;
-    const HI_U32 MAXSIZE = 1024*1024*1024;
+    const HI_U32 MAXSIZE = 1024*1024*20;
 
     VIDEO_NORM_E m_enNorm;
     PAYLOAD_TYPE_E m_enType;
@@ -100,7 +102,7 @@ private:
     HI_BOOL m_ViStatusChanged;
     HI_S32 m_maxfd;
     QFileSystemWatcher *m_ViDetect;
-//    Vdec mVdec;
+//    VideoPlay mVdec;
 //    FILE* m_pFile[VENC_MAX_CHN_NUM];
 //    array <FILE*,VENC_MAX_CHN_NUM> m_pFile;
 

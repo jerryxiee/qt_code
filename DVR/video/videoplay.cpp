@@ -1,17 +1,17 @@
-#include "vdec.h"
+#include "videoplay.h"
 #include <string.h>
 #include "stdlib.h"
 #include "stdio.h"
 #include <QDebug>
 
-Vdec::Vdec(QObject *parent) : QThread(parent)
+VideoPlay::VideoPlay(QObject *parent) : QThread(parent)
 {
     memset(&m_Thread_Attr,0x0,sizeof (VdecThreadParam));
     memset(&m_stVdecChnAttr,0x0,sizeof(VDEC_CHN_ATTR_S));
 
 }
 
-Vdec::~Vdec()
+VideoPlay::~VideoPlay()
 {
     qDebug("enter %s:%d",__FUNCTION__,__LINE__);
     if(m_pVdec){
@@ -24,13 +24,13 @@ Vdec::~Vdec()
 
 }
 
-void Vdec::Set_VdecAttr(VdecThreadParam &VdecAttr)
+void VideoPlay::Set_VdecAttr(VdecThreadParam &VdecAttr)
 {
     memcpy(&m_Thread_Attr,&VdecAttr,sizeof (VdecThreadParam));
     qDebug("Set_VdecAttr  m_Thread_Attr.s32MinBufSize=%d\n",m_Thread_Attr.s32MinBufSize);
 }
 
-char* Vdec::Get_FileType(char *filename)
+char* VideoPlay::Get_FileType(char *filename)
 {
     char *name = filename;
     char *filetype = nullptr;
@@ -45,7 +45,7 @@ char* Vdec::Get_FileType(char *filename)
     return filetype;
 }
 
-HI_BOOL Vdec::Start_Vdec(char *filename, VPSS_GRP VpssGrp, VPSS_CHN VpssChn)
+HI_BOOL VideoPlay::Start_Vdec(char *filename, VPSS_GRP VpssGrp, VPSS_CHN VpssChn)
 {
     char* filetype = nullptr;
     HI_S32 s32Ret;
@@ -170,7 +170,7 @@ END1:
     return HI_FALSE;
 }
 
-void Vdec::Stop_Vdec()
+void VideoPlay::Stop_Vdec()
 {
     m_Vdec_Run = false;
     m_pVdec->SAMPLE_COMM_VDEC_UnBindVpss(m_pVdec->m_Vdec_Tab[0],m_pVpss->m_Grp_Tab[0],0);
@@ -180,7 +180,7 @@ void Vdec::Stop_Vdec()
     m_pVpss->SAMPLE_COMM_VPSS_Stop();
 
 }
-void Vdec::run()
+void VideoPlay::run()
 {
 //    VdecThreadParam *pstVdecThreadParam =(VdecThreadParam *)pArgs;
     FILE *fpStrm=nullptr;

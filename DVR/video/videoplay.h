@@ -1,17 +1,17 @@
-#ifndef VDEC_H
-#define VDEC_H
+#ifndef VDECPLAY_H
+#define VDECPLAY_H
 
 #include <QObject>
 #include <QThread>
 #include "common/sample_common_vio.h"
 #include "common/sample_common_vdec.h"
 
-class Vdec : public QThread
+class VideoPlay : public QThread
 {
     Q_OBJECT
 public:
-    explicit Vdec(QObject *parent = nullptr);
-    ~Vdec();
+    explicit VideoPlay(QObject *parent = nullptr);
+    ~VideoPlay();
 
     void Set_VdecAttr(VdecThreadParam &VdecAttr);
     HI_BOOL Start_Vdec(char *filename,VPSS_GRP VpssGrp,VPSS_CHN VpssChn);
@@ -39,4 +39,4 @@ private:
     bool m_Vdec_Run;
 };
 
-#endif // VDEC_H
+#endif // VDECPLAY_H

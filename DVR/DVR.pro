@@ -34,11 +34,14 @@ SOURCES += \
     video/videocontrol.cpp
 
 
+
+
 HEADERS += \
         widget.h \
     windows/CustomControls/animationbutton.h \
     windows/MyModel/mytablemodel.h \
     video/videocontrol.h
+
 
 INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
                 /home/abhw/haisi/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/include \
@@ -57,7 +60,7 @@ SOURCES +=common/sample_common_sys.cpp \
             common/sample_common_venc.cpp \
             video/venc.cpp \
             video/vio.cpp \
-            video/vdec.cpp
+            video/videoplay.cpp
 
 HEADERS +=common/loadbmp.h \
             common/sample_common_sys.h \
@@ -67,7 +70,7 @@ HEADERS +=common/loadbmp.h \
             common/sample_common_venc.h \
             video/venc.h \
             video/vio.h \
-            video/vdec.h
+            video/videoplay.h
 
 LIBS += -lpthread
 

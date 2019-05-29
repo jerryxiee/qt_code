@@ -14,6 +14,7 @@ public:
 
     HI_BOOL SAMPLE_COMM_VPSS_CreatIsSucess();
     HI_S32 SAMPLE_COMM_VPSS_SetChnMod(VPSS_GRP VpssGrpIndex,VPSS_CHN VpssChn,VPSS_CHN_MODE_S *pstVpssMode,HI_U32 u32Depth);
+    HI_S32 SAMPLE_COMM_VPSS_GetChnMod(VPSS_GRP VpssGrpIndex,VPSS_CHN VpssChn,VPSS_CHN_MODE_S *pstVpssMode);
     HI_S32 SAMPLE_COMM_VPSS_Stop();
     HI_S32 SAMPLE_COMM_VPSS_MemConfig();
 

@@ -8,9 +8,9 @@
 Vio::Vio(QObject *parent):QThread(parent),
     m_ViChnCnt(8),m_enVoMode(VO_MODE_9MUX)
 {
-    m_enType = PT_H265;
+    m_enType = PT_H264;
     m_enSize = PIC_HD720;
-    m_enRcMode = SAMPLE_RC_CBR;
+    m_enRcMode = SAMPLE_RC_VBR;
     m_u32Profile = 0;
     m_pFile.resize(m_ViChnCnt);
     m_timer = nullptr;
@@ -29,9 +29,9 @@ Vio::Vio(QObject *parent):QThread(parent),
 }
 Vio::Vio(VI_CHN ViChnCnt, SAMPLE_VO_MODE_E enVoMode):m_ViChnCnt(ViChnCnt),m_enVoMode(enVoMode)
 {
-    m_enType = PT_H265;
+    m_enType = PT_H264;
     m_enSize = PIC_HD720;
-    m_enRcMode = SAMPLE_RC_CBR;
+    m_enRcMode = SAMPLE_RC_VBR;
     m_u32Profile = 0;
     m_pFile.resize(m_ViChnCnt);
     m_timer = nullptr;
@@ -485,12 +485,58 @@ void Vio::onDispChnToWin(QMap<VO_CHN,RECT_S> &ChnAttr)
 
 }
 
-void Vio::Set_VencAttr(PAYLOAD_TYPE_E enType,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32Profile)
+HI_S32 Vio::Set_VencAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32BitRate,HI_FR32 frmRate,HI_U32 u32Profile)
 {
-    m_enType = enType;
-    m_enSize = enSize;
-    m_enRcMode = enRcMode;
-    m_u32Profile = u32Profile;
+    VPSS_CHN_MODE_S stVpssMode;
+    SIZE_S stPicSize;
+    HI_S32 s32Ret;
+
+    Venc_Save_file_Stop(ViChnCnt);
+
+    s32Ret = Vi_Venc_Stop(ViChnCnt);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("GetChnMod failed!\n");
+        goto END;
+    }
+
+    s32Ret = m_pVpss->SAMPLE_COMM_VPSS_GetChnMod(ViChnCnt,m_VencBindVpss,&stVpssMode);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("GetChnMod failed!\n");
+        return HI_FAILURE;
+    }
+
+    s32Ret = Sample_Common_Sys::SAMPLE_COMM_SYS_GetPicSize(m_enNorm, enSize, &stPicSize);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Get picture size failed!\n");
+        return HI_FAILURE;
+    }
+
+    stVpssMode.u32Width = stPicSize.u32Width;
+    stVpssMode.u32Height = stPicSize.u32Height;
+
+    s32Ret = m_pVpss->SAMPLE_COMM_VPSS_SetChnMod(ViChnCnt,m_VencBindVpss,&stVpssMode,0);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("SetChnMod failed!\n");
+        return HI_FAILURE;
+    }
+
+    s32Ret = Vi_Venc_Start(ViChnCnt,enSize,enRcMode,u32BitRate,frmRate,u32Profile);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Vi_Venc_Start failed!\n");
+        return HI_FAILURE;
+    }
+
+END:
+    if(m_ViStatus["channel"+QString::number(ViChnCnt)] == true){
+        Venc_CreatNewFile(ViChnCnt);
+    }
+
+    return s32Ret;
 }
 
 HI_S32 Vio::Vi_Venc_Start()
@@ -500,7 +546,7 @@ HI_S32 Vio::Vi_Venc_Start()
 
     for(i = 0;i < m_ViChnCnt;i++){
         m_pVenc[i] = new Sample_Common_Venc();
-        m_pVenc[i]->SAMPLE_COMM_VENC_SetAttr(m_enType,m_enNorm, m_enSize, m_enRcMode,0,m_u32Profile);
+        m_pVenc[i]->SAMPLE_COMM_VENC_SetAttr(m_enType,m_enNorm, m_enSize, m_enRcMode,0,25,m_u32Profile);
         s32Ret = m_pVenc[i]->SAMPLE_COMM_VENC_Start();
         if (HI_SUCCESS != s32Ret)
         {
@@ -517,7 +563,7 @@ HI_S32 Vio::Vi_Venc_Start()
 
     }
 
-    start();
+//    start();
     return s32Ret;
 
 END_1:
@@ -534,26 +580,68 @@ END_2:
 
     return s32Ret;
 }
+
+HI_S32 Vio::Vi_Venc_Start(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32BitRate,HI_FR32 frmRate,HI_U32 u32Profile)
+{
+    HI_S32 s32Ret;
+    qDebug()<<"start venc chn "<<ViChnCnt;
+    m_pVenc[ViChnCnt] = new Sample_Common_Venc();
+    m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_SetAttr(m_enType,m_enNorm, enSize, enRcMode,u32BitRate,frmRate,u32Profile);
+    s32Ret = m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_Start();
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start Venc failed!\n");
+        goto END_1;
+    }
+
+    s32Ret = m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_BindVpss(m_pVpss->m_Grp_Tab[ViChnCnt], m_VencBindVpss);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start Venc failed!\n");
+        goto END_2;
+    }
+
+    return s32Ret;
+END_2:
+    m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_UnBindVpss(m_pVpss->m_Grp_Tab[ViChnCnt], m_VencBindVpss);
+END_1:
+    m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_Stop();
+    return s32Ret;
+}
+
+HI_S32 Vio::Vi_Venc_Stop(VI_CHN ViChnCnt)
+{
+    HI_S32 s32Ret;
+
+
+    s32Ret = m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_UnBindVpss(m_pVpss->m_Grp_Tab[ViChnCnt], m_VencBindVpss);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("SAMPLE_COMM_VENC_UnBindVpss failed!\n");
+    }
+
+    s32Ret = m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_Stop();
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("SAMPLE_COMM_VENC_Stop failed!\n");
+    }
+
+    delete m_pVenc[ViChnCnt];
+
+
+    return s32Ret;
+
+}
+
 void Vio::run()
 {
     HI_S32 i = 0;
-//    HI_S32 s32Cnt = 0;
-//    VENC_CHN_ATTR_S stVencChnAttr;
-//    SAMPLE_VENC_GETSTREAM_PARA_S* pstPara;
-//    HI_S32 maxfd = 0;
     struct timeval TimeoutVal;
     fd_set read_fds;
-//    HI_S32 VencFd[VENC_MAX_CHN_NUM];
-//    HI_CHAR aszFileName[VENC_MAX_CHN_NUM][64];
-//    HI_CHAR venc_path_name[64];
 
     VENC_CHN_STAT_S stStat;
     VENC_STREAM_S stStream;
     HI_S32 s32Ret;
-//    VI_CHN_LUM_S stLuma;
-//    VENC_CHN VencChn;
-//    PAYLOAD_TYPE_E enPayLoadType[VENC_MAX_CHN_NUM];
-//    VENC_STREAM_BUF_INFO_S stStreamBufInfo[VENC_MAX_CHN_NUM];
 
     /******************************************
      step 1:  check & prepare save-file & venc-fd
@@ -563,71 +651,6 @@ void Vio::run()
         SAMPLE_PRT("input count invaild\n");
         return ;
     }
-//    for (i = 0; i < m_ViChnCnt; i++)
-//    {
-        /* decide the stream file name, and open file to save stream */
-//        s32Ret = HI_MPI_VENC_GetChnAttr(m_pVenc[i]->m_Venc_Chn, &stVencChnAttr);
-//        if (s32Ret != HI_SUCCESS)
-//        {
-//            SAMPLE_PRT("HI_MPI_VENC_GetChnAttr chn[%d] failed with %#x!\n", \
-//                       m_pVenc[i]->m_Venc_Chn, s32Ret);
-//            return;
-//        }
-//        enPayLoadType[i] = stVencChnAttr.stVeAttr.enType;
-//        s32Ret = Sample_Common_Venc::SAMPLE_COMM_VENC_GetFilePostfix(enPayLoadType[i], szFilePostfix);
-//        if (s32Ret != HI_SUCCESS)
-//        {
-//            SAMPLE_PRT("SAMPLE_COMM_VENC_GetFilePostfix [%d] failed with %#x!\n", \
-//                       stVencChnAttr.stVeAttr.enType, s32Ret);
-//            return ;
-//        }
-//        sprintf(venc_path_name,"%s/channel%d",venc_path,i);
-//        QDir dir(venc_path_name);
-//        if(!dir.exists()){
-//            if(!dir.mkpath(venc_path_name)){
-//                SAMPLE_PRT("mkpath %s failed\n",venc_path_name);
-//                return;
-//            }
-//        }
-//        snprintf(aszFileName[i], FILE_NAME_LEN, "%s/stream%d%s", venc_path_name , i , szFilePostfix);
-//        m_pFile[i] = fopen(aszFileName[i], "wb");
-//        if (!m_pFile[i])
-//        {
-//            SAMPLE_PRT("open file[%s] failed!\n",
-//                       aszFileName[i]);
-//            return ;
-//        }        /* Set Venc Fd. */
-//        VencFd[i] = HI_MPI_VENC_GetFd(m_pVenc[i]->m_Venc_Chn);
-//        if (VencFd[i] < 0)
-//        {
-//            SAMPLE_PRT("HI_MPI_VENC_GetFd failed with %#x!\n",
-//                       VencFd[i]);
-//            return ;
-//        }
-//        if (m_maxfd <= VencFd[i])
-//        {
-//            m_maxfd = VencFd[i];
-//        }
-//        s32Ret = HI_MPI_VENC_GetStreamBufInfo (m_pVenc[i]->m_Venc_Chn, &stStreamBufInfo[i]);
-//        if (HI_SUCCESS != s32Ret)
-//        {
-//            SAMPLE_PRT("HI_MPI_VENC_GetStreamBufInfo failed with %#x!\n", s32Ret);
-//            return ;
-//        }
-//    }
-
-//    if(!make_file()){
-//        return ;
-//    }
-//    Venc_CreatNewFile(0);
-//    for(int i = 0; i < m_ViChnCnt;i++){
-//        s32Ret = HI_MPI_VI_GetChnLuma(i,&stLuma);
-//        if (HI_SUCCESS != s32Ret){
-//            SAMPLE_PRT("HI_MPI_VI_GetChnLuma(%d) failed with %#x!\n", i,s32Ret);
-//        }
-//        qDebug("vi(%d)Luma =%d",i,stLuma.u32Lum);
-//    }
-
 
     printf("start venc count:%d\n",m_VencChnPara.count());
 

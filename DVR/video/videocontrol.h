@@ -9,7 +9,7 @@
 #include "common/sample_comm.h"
 #ifndef LUNUX_WIN
 #include "video/vio.h"
-#include <video/vdec.h>
+#include <video/videoplay.h>
 #endif
 
 typedef enum StreamType{
@@ -28,7 +28,7 @@ typedef struct Vdec_param{
     HI_U32      mu32Profile;   //图像等级
     HI_FR32     mfr32DstFrmRate ; //编码帧率
 
-}VDEC_PARAM;
+}VDEC_PARAM;   //编码参数配置
 
 Q_DECLARE_METATYPE(VDEC_PARAM)
 Q_DECLARE_METATYPE(STREAMTYPE)

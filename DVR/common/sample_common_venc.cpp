@@ -13,6 +13,7 @@
 #include <math.h>
 #include <unistd.h>
 #include <signal.h>
+#include <QDebug>
 
 #include "sample_common_venc.h"
 #include "sample_common_sys.h"
@@ -34,6 +35,13 @@ Sample_Common_Venc::Sample_Common_Venc()
     }
     m_Venc_MaxTab[Venc_Index] = 1;
     m_Venc_Chn = Venc_Index;
+}
+
+Sample_Common_Venc::~Sample_Common_Venc()
+{
+    m_Venc_MaxTab[m_Venc_Chn] = 0;
+    qDebug("exit %s:%d\n",__FUNCTION__,__LINE__);
+
 }
 
 /******************************************************************************
@@ -564,7 +572,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SaveFile(FILE* pFd, VENC_STREAM_BUF_
 //    return HI_SUCCESS;
 //}
 
-HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetAttr(PAYLOAD_TYPE_E enType, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_U32  u32Profile)
+HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetAttr(PAYLOAD_TYPE_E enType, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_FR32 frmRate, HI_U32  u32Profile)
 {
     m_enType = enType;
     m_enNorm = enNorm;
@@ -572,6 +580,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetAttr(PAYLOAD_TYPE_E enType, VIDEO
     m_enRcMode = enRcMode;
     m_u32Profile = u32Profile;
     m_u32BitRate = u32BitRate;
+    m_DstFrmRate = frmRate;
 
     return HI_SUCCESS;
 
@@ -604,7 +613,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE
         {
             stVencChnAttr.stVeAttr.stAttrH264e.u32PicWidth = stPicSize.u32Width;/*the picture width*/
             stVencChnAttr.stVeAttr.stAttrH264e.u32PicHeight = stPicSize.u32Height;/*the picture height*/
-            stVencChnAttr.stVeAttr.stAttrH264e.u32BufSize  = stPicSize.u32Width * stPicSize.u32Height * 2;/*stream buffer size*/
+//            stVencChnAttr.stVeAttr.stAttrH264e.u32BufSize  = stPicSize.u32Width * stPicSize.u32Height * 2;/*stream buffer size*/
             stVencChnAttr.stVeAttr.stAttrH264e.u32Profile  = u32Profile;/*0: baseline; 1:MP; 2:HP;  3:svc_t */
             if (SAMPLE_RC_CBR == enRcMode)
             {
@@ -650,7 +659,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE
 
             stVencChnAttr.stVeAttr.stAttrMjpege.u32PicWidth = stPicSize.u32Width;
             stVencChnAttr.stVeAttr.stAttrMjpege.u32PicHeight = stPicSize.u32Height;
-            stVencChnAttr.stVeAttr.stAttrMjpege.u32BufSize = stPicSize.u32Width * stPicSize.u32Height * 3;
+//            stVencChnAttr.stVeAttr.stAttrMjpege.u32BufSize = stPicSize.u32Width * stPicSize.u32Height * 3;
 
 
             if (SAMPLE_RC_FIXQP == enRcMode)
@@ -683,14 +692,14 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE
         case PT_JPEG:
             stVencChnAttr.stVeAttr.stAttrJpege.u32PicWidth  = stPicSize.u32Width;
             stVencChnAttr.stVeAttr.stAttrJpege.u32PicHeight = stPicSize.u32Height;
-            stVencChnAttr.stVeAttr.stAttrJpege.u32BufSize   = stPicSize.u32Width * stPicSize.u32Height * 3;
+//            stVencChnAttr.stVeAttr.stAttrJpege.u32BufSize   = stPicSize.u32Width * stPicSize.u32Height * 3;
 
             break;
         case PT_H265:
         {
             stVencChnAttr.stVeAttr.stAttrH265e.u32PicWidth = stPicSize.u32Width;/*the picture width*/
             stVencChnAttr.stVeAttr.stAttrH265e.u32PicHeight = stPicSize.u32Height;/*the picture height*/
-            stVencChnAttr.stVeAttr.stAttrH265e.u32BufSize  = stPicSize.u32Width * stPicSize.u32Height * 2;/*stream buffer size*/
+//            stVencChnAttr.stVeAttr.stAttrH265e.u32BufSize  = stPicSize.u32Width * stPicSize.u32Height * 2;/*stream buffer size*/
             stVencChnAttr.stVeAttr.stAttrH265e.u32Profile = 0;
 
 
@@ -736,7 +745,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE
     s32Ret = HI_MPI_VENC_SetChnAttr(m_Venc_Chn, &stVencChnAttr);
     if (HI_SUCCESS != s32Ret)
     {
-        SAMPLE_PRT(" HI_MPI_VENC_GetChnAttr failed!\n");
+        SAMPLE_PRT(" HI_MPI_VENC_GetChnAttr failed with(%#x)!\n",s32Ret);
         return HI_FAILURE;
     }
 
@@ -804,7 +813,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stH264Cbr.u32Gop            = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH264Cbr.u32StatTime       = 1; /* stream rate statics time(s) */
                 stH264Cbr.u32SrcFrmRate      = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30; /* input (vi) frame rate */
-                stH264Cbr.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30; /* target frame rate */
+                stH264Cbr.fr32DstFrmRate = m_DstFrmRate;//(VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30; /* target frame rate */
                 if(m_u32BitRate == 0){
                     switch (m_enSize)
                     {
@@ -843,7 +852,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264FIXQP;
                 stH264FixQp.u32Gop = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH264FixQp.u32SrcFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
-                stH264FixQp.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
+                stH264FixQp.fr32DstFrmRate = m_DstFrmRate;//(VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH264FixQp.u32IQp = 20;
                 stH264FixQp.u32PQp = 23;
                 stH264FixQp.u32BQp = 23;
@@ -855,7 +864,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stH264Vbr.u32Gop = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH264Vbr.u32StatTime = 1;
                 stH264Vbr.u32SrcFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
-                stH264Vbr.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
+                stH264Vbr.fr32DstFrmRate = m_DstFrmRate;//(VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH264Vbr.u32MinQp = 10;
                 stH264Vbr.u32MinIQp = 10;
                 stH264Vbr.u32MaxQp = 40;
@@ -897,7 +906,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stH264AVbr.u32Gop = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH264AVbr.u32StatTime = 1;
                 stH264AVbr.u32SrcFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
-                stH264AVbr.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
+                stH264AVbr.fr32DstFrmRate = m_DstFrmRate;//(VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 if(m_u32BitRate == 0){
                     switch (m_enSize)
                     {
@@ -950,7 +959,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_MJPEGFIXQP;
                 stMjpegeFixQp.u32Qfactor        = 90;
                 stMjpegeFixQp.u32SrcFrmRate      = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
-                stMjpegeFixQp.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
+                stMjpegeFixQp.fr32DstFrmRate = m_DstFrmRate;//(VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 memcpy(&stVencChnAttr.stRcAttr.stAttrMjpegeFixQp, &stMjpegeFixQp,
                        sizeof(VENC_ATTR_MJPEG_FIXQP_S));
             }
@@ -959,7 +968,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_MJPEGCBR;
                 stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32StatTime       = 1;
                 stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32SrcFrmRate      = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
-                stVencChnAttr.stRcAttr.stAttrMjpegeCbr.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
+                stVencChnAttr.stRcAttr.stAttrMjpegeCbr.fr32DstFrmRate = m_DstFrmRate;//(VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32FluctuateLevel = 1;
                 if(m_u32BitRate == 0){
                     switch (m_enSize)
@@ -1065,7 +1074,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stH265Cbr.u32Gop            = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH265Cbr.u32StatTime       = 1; /* stream rate statics time(s) */
                 stH265Cbr.u32SrcFrmRate      = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30; /* input (vi) frame rate */
-                stH265Cbr.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30; /* target frame rate */
+                stH265Cbr.fr32DstFrmRate = m_DstFrmRate;//(VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30; /* target frame rate */
                 if(m_u32BitRate == 0){
                     switch (m_enSize)
                     {
@@ -1101,7 +1110,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265FIXQP;
                 stH265FixQp.u32Gop = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH265FixQp.u32SrcFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
-                stH265FixQp.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
+                stH265FixQp.fr32DstFrmRate = m_DstFrmRate;//(VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH265FixQp.u32IQp = 20;
                 stH265FixQp.u32PQp = 23;
                 stH265FixQp.u32BQp = 25;
@@ -1113,7 +1122,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stH265Vbr.u32Gop = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH265Vbr.u32StatTime = 1;
                 stH265Vbr.u32SrcFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
-                stH265Vbr.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
+                stH265Vbr.fr32DstFrmRate = m_DstFrmRate;//(VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH265Vbr.u32MinQp  = 10;
                 stH265Vbr.u32MinIQp = 10;
                 stH265Vbr.u32MaxQp  = 40;
@@ -1152,7 +1161,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
                 stH265AVbr.u32Gop = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 stH265AVbr.u32StatTime = 1;
                 stH265AVbr.u32SrcFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
-                stH265AVbr.fr32DstFrmRate = (VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
+                stH265AVbr.fr32DstFrmRate = m_DstFrmRate;//(VIDEO_ENCODING_MODE_PAL == m_enNorm) ? 25 : 30;
                 if(m_u32BitRate == 0){
                     switch (m_enSize)
                     {
@@ -1209,6 +1218,8 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
         SAMPLE_PRT("HI_MPI_VENC_StartRecvPic faild with%#x! \n", s32Ret);
         return HI_FAILURE;
     }
+
+    SAMPLE_PRT("Chn(%d) VENC_Start Sucess! \n", m_Venc_Chn);
     return HI_SUCCESS;
 }
 #endif
@@ -1653,6 +1664,36 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_StartEx(PAYLOAD_TYPE_E enType, VIDEO
     return HI_SUCCESS;
 }
 
+HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_StartRecv()
+{
+    HI_S32 s32Ret;
+
+    s32Ret = HI_MPI_VENC_StartRecvPic(m_Venc_Chn);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("HI_MPI_VENC_StartRecvPic faild with%#x! \n", s32Ret);
+        return HI_FAILURE;
+    }
+
+    return s32Ret;
+
+}
+
+HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_StopRecv()
+{
+    HI_S32 s32Ret;
+
+    s32Ret = HI_MPI_VENC_StopRecvPic(m_Venc_Chn);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("HI_MPI_VENC_StopRecvPic vechn[%d] failed with %#x!\n", \
+                   m_Venc_Chn, s32Ret);
+        return HI_FAILURE;
+    }
+
+    return s32Ret;
+
+}
 /******************************************************************************
 * funciton : Stop venc ( stream mode -- H264, MJPEG )
 ******************************************************************************/
@@ -1662,7 +1703,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Stop()
     /******************************************
      step 1:  Stop Recv Pictures
     ******************************************/
-    m_Venc_MaxTab[m_Venc_Chn] = 0;
+//    m_Venc_MaxTab[m_Venc_Chn] = 0;
     s32Ret = HI_MPI_VENC_StopRecvPic(m_Venc_Chn);
     if (HI_SUCCESS != s32Ret)
     {
