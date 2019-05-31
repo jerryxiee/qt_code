@@ -3,7 +3,6 @@ import QtQuick.Controls 1.2
 
 Rectangle {
     id:mainItem
-//    color: "#212126"
 
     signal launcher(string flag ,string titlename,string page)
     ListModel{

@@ -1,66 +1,202 @@
 import QtQuick 2.0
+import QtQuick.Controls 2.2
 
 Rectangle {
     id:setparent
 
     property bool press: false
+    signal suresignal
+    signal cancelsignal
 
-    Item {
-        id: setSelect
-        width:setparent.width/5
-        height:setparent.height
+//    Row{
+        Rectangle {
+            id: setSelect
+            width:setparent.width/5
+            height:setparent.height - button.height
+            color: "#DDDDDD"
 
-        ListModel {
-            id: pageModel
-            ListElement {
-                title: "录像配置"
-                page: "content/RecordSet.qml"
+            ListModel {
+                id: pageModel
+                ListElement {
+                    title: "录像配置"
+                    page: "content/RecordSet.qml"
+                    source:"qrc:/qml/setting/images/settings.png"
+                }
+                ListElement {
+                    title: "通道配置"
+                    page: "content/SliderPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+                ListElement {
+                    title: "网络配置"
+                    page: "content/ProgressBarPage.qml"
+                    source:""
+                }
+
+
+
+
             }
-            ListElement {
-                title: "通道配置"
-                page: "content/SliderPage.qml"
-            }
-            ListElement {
-                title: "网络配置"
-                page: "content/ProgressBarPage.qml"
-            }
-
-        }
-
-        ListView {
-            id:listview
-    //                keyNavigationWraps:true
-            model: pageModel
-            clip: true
-            highlight: Rectangle { color: "#00CED1" }
+          ScrollView {
             anchors.fill: parent
-            delegate: SetDelegate1 {
-                height:50
-                text: title
-//                backgroundcolor: ListView.isCurrentItem?"#157efb":"#53d769"
-                onClicked: {
-                    ListView.view.currentIndex = index
-                    console.log(index)
-                    console.log(Qt.resolvedUrl(page))
-//                    stackview.push(Qt.resolvedUrl(page))
-                    load.source = page
+                ListView {
+                    id:listview
+            //                keyNavigationWraps:true
+                    model: pageModel
+                    clip: true
+                    highlight: Rectangle { color: "#00CED1" }
+                    anchors.fill: parent
+                    delegate: SetDelegate1 {
+                        height:40
+                        text: title
+//                        imageSource: source
+        //                backgroundcolor: ListView.isCurrentItem?"#157efb":"#53d769"
+                        onClicked: {
+                            ListView.view.currentIndex = index
+                            console.log(index)
+                            console.log(Qt.resolvedUrl(page))
+        //                    stackview.push(Qt.resolvedUrl(page))
+                            load.source = page
+                        }
+                    }
                 }
             }
+
         }
+
+        Rectangle {
+            id:setAttr
+            width:setparent.width - setSelect.width
+            height:setparent.height - button.height
+            anchors.left: setSelect.right
+
+            Loader{
+                id:load
+                anchors.fill: setAttr
+                source: "content/RecordSet.qml"
+            }
+
+        }
+//    }
+
+    Rectangle{
+        id:button
+        width: setparent.width
+        height: 40
+        color: "#BBBBBB"
+        anchors.bottom: setparent.bottom
+
+        Button{
+            id:cancel
+            width:120
+            height:40
+//            anchors.bottom:record.bottom
+            anchors.rightMargin:20
+            anchors.right:button.right
+//            anchors.bottomMargin:40
+            text:qsTr("取消")
+
+            onClicked:{
+                  cancelsignal()
+                stackview.pop()
+            }
+        }
+
+        Button{
+            id:sure
+            width:120
+            height:40
+//            anchors.bottom:record.bottom
+            anchors.rightMargin:10
+            anchors.right:cancel.left
+//            anchors.bottomMargin:40
+            text:qsTr("应用")
+
+            onClicked:{
+//                load.item.set()
+                suresignal()
+//                VideoControl.setVencAttr(setchnBox.currentText,setStreamBox.currentText,setStreamTypeBox.currentText,resolutionBox.currentText
+//                                         ,bitRateTyprBox.currentText,imageQualityBox.currentText,frameRateBox.currentText,bitRateBox.currentText)
+            }
+        }
+
 
     }
 
-    Item {
-        id:setAttr
-        width:setparent.width - setSelect.width
-        height:setparent.height
-        anchors.right: setparent.right
-
-        Loader{
-            id:load
-            anchors.fill: parent
-        }
-
-    }
 
 }

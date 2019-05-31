@@ -136,10 +136,10 @@ void Widget::paintEvent(QPaintEvent *event)
     QFont font;
 
 #ifndef LUNUX_WIN
-    if(mMainWin){
+//    if(mMainWin){
         painter.setCompositionMode( QPainter::CompositionMode_Clear );
         painter.fillRect( 0, 0, 1280, 720, Qt::SolidPattern );
-    }
+//    }
 #endif
 
 }

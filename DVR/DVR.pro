@@ -24,7 +24,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
-greaterThan(QT_VERSION, 5.9):DEFINES += LUNUX_WIN
+#greaterThan(QT_VERSION, 5.9):DEFINES += LUNUX_WIN
+
+contains(QT_ARCH, x86_64) {
+        message("x86_64")
+        DEFINES += LUNUX_WIN
+    } else {
+
+    }
 
 SOURCES += \
         main.cpp \

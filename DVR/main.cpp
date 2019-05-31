@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
-    int nIndex = QFontDatabase::addApplicationFont(QString("/opt/Qt5.8-Arm/lib/fonts/my.ttf"));
+    int nIndex = QFontDatabase::addApplicationFont(QString("/nfsroot/Qt5.9.8-Arm/lib/fonts/my.ttf"));
     if(nIndex != -1)
     {
         QStringList strList(QFontDatabase::applicationFontFamilies(nIndex));

@@ -22,7 +22,7 @@
 #include "thread_test.h"
 #include "sources/model/mytableviewmodel.h"
 #include "qmlsignal.h"
-#ifndef LUNUX_WIN
+#ifndef LUNUX_WINz
 #include "common/sample_common_sys.h"
 #endif
 

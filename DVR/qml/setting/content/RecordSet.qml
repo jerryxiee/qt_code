@@ -55,9 +55,10 @@ import "qrc:/qml/Controls"
 
 Item {
     id:record
-    width: parent.width
-    height: parent.height
+//    width: parent.width
+//    height: parent.height
     property int fontpixelSize : 32
+    property int boxwidth: 300
 
 
 //Column{
@@ -77,63 +78,63 @@ Item {
             Text{
                 id:setchn
                 text:qsTr("通道选择")
-                color:"white"
+//                color:"white"
                 font.pixelSize: fontpixelSize
             }
             Text{
                 id:setStream
                 text:qsTr("码流选择")
-                color:"white"
+//                color:"white"
                 font.pixelSize: fontpixelSize
             }
             Text{
                 id:setStreamType
                 text:qsTr("码流类型")
-                color:"white"
+//                color:"white"
                 font.pixelSize: fontpixelSize
             }
             Text{
                 id: resolution
                 text:qsTr("分辨率")
-                color:"white"
+//                color:"white"
                 font.pixelSize: fontpixelSize
             }
             Text{
                 id: bitRateTypr
                 text:qsTr("码率类型")
-                color:"white"
+//                color:"white"
                 font.pixelSize: fontpixelSize
             }
             Text{
                 id: imageQuality
                 text:qsTr("图像质量")
-                color:"white"
+//                color:"white"
                 font.pixelSize: fontpixelSize
             }
 
             Text{
                 id: frameRate
                 text:qsTr("视频帧率")
-                color:"white"
+//                color:"white"
                 font.pixelSize: fontpixelSize
             }
             Text{
                 id: bitRate
                 text:qsTr("码流设置")
-                color:"white"
+//                color:"white"
                 font.pixelSize: fontpixelSize
             }
             Text{
                 id: recordPlay
                 text:qsTr("录像时间配置")
-                color:"white"
+//                color:"white"
                 font.pixelSize: fontpixelSize
             }
 
             Text{
                 id: otherSet
                 text:qsTr("其他配置")
-                color:"white"
+//                color:"white"
                 font.pixelSize: fontpixelSize
             }
 
@@ -143,6 +144,7 @@ Item {
             spacing:10
             ComboBox{
                 id:setchnBox
+                width: boxwidth
                 height:setchn.height
                 model: ListModel{
                     ListElement{text:qsTr("模拟通道0")}
@@ -158,6 +160,7 @@ Item {
 
             ComboBox{
                 id:setStreamBox
+                width: boxwidth
                 height:setchn.height
                 model: ListModel{
                     ListElement{text:qsTr("主码流")}
@@ -168,6 +171,7 @@ Item {
 
             ComboBox{
                 id:setStreamTypeBox
+                width: boxwidth
                 height:setchn.height
                 model: ListModel{
                     ListElement{text:qsTr("视频流")}
@@ -177,6 +181,7 @@ Item {
             }
             ComboBox{
                 id:resolutionBox
+                width: boxwidth
                 height:setchn.height
                 model: ListModel{
                     ListElement{text:qsTr("720P")}
@@ -186,6 +191,7 @@ Item {
             }
             ComboBox{
                 id:bitRateTyprBox
+                width: boxwidth
                 height:setchn.height
                 model: ListModel{
                     ListElement{text:qsTr("定码率")}
@@ -196,6 +202,7 @@ Item {
 
             ComboBox{
                 id:imageQualityBox
+                width: boxwidth
                 height:setchn.height
                 model: ListModel{
                     ListElement{text:qsTr("低等")}
@@ -207,6 +214,7 @@ Item {
 
             ComboBox{
                 id:frameRateBox
+                width: boxwidth
                 height:setchn.height
                 editable : true
                 model: ListModel{
@@ -218,6 +226,7 @@ Item {
 
             ComboBox{
                 id:bitRateBox
+                width: boxwidth
                 height:setchn.height
                 editable : true
                 model: ListModel{
@@ -243,6 +252,20 @@ Item {
 //        }
     }
 
+    Connections{
+        target: setparent
+        onSuresignal:{
+
+            VideoControl.setVencAttr(setchnBox.currentText,setStreamBox.currentText,setStreamTypeBox.currentText,resolutionBox.currentText,
+                                     bitRateTyprBox.currentText,imageQualityBox.currentText,frameRateBox.currentText,bitRateBox.currentText)
+            console.log("sure press")
+        }
+        onCancelsignal:{
+
+            console.log("cancel press")
+        }
+    }
+
 //    Row{
 //        Button{
 //            anchors.bottom:record.bottom
@@ -252,46 +275,51 @@ Item {
 
 //    }
 //}
-    Rectangle{
-        width: record.width
-        height: 40
-        color: "#333333"
-        anchors.bottom: record.bottom
+//    Rectangle{
+//        width: record.width
+//        height: 40
+//        color: "#333333"
+//        anchors.bottom: record.bottom
 
-        Button{
-            id:recordsure
-            width:120
-            height:40
-//            anchors.bottom:record.bottom
-            anchors.rightMargin:400
-            anchors.right:parent.right
-//            anchors.bottomMargin:40
-            text:qsTr("应用")
+//        Button{
+//            id:recordsure
+//            width:120
+//            height:40
+////            anchors.bottom:record.bottom
+//            anchors.rightMargin:400
+//            anchors.right:parent.right
+////            anchors.bottomMargin:40
+//            text:qsTr("应用")
 
-            onClicked:{
-                VideoControl.setVencAttr(setchnBox.currentText,setStreamBox.currentText,setStreamTypeBox.currentText,resolutionBox.currentText
-                                         ,bitRateTyprBox.currentText,imageQualityBox.currentText,frameRateBox.currentText,bitRateBox.currentText)
-            }
-        }
+//            onClicked:{
+//                VideoControl.setVencAttr(setchnBox.currentText,setStreamBox.currentText,setStreamTypeBox.currentText,resolutionBox.currentText
+//                                         ,bitRateTyprBox.currentText,imageQualityBox.currentText,frameRateBox.currentText,bitRateBox.currentText)
+//            }
+//        }
 
-        Button{
-            id:recordcancel
-            width:120
-            height:40
-//            anchors.bottom:record.bottom
-            anchors.leftMargin:10
-            anchors.left:recordsure.right
-//            anchors.bottomMargin:40
-            text:qsTr("取消")
+//        Button{
+//            id:recordcancel
+//            width:120
+//            height:40
+////            anchors.bottom:record.bottom
+//            anchors.leftMargin:10
+//            anchors.left:recordsure.right
+////            anchors.bottomMargin:40
+//            text:qsTr("取消")
 
-            onClicked:{
-                stackview.pop()
-            }
-        }
+//            onClicked:{
+//                stackview.pop()
+//            }
+//        }
 
-    }
+//    }
 
 
+//    function set(){
+//        console.log("enter set")
+//    }
+
+//    function
 
 
 

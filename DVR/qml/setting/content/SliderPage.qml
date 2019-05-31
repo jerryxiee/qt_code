@@ -51,62 +51,41 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.1
+import QtQuick.Layouts 1.1
+import QtQuick.Dialogs 1.1
 
 Item {
-    width: parent.width
-    height: parent.height
 
-    Column {
-        spacing: 12
-        anchors.centerIn: parent
+    TabView {
+        id: tabView
 
-        Slider {
-            anchors.margins: 20
-            style: touchStyle
-            value: 0
+        anchors.fill: parent
+        anchors.margins: UI.margin
+        tabPosition: UI.tabPosition
+
+        Layout.minimumWidth: 360
+        Layout.minimumHeight: 360
+        Layout.preferredWidth: 480
+        Layout.preferredHeight: 640
+
+        Tab {
+            title: "Buttons"
+//            ButtonPage {
+////                enabled: enabler.checked
+//            }
         }
-        Slider {
-            anchors.margins: 20
-            style: touchStyle
-            value: 0.5
+        Tab {
+            title: "Progress"
+//            ProgressPage {
+////                enabled: enabler.checked
+//            }
         }
-        Slider {
-            anchors.margins: 20
-            style: touchStyle
-            value: 1.0
-        }
-
-    }
-
-    Component {
-        id: touchStyle
-        SliderStyle {
-            handle: Rectangle {
-                width: 30
-                height: 30
-                radius: height
-                antialiasing: true
-                color: Qt.lighter("#468bb7", 1.2)
-            }
-
-            groove: Item {
-                implicitHeight: 50
-                implicitWidth: 400
-                Rectangle {
-                    height: 8
-                    width: parent.width
-                    anchors.verticalCenter: parent.verticalCenter
-                    color: "#444"
-                    opacity: 0.8
-                    Rectangle {
-                        antialiasing: true
-                        radius: 1
-                        color: "#468bb7"
-                        height: parent.height
-                        width: parent.width * control.value / control.maximumValue
-                    }
-                }
-            }
+        Tab {
+            title: "Input"
+//            InputPage {
+////                enabled: enabler.checked
+//            }
         }
     }
+
 }
