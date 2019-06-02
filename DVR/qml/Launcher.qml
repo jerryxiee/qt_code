@@ -9,15 +9,21 @@ Rectangle {
         id:model
         ListElement{
             flag:"qml"
-            name:"video"
+            name:"录像查询"
             icon:"qrc:/images/video.jpg"
             page:"qrc:/qml/video.qml"
         }
         ListElement{
             flag:"qml"
-            name:"Setting"
+            name:"设置"
             icon:"qrc:/qml/setting/images/settings.png"
             page:"qrc:/qml/setting/Setting1.qml"
+        }
+        ListElement{
+            flag:"qml"
+            name:"状态管理"
+            icon:"qrc:/qml/setting/images/settings.png"
+            page:"qrc:/qml/State/StateManage.qml"
         }
 //        ListElement{name:"video1";icon:"qrc:images/1.png"}
     }

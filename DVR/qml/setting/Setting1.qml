@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.2
+import "../delegate"
 
 Rectangle {
     id:setparent
@@ -33,83 +34,20 @@ Rectangle {
                     source:""
                 }
                 ListElement {
-                    title: "网络配置"
+                    title: "系统时间配置"
                     page: "content/ProgressBarPage.qml"
                     source:""
                 }
                 ListElement {
-                    title: "网络配置"
+                    title: "预览配置"
                     page: "content/ProgressBarPage.qml"
                     source:""
                 }
                 ListElement {
-                    title: "网络配置"
+                    title: "报警配置"
                     page: "content/ProgressBarPage.qml"
                     source:""
                 }
-                ListElement {
-                    title: "网络配置"
-                    page: "content/ProgressBarPage.qml"
-                    source:""
-                }
-                ListElement {
-                    title: "网络配置"
-                    page: "content/ProgressBarPage.qml"
-                    source:""
-                }
-                ListElement {
-                    title: "网络配置"
-                    page: "content/ProgressBarPage.qml"
-                    source:""
-                }
-                ListElement {
-                    title: "网络配置"
-                    page: "content/ProgressBarPage.qml"
-                    source:""
-                }
-                ListElement {
-                    title: "网络配置"
-                    page: "content/ProgressBarPage.qml"
-                    source:""
-                }
-                ListElement {
-                    title: "网络配置"
-                    page: "content/ProgressBarPage.qml"
-                    source:""
-                }
-                ListElement {
-                    title: "网络配置"
-                    page: "content/ProgressBarPage.qml"
-                    source:""
-                }
-                ListElement {
-                    title: "网络配置"
-                    page: "content/ProgressBarPage.qml"
-                    source:""
-                }
-                ListElement {
-                    title: "网络配置"
-                    page: "content/ProgressBarPage.qml"
-                    source:""
-                }
-                ListElement {
-                    title: "网络配置"
-                    page: "content/ProgressBarPage.qml"
-                    source:""
-                }
-                ListElement {
-                    title: "网络配置"
-                    page: "content/ProgressBarPage.qml"
-                    source:""
-                }
-                ListElement {
-                    title: "网络配置"
-                    page: "content/ProgressBarPage.qml"
-                    source:""
-                }
-
-
-
 
             }
           ScrollView {
