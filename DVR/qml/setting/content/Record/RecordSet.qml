@@ -52,7 +52,7 @@ import QtQuick 2.2
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.1
 import "qrc:/qml/Controls"
-import "Record"
+
 
 Item {
     id:record

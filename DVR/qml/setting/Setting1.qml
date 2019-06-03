@@ -20,12 +20,12 @@ Rectangle {
                 id: pageModel
                 ListElement {
                     title: "录像配置"
-                    page: "content/RecordSet.qml"
+                    page: "content/Record/RecordSet.qml"
                     source:"qrc:/qml/setting/images/settings.png"
                 }
                 ListElement {
                     title: "通道配置"
-                    page: "content/SliderPage.qml"
+                    page: "content/ChnProperty/ChannelSet.qml"
                     source:""
                 }
                 ListElement {
@@ -86,7 +86,7 @@ Rectangle {
             Loader{
                 id:load
                 anchors.fill: setAttr
-                source: "content/RecordSet.qml"
+                source: "content/Record/RecordSet.qml"
             }
 
         }
