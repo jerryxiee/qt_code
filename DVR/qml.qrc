@@ -46,5 +46,11 @@
         <file>qml/delegate/SetDelegate1.qml</file>
         <file>qml/setting/content/Record/RecordSet.qml</file>
         <file>qml/setting/content/ChnProperty/ChannelSet.qml</file>
+        <file>qml/setting/content/ChnProperty/NormalSet.qml</file>
+        <file>qml/setting/content/ChnProperty/OtherSet.qml</file>
+        <file>qml/setting/content/ChnProperty/Position.qml</file>
+        <file>qml/Controls/MyCheckBox.qml</file>
+        <file>qml/Controls/DatePicker.qml</file>
+        <file>qml/Controls/images/arrow_bc.png</file>
     </qresource>
 </RCC>

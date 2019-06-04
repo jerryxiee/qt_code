@@ -7,6 +7,7 @@ import MyTableViewModel 1.0
 import QtQuick.Controls.Styles 1.2
 import "./"
 import "Controls/"
+//import "Datepicker.qml"
 
 //Window{
 Rectangle {
@@ -68,72 +69,72 @@ Rectangle {
 //    }
 
 
-    TabBar{
-            id:bar;
-            width:100*count
+//    TabBar{
+//            id:bar;
+//            width:100*count
 
-            onCurrentIndexChanged: console.log("index "+currentIndex)
-
-
-
-            TabButton{
-                text:qsTr("Home");
-
-            }
-            TabButton{
-
-                text:qsTr("Discover");
-            }
-            TabButton{
-                text:qsTr("Activity");
-            }
-        }
+//            onCurrentIndexChanged: console.log("index "+currentIndex)
 
 
-        StackLayout{
-            width:parent.width;
-            height: parent.height - bar.height
-            anchors.top: bar.bottom
-            currentIndex:bar.currentIndex;
-            Item{
-                id:homeTab
-//                Button{
-//                    style:ButtonStyle{
-//                        label:Text {
-//                            id: name
-//                            text: qsTr("text")
-//                            color: control.pressed?"red":"blue"
-//                        }
-//                    }
+
+//            TabButton{
+//                text:qsTr("Home");
+
+//            }
+//            TabButton{
+
+//                text:qsTr("Discover");
+//            }
+//            TabButton{
+//                text:qsTr("Activity");
+//            }
+//        }
+
+
+//        StackLayout{
+//            width:parent.width;
+//            height: parent.height - bar.height
+//            anchors.top: bar.bottom
+//            currentIndex:bar.currentIndex;
+//            Item{
+//                id:homeTab
+////                Button{
+////                    style:ButtonStyle{
+////                        label:Text {
+////                            id: name
+////                            text: qsTr("text")
+////                            color: control.pressed?"red":"blue"
+////                        }
+////                    }
+////                }
+//                Text {
+//                    anchors.centerIn: parent
+//                    color: "white"
+
+//                    text: qsTr("text")
+//                    font.pixelSize: 24
 //                }
-                Text {
-                    anchors.centerIn: parent
-                    color: "white"
+//            }
+//            Item{
+//                id:discoverTab
+//                Text {
+//                    anchors.centerIn: parent
+//                    color: "white"
+//                    text: qsTr("text1")
+//                    font.pixelSize: 24
+//                }
+//            }
+//            Item{
+//                id:activityTab
+//                Text {
+//                    anchors.centerIn: parent
+//                    color: "white"
+//                    text: qsTr("text2")
+//                    font.pixelSize: 24
+//                }
+//            }
 
-                    text: qsTr("text")
-                    font.pixelSize: 24
-                }
-            }
-            Item{
-                id:discoverTab
-                Text {
-                    anchors.centerIn: parent
-                    color: "white"
-                    text: qsTr("text1")
-                    font.pixelSize: 24
-                }
-            }
-            Item{
-                id:activityTab
-                Text {
-                    anchors.centerIn: parent
-                    color: "white"
-                    text: qsTr("text2")
-                    font.pixelSize: 24
-                }
-            }
-
-        }
+//        }
 
 //    TabBar{
 //        id:bar
@@ -147,6 +148,11 @@ Rectangle {
 //        }
 //    }
 
+    Datepicker{
+        width: 150
+               dateValue: (new Date()).toLocaleString(Qt.locale(), "yyyy-MM-dd")
+               onDateValueChanged: text = dateValue
+    }
 }
 
 

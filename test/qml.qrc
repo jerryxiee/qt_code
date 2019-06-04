@@ -27,5 +27,8 @@
         <file>qml/Controls/MyComboBox.qml</file>
         <file>qml/Controls/images/bullet_dn.png</file>
         <file>qml/swipe.qml</file>
+        <file>qml/Controls/Datepicker.qml</file>
+        <file>images/arrow_bc.png</file>
+        <file>qml/Controls/images/arrow_bc.png</file>
     </qresource>
 </RCC>
