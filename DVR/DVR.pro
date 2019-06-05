@@ -50,6 +50,7 @@ HEADERS += \
     video/videocontrol.h
 
 
+
 INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
                 /home/abhw/haisi/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/include \
                 /home/abhw/haisi/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/nvp6134_ex \
@@ -63,8 +64,10 @@ SOURCES +=common/sample_common_sys.cpp \
             common/loadbmp.c \
             common/sample_common_vpss.cpp \
             common/sample_common_vdec.cpp \
-            common/sample_common_vio.cpp \
+#            common/sample_common_vio.cpp \
             common/sample_common_venc.cpp \
+            common/sample_common_vi.cpp \
+            common/sample_common_vo.cpp \
             video/venc.cpp \
             video/vio.cpp \
             video/videoplay.cpp
@@ -73,11 +76,14 @@ HEADERS +=common/loadbmp.h \
             common/sample_common_sys.h \
             common/sample_common_vpss.h \
             common/sample_common_vdec.h \
-            common/sample_common_vio.h \
+#            common/sample_common_vio.h \
             common/sample_common_venc.h \
+            common/sample_common_vi.h \
+            common/sample_common_vo.h \
             video/venc.h \
             video/vio.h \
             video/videoplay.h
+
 
 LIBS += -lpthread
 

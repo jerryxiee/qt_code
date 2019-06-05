@@ -18,6 +18,7 @@
 
 #include "common/sample_common_sys.h"
 #include <video/videoplay.h>
+#include "common/sample_common_vi.h"
 
 class Vio :public QThread
 {
@@ -69,7 +70,9 @@ public:
     const VPSS_CHN m_ChildVencBindVpss = VPSS_CHN1;  //子码流绑定到通道1
 
     VI_CHN m_ViChnCnt;
-    Sample_Common_Vio m_Vio;
+    Sample_Common_Vi m_Vi;
+//    Sample_Common_Vio m_Vio;
+    Sample_Common_Vo m_Vo;
     SAMPLE_VO_MODE_E m_enVoMode;
     Sample_Common_Vpss *m_pVpss;
     Sample_Common_Venc *m_pVenc[VENC_MAX_CHN_NUM];

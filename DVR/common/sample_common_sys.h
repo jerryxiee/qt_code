@@ -3,7 +3,8 @@
 
 #include <QObject>
 #include "sample_comm.h"
-#include "common/sample_common_vio.h"
+//#include "common/sample_common_vio.h"
+#include "common/sample_common_vo.h"
 #include "common/sample_common_vdec.h"
 #include "sample_common_venc.h"
 #include "hifb.h"
@@ -23,6 +24,7 @@ public:
     HI_S32 SAMPLE_COMM_SYS_Payload2FilePostfix(PAYLOAD_TYPE_E enPayload, HI_CHAR* szFilePostfix);
     static HI_VOID SAMPLE_COMM_SYS_Exit(void);
 //    HI_BOOL SYS_INIT_ISSUCESS();
+    static void Get_Sys_VoDev(VO_DEV &VoDev,VO_LAYER &VoLayer);
 
     static HI_S32 SAMPLE_COMM_SYS_GetPicSize(VIDEO_NORM_E enNorm, PIC_SIZE_E enPicSize, SIZE_S *pstSize);
     static HI_U32 SAMPLE_COMM_SYS_CalcHistVbBlkSize(VIDEO_NORM_E enNorm, PIC_SIZE_E enPicSize, SIZE_S *pstHistBlkSize, HI_U32 u32AlignWidth);
@@ -44,7 +46,7 @@ private:
     static VO_DEV m_FbVoDev;
     static VO_LAYER m_FbVoLayer;
     HI_S32 m_sys_hifb_fd;
-    Sample_Common_Vio m_Sys_Vo;
+    Sample_Common_Vo m_Sys_Vo;
 
 signals:
 

@@ -3,9 +3,16 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include <QDebug>
+#include "common/sample_common_sys.h"
 
 VideoPlay::VideoPlay(QObject *parent) : QThread(parent)
 {
+    VO_DEV VoDev;
+    VO_LAYER VoLayer;
+
+    Sample_Common_Sys::Get_Sys_VoDev(VoDev,VoLayer);
+    m_Vdec_Vio.SAMPLE_COMM_VO_SetDev(VoDev,VoLayer);
+
     memset(&m_Thread_Attr,0x0,sizeof (VdecThreadParam));
     memset(&m_stVdecChnAttr,0x0,sizeof(VDEC_CHN_ATTR_S));
 

@@ -82,6 +82,8 @@ Sample_Common_Sys::Sample_Common_Sys(QObject *parent):QObject(parent)
     m_stPubAttr.enIntfType = VO_INTF_VGA;
     m_stPubAttr.u32BgColor = 0x0;
 
+    m_Sys_Vo.SAMPLE_COMM_VO_SetDev(m_FbVoDev,m_FbVoLayer);
+
     s32Ret = m_Sys_Vo.SAMPLE_COMM_VO_StartDev(&m_stPubAttr);
     if (HI_SUCCESS != s32Ret)
     {
@@ -200,6 +202,11 @@ SAMPLE_HIFB_NoneBufMode_0:
 #endif
 }
 
+void Sample_Common_Sys::Get_Sys_VoDev(VO_DEV &VoDev,VO_LAYER &VoLayer)
+{
+    VoDev = m_FbVoDev;
+    VoLayer = m_FbVoLayer;
+}
 
 Sample_Common_Sys::~Sample_Common_Sys()
 {

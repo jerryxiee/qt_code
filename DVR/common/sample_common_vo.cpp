@@ -5,26 +5,31 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <sys/poll.h>
-#include <sys/time.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <pthread.h>
 #include <math.h>
 #include <unistd.h>
-#include <signal.h>
 
 HI_HDMI_CALLBACK_FUNC_S Sample_Common_Vo::stCallbackFunc = {nullptr,nullptr};
 HDMI_ARGS_S      Sample_Common_Vo::stHdmiArgs = {HI_HDMI_ID_0};
 
-Sample_Common_Vo::Sample_Common_Vo()
+
+Sample_Common_Vo::Sample_Common_Vo():m_enVoMode(VO_MODE_9MUX)
 {
 
 }
 
-Sample_Common_Vo::Sample_Common_Vo(Sample_Common_Vo &Sample_Vo)
+Sample_Common_Vo::Sample_Common_Vo(VO_DEV VoDev, VO_LAYER VoLayer, SAMPLE_VO_MODE_E enVoMode):
+    m_enVoMode(enVoMode),m_VoDev(VoDev),m_VoLayer(VoLayer)
 {
 
+}
+Sample_Common_Vo::Sample_Common_Vo(const Sample_Common_Vo &Sample_Vo)
+{
+
+    this->m_VoDev        = Sample_Vo.m_VoDev;
+    this->m_VoLayer      = Sample_Vo.m_VoLayer;
+    this->m_enVoMode     = Sample_Vo.m_enVoMode;
     this->stCallbackFunc = Sample_Vo.stCallbackFunc;
     this->stHdmiArgs     = Sample_Vo.stHdmiArgs;
 }
@@ -34,11 +39,22 @@ Sample_Common_Vo & Sample_Common_Vo::operator=(const Sample_Common_Vo &Sample_Vo
     if(this == &Sample_Vo)
         return *this;
 
+    m_VoDev        = Sample_Vo.m_VoDev;
+    m_VoLayer      = Sample_Vo.m_VoLayer;
+    m_enVoMode     = Sample_Vo.m_enVoMode;
     stCallbackFunc = Sample_Vo.stCallbackFunc;
     stHdmiArgs     = Sample_Vo.stHdmiArgs;
 
 }
 
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_SetDev(VO_DEV VoDev,VO_LAYER VoLayer,SAMPLE_VO_MODE_E enVoMode)
+{
+    m_VoDev = VoDev;
+    m_VoLayer = VoLayer;
+    m_enVoMode = enVoMode;
+
+
+}
 HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_GetWH(VO_INTF_SYNC_E enIntfSync, HI_U32 *pu32W,HI_U32 *pu32H, HI_U32 *pu32Frm)
 {
     switch (enIntfSync)
@@ -78,14 +94,14 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_GetWH(VO_INTF_SYNC_E enIntfSync, HI_U32 
 /******************************************************************************
 * function : Set system memory location
 ******************************************************************************/
-HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_MemConfig(VO_DEV VoDev, HI_CHAR *pcMmzName)
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_MemConfig( HI_CHAR *pcMmzName)
 {
     HI_S32 s32Ret = HI_SUCCESS;
     MPP_CHN_S stMppChnVO;
 
     /* config vo dev */
     stMppChnVO.enModId  = HI_ID_VOU;
-    stMppChnVO.s32DevId = VoDev;
+    stMppChnVO.s32DevId = m_VoDev;
     stMppChnVO.s32ChnId = 0;
     s32Ret = HI_MPI_SYS_SetMemConf(&stMppChnVO, pcMmzName);
     if (s32Ret)
@@ -97,18 +113,18 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_MemConfig(VO_DEV VoDev, HI_CHAR *pcMmzNa
     return HI_SUCCESS;
 }
 
-HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StartDev(VO_DEV VoDev, VO_PUB_ATTR_S *pstPubAttr)
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StartDev(VO_PUB_ATTR_S *pstPubAttr)
 {
     HI_S32 s32Ret = HI_SUCCESS;
 
-    s32Ret = HI_MPI_VO_SetPubAttr(VoDev, pstPubAttr);
+    s32Ret = HI_MPI_VO_SetPubAttr(m_VoDev, pstPubAttr);
     if (s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("failed with %#x!\n", s32Ret);
         return HI_FAILURE;
     }
 
-    s32Ret = HI_MPI_VO_Enable(VoDev);
+    s32Ret = HI_MPI_VO_Enable(m_VoDev);
     if (s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("failed with %#x!\n", s32Ret);
@@ -118,11 +134,11 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StartDev(VO_DEV VoDev, VO_PUB_ATTR_S *ps
     return s32Ret;
 }
 
-HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StopDev(VO_DEV VoDev)
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StopDev()
 {
     HI_S32 s32Ret = HI_SUCCESS;
 
-    s32Ret = HI_MPI_VO_Disable(VoDev);
+    s32Ret = HI_MPI_VO_Disable(m_VoDev);
     if (s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("failed with %#x!\n", s32Ret);
@@ -131,17 +147,17 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StopDev(VO_DEV VoDev)
     return s32Ret;
 }
 
-HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StartLayer(VO_LAYER VoLayer,const VO_VIDEO_LAYER_ATTR_S *pstLayerAttr)
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StartLayer(const VO_VIDEO_LAYER_ATTR_S *pstLayerAttr)
 {
     HI_S32 s32Ret = HI_SUCCESS;
-    s32Ret = HI_MPI_VO_SetVideoLayerAttr(VoLayer, pstLayerAttr);
+    s32Ret = HI_MPI_VO_SetVideoLayerAttr(m_VoLayer, pstLayerAttr);
     if (s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("failed with %#x!\n", s32Ret);
         return HI_FAILURE;
     }
 
-    s32Ret = HI_MPI_VO_EnableVideoLayer(VoLayer);
+    s32Ret = HI_MPI_VO_EnableVideoLayer(m_VoLayer);
     if (s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("failed with %#x!\n", s32Ret);
@@ -151,11 +167,11 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StartLayer(VO_LAYER VoLayer,const VO_VID
     return s32Ret;
 }
 
-HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StopLayer(VO_LAYER VoLayer)
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StopLayer()
 {
     HI_S32 s32Ret = HI_SUCCESS;
 
-    s32Ret = HI_MPI_VO_DisableVideoLayer(VoLayer);
+    s32Ret = HI_MPI_VO_DisableVideoLayer(m_VoLayer);
     if (s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("failed with %#x!\n", s32Ret);
@@ -164,7 +180,7 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StopLayer(VO_LAYER VoLayer)
     return s32Ret;
 }
 
-HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StartChn(VO_LAYER VoLayer, SAMPLE_VO_MODE_E enMode)
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StartChn(SAMPLE_VO_MODE_E enMode)
 {
     HI_S32 i;
     HI_S32 s32Ret = HI_SUCCESS;
@@ -174,6 +190,7 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StartChn(VO_LAYER VoLayer, SAMPLE_VO_MOD
     HI_U32 u32Height = 0;
     VO_CHN_ATTR_S stChnAttr;
     VO_VIDEO_LAYER_ATTR_S stLayerAttr;
+//    VO_BORDER_S stBorder;
 
     switch (enMode)
     {
@@ -198,7 +215,7 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StartChn(VO_LAYER VoLayer, SAMPLE_VO_MOD
             return HI_FAILURE;
     }
 
-    s32Ret = HI_MPI_VO_GetVideoLayerAttr(VoLayer, &stLayerAttr);
+    s32Ret = HI_MPI_VO_GetVideoLayerAttr(m_VoLayer, &stLayerAttr);
     if (s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("failed with %#x!\n", s32Ret);
@@ -214,33 +231,273 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StartChn(VO_LAYER VoLayer, SAMPLE_VO_MOD
         stChnAttr.stRect.u32Width   = ALIGN_BACK(u32Width/u32Square, 2);
         stChnAttr.stRect.u32Height  = ALIGN_BACK(u32Height/u32Square, 2);
         stChnAttr.u32Priority       = 0;
-        stChnAttr.bDeflicker        = (SAMPLE_VO_LAYER_VSD0 == VoLayer) ? HI_TRUE : HI_FALSE;
+        stChnAttr.bDeflicker        = (SAMPLE_VO_LAYER_VSD0 == m_VoLayer) ? HI_TRUE : HI_FALSE;
 
-        s32Ret = HI_MPI_VO_SetChnAttr(VoLayer, i, &stChnAttr);
+        s32Ret = HI_MPI_VO_SetChnAttr(m_VoLayer, i, &stChnAttr);
         if (s32Ret != HI_SUCCESS)
         {
             printf("%s(%d):failed with %#x!\n",\
                    __FUNCTION__,__LINE__,  s32Ret);
             return HI_FAILURE;
         }
+//        stBorder.bBorderEn = HI_FALSE;
+//        s32Ret = HI_MPI_VO_SetChnBorder(m_VoLayer,i,&stBorder);
+//        if (s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_PRT("failed with %#x!\n", s32Ret);
+//            return HI_FAILURE;
+//        }
 
-        s32Ret = HI_MPI_VO_EnableChn(VoLayer, i);
+        s32Ret = HI_MPI_VO_EnableChn(m_VoLayer, i);
         if (s32Ret != HI_SUCCESS)
         {
             SAMPLE_PRT("failed with %#x!\n", s32Ret);
             return HI_FAILURE;
         }
     }
+
+    m_enVoMode = enMode;
+
     return HI_SUCCESS;
 }
 
-HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StopChn(VO_LAYER VoLayer, SAMPLE_VO_MODE_E enMode)
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StartChn(VO_CHN VoChn,RECT_S &pos)
+{
+    HI_S32 s32Ret = HI_SUCCESS;
+    HI_U32 u32Width = 0;
+    HI_U32 u32Height = 0;
+    VO_CHN_ATTR_S stChnAttr;
+    VO_VIDEO_LAYER_ATTR_S stLayerAttr;
+//    VO_BORDER_S stBorder;
+
+
+    s32Ret = HI_MPI_VO_GetVideoLayerAttr(m_VoLayer, &stLayerAttr);
+    if (s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_PRT("failed with %#x!\n", s32Ret);
+        return HI_FAILURE;
+    }
+
+    u32Width = stLayerAttr.stImageSize.u32Width;
+    u32Height = stLayerAttr.stImageSize.u32Height;
+
+    if(u32Width < pos.u32Width || u32Height < pos.u32Height){
+        SAMPLE_PRT("failed pos and size lager than ImageSize!\n");
+        return HI_FAILURE;
+    }
+
+    stChnAttr.stRect.s32X       = ALIGN_BACK(pos.s32X,2);
+    stChnAttr.stRect.s32Y       = ALIGN_BACK(pos.s32Y,2);
+    stChnAttr.stRect.u32Width   = ALIGN_BACK(pos.u32Width,2);
+    stChnAttr.stRect.u32Height  = ALIGN_BACK(pos.u32Height,2);
+    stChnAttr.u32Priority       = 0;
+    stChnAttr.bDeflicker        = (SAMPLE_VO_LAYER_VSD0 == m_VoLayer) ? HI_TRUE : HI_FALSE;
+
+    s32Ret = HI_MPI_VO_SetChnAttr(m_VoLayer, VoChn, &stChnAttr);
+    if (s32Ret != HI_SUCCESS)
+    {
+        printf("%s(%d):failed with %#x!\n",__FUNCTION__,__LINE__,  s32Ret);
+        return HI_FAILURE;
+    }
+
+//    stBorder.bBorderEn = HI_FALSE;
+//    s32Ret = HI_MPI_VO_SetChnBorder(m_VoLayer,VoChn,&stBorder);
+//    if (s32Ret != HI_SUCCESS)
+//    {
+//        SAMPLE_PRT("failed with %#x!\n", s32Ret);
+//        return HI_FAILURE;
+//    }
+
+    s32Ret = HI_MPI_VO_EnableChn(m_VoLayer, VoChn);
+    if (s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_PRT("failed with %#x!\n", s32Ret);
+        return HI_FAILURE;
+    }
+
+
+//    m_enVoMode = VO_MODE_1MUX;
+    return s32Ret;
+}
+
+#if 0
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StartChn(SAMPLE_VO_MODE_E enMode,VO_CHN StartChn)
+{
+    HI_S32 i;
+    HI_S32 s32Ret = HI_SUCCESS;
+    HI_U32 u32WndNum = 0;
+    HI_U32 u32Square = 0;
+    HI_U32 u32Width = 0;
+    HI_U32 u32Height = 0;
+    VO_CHN_ATTR_S stChnAttr;
+    VO_VIDEO_LAYER_ATTR_S stLayerAttr;
+//    VO_BORDER_S stBorder;
+
+    switch (enMode)
+    {
+        case VO_MODE_1MUX:
+            u32WndNum = 1;
+            u32Square = 1;
+            break;
+        case VO_MODE_4MUX:
+            u32WndNum = 4;
+            u32Square = 2;
+            break;
+        case VO_MODE_9MUX:
+            u32WndNum = 9;
+            u32Square = 3;
+            break;
+        case VO_MODE_16MUX:
+            u32WndNum = 16;
+            u32Square = 4;
+            break;
+        default:
+            SAMPLE_PRT("failed with %#x!\n", s32Ret);
+            return HI_FAILURE;
+    }
+
+    s32Ret = HI_MPI_VO_GetVideoLayerAttr(m_VoLayer, &stLayerAttr);
+    if (s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_PRT("failed with %#x!\n", s32Ret);
+        return HI_FAILURE;
+    }
+    u32Width = stLayerAttr.stImageSize.u32Width;
+    u32Height = stLayerAttr.stImageSize.u32Height;
+
+    for (i=0; i<u32WndNum; i++)
+    {
+        stChnAttr.stRect.s32X       = ALIGN_BACK((u32Width/u32Square) * (i%u32Square), 2);
+        stChnAttr.stRect.s32Y       = ALIGN_BACK((u32Height/u32Square) * (i/u32Square), 2);
+        stChnAttr.stRect.u32Width   = ALIGN_BACK(u32Width/u32Square, 2);
+        stChnAttr.stRect.u32Height  = ALIGN_BACK(u32Height/u32Square, 2);
+        stChnAttr.u32Priority       = 0;
+        stChnAttr.bDeflicker        = (SAMPLE_VO_LAYER_VSD0 == m_VoLayer) ? HI_TRUE : HI_FALSE;
+
+        if(StartChn+i >= 8)
+            return HI_SUCCESS;
+
+        s32Ret = HI_MPI_VO_SetChnAttr(m_VoLayer, StartChn+i, &stChnAttr);
+        if (s32Ret != HI_SUCCESS)
+        {
+            printf("%s(%d):failed with %#x!\n",\
+                   __FUNCTION__,__LINE__,  s32Ret);
+            return HI_FAILURE;
+        }
+//        stBorder.bBorderEn = HI_FALSE;
+//        s32Ret = HI_MPI_VO_SetChnBorder(m_VoLayer,i,&stBorder);
+//        if (s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_PRT("failed with %#x!\n", s32Ret);
+//            return HI_FAILURE;
+//        }
+
+        s32Ret = HI_MPI_VO_EnableChn(m_VoLayer, StartChn+i);
+        if (s32Ret != HI_SUCCESS)
+        {
+            SAMPLE_PRT("failed with %#x!\n", s32Ret);
+            return HI_FAILURE;
+        }
+    }
+
+    m_enVoMode = enMode;
+
+    return HI_SUCCESS;
+}
+#endif
+
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_SetChnDispPos(VO_CHN VoChn, const POINT_S *pstDispPos)
+{
+    HI_S32 s32Ret = HI_SUCCESS;
+    VO_CHN_ATTR_S stChnAttr;
+    POINT_S stDispPos;
+    VO_VIDEO_LAYER_ATTR_S stLayerAttr;
+
+
+    s32Ret = HI_MPI_VO_GetVideoLayerAttr(m_VoLayer, &stLayerAttr);
+    if (s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_PRT("failed with %#x!\n", s32Ret);
+        return HI_FAILURE;
+    }
+
+    stLayerAttr.bClusterMode = HI_TRUE;
+    s32Ret = HI_MPI_VO_SetVideoLayerAttr(m_VoLayer, &stLayerAttr);
+    if (s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_PRT("failed with %#x!\n", s32Ret);
+        return HI_FAILURE;
+    }
+
+    s32Ret = HI_MPI_VO_GetChnAttr(m_VoLayer, VoChn, &stChnAttr);
+    if (s32Ret != HI_SUCCESS)
+    {
+        printf("Set channel attr failed with errno %#x!\n", s32Ret);
+        return HI_FAILURE;
+    }
+
+    if(pstDispPos->s32X + stChnAttr.stRect.u32Width > stLayerAttr.stDispRect.u32Width
+            || pstDispPos->s32Y + stChnAttr.stRect.u32Height > stLayerAttr.stDispRect.u32Height){
+        printf("Set pos failed %#x!\n");
+        return HI_FAILURE;
+    }
+
+    stDispPos.s32X = ALIGN_BACK(pstDispPos->s32X,2);
+    stDispPos.s32Y = ALIGN_BACK(pstDispPos->s32Y,2);
+
+    s32Ret = HI_MPI_VO_SetChnDispPos (m_VoLayer, VoChn, &stDispPos);
+    if (s32Ret != HI_SUCCESS)
+    {
+        printf("Set channel display position failed with errno %#x!\n",s32Ret);
+        return HI_FAILURE;
+    }
+
+
+    return s32Ret;
+}
+
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_SetMode(SAMPLE_VO_MODE_E enMode)
+{
+    HI_S32 s32Ret;
+
+    s32Ret= HI_MPI_VO_SetAttrBegin(m_VoLayer);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start VO failed!\n");
+        return HI_FAILURE;
+    }
+
+    s32Ret = SAMPLE_COMM_VO_StopChn();
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start VO failed!\n");
+        return HI_FAILURE;
+    }
+
+    s32Ret = SAMPLE_COMM_VO_StartChn(enMode);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start VO failed!\n");
+        return HI_FAILURE;
+    }
+    s32Ret= HI_MPI_VO_SetAttrEnd(m_VoLayer);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start VO failed!\n");
+        return HI_FAILURE;
+    }
+
+
+    return HI_SUCCESS;
+}
+
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StopChn()
 {
     HI_S32 i;
     HI_S32 s32Ret = HI_SUCCESS;
     HI_U32 u32WndNum = 0;
 
-    switch (enMode)
+    switch (m_enVoMode)
     {
         case VO_MODE_1MUX:
         {
@@ -270,13 +527,27 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StopChn(VO_LAYER VoLayer, SAMPLE_VO_MODE
 
     for (i=0; i<u32WndNum; i++)
     {
-        s32Ret = HI_MPI_VO_DisableChn(VoLayer, i);
+        s32Ret = HI_MPI_VO_DisableChn(m_VoLayer, i);
         if (s32Ret != HI_SUCCESS)
         {
             SAMPLE_PRT("failed with %#x!\n", s32Ret);
             return HI_FAILURE;
         }
     }
+    return s32Ret;
+}
+
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StopChn(VO_CHN VoChn)
+{
+    HI_S32 s32Ret = HI_SUCCESS;
+
+    s32Ret = HI_MPI_VO_DisableChn(m_VoLayer, VoChn);
+    if (s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_PRT("failed with %#x!\n", s32Ret);
+        return HI_FAILURE;
+    }
+
     return s32Ret;
 }
 
@@ -304,7 +575,7 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_StopChn(VO_LAYER VoLayer, SAMPLE_VO_MODE
 //    return s32Ret;
 //}
 
-HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_BindVpss(VO_LAYER VoLayer,VO_CHN VoChn,VPSS_GRP VpssGrp,VPSS_CHN VpssChn)
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_BindVpss(VO_CHN VoChn, VPSS_GRP VpssGrp, VPSS_CHN VpssChn)
 {
     HI_S32 s32Ret = HI_SUCCESS;
     MPP_CHN_S stSrcChn;
@@ -315,7 +586,7 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_BindVpss(VO_LAYER VoLayer,VO_CHN VoChn,V
     stSrcChn.s32ChnId = VpssChn;
 
     stDestChn.enModId = HI_ID_VOU;
-    stDestChn.s32DevId = VoLayer;
+    stDestChn.s32DevId = m_VoLayer;
     stDestChn.s32ChnId = VoChn;
 
     s32Ret = HI_MPI_SYS_Bind(&stSrcChn, &stDestChn);
@@ -328,7 +599,7 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_BindVpss(VO_LAYER VoLayer,VO_CHN VoChn,V
     return s32Ret;
 }
 
-HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_UnBindVpss(VO_LAYER VoLayer,VO_CHN VoChn,VPSS_GRP VpssGrp,VPSS_CHN VpssChn)
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_UnBindVpss(VO_CHN VoChn, VPSS_GRP VpssGrp, VPSS_CHN VpssChn)
 {
     HI_S32 s32Ret = HI_SUCCESS;
     MPP_CHN_S stSrcChn;
@@ -339,7 +610,7 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_UnBindVpss(VO_LAYER VoLayer,VO_CHN VoChn
     stSrcChn.s32ChnId = VpssChn;
 
     stDestChn.enModId = HI_ID_VOU;
-    stDestChn.s32DevId = VoLayer;
+    stDestChn.s32DevId = m_VoLayer;
     stDestChn.s32ChnId = VoChn;
 
     s32Ret = HI_MPI_SYS_UnBind(&stSrcChn, &stDestChn);
@@ -351,7 +622,7 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_UnBindVpss(VO_LAYER VoLayer,VO_CHN VoChn
     return s32Ret;
 }
 
-HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_BindVi(VO_LAYER VoLayer, VO_CHN VoChn, VI_CHN ViChn)
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_BindVi(VO_CHN VoChn, VI_CHN ViChn)
 {
     MPP_CHN_S stSrcChn, stDestChn;
 
@@ -361,17 +632,17 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_BindVi(VO_LAYER VoLayer, VO_CHN VoChn, V
 
     stDestChn.enModId   = HI_ID_VOU;
     stDestChn.s32ChnId  = VoChn;
-    stDestChn.s32DevId  = VoLayer;
+    stDestChn.s32DevId  = m_VoLayer;
 
     return HI_MPI_SYS_Bind(&stSrcChn, &stDestChn);
 }
 
-HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_UnBindVi(VO_LAYER VoLayer, VO_CHN VoChn)
+HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_UnBindVi(VO_CHN VoChn)
 {
     MPP_CHN_S stDestChn;
 
     stDestChn.enModId   = HI_ID_VOU;
-    stDestChn.s32DevId  = VoLayer;
+    stDestChn.s32DevId  = m_VoLayer;
     stDestChn.s32ChnId  = VoChn;
 
     return HI_MPI_SYS_UnBind(NULL, &stDestChn);
@@ -594,3 +865,4 @@ HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_HdmiStop(HI_VOID)
 
     return HI_SUCCESS;
 }
+
