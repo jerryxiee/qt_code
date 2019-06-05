@@ -527,9 +527,9 @@ HI_BOOL VideoControl::videoStart()
 
     vio.Vi_Start(VIDEO_ENCODING_MODE_AUTO);
     vio.Vo_Start();
-    for(int i = 0; i < m_Vdec_Param[0].count();i++){
-        vio.Vi_Venc_Start(i,m_Vdec_Param[0][i].mvencSize,m_Vdec_Param[0][i].menRcMode,
-                m_Vdec_Param[0][i].mu32BitRate,m_Vdec_Param[0][i].mfr32DstFrmRate,m_Vdec_Param[0][i].mu32Profile);
+    for(int i = 0; i < m_VencSet->m_Vdec_Param[0].count();i++){
+        vio.Vi_Venc_Start(i,m_VencSet->m_Vdec_Param[0][i].mvencSize,m_VencSet->m_Vdec_Param[0][i].menRcMode,
+                m_VencSet->m_Vdec_Param[0][i].mu32BitRate,m_VencSet->m_Vdec_Param[0][i].mfr32DstFrmRate,m_VencSet->m_Vdec_Param[0][i].mu32Profile);
     }
 //    vio.Vi_Venc_Start();
     vio.start();
