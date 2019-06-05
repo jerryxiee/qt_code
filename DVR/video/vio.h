@@ -27,6 +27,7 @@ public:
     explicit Vio(QObject *parent = nullptr);
     Vio(VI_CHN ViChnCnt,SAMPLE_VO_MODE_E enVoMode);
     ~Vio();
+
     HI_BOOL Vi_Start(VIDEO_NORM_E enNorm);
     HI_BOOL Vi_stop();
     HI_BOOL Vo_Start();
@@ -45,6 +46,7 @@ public:
 
 private:
     HI_BOOL make_file();
+    void Init();
 
 protected:
     virtual void run();

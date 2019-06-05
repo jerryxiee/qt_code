@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QtQml>
 #include <QtMath>
+#include "settings/settings.h"
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -25,7 +26,7 @@ Widget::Widget(QWidget *parent) :
     }
     QQmlContext *context = mQuickWidget->rootContext();
     if(context){
-        context->setContextProperty("VideoControl",&mvideoControl);
+        context->setContextProperty("VideoControl",Settings::getVencIni());
     }
 
 

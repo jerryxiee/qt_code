@@ -1219,7 +1219,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
         return HI_FAILURE;
     }
 
-    SAMPLE_PRT("Chn(%d) VENC_Start Sucess! \n", m_Venc_Chn);
+//    SAMPLE_PRT("Chn(%d) VENC_Start Sucess! \n", m_Venc_Chn);
     return HI_SUCCESS;
 }
 #endif

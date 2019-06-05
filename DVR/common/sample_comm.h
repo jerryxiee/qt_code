@@ -372,6 +372,24 @@ typedef enum hiAudioCodecType
 }AudioCodecType;
 
 
+typedef enum StreamType{
+  MAINTYPE,
+  CHILDTYPE,
+  NUM
+}STREAMTYPE;
+
+typedef struct Vdec_param{
+    HI_BOOL mopen;
+    HI_U32 mainStream;    //主子码流
+    STREAMTYPE mstreamType;    //视频流、复合流
+    PIC_SIZE_E mvencSize;      //编码分辨率
+    SAMPLE_RC_E menRcMode;     //码率控制类型
+    HI_U32      mu32BitRate;   //码率大小
+    HI_U32      mu32Profile;   //图像等级
+    HI_FR32     mfr32DstFrmRate ; //编码帧率
+
+}VDEC_PARAM;   //编码参数配置
+
 
 /*******************************************************
     function announce  

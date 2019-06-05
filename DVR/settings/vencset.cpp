@@ -1,31 +1,16 @@
-#include "videocontrol.h"
-#include <QDebug>
-#include <QMetaType>
-#include <QFileInfo>
+#include "vencset.h"
+#include <QVariant>
 #include <QSettings>
+#include <QFileInfo>
+#include <QDebug>
 
-VideoControl::VideoControl(QObject *parent) : QObject(parent)
+
+VencSet::VencSet(QObject *parent) : QObject(parent)
 {
-
-//    qRegisterMetaType<STREAMTYPE>("STREAMTYPE");
-//    loadVideoConfig();
-
-    m_VencSet = Settings::getVencIni();
-
-    connect(m_VencSet,SIGNAL(vencAttrChanged(VI_CHN,HI_U32)),this,SLOT(onVencAttrChangedSlot(VI_CHN,HI_U32)));
-
+    loadVideoConfig();
 }
 
-VideoControl::~VideoControl()
-{
-#ifndef LUNUX_WIN
-    vio.Venc_exit();
-    vio.wait();
-#endif
-
-}
-
-QString VideoControl::vencToString(QString attr, QVariant &variant)
+QString VencSet::vencToString(QString attr, QVariant &variant)
 {
     QString ret;
 
@@ -77,7 +62,7 @@ QString VideoControl::vencToString(QString attr, QVariant &variant)
     return ret;
 }
 
-QVariant VideoControl::stringToVenc(QString &str)
+QVariant VencSet::stringToVenc(QString &str)
 {
     QVariant ret;
 
@@ -117,126 +102,10 @@ QVariant VideoControl::stringToVenc(QString &str)
     return ret;
 }
 
-void VideoControl::setVencAttr(QString Chn,QString mainStream,QString streamType,QString vencSize,QString enRcMode,
-                               QString profile,QString dstFrmRate,QString bitRate)
-{
-    VI_CHN chn = Chn.right(1).toInt();
-    HI_U32 stream = stringToVenc(mainStream).value<HI_U32>();
-    HI_BOOL change = HI_FALSE;
-    VDEC_PARAM attr = m_Vdec_Param[stream].at(chn);
-
-    qDebug("set attr chn(%d) stream(%d)\n",chn,stream);
-    if(stringToVenc(streamType).value<STREAMTYPE>() != attr.mstreamType ){
-        attr.mstreamType = stringToVenc(streamType).value<STREAMTYPE>();
-        change = HI_TRUE;
-    }
-    if(stringToVenc(vencSize).value<PIC_SIZE_E>() != attr.mvencSize){
-        attr.mvencSize = stringToVenc(vencSize).value<PIC_SIZE_E>();
-        change = HI_TRUE;
-    }
-
-    if(stringToVenc(enRcMode).value<SAMPLE_RC_E>() != attr.menRcMode){
-        attr.menRcMode = stringToVenc(enRcMode).value<SAMPLE_RC_E>();
-        change = HI_TRUE;
-    }
-    if(stringToVenc(profile).value<HI_U32>() != attr.mu32Profile){
-        attr.mu32Profile = stringToVenc(profile).value<HI_U32>();
-        change = HI_TRUE;
-    }
-    if(attr.mu32BitRate != bitRate.toUInt()){
-        attr.mu32BitRate = bitRate.toUInt();
-        change = HI_TRUE;
-    }
-    if(attr.mfr32DstFrmRate != dstFrmRate.toUInt()){
-        attr.mfr32DstFrmRate = dstFrmRate.toUInt();
-        change = HI_TRUE;
-    }
-
-    if(change){
-        m_Vdec_Param[stream].replace(chn,attr);
-        setVencConfig(chn,stream,attr);
-
-    }
-
-
-    qDebug()<<"Chn "+Chn<<endl
-            <<"mainStream "+mainStream<<endl
-            <<"streamType "+streamType<<endl
-            <<"vencSize "+vencSize<<endl
-            <<"enRcMode "+enRcMode<<endl
-            <<"bitRate "+bitRate<<endl
-            <<"profile "+profile<<endl
-            <<"dstFrmRate "+dstFrmRate<<endl;
-}
-//STREAMTYPE VideoControl::mainStrean() const
-//{
-//    qDebug()<<"read stream";
-//    return m_mainStream;
-//}
-//void VideoControl::setStream(STREAMTYPE &stream)
-//{
-//    m_mainStream = stream;
-//}
-
-////STREAMTYPE VideoControl::streanType() const
-////{
-////    return m_streamType;
-////}
-//void VideoControl::setStreamType(STREAMTYPE &streamType)
-//{
-//    m_streamType = streamType;
-//}
-
-//PIC_SIZE_E VideoControl::vencSize() const
-//{
-//    return m_vencSize;
-//}
-//void VideoControl::setVencSize(PIC_SIZE_E &streamType)
-//{
-//    m_vencSize = streamType;
-//}
-
-//SAMPLE_RC_E VideoControl::enRcMode() const
-//{
-//    return m_enRcMode;
-//}
-//void VideoControl::setEnRcMode(SAMPLE_RC_E &enRcMode)
-//{
-//    m_enRcMode = enRcMode;
-//}
-
-//HI_U32 VideoControl::bitRate() const
-//{
-//    return m_u32BitRate;
-//}
-//void VideoControl::setBitRate(HI_U32 &bitRate)
-//{
-//    m_u32BitRate = bitRate;
-//}
-
-//HI_U32 VideoControl::profile() const
-//{
-//    return m_u32Profile;
-//}
-//void VideoControl::setProfile(HI_U32 &profile)
-//{
-//    m_u32Profile = profile;
-//}
-
-
-//HI_FR32 VideoControl::frmRate() const
-//{
-//    return m_fr32DstFrmRate;
-//}
-//void VideoControl::setFrmRate(HI_FR32 &frmRate)
-//{
-//    m_fr32DstFrmRate = frmRate;
-//}
-
-HI_BOOL VideoControl::loadVideoConfig()
+HI_BOOL VencSet::loadVideoConfig()
 {
 #ifndef LUNUX_WIN
-    int vicnt = vio.m_ViChnCnt;
+    int vicnt = 8;//vio.m_ViChnCnt;
 #else
     int vicnt = 8;
 #endif
@@ -351,7 +220,7 @@ HI_BOOL VideoControl::loadVideoConfig()
 输出
     返回配置参数值
 *********************/
-QString VideoControl::readVencConfig(VI_CHN Chn,HI_U32 stream,QString str)
+QString VencSet::readVencConfig(VI_CHN Chn,HI_U32 stream,QString str)
 {
 //#ifndef LUNUX_WIN
     QFileInfo fileinfo(VIO_CONFIG_PATH);
@@ -376,7 +245,7 @@ QString VideoControl::readVencConfig(VI_CHN Chn,HI_U32 stream,QString str)
 
 *********************/
 
-void VideoControl::setVencConfig(VI_CHN Chn,HI_U32 stream,QString str,QString value)
+void VencSet::setVencConfig(VI_CHN Chn,HI_U32 stream,QString str,QString value)
 {
     QSettings vioConfig(VIO_CONFIG_PATH, QSettings::IniFormat);
     vioConfig.setValue("Channel"+QString::number(Chn)+"/stream"+QString::number(stream)+"/"+str,value);
@@ -390,7 +259,7 @@ void VideoControl::setVencConfig(VI_CHN Chn,HI_U32 stream,QString str,QString va
 
 *********************/
 
-void VideoControl::setVencConfig(VI_CHN Chn,HI_U32 stream,VDEC_PARAM &str)
+void VencSet::setVencConfig(VI_CHN Chn,HI_U32 stream,VDEC_PARAM &str)
 {
     QSettings *vioConfig = new QSettings(VIO_CONFIG_PATH, QSettings::IniFormat);
     QString result;
@@ -457,7 +326,7 @@ void VideoControl::setVencConfig(VI_CHN Chn,HI_U32 stream,VDEC_PARAM &str)
     str:读取配置参数
     成功返回true
 *********************/
-HI_BOOL VideoControl::readVencConfig(VI_CHN Chn,HI_U32 stream,VDEC_PARAM &str)
+HI_BOOL VencSet::readVencConfig(VI_CHN Chn,HI_U32 stream,VDEC_PARAM &str)
 {
     QFileInfo fileinfo(VIO_CONFIG_PATH);
     if(!fileinfo.exists())
@@ -519,66 +388,54 @@ HI_BOOL VideoControl::readVencConfig(VI_CHN Chn,HI_U32 stream,VDEC_PARAM &str)
 
 }
 
-HI_BOOL VideoControl::videoStart()
+void VencSet::setVencAttr(QString Chn,QString mainStream,QString streamType,QString vencSize,QString enRcMode,
+                               QString profile,QString dstFrmRate,QString bitRate)
 {
+    VI_CHN chn = Chn.right(1).toInt();
+    HI_U32 stream = stringToVenc(mainStream).value<HI_U32>();
+    HI_BOOL change = HI_FALSE;
+    VDEC_PARAM attr = m_Vdec_Param[stream].at(chn);
 
-//    qDebug()<<"m_Vdec_Param[0].count()="<<m_Vdec_Param[0].count();
-#ifndef LUNUX_WIN
-
-    vio.Vi_Start(VIDEO_ENCODING_MODE_AUTO);
-    vio.Vo_Start();
-    for(int i = 0; i < m_Vdec_Param[0].count();i++){
-        vio.Vi_Venc_Start(i,m_Vdec_Param[0][i].mvencSize,m_Vdec_Param[0][i].menRcMode,
-                m_Vdec_Param[0][i].mu32BitRate,m_Vdec_Param[0][i].mfr32DstFrmRate,m_Vdec_Param[0][i].mu32Profile);
+    qDebug("set attr chn(%d) stream(%d)\n",chn,stream);
+    if(stringToVenc(streamType).value<STREAMTYPE>() != attr.mstreamType ){
+        attr.mstreamType = stringToVenc(streamType).value<STREAMTYPE>();
+        change = HI_TRUE;
     }
-//    vio.Vi_Venc_Start();
-    vio.start();
-    vio.start_timer();
-
-    QObject::connect(&vio,SIGNAL(VistatusChanged(VI_CHN)),&vio,SLOT(onChangeStatus(VI_CHN)));
-    QObject::connect(&vio,SIGNAL(MakeNewFile(VI_CHN)),&vio,SLOT(onMakeNewFile(VI_CHN)));
-#endif
-    return HI_TRUE;
-}
-
-
-void VideoControl::onSet_VoMode(SAMPLE_VO_MODE_E &enVoMode)
-{
-    //qDebug()<<"get vo_mode:"<<enVoMode<<endl;
-#ifndef LUNUX_WIN
-    return vio.onSet_VoMode(enVoMode);
-#endif
-}
-
-void VideoControl::onDispChnToWin(QMap<VO_CHN, RECT_S> &ChnAttr)
-{
-#ifndef LUNUX_WIN
-    return vio.onDispChnToWin(ChnAttr);
-#endif
-
-}
-
-void VideoControl::onStopVoSlot()
-{
-#ifndef LUNUX_WIN
-    return vio.onStopVoSlot();
-#endif
-}
-
-void VideoControl::onVencAttrChangedSlot(VI_CHN Chn,HI_U32 stream)
-{
-    qDebug()<<"onVencAttrChangedSlot";
-
-    qDebug()<<"mvencSize"<<m_VencSet->m_Vdec_Param[stream][Chn].mvencSize<<endl
-            <<"menRcMode"<<m_VencSet->m_Vdec_Param[stream][Chn].menRcMode<<endl
-            <<"mu32BitRate"<<m_VencSet->m_Vdec_Param[stream][Chn].mu32BitRate<<endl
-            <<"mu32Profile"<<m_VencSet->m_Vdec_Param[stream][Chn].mu32Profile<<endl;
-
-    if(stream == 0){
-#ifndef LUNUX_WIN
-        vio.Set_VencAttr(Chn,m_VencSet->m_Vdec_Param[stream][Chn].mvencSize,m_VencSet->m_Vdec_Param[stream][Chn].menRcMode,
-                     m_VencSet->m_Vdec_Param[stream][Chn].mu32BitRate,m_VencSet->m_Vdec_Param[stream][Chn].mfr32DstFrmRate,
-                         m_VencSet->m_Vdec_Param[stream][Chn].mu32Profile);
-#endif
+    if(stringToVenc(vencSize).value<PIC_SIZE_E>() != attr.mvencSize){
+        attr.mvencSize = stringToVenc(vencSize).value<PIC_SIZE_E>();
+        change = HI_TRUE;
     }
+
+    if(stringToVenc(enRcMode).value<SAMPLE_RC_E>() != attr.menRcMode){
+        attr.menRcMode = stringToVenc(enRcMode).value<SAMPLE_RC_E>();
+        change = HI_TRUE;
+    }
+    if(stringToVenc(profile).value<HI_U32>() != attr.mu32Profile){
+        attr.mu32Profile = stringToVenc(profile).value<HI_U32>();
+        change = HI_TRUE;
+    }
+    if(attr.mu32BitRate != bitRate.toUInt()){
+        attr.mu32BitRate = bitRate.toUInt();
+        change = HI_TRUE;
+    }
+    if(attr.mfr32DstFrmRate != dstFrmRate.toUInt()){
+        attr.mfr32DstFrmRate = dstFrmRate.toUInt();
+        change = HI_TRUE;
+    }
+
+    if(change){
+        m_Vdec_Param[stream].replace(chn,attr);
+        setVencConfig(chn,stream,attr);
+
+    }
+
+
+    qDebug()<<"Chn "+Chn<<endl
+            <<"mainStream "+mainStream<<endl
+            <<"streamType "+streamType<<endl
+            <<"vencSize "+vencSize<<endl
+            <<"enRcMode "+enRcMode<<endl
+            <<"bitRate "+bitRate<<endl
+            <<"profile "+profile<<endl
+            <<"dstFrmRate "+dstFrmRate<<endl;
 }

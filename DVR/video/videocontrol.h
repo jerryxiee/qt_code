@@ -6,35 +6,19 @@
 #include <QDebug>
 #include <QList>
 
+#include "settings/settings.h"
 #include "common/sample_comm.h"
 #ifndef LUNUX_WIN
 #include "video/vio.h"
 #include <video/videoplay.h>
 #endif
 
-typedef enum StreamType{
-  MAINTYPE,
-  CHILDTYPE,
-  NUM
-}STREAMTYPE;
+//Q_DECLARE_METATYPE(VDEC_PARAM)
+//Q_DECLARE_METATYPE(STREAMTYPE)
+//Q_DECLARE_METATYPE(PIC_SIZE_E)
+//Q_DECLARE_METATYPE(SAMPLE_RC_E)
+//Q_DECLARE_METATYPE(HI_BOOL)
 
-typedef struct Vdec_param{
-    HI_BOOL mopen;
-    HI_U32 mainStream;    //主子码流
-    STREAMTYPE mstreamType;    //视频流、复合流
-    PIC_SIZE_E mvencSize;      //编码分辨率
-    SAMPLE_RC_E menRcMode;     //码率控制类型
-    HI_U32      mu32BitRate;   //码率大小
-    HI_U32      mu32Profile;   //图像等级
-    HI_FR32     mfr32DstFrmRate ; //编码帧率
-
-}VDEC_PARAM;   //编码参数配置
-
-Q_DECLARE_METATYPE(VDEC_PARAM)
-Q_DECLARE_METATYPE(STREAMTYPE)
-Q_DECLARE_METATYPE(PIC_SIZE_E)
-Q_DECLARE_METATYPE(SAMPLE_RC_E)
-Q_DECLARE_METATYPE(HI_BOOL)
 
 class VideoControl : public QObject
 {
@@ -134,6 +118,7 @@ private:
 #else
     const HI_CHAR * VIO_CONFIG_PATH = "/home/abhw/nfsroot/dvr_config/video.ini";
 #endif
+    VencSet *m_VencSet;
 
 };
 

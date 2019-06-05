@@ -38,7 +38,9 @@ SOURCES += \
         widget.cpp \
     windows/CustomControls/animationbutton.cpp \
     windows/MyModel/mytablemodel.cpp \
-    video/videocontrol.cpp
+    video/videocontrol.cpp \
+    settings/settings.cpp \
+    settings/vencset.cpp
 
 
 
@@ -47,7 +49,9 @@ HEADERS += \
         widget.h \
     windows/CustomControls/animationbutton.h \
     windows/MyModel/mytablemodel.h \
-    video/videocontrol.h
+    video/videocontrol.h \
+    settings/settings.h \
+    settings/vencset.h
 
 
 

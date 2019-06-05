@@ -8,31 +8,60 @@
 Vio::Vio(QObject *parent):QThread(parent),
     m_ViChnCnt(8),m_enVoMode(VO_MODE_9MUX)
 {
-    VO_DEV VoDev;
-    VO_LAYER VoLayer;
+//    VO_DEV VoDev;
+//    VO_LAYER VoLayer;
 
-    m_enType = PT_H264;
-    m_enSize = PIC_HD720;
-    m_enRcMode = SAMPLE_RC_VBR;
-    m_u32Profile = 0;
-    m_pFile.resize(m_ViChnCnt);
-    m_timer = nullptr;
-    m_pVpss = nullptr;
-    m_maxfd = 0;
-//    m_ViDetect = new QFileSystemWatcher(this);
-//    m_ViDetect->addPath(QString::fromLatin1(VI_STATUS_FILE));
-//    connect(this,SIGNAL(VistatusChanged(VI_CHN)),this,SLOT(onChangeStatus(VI_CHN)));
-    for(int i; i < m_ViChnCnt;i++){
-        m_ViStatus.insert("channel"+QString::number(i),false);
-    }
-    m_ViStatusChanged = HI_FALSE;
-    Sample_Common_Sys::Get_Sys_VoDev(VoDev,VoLayer);
-    m_Vo.SAMPLE_COMM_VO_SetDev(VoDev,VoLayer);
+//    m_enType = PT_H264;
+//    m_enSize = PIC_HD720;
+//    m_enRcMode = SAMPLE_RC_VBR;
+//    m_u32Profile = 0;
+//    m_pFile.resize(m_ViChnCnt);
+//    m_timer = nullptr;
+//    m_pVpss = nullptr;
+//    m_maxfd = 0;
+////    m_ViDetect = new QFileSystemWatcher(this);
+////    m_ViDetect->addPath(QString::fromLatin1(VI_STATUS_FILE));
+////    connect(this,SIGNAL(VistatusChanged(VI_CHN)),this,SLOT(onChangeStatus(VI_CHN)));
+//    for(int i; i < m_ViChnCnt;i++){
+//        m_ViStatus.insert("channel"+QString::number(i),false);
+//    }
+//    m_ViStatusChanged = HI_FALSE;
+//    Sample_Common_Sys::Get_Sys_VoDev(VoDev,VoLayer);
+//    m_Vo.SAMPLE_COMM_VO_SetDev(VoDev,VoLayer);
+    Init();
 
     qDebug()<<"vio start";
 
 }
 Vio::Vio(VI_CHN ViChnCnt, SAMPLE_VO_MODE_E enVoMode):m_ViChnCnt(ViChnCnt),m_enVoMode(enVoMode)
+{
+//    VO_DEV VoDev;
+//    VO_LAYER VoLayer;
+
+//    m_enType = PT_H264;
+//    m_enSize = PIC_HD720;
+//    m_enRcMode = SAMPLE_RC_VBR;
+//    m_u32Profile = 0;
+//    m_pFile.resize(m_ViChnCnt);
+//    m_timer = nullptr;
+//    m_pVpss = nullptr;
+//    m_maxfd = 0;
+////    m_ViDetect = new QFileSystemWatcher(this);
+////    m_ViDetect->addPath(QString::fromLatin1(VI_STATUS_FILE));
+////    connect(this,SIGNAL(VistatusChanged(VI_CHN)),this,SLOT(onChangeStatus(VI_CHN)));
+//    for(int i; i < m_ViChnCnt;i++){
+//        m_ViStatus.insert("channel"+QString::number(i),false);
+//    }
+//    m_ViStatusChanged = HI_FALSE;
+
+//    Sample_Common_Sys::Get_Sys_VoDev(VoDev,VoLayer);
+//    m_Vo.SAMPLE_COMM_VO_SetDev(VoDev,VoLayer);
+    Init();
+
+
+}
+
+void Vio::Init()
 {
     VO_DEV VoDev;
     VO_LAYER VoLayer;
@@ -55,7 +84,6 @@ Vio::Vio(VI_CHN ViChnCnt, SAMPLE_VO_MODE_E enVoMode):m_ViChnCnt(ViChnCnt),m_enVo
 
     Sample_Common_Sys::Get_Sys_VoDev(VoDev,VoLayer);
     m_Vo.SAMPLE_COMM_VO_SetDev(VoDev,VoLayer);
-
 
 }
 
@@ -553,7 +581,7 @@ END:
 HI_S32 Vio::Vi_Venc_Start()
 {
     VI_CHN i;
-    HI_S32 s32Ret;
+    HI_S32 s32Ret = HI_SUCCESS;
 
     for(i = 0;i < m_ViChnCnt;i++){
         m_pVenc[i] = new Sample_Common_Venc();
@@ -595,7 +623,7 @@ END_2:
 HI_S32 Vio::Vi_Venc_Start(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32BitRate,HI_FR32 frmRate,HI_U32 u32Profile)
 {
     HI_S32 s32Ret;
-    qDebug()<<"start venc chn "<<ViChnCnt;
+//    qDebug()<<"start venc chn "<<ViChnCnt;
     m_pVenc[ViChnCnt] = new Sample_Common_Venc();
     m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_SetAttr(m_enType,m_enNorm, enSize, enRcMode,u32BitRate,frmRate,u32Profile);
     s32Ret = m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_Start();
