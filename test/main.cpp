@@ -51,6 +51,8 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<MyTableViewModel>("MyTableViewModel", 1, 0, "MyTableViewModel");
 
+    qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
+
     QApplication a(argc, argv);
     Widget w;
     w.show();

@@ -30,5 +30,12 @@
         <file>qml/Controls/Datepicker.qml</file>
         <file>images/arrow_bc.png</file>
         <file>qml/Controls/images/arrow_bc.png</file>
+        <file>qml/Controls/Test.qml</file>
+        <file>qml/Controls/TestForm.ui.qml</file>
+        <file>qml/Controls/TimeInput.qml</file>
+        <file>qml/Controls/TimeInputForm.ui.qml</file>
+        <file>qml/Controls/time.qml</file>
+        <file>qml/Controls/Mydate.qml</file>
+        <file>qml/Controls/images/arrow.png</file>
     </qresource>
 </RCC>

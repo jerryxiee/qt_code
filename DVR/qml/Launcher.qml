@@ -11,7 +11,7 @@ Rectangle {
             flag:"qml"
             name:"录像查询"
             icon:"qrc:/images/video.jpg"
-            page:"qrc:/qml/video.qml"
+            page:"qrc:/qml/videoplay.qml"
         }
         ListElement{
             flag:"qml"

@@ -16,6 +16,7 @@ Item {
         }
     }
 
+
     Row{
 //        anchors.left: parent.left
 //        anchors.top: parent.top
@@ -188,6 +189,7 @@ Item {
                     ListElement{text:qsTr("1024")}
 
                 }
+                onPressedChanged:console.log("dfgdf")
             }
 
         }

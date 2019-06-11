@@ -52,5 +52,8 @@
         <file>qml/Controls/MyCheckBox.qml</file>
         <file>qml/Controls/DatePicker.qml</file>
         <file>qml/Controls/images/arrow_bc.png</file>
+        <file>qml/videoplay.qml</file>
+        <file>qml/Controls/images/arrow.png</file>
+        <file>qml/Controls/MyDateTime.qml</file>
     </qresource>
 </RCC>

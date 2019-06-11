@@ -10,8 +10,11 @@ TextField
         id: calendar
         anchors.topMargin: 0
         anchors.top: parent.bottom
+        width: parent.width
         visible: false
         activeFocusOnTab: true
+        z:10
+
         onReleased: {
             text = date;
             text = text.substr(0, 10);

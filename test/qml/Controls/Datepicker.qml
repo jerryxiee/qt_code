@@ -49,7 +49,20 @@ TextField
         anchors.top: parent.top
         anchors.topMargin: 0
         iconSource: "images/arrow_bc.png"
-        onClicked: calendar.visible = !calendar.visible
+        onClicked: {
+            rect.visible = !rect.visible
+
+//            calendar.visible = !calendar.visible
+        }
+    }
+
+    Rectangle{
+        id:rect
+        visible: false
+        width: 200
+        height: 300
+        anchors.top:parent.bottom
+        color: "blue"
     }
 
     onDateValueChanged: {

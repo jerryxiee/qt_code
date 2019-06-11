@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
 import MyTableViewModel 1.0
+import QtQuick.Dialogs 1.2
 import "Controls"
 
 Rectangle {
@@ -46,6 +47,13 @@ Rectangle {
     }
 
 
+    MessageDialog{
+        id:warning
+        text:"paramter error"
+
+        standardButtons:    StandardButton.Yes
+        onYes: console.log("yes")
+    }
 
     MyTableViewModel {
         id:dataModel
@@ -77,9 +85,11 @@ Rectangle {
 
                 Label{
                     id:findtype
-                    anchors.top: buttonEare.top
-                    anchors.topMargin: 100
-                    anchors.rightMargin: 20
+//                    anchors.top: buttonEare.top
+//                    x:20
+                    y:100
+//                    anchors.topMargin: 100
+//                    anchors.rightMargin: 20
                     text: qsTr("查询方式")
                     font.pixelSize: 18
 
@@ -141,60 +151,78 @@ Rectangle {
 
                 }
 
-                Column{
-                    x:starttime.width + 20; y:starttime.y
-                    Row{
+//                Column{
+//                    x:starttime.width + 20; y:starttime.y
+//                    Row{
 
-                        SpinBox{
-                            id:yearBox
-                            minimumValue:2019
-                            maximumValue: 2050
-//                            value: years
-
-
-                        }
-                        SpinBox{
-                            id:monthBox
-                            minimumValue:1
-                            maximumValue: 12
-//                            value: month
-
-                        }
-                        SpinBox{
-                            id:dayBox
-                            minimumValue:1
-                            maximumValue: 31
-//                            value: days
+//                        SpinBox{
+//                            id:yearBox
+//                            minimumValue:2019
+//                            maximumValue: 2050
+////                            value: years
 
 
-                        }
-                    }
+//                        }
+//                        SpinBox{
+//                            id:monthBox
+//                            minimumValue:1
+//                            maximumValue: 12
+////                            value: month
+
+//                        }
+//                        SpinBox{
+//                            id:dayBox
+//                            minimumValue:1
+//                            maximumValue: 31
+////                            value: days
+
+
+//                        }
+//                    }
 //                    DatePicker{
+//                        id:datetext
+//                        x:starttime.width + 20; y:starttime.y
 //                        width: 150
 //                               dateValue: (new Date()).toLocaleString(Qt.locale(), "yyyy-MM-dd")
-//                               onDateValueChanged: text = dateValue
+//                               onDateValueChanged: {
+//                                   console.log("x:"+x)
+//                                   text = dateValue
+//                               }
 //                    }
+                    MyDateTime{
+                        id:datedis
+                        x:starttime.width + 20; y:starttime.y
+                        width: 150
+                        height: starttime.height + 5
+                        text: (new Date()).toLocaleString(Qt.locale(), "yyyy/MM/dd")
 
-                    Row{
-                        SpinBox{
-                            id:hBox
-                            minimumValue:0
-                            maximumValue: 23
-                        }
-                        SpinBox{
-                            id:mBox
-                            minimumValue:0
-                            maximumValue: 59
+                //        onPressed: vkb.visible = true;
 
-                        }
-                        SpinBox{
-                            id:sBox
-                            minimumValue:0
-                            maximumValue: 59
-
-                        }
+                        onValueChanged: console.log("test value:"+value)
                     }
-                }
+
+//                    Row{
+//                        anchors.top: datetext.bottom
+//                        anchors.left: datetext.left
+//                        SpinBox{
+//                            id:hBox
+//                            minimumValue:0
+//                            maximumValue: 23
+//                        }
+//                        SpinBox{
+//                            id:mBox
+//                            minimumValue:0
+//                            maximumValue: 59
+
+//                        }
+//                        SpinBox{
+//                            id:sBox
+//                            minimumValue:0
+//                            maximumValue: 59
+
+//                        }
+//                    }
+//                }
 
                 Label{
                     id:endtime
@@ -255,6 +283,7 @@ Rectangle {
                     text: qsTr("播放")
                     anchors.top: endtime.bottom
                     anchors.topMargin: 40
+                    onClicked: warning.open()
 
                 }
 
@@ -269,7 +298,7 @@ Rectangle {
         }
         Column{
             Rectangle{
-                height: 20
+                height: 40
                 width: 1024
                 NaviButton {
                     id: filebackButton
@@ -278,8 +307,8 @@ Rectangle {
                     enabled: true
                     imageSource: "qrc:/images/left1.png"
                     anchors.left: parent.left
-                    imageheight: 20
-                    imagewidth: 20
+                    imageheight: 40
+                    imagewidth: 40
                     imageRotation:180
                     onClicked: {
                         dataModel.onBackButtonClickedSlot()
@@ -289,6 +318,8 @@ Rectangle {
                     id:filepath
                     text: dataModel.mCurrentPath
                     anchors.left:filebackButton.right
+                    anchors.verticalCenter: filebackButton.verticalCenter
+                    font.pixelSize: 24
                 }
             }
             TableView {
@@ -321,6 +352,8 @@ Rectangle {
             }
         }
     }
+
+//    Component.onCompleted: console.log("component")
 
 
 }
