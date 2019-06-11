@@ -54,7 +54,9 @@ Item {
 //        }
 //        Font{pixelSize: fontpixelSize}
     }
-
+    ExclusiveGroup{
+        id:boxexcl
+    }
     MyCheckBox{
         id:timeCheckbox2
         anchors.top: timeCheckbox1.top
@@ -63,6 +65,7 @@ Item {
         height: timesetchn.height
         checked: true
         pixSize:fontpixelSize
+        exclusiveGroup:boxexcl
 
         str: qsTr("全天录像")
     }
@@ -76,9 +79,11 @@ Item {
         height: timesetchn.height
         checked: false
         pixSize:fontpixelSize
+        exclusiveGroup:boxexcl
 
         str: qsTr("定时录像")
     }
+
 
     MyDateTime{
         id:sett
