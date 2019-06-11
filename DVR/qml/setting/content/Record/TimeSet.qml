@@ -80,15 +80,53 @@ Item {
         str: qsTr("定时录像")
     }
 
-    SpinBox{
-        id:timehBox
-        minimumValue:1
-        maximumValue: 31
+    MyDateTime{
+        id:sett
         anchors.left: timeCheckbox3.right
         anchors.leftMargin: 100
         anchors.verticalCenter: timeCheckbox3.verticalCenter
+        type: "time"
+        width: 150
+        height: timeCheckbox3.height
+        text: "00:00:00"//(new Date()).toLocaleString(Qt.locale(), "hh/mm/ss")
+
+//        onPressed: vkb.visible = true;
+
+        onValueChanged: console.log("test value:"+value)
+    }
+
+    Label{
+        id:lab
+        anchors.left: sett.right
+        anchors.leftMargin: 20
+        anchors.verticalCenter:sett.verticalCenter
+        text: "----"
 
     }
+    MyDateTime{
+        id:sett1
+        anchors.left: lab.right
+        anchors.leftMargin: 20
+        anchors.verticalCenter: lab.verticalCenter
+        type: "time"
+        width: 150
+        height: sett.height
+        text: "23:59:59"//(new Date()).toLocaleString(Qt.locale(), "hh/mm/ss")
+
+//        onPressed: vkb.visible = true;
+
+        onValueChanged: console.log("test value:"+value)
+    }
+
+//    SpinBox{
+//        id:timehBox
+//        minimumValue:1
+//        maximumValue: 31
+//        anchors.left: timeCheckbox3.right
+//        anchors.leftMargin: 100
+//        anchors.verticalCenter: timeCheckbox3.verticalCenter
+
+//    }
 
 
 }

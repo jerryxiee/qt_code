@@ -1,5 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
+import "Controls"
+
 
 Rectangle {
     id:mainItem
@@ -16,7 +18,7 @@ Rectangle {
         ListElement{
             flag:"qml"
             name:"设置"
-            icon:"qrc:/qml/setting/images/settings.png"
+            icon:"qrc:/qml/setting/images/set.jpg"
             page:"qrc:/qml/setting/Setting1.qml"
         }
         ListElement{

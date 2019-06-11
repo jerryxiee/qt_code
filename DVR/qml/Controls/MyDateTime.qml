@@ -7,7 +7,7 @@ FocusScope {
     id:root
 
     width: 150
-    height: 40
+    height: 30
 
     property string type: "date"
     property int curindex: 0
@@ -136,7 +136,7 @@ FocusScope {
         case 0:
             intnum = Number(strlist[0]);
             intnum++;
-            strlist[0] = intnum.toString();
+            strlist[0] = (intnum<10)?"0"+intnum.toString():intnum.toString();
             break;
         case 1:
             intnum = Number(strlist[1]);
@@ -210,7 +210,7 @@ FocusScope {
                 intnum--;
                 if(intnum < 0)
                     intnum = 0
-                strlist[0] = intnum.toString();
+                strlist[0] = (intnum<10)?"0"+intnum.toString():intnum.toString();
                 break;
             case 1:
                 intnum = Number(strlist[1]);
@@ -276,6 +276,7 @@ FocusScope {
         text:type=="date"?(new Date()).toLocaleString(Qt.locale(), "yyyy/MM/dd"):(new Date()).toLocaleString(Qt.locale(), "hh:mm:ss")
 
         inputMask: type=="date"?"0000/00/00":"00:00:00"
+        font.pixelSize:16
 
         Control1.Button{
             height:parent.height /2

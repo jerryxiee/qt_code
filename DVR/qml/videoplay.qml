@@ -190,16 +190,32 @@ Rectangle {
 //                               }
 //                    }
                     MyDateTime{
-                        id:datedis
+                        id:startd
                         x:starttime.width + 20; y:starttime.y
                         width: 150
-                        height: starttime.height + 5
+//                        height: starttime.height + 5
                         text: (new Date()).toLocaleString(Qt.locale(), "yyyy/MM/dd")
 
                 //        onPressed: vkb.visible = true;
 
                         onValueChanged: console.log("test value:"+value)
                     }
+
+                    MyDateTime{
+                        id:startt
+                        anchors.top: startd.bottom
+                        anchors.topMargin: 5
+                        anchors.left: startd.left
+                        type: "time"
+                        width: 150
+//                        height: starttime.height + 5
+                        text: (new Date()).toLocaleString(Qt.locale(), "hh/mm/ss")
+
+                //        onPressed: vkb.visible = true;
+
+                        onValueChanged: console.log("test value:"+value)
+                    }
+
 
 //                    Row{
 //                        anchors.top: datetext.bottom
@@ -227,62 +243,91 @@ Rectangle {
                 Label{
                     id:endtime
                     anchors.top: starttime.bottom
-                    anchors.topMargin: 40
+                    anchors.topMargin: 50
                     text: qsTr("结束时间")
                     font.pixelSize: 18
 
                 }
-                Column{
-                    x:endtime.width + 20; y:endtime.y
-                    Row{
+//                Column{
+//                    x:endtime.width + 20; y:endtime.y
 
-                        SpinBox{
-                            id:year1Box
-                            minimumValue:2019
-                            maximumValue: 2050
-//                            value: years
-                        }
-                        SpinBox{
-                            id:month1Box
-                            minimumValue:1
-                            maximumValue: 12
-//                            value: month
-                        }
-                        SpinBox{
-                            id:day1Box
-                            minimumValue:1
-                            maximumValue: 31
-//                            value: days
-                        }
+                    MyDateTime{
+                        id:endd
+                        x:endtime.width + 20; y:endtime.y
+                        width: 150
+//                        height: endtime.height + 5
+                        text: (new Date()).toLocaleString(Qt.locale(), "yyyy/MM/dd")
+
+                //        onPressed: vkb.visible = true;
+
+                        onValueChanged: console.log("test value:"+value)
                     }
 
-                    Row{
-                        SpinBox{
-                            id:h1Box
-                            minimumValue:0
-                            maximumValue: 23
-                            value: maximumValue
-                        }
-                        SpinBox{
-                            id:m1Box
-                            minimumValue:0
-                            maximumValue: 59
-                            value: maximumValue
-                        }
-                        SpinBox{
-                            id:s1Box
-                            minimumValue:0
-                            maximumValue: 59
-                            value: maximumValue
-                        }
+                    MyDateTime{
+                        id:endt
+                        anchors.top: endd.bottom
+                        anchors.topMargin: 5
+                        anchors.left: endd.left
+                        type: "time"
+                        width: 150
+//                        height: endtime.height + 5
+                        text: (new Date()).toLocaleString(Qt.locale(), "hh/mm/ss")
+
+                //        onPressed: vkb.visible = true;
+
+                        onValueChanged: console.log("test value:"+value)
                     }
-                }
+
+
+//                    Row{
+
+//                        SpinBox{
+//                            id:year1Box
+//                            minimumValue:2019
+//                            maximumValue: 2050
+////                            value: years
+//                        }
+//                        SpinBox{
+//                            id:month1Box
+//                            minimumValue:1
+//                            maximumValue: 12
+////                            value: month
+//                        }
+//                        SpinBox{
+//                            id:day1Box
+//                            minimumValue:1
+//                            maximumValue: 31
+////                            value: days
+//                        }
+//                    }
+
+//                    Row{
+//                        SpinBox{
+//                            id:h1Box
+//                            minimumValue:0
+//                            maximumValue: 23
+//                            value: maximumValue
+//                        }
+//                        SpinBox{
+//                            id:m1Box
+//                            minimumValue:0
+//                            maximumValue: 59
+//                            value: maximumValue
+//                        }
+//                        SpinBox{
+//                            id:s1Box
+//                            minimumValue:0
+//                            maximumValue: 59
+//                            value: maximumValue
+//                        }
+//                    }
+//                }
 
                 Button{
                     id:video
                     text: qsTr("播放")
                     anchors.top: endtime.bottom
-                    anchors.topMargin: 40
+                    anchors.topMargin: 60
                     onClicked: warning.open()
 
                 }

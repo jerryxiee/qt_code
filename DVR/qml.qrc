@@ -1,8 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>qml/video.qml</file>
-        <file>qml/NaviButton.qml</file>
-        <file>qml/MyButton.qml</file>
         <file>qml/main.qml</file>
         <file>qml/Launcher.qml</file>
         <file>images/video.jpg</file>
@@ -55,5 +53,8 @@
         <file>qml/videoplay.qml</file>
         <file>qml/Controls/images/arrow.png</file>
         <file>qml/Controls/MyDateTime.qml</file>
+        <file>qml/Controls/MyButton.qml</file>
+        <file>qml/Controls/NaviButton.qml</file>
+        <file>qml/setting/images/set.jpg</file>
     </qresource>
 </RCC>

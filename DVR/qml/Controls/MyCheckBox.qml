@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.2
 
 
-Rectangle {
+Item {
 
     property string str:""
     property int pixSize:25
