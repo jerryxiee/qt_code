@@ -324,9 +324,11 @@ Rectangle {
 //                }
 
                 Button{
-                    id:video
+                    id:play
                     text: qsTr("播放")
                     anchors.top: endtime.bottom
+                    anchors.left: parent.left
+                    anchors.leftMargin: 20
                     anchors.topMargin: 60
                     onClicked: warning.open()
 
@@ -335,7 +337,30 @@ Rectangle {
                 Button{
                     id:check
                     text: qsTr("查询")
-                    x:video.width + 20; y:video.y
+                    anchors.verticalCenter: play.verticalCenter
+                    anchors.left: play.right
+                    anchors.leftMargin: 30
+//                    x:video.width + 20; y:video.y
+
+                }
+
+                Button{
+                    id:preview
+                    text: qsTr("预览")
+                    anchors.top: play.bottom
+                    anchors.topMargin: 20
+                    anchors.left: play.left
+//                    anchors.leftMargin: 20
+
+                }
+
+                Button{
+                    id:cancel
+                    text: qsTr("取消")
+                    anchors.verticalCenter: preview.verticalCenter
+                    anchors.left: preview.right
+                    anchors.leftMargin: 30
+//                    x:video.width + 20; y:video.y
 
                 }
 

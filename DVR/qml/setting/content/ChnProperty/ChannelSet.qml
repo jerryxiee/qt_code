@@ -14,23 +14,23 @@ Item {
 
         Tab{
             title: "Normal"
-//            NormalSet{
-//                index:0
+            NormalSet{
+                index:0
 
-//            }
+            }
         }
 
         Tab{
             title: "Position"
-//            TimeSet{
-//                index:1
-//            }
+            Position{
+                index:1
+            }
         }
         Tab{
             title: "Other"
-//            OtherSet{
-//                index:2
-//            }
+            OtherSet{
+                index:2
+            }
         }
     }
 
