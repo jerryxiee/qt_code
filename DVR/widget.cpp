@@ -26,7 +26,7 @@ Widget::Widget(QWidget *parent) :
     }
     QQmlContext *context = mQuickWidget->rootContext();
     if(context){
-        context->setContextProperty("VideoControl",Settings::getVencIni());
+        context->setContextProperty("VencControl",Settings::getVencIni());
     }
 
 

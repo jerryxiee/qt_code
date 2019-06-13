@@ -43,6 +43,8 @@ int main(int argc, char *argv[])
     QDateTime current_date_time =QDateTime::currentDateTime();
     QString current_date =current_date_time.toString("yyyy-MM-dd-hh-mm-ss");
     qDebug()<<current_date;
+//    qDebug()<<current_date_time.toTime_t();
+//    qDebug()<<QDateTime::fromString(current_date,"yyyy-MM-dd-hh-mm-ss").toTime_t();
     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
 
     QApplication a(argc, argv);

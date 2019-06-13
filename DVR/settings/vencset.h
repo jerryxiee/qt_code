@@ -18,11 +18,11 @@ public:
     explicit VencSet(QObject *parent = nullptr);
 
     HI_BOOL loadVideoConfig();
-    QString readVencConfig(VI_CHN Chn,HI_U32 stream,QString str);
-    HI_BOOL readVencConfig(VI_CHN Chn,HI_U32 stream,VDEC_PARAM &str);
+    Q_INVOKABLE QString readVencConfig(int Chn,uint stream,QString str);
+    HI_BOOL readVencConfig(int Chn,uint stream,VDEC_PARAM &str);
 
-    void setVencConfig(VI_CHN Chn,HI_U32 stream,QString str,QString value);
-    void setVencConfig(VI_CHN Chn,HI_U32 stream,VDEC_PARAM &str);
+    Q_INVOKABLE void setVencConfig(int Chn,uint stream,QString str,QString value);
+    void setVencConfig(int Chn,uint stream,VDEC_PARAM &str);
 
     Q_INVOKABLE void setVencAttr(QString Chn,QString mainStream,QString streamType,QString vencSize,QString enRcMode,
                                  QString profile,QString dstFrmRate,QString bitRate);

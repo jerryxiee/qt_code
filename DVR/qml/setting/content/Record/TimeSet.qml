@@ -11,6 +11,14 @@ Item {
         target: record
         onPressed:{
             if(setindex == index){
+                console.log(timesetchnBox.currentIndex)
+                console.log(timeCheckbox1.checked)
+                VencControl.setVencConfig(timesetchnBox.currentIndex,0,"open",timeCheckbox1.checked.toString())
+                if(timeCheckbox2.checked){
+                    VencControl.setVencConfig(timesetchnBox.currentIndex,0,"RecordTime","null")
+                }else{
+                    VencControl.setVencConfig(timesetchnBox.currentIndex,0,"RecordTime",sett.text+"-"+sett1.text)
+                }
 
             }
         }

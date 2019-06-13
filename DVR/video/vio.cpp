@@ -103,15 +103,15 @@ Vio::~Vio()
     }
 //    qDebug()<<"delete timer";
 
-    m_Vi.SAMPLE_COMM_VI_UnBindVpss(enViMode,m_pVpss->m_Grp_Tab,m_ViChnCnt);
+    m_Vi.SAMPLE_COMM_VI_UnBindVpss(enViMode,m_Vpss.m_Grp_Tab,m_ViChnCnt);
     for(i=0;i<m_ViChnCnt;i++){
-        m_Vo.SAMPLE_COMM_VO_UnBindVpss(i,m_pVpss->m_Grp_Tab[i],m_VoBindVpss);
+        m_Vo.SAMPLE_COMM_VO_UnBindVpss(i,m_Vpss.m_Grp_Tab[i],m_VoBindVpss);
 //        m_pVenc[i]->SAMPLE_COMM_VENC_Stop();
 //        m_pVenc[i]->SAMPLE_COMM_VENC_UnBindVpss(m_pVpss->m_Grp_Tab[i], m_VencBindVpss);
     }
 
-    m_pVpss->SAMPLE_COMM_VPSS_Stop();
-    delete m_pVpss;
+//    m_pVpss->SAMPLE_COMM_VPSS_Stop();
+//    delete m_pVpss;
     m_Vo.SAMPLE_COMM_VO_StopChn();
     m_Vo.SAMPLE_COMM_VO_StopLayer();
     m_Vi.SAMPLE_COMM_VI_Stop(enViMode);
@@ -369,7 +369,7 @@ HI_BOOL Vio::Vo_Start()
 
     for(i=0;i<m_ViChnCnt;i++)
     {
-        s32Ret = m_Vo.SAMPLE_COMM_VO_BindVpss(i,m_pVpss->m_Grp_Tab[i],m_VoBindVpss);
+        s32Ret = m_Vo.SAMPLE_COMM_VO_BindVpss(i,m_Vpss.m_Grp_Tab[i],m_VoBindVpss);
         if (HI_SUCCESS != s32Ret)
         {
             SAMPLE_PRT("Start VO failed!\n");
@@ -382,7 +382,7 @@ HI_BOOL Vio::Vo_Start()
 
 END_3:
     for(i=0;i<m_ViChnCnt;i++){
-        m_Vo.SAMPLE_COMM_VO_UnBindVpss(i,m_pVpss->m_Grp_Tab[i],m_VoBindVpss);
+        m_Vo.SAMPLE_COMM_VO_UnBindVpss(i,m_Vpss.m_Grp_Tab[i],m_VoBindVpss);
     }
 END_2:
     m_Vo.SAMPLE_COMM_VO_StopChn();
@@ -398,7 +398,7 @@ HI_BOOL Vio::Vo_Start(VO_CHN Vo_Chn, RECT_S &pos)
     if(m_Vo.SAMPLE_COMM_VO_StartChn(Vo_Chn,pos) < 0){
         return HI_FALSE;
     }
-    return (m_Vo.SAMPLE_COMM_VO_BindVpss(Vo_Chn,m_pVpss->m_Grp_Tab[Vo_Chn],m_VoBindVpss)) < 0 ?HI_FALSE:HI_TRUE;
+    return (m_Vo.SAMPLE_COMM_VO_BindVpss(Vo_Chn,m_Vpss.m_Grp_Tab[Vo_Chn],m_VoBindVpss)) < 0 ?HI_FALSE:HI_TRUE;
 }
 
 HI_BOOL Vio::Vo_Stop(VO_CHN Vo_Chn)
@@ -406,11 +406,11 @@ HI_BOOL Vio::Vo_Stop(VO_CHN Vo_Chn)
     HI_S32 i;
 
     if(Vo_Chn >= 0){
-        m_Vo.SAMPLE_COMM_VO_UnBindVpss(Vo_Chn,m_pVpss->m_Grp_Tab[Vo_Chn],m_VoBindVpss);
+        m_Vo.SAMPLE_COMM_VO_UnBindVpss(Vo_Chn,m_Vpss.m_Grp_Tab[Vo_Chn],m_VoBindVpss);
         return m_Vo.SAMPLE_COMM_VO_StopChn(Vo_Chn) > 0 ? HI_TRUE:HI_TRUE;
     }
     for(i = 0; i < m_ViChnCnt; i++){
-        m_Vo.SAMPLE_COMM_VO_UnBindVpss(i,m_pVpss->m_Grp_Tab[i],m_VoBindVpss);
+        m_Vo.SAMPLE_COMM_VO_UnBindVpss(i,m_Vpss.m_Grp_Tab[i],m_VoBindVpss);
     }
 
     m_Vo.SAMPLE_COMM_VO_StopChn();
@@ -430,6 +430,7 @@ void Vio::onStopVoSlot()
     qDebug()<<"stop vo";
 }
 
+#if 0
 HI_BOOL Vio::Vi_Start(VIDEO_NORM_E enNorm)
 {
     HI_S32 s32Ret = HI_SUCCESS;
@@ -504,6 +505,44 @@ END_VI_START:
 
 
 }
+#endif
+
+HI_BOOL Vio::Vi_Start(VIDEO_NORM_E enNorm,Sample_Common_Vpss *vpss)
+{
+    HI_S32 s32Ret = HI_SUCCESS;
+
+    m_enNorm = enNorm;
+    m_Vpss = vpss;
+    /*** Start AD ***/
+    s32Ret = m_Vi.SAMPLE_COMM_VI_ADStart(enViMode, enNorm);
+    if (HI_SUCCESS !=s32Ret)
+    {
+        SAMPLE_PRT("Start AD failed!\n");
+        return HI_FALSE;
+    }
+
+    s32Ret = m_Vi.SAMPLE_COMM_VI_Start(enViMode, enNorm);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("start vi failed!\n");
+        goto END_VI_START;
+    }
+
+    s32Ret = m_Vi.SAMPLE_COMM_VI_BindVpss(enViMode,m_Vpss.m_Grp_Tab,m_ViChnCnt);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Vi bind Vpss failed!\n");
+        goto END_VI_START;
+    }
+
+
+    return HI_TRUE;
+
+END_VI_START:
+    m_Vi.SAMPLE_COMM_VI_Stop(enViMode);
+
+    return HI_FALSE;
+}
 
 void Vio::onSet_VoMode(SAMPLE_VO_MODE_E &enVoMode)
 {
@@ -539,7 +578,7 @@ HI_S32 Vio::Set_VencAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,
         goto END;
     }
 
-    s32Ret = m_pVpss->SAMPLE_COMM_VPSS_GetChnMod(ViChnCnt,m_VencBindVpss,&stVpssMode);
+    s32Ret = m_Vpss.SAMPLE_COMM_VPSS_GetChnMod(ViChnCnt,m_VencBindVpss,&stVpssMode);
     if (HI_SUCCESS != s32Ret)
     {
         SAMPLE_PRT("GetChnMod failed!\n");
@@ -556,7 +595,7 @@ HI_S32 Vio::Set_VencAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,
     stVpssMode.u32Width = stPicSize.u32Width;
     stVpssMode.u32Height = stPicSize.u32Height;
 
-    s32Ret = m_pVpss->SAMPLE_COMM_VPSS_SetChnMod(ViChnCnt,m_VencBindVpss,&stVpssMode,0);
+    s32Ret = m_Vpss.SAMPLE_COMM_VPSS_SetChnMod(ViChnCnt,m_VencBindVpss,&stVpssMode,0);
     if (HI_SUCCESS != s32Ret)
     {
         SAMPLE_PRT("SetChnMod failed!\n");
@@ -593,7 +632,7 @@ HI_S32 Vio::Vi_Venc_Start()
             goto END_1;
         }
 
-        s32Ret = m_pVenc[i]->SAMPLE_COMM_VENC_BindVpss(m_pVpss->m_Grp_Tab[i], m_VencBindVpss);
+        s32Ret = m_pVenc[i]->SAMPLE_COMM_VENC_BindVpss(m_Vpss.m_Grp_Tab[i], m_VencBindVpss);
         if (HI_SUCCESS != s32Ret)
         {
             SAMPLE_PRT("Start Venc failed!\n");
@@ -609,12 +648,12 @@ END_1:
     m_pVenc[i]->SAMPLE_COMM_VENC_Stop();
     for(i--;i >= 0;i--){
         m_pVenc[i]->SAMPLE_COMM_VENC_Stop();
-        m_pVenc[i]->SAMPLE_COMM_VENC_UnBindVpss(m_pVpss->m_Grp_Tab[i], m_VencBindVpss);
+        m_pVenc[i]->SAMPLE_COMM_VENC_UnBindVpss(m_Vpss.m_Grp_Tab[i], m_VencBindVpss);
     }
 END_2:
     for(;i >= 0;i--){
         m_pVenc[i]->SAMPLE_COMM_VENC_Stop();
-        m_pVenc[i]->SAMPLE_COMM_VENC_UnBindVpss(m_pVpss->m_Grp_Tab[i], m_VencBindVpss);
+        m_pVenc[i]->SAMPLE_COMM_VENC_UnBindVpss(m_Vpss.m_Grp_Tab[i], m_VencBindVpss);
     }
 
     return s32Ret;
@@ -633,7 +672,7 @@ HI_S32 Vio::Vi_Venc_Start(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode
         goto END_1;
     }
 
-    s32Ret = m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_BindVpss(m_pVpss->m_Grp_Tab[ViChnCnt], m_VencBindVpss);
+    s32Ret = m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_BindVpss(m_Vpss.m_Grp_Tab[ViChnCnt], m_VencBindVpss);
     if (HI_SUCCESS != s32Ret)
     {
         SAMPLE_PRT("Start Venc failed!\n");
@@ -642,7 +681,7 @@ HI_S32 Vio::Vi_Venc_Start(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode
 
     return s32Ret;
 END_2:
-    m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_UnBindVpss(m_pVpss->m_Grp_Tab[ViChnCnt], m_VencBindVpss);
+    m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_UnBindVpss(m_Vpss.m_Grp_Tab[ViChnCnt], m_VencBindVpss);
 END_1:
     m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_Stop();
     return s32Ret;
@@ -653,7 +692,7 @@ HI_S32 Vio::Vi_Venc_Stop(VI_CHN ViChnCnt)
     HI_S32 s32Ret;
 
 
-    s32Ret = m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_UnBindVpss(m_pVpss->m_Grp_Tab[ViChnCnt], m_VencBindVpss);
+    s32Ret = m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_UnBindVpss(m_Vpss.m_Grp_Tab[ViChnCnt], m_VencBindVpss);
     if (HI_SUCCESS != s32Ret)
     {
         SAMPLE_PRT("SAMPLE_COMM_VENC_UnBindVpss failed!\n");
@@ -675,6 +714,7 @@ HI_S32 Vio::Vi_Venc_Stop(VI_CHN ViChnCnt)
 void Vio::run()
 {
     HI_S32 i = 0;
+    HI_S32 count;
     struct timeval TimeoutVal;
     fd_set read_fds;
 
@@ -813,16 +853,19 @@ void Vio::run()
     /*******************************************************
      step 3 : close save-file
     *******************************************************/
+    count = m_VencChnPara.count();
     m_file_mutex.lock();
-    for (i = 0; i < m_VencChnPara.count(); i++)
+    for (i = 0; i < count; i++)
     {  
-        m_pVenc[i]->SAMPLE_COMM_VENC_Stop();
-        m_pVenc[i]->SAMPLE_COMM_VENC_UnBindVpss(m_pVpss->m_Grp_Tab[i], m_VencBindVpss);
-        delete m_pVenc[i];
+        m_pVenc[m_VencChnPara[i].Vi_Chn]->SAMPLE_COMM_VENC_Stop();
+        m_pVenc[m_VencChnPara[i].Vi_Chn]->SAMPLE_COMM_VENC_UnBindVpss(m_Vpss.m_Grp_Tab[m_VencChnPara[i].Vi_Chn], m_VencBindVpss);
+        delete m_pVenc[m_VencChnPara[i].Vi_Chn];
         fclose(m_VencChnPara[i].pFile);
-        m_VencChnPara.removeAt(i);
+//        m_VencChnPara.removeAt(i);
+//        qDebug()<<"stop venc"<<i<<"/"<<m_VencChnPara.count();
 
     }
+    m_VencChnPara.clear();
     m_file_mutex.unlock();
     return;
 }

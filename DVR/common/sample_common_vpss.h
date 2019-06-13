@@ -8,7 +8,9 @@ class Sample_Common_Vpss
 public:
     Sample_Common_Vpss();
     Sample_Common_Vpss(Sample_Common_Vpss &Sample_Vpss);
+    Sample_Common_Vpss(Sample_Common_Vpss *Sample_Vpss);
     Sample_Common_Vpss & operator = (const Sample_Common_Vpss & Sample_Vpss);
+    Sample_Common_Vpss & operator = (const Sample_Common_Vpss * Sample_Vpss);
     Sample_Common_Vpss(HI_U32 u32GrpCnt,HI_U32 s32ChnCnt,SIZE_S *pstSize,VPSS_GRP_ATTR_S *pstVpssGrpAttr);
     ~Sample_Common_Vpss();
 

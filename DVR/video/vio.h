@@ -29,6 +29,7 @@ public:
     ~Vio();
 
     HI_BOOL Vi_Start(VIDEO_NORM_E enNorm);
+    HI_BOOL Vi_Start(VIDEO_NORM_E enNorm, Sample_Common_Vpss *vpss);
     HI_BOOL Vi_stop();
     HI_BOOL Vo_Start();
     HI_BOOL Vo_Start(VO_CHN Vo_Chn,RECT_S &pos);
@@ -76,7 +77,8 @@ public:
 //    Sample_Common_Vio m_Vio;
     Sample_Common_Vo m_Vo;
     SAMPLE_VO_MODE_E m_enVoMode;
-    Sample_Common_Vpss *m_pVpss;
+//    Sample_Common_Vpss *m_pVpss;
+    Sample_Common_Vpss m_Vpss;
     Sample_Common_Venc *m_pVenc[VENC_MAX_CHN_NUM];
     //Sample_Common_Vpss *m_pVpss[VPSS_MAX_GRP_NUM];
 

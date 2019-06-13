@@ -10,7 +10,7 @@ Item {
         target: record
         onPressed:{
             if(setindex == index){
-                VideoControl.setVencAttr(setchnBox.currentText,setStreamBox.currentText,setStreamTypeBox.currentText,resolutionBox.currentText,
+                VencControl.setVencAttr(setchnBox.currentText,setStreamBox.currentText,setStreamTypeBox.currentText,resolutionBox.currentText,
                                          bitRateTyprBox.currentText,imageQualityBox.currentText,frameRateBox.currentText,bitRateBox.currentText)
             }
         }

@@ -220,7 +220,7 @@ HI_BOOL VencSet::loadVideoConfig()
 输出
     返回配置参数值
 *********************/
-QString VencSet::readVencConfig(VI_CHN Chn,HI_U32 stream,QString str)
+QString VencSet::readVencConfig(int Chn,uint stream,QString str)
 {
 //#ifndef LUNUX_WIN
     QFileInfo fileinfo(VIO_CONFIG_PATH);
@@ -245,7 +245,7 @@ QString VencSet::readVencConfig(VI_CHN Chn,HI_U32 stream,QString str)
 
 *********************/
 
-void VencSet::setVencConfig(VI_CHN Chn,HI_U32 stream,QString str,QString value)
+void VencSet::setVencConfig(int Chn,uint stream,QString str,QString value)
 {
     QSettings vioConfig(VIO_CONFIG_PATH, QSettings::IniFormat);
     vioConfig.setValue("Channel"+QString::number(Chn)+"/stream"+QString::number(stream)+"/"+str,value);
@@ -259,7 +259,7 @@ void VencSet::setVencConfig(VI_CHN Chn,HI_U32 stream,QString str,QString value)
 
 *********************/
 
-void VencSet::setVencConfig(VI_CHN Chn,HI_U32 stream,VDEC_PARAM &str)
+void VencSet::setVencConfig(int Chn,uint stream,VDEC_PARAM &str)
 {
     QSettings *vioConfig = new QSettings(VIO_CONFIG_PATH, QSettings::IniFormat);
     QString result;
@@ -326,7 +326,7 @@ void VencSet::setVencConfig(VI_CHN Chn,HI_U32 stream,VDEC_PARAM &str)
     str:读取配置参数
     成功返回true
 *********************/
-HI_BOOL VencSet::readVencConfig(VI_CHN Chn,HI_U32 stream,VDEC_PARAM &str)
+HI_BOOL VencSet::readVencConfig(int Chn,uint stream,VDEC_PARAM &str)
 {
     QFileInfo fileinfo(VIO_CONFIG_PATH);
     if(!fileinfo.exists())

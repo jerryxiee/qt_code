@@ -12,6 +12,7 @@
 #include <math.h>
 #include <unistd.h>
 #include <signal.h>
+#include <QDebug>
 
 #include "sample_common_vpss.h"
 
@@ -45,23 +46,47 @@ Sample_Common_Vpss::Sample_Common_Vpss()
 
 Sample_Common_Vpss::Sample_Common_Vpss(Sample_Common_Vpss &Sample_Vpss)
 {
+    qDebug("%s:%d\n",__FUNCTION__,__LINE__);
     m_Chn_Num   = Sample_Vpss.m_Chn_Num;
     m_Grp_Num   = Sample_Vpss.m_Grp_Num;
     memcpy(m_Grp_Tab,Sample_Vpss.m_Grp_Tab,sizeof (HI_U32) * m_Grp_Num);
 //    memcpy(m_pstVpssGrpAttr,Sample_Vpss.m_pstVpssGrpAttr,sizeof (VPSS_GRP_ATTR_S) * m_Grp_Num);
+}
+
+Sample_Common_Vpss::Sample_Common_Vpss(Sample_Common_Vpss *Sample_Vpss)
+{
+    qDebug("%s:%d\n",__FUNCTION__,__LINE__);
+    m_Chn_Num   = Sample_Vpss->m_Chn_Num;
+    m_Grp_Num   = Sample_Vpss->m_Grp_Num;
+    memcpy(m_Grp_Tab,Sample_Vpss->m_Grp_Tab,sizeof (HI_U32) * m_Grp_Num);
 }
 
 Sample_Common_Vpss & Sample_Common_Vpss::operator = (const Sample_Common_Vpss & Sample_Vpss)
 {
-    if(this == &Sample_Vpss)
-        return *this;
+    qDebug("%s:%d\n",__FUNCTION__,__LINE__);
+    if(this == &Sample_Vpss){
+        m_Chn_Num   = Sample_Vpss.m_Chn_Num;
+        m_Grp_Num   = Sample_Vpss.m_Grp_Num;
+        memcpy(m_Grp_Tab,Sample_Vpss.m_Grp_Tab,sizeof (HI_U32) * m_Grp_Num);
+    //    memcpy(m_pstVpssGrpAttr,Sample_Vpss.m_pstVpssGrpAttr,sizeof (VPSS_GRP_ATTR_S) * m_Grp_Num);
+    }
 
-    m_Chn_Num   = Sample_Vpss.m_Chn_Num;
-    m_Grp_Num   = Sample_Vpss.m_Grp_Num;
-    memcpy(m_Grp_Tab,Sample_Vpss.m_Grp_Tab,sizeof (HI_U32) * m_Grp_Num);
-//    memcpy(m_pstVpssGrpAttr,Sample_Vpss.m_pstVpssGrpAttr,sizeof (VPSS_GRP_ATTR_S) * m_Grp_Num);
+    return *this;
+}
+
+Sample_Common_Vpss & Sample_Common_Vpss::operator = (const Sample_Common_Vpss * Sample_Vpss)
+{
+    qDebug("%s:%d\n",__FUNCTION__,__LINE__);
+    if(this != Sample_Vpss){
+        m_Chn_Num   = Sample_Vpss->m_Chn_Num;
+        m_Grp_Num   = Sample_Vpss->m_Grp_Num;
+        memcpy(m_Grp_Tab,Sample_Vpss->m_Grp_Tab,sizeof (HI_U32) * m_Grp_Num);
+    }
+
+    return *this;
 
 }
+
 Sample_Common_Vpss::Sample_Common_Vpss(HI_U32 u32GrpCnt,HI_U32 u32ChnCnt,SIZE_S *pstSize,VPSS_GRP_ATTR_S *pstVpssGrpAttr)
     :m_Chn_Num(u32ChnCnt)
 {
@@ -92,9 +117,9 @@ Sample_Common_Vpss::Sample_Common_Vpss(HI_U32 u32GrpCnt,HI_U32 u32ChnCnt,SIZE_S 
 
 Sample_Common_Vpss::~Sample_Common_Vpss()
 {
-    for(int i = 0;i < m_Grp_Num;i++){
-        m_Grp_MaxTable[m_Grp_Tab[i]] = 0;
-    }
+//    for(int i = 0;i < m_Grp_Num;i++){
+//        m_Grp_MaxTable[m_Grp_Tab[i]] = 0;
+//    }
     printf("exit %s\n",__FUNCTION__);
 
 }
