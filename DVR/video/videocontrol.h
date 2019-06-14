@@ -38,6 +38,7 @@ public slots:
     void onDispChnToWin(QMap<VO_CHN, RECT_S> &);
     void onStopVoSlot();
     void onVencAttrChangedSlot(VI_CHN Chn,HI_U32 stream);
+    void onVencStatusChanged(VI_CHN Chn,bool start);
 
 
 public:

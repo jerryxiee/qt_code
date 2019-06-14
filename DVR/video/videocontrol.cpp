@@ -14,6 +14,8 @@ VideoControl::VideoControl(QObject *parent) : QObject(parent)
     m_VencSet = Settings::getVencIni();
 
     connect(m_VencSet,SIGNAL(vencAttrChanged(VI_CHN,HI_U32)),this,SLOT(onVencAttrChangedSlot(VI_CHN,HI_U32)));
+    connect(m_VencSet,SIGNAL(vencStatusChanged(VI_CHN,bool)),this,SLOT(onVencStatusChanged(VI_CHN,bool)));
+
 
 }
 
@@ -55,6 +57,7 @@ HI_BOOL VideoControl::videoStart()
     for(int i = 0; i < m_VencSet->m_Vdec_Param[0].count();i++){
         vio.Vi_Venc_Start(i,m_VencSet->m_Vdec_Param[0][i].mvencSize,m_VencSet->m_Vdec_Param[0][i].menRcMode,
                 m_VencSet->m_Vdec_Param[0][i].mu32BitRate,m_VencSet->m_Vdec_Param[0][i].mfr32DstFrmRate,m_VencSet->m_Vdec_Param[0][i].mu32Profile);
+        vio.Vi_Venc_SetStatus(i,m_VencSet->m_Vdec_Param[0][i].mopen);
     }
 //    vio.Vi_Venc_Start();
     vio.start();
@@ -114,4 +117,12 @@ void VideoControl::onVencAttrChangedSlot(VI_CHN Chn,HI_U32 stream)
                          m_VencSet->m_Vdec_Param[stream][Chn].mu32Profile);
 #endif
     }
+}
+
+void VideoControl::onVencStatusChanged(VI_CHN Chn,bool start)
+{
+    qDebug("%s:%d",__FUNCTION__,__LINE__);
+#ifndef LUNUX_WIN
+    vio.Vi_Venc_SetStatus(Chn,start);
+#endif
 }

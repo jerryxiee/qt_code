@@ -77,8 +77,9 @@ Rectangle {
             imagewidth: 40
 
             onClicked: {
-                hidqmlsignal()
+
                 stackview.pop(null)
+                hidqmlsignal()
             }
         }
 

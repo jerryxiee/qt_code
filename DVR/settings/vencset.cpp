@@ -249,6 +249,8 @@ void VencSet::setVencConfig(int Chn,uint stream,QString str,QString value)
 {
     QSettings vioConfig(VIO_CONFIG_PATH, QSettings::IniFormat);
     vioConfig.setValue("Channel"+QString::number(Chn)+"/stream"+QString::number(stream)+"/"+str,value);
+
+
 }
 
 /*******************
@@ -438,4 +440,16 @@ void VencSet::setVencAttr(QString Chn,QString mainStream,QString streamType,QStr
             <<"bitRate "+bitRate<<endl
             <<"profile "+profile<<endl
             <<"dstFrmRate "+dstFrmRate<<endl;
+}
+
+
+void VencSet::setVencOpen(int Chn,QString value)
+{
+    if(readVencConfig(Chn,0,"open") != value){
+        QVariant tempValue = value;
+        emit vencStatusChanged(Chn,tempValue.toBool());
+        qDebug("%s:%d",__FUNCTION__,__LINE__);
+        setVencConfig(Chn,0,"open",value);
+    }
+
 }

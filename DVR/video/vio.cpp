@@ -72,13 +72,13 @@ void Vio::Init()
     m_u32Profile = 0;
     m_pFile.resize(m_ViChnCnt);
     m_timer = nullptr;
-    m_pVpss = nullptr;
     m_maxfd = 0;
 //    m_ViDetect = new QFileSystemWatcher(this);
 //    m_ViDetect->addPath(QString::fromLatin1(VI_STATUS_FILE));
 //    connect(this,SIGNAL(VistatusChanged(VI_CHN)),this,SLOT(onChangeStatus(VI_CHN)));
     for(int i; i < m_ViChnCnt;i++){
         m_ViStatus.insert("channel"+QString::number(i),false);
+        m_VencStatus.insert("channel"+QString::number(i),false);
     }
     m_ViStatusChanged = HI_FALSE;
 
@@ -317,7 +317,8 @@ void Vio::onTimeHander()
 void Vio::onChangeStatus(VI_CHN ViChn)
 {
     qDebug()<<"video "<<ViChn<<"changed";
-    if(m_ViStatus.value("channel"+QString::number(ViChn)) == true){
+    if(m_ViStatus.value("channel"+QString::number(ViChn)) == true
+            &&m_VencStatus.value("channel"+QString::number(ViChn)) == true){
         Venc_CreatNewFile(ViChn);
     }else{
         Venc_Save_file_Stop(ViChn);
@@ -685,6 +686,16 @@ END_2:
 END_1:
     m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_Stop();
     return s32Ret;
+}
+
+void Vio::Vi_Venc_SetStatus(VI_CHN ViChn, bool start)
+{
+    qDebug("%s:%d",__FUNCTION__,__LINE__);
+    if(m_VencStatus.value("channel"+QString::number(ViChn)) !=  start){
+        m_VencStatus["channel"+QString::number(ViChn)] = start;
+        emit VistatusChanged(ViChn);
+    }
+
 }
 
 HI_S32 Vio::Vi_Venc_Stop(VI_CHN ViChnCnt)

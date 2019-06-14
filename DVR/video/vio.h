@@ -40,6 +40,7 @@ public:
     HI_S32 Set_VencAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32BitRate,HI_FR32 frmRate,HI_U32 u32Profile);
     HI_S32 Vi_Venc_Start();
     HI_S32 Vi_Venc_Start(VI_CHN ViChnCnt, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_FR32 frmRate, HI_U32 u32Profile);
+    void Vi_Venc_SetStatus(VI_CHN ViChn,bool start);
     HI_S32 Vi_Venc_Stop(VI_CHN ViChnCnt);
     HI_BOOL Venc_CreatNewFile(VI_CHN ViChn);
     HI_BOOL Venc_Save_file_Stop(VI_CHN ViChn);
@@ -74,10 +75,8 @@ public:
 
     VI_CHN m_ViChnCnt;
     Sample_Common_Vi m_Vi;
-//    Sample_Common_Vio m_Vio;
     Sample_Common_Vo m_Vo;
     SAMPLE_VO_MODE_E m_enVoMode;
-//    Sample_Common_Vpss *m_pVpss;
     Sample_Common_Vpss m_Vpss;
     Sample_Common_Venc *m_pVenc[VENC_MAX_CHN_NUM];
     //Sample_Common_Vpss *m_pVpss[VPSS_MAX_GRP_NUM];
@@ -89,7 +88,7 @@ private:
         HI_S32 VencFd;
         FILE *pFile;
     } Venc_Data;
-    const HI_CHAR *VI_STATUS_FILE="/dev/vi_status";
+//    const HI_CHAR *VI_STATUS_FILE="/dev/vi_status";
     const HI_CHAR *VENC_PATH = "/mnt/sda1/venc";
     const HI_S32 TIMEOUT = 1000*1;
     const HI_U32 LUMCONST = 14745600;
@@ -106,6 +105,7 @@ private:
     QVector<FILE*> m_pFile;
     QList<Venc_Data> m_VencChnPara;
     QMap<QString,bool> m_ViStatus;
+    QMap<QString,bool> m_VencStatus;
     HI_BOOL m_ViStatusChanged;
     HI_S32 m_maxfd;
     QFileSystemWatcher *m_ViDetect;

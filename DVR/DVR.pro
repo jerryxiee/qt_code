@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui quickwidgets
+QT       += core gui quickwidgets multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -40,7 +40,8 @@ SOURCES += \
     windows/MyModel/mytablemodel.cpp \
     video/videocontrol.cpp \
     settings/settings.cpp \
-    settings/vencset.cpp
+    settings/vencset.cpp \
+    video/yuvframeprovider.cpp
 
 
 
@@ -51,7 +52,8 @@ HEADERS += \
     windows/MyModel/mytablemodel.h \
     video/videocontrol.h \
     settings/settings.h \
-    settings/vencset.h
+    settings/vencset.h \
+    video/yuvframeprovider.h
 
 
 

@@ -6,6 +6,7 @@
 #include <QDateTime>
 #include <QFontDatabase>
 #include "windows/MyModel/mytablemodel.h"
+#include "video/yuvframeprovider.h"
 //#ifndef LUNUX_WIN
 #include "common/sample_common_sys.h"
 #include "video/vio.h"
@@ -61,6 +62,7 @@ int main(int argc, char *argv[])
         }
     }
     qmlRegisterType<MyTableModel>("MyTableViewModel", 1, 0, "MyTableViewModel");
+    qmlRegisterType<YuvFrameProvider>("FrameProvider", 1, 0, "FrameProvider");
 
     Widget w;
     w.show();

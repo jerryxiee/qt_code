@@ -4,6 +4,7 @@
 #include <QObject>
 #include "common/sample_comm.h"
 #include <QList>
+#include <QMap>
 
 Q_DECLARE_METATYPE(VDEC_PARAM)
 Q_DECLARE_METATYPE(STREAMTYPE)
@@ -26,6 +27,7 @@ public:
 
     Q_INVOKABLE void setVencAttr(QString Chn,QString mainStream,QString streamType,QString vencSize,QString enRcMode,
                                  QString profile,QString dstFrmRate,QString bitRate);
+    Q_INVOKABLE void setVencOpen(int Chn,QString value);
 
 private:
     QString vencToString(QString attr,QVariant &variant);
@@ -33,12 +35,17 @@ private:
 
 signals:
     void vencAttrChanged(VI_CHN Chn,HI_U32 stream);
+    void vencStatusChanged(VI_CHN Chn,bool start);
 
 public slots:
 
 
 public:
     QList<VDEC_PARAM> m_Vdec_Param[2];
+//    QMap<VI_CHN,bool> m_VencStatus;
+    const QString Open = "open";
+    const QString RecordTime = "RecordTime";
+
 
 private:
 #ifndef LUNUX_WIN

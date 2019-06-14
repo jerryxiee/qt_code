@@ -351,3 +351,108 @@ HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_SetChnMod(VPSS_GRP VpssGrpIndex, VPS
 
     return HI_SUCCESS;
 }
+
+HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_SetChnMode(VPSS_GRP VpssGrp, VPSS_CHN VpssChn, VPSS_CHN_MODE_S *pstVpssMode, HI_U32 u32Depth)
+{
+
+    HI_S32 s32Ret = HI_SUCCESS;
+    VPSS_CHN_MODE_S stVpssMode;
+
+    if(m_Grp_MaxTable[VpssGrp] != 1){
+        SAMPLE_PRT("Group %d not create!\n",VpssGrp);
+        return HI_FAILURE;
+    }
+
+    s32Ret = HI_MPI_VPSS_GetChnMode(VpssGrp,VpssChn,&stVpssMode);
+    if(s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_PRT("HI_MPI_VPSS_GetChnMode failed with %#x!\n",s32Ret);
+        return s32Ret;
+    }
+
+    stVpssMode.enChnMode = pstVpssMode->enChnMode;
+    stVpssMode.enPixelFormat = pstVpssMode->enPixelFormat;
+    stVpssMode.u32Width = pstVpssMode->u32Width;
+    stVpssMode.u32Height = pstVpssMode->u32Height;
+
+    s32Ret = HI_MPI_VPSS_SetChnMode(VpssGrp,VpssChn,&stVpssMode);
+    if(s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_PRT("HI_MPI_VPSS_SetChnMode failed with %#x!\n",s32Ret);
+        return s32Ret;
+    }
+    s32Ret = HI_MPI_VPSS_SetDepth(VpssGrp,VpssChn,u32Depth);
+    if(s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_PRT("HI_MPI_VPSS_SetDepth failed with %#x!\n",s32Ret);
+        return s32Ret;
+    }
+
+
+
+    return s32Ret;
+}
+
+HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_GetChnMode(VPSS_GRP VpssGrp,VPSS_CHN VpssChn,VPSS_CHN_MODE_S *pstVpssMode)
+{
+    if(m_Grp_MaxTable[VpssGrp] != 1){
+        SAMPLE_PRT("Group %d not create!\n",VpssGrp);
+        return HI_FAILURE;
+    }
+
+    return HI_MPI_VPSS_GetChnMode(VpssGrp,VpssChn,pstVpssMode);
+}
+
+HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_GetChnFrame(VPSS_GRP VpssGrp, VPSS_CHN VpssChn,VIDEO_FRAME_INFO_S *pstVideoFrame, HI_S32 s32MilliSec)
+{
+
+    if(m_Grp_MaxTable[VpssGrp] != 1){
+        SAMPLE_PRT("Group %d not create!\n",VpssGrp);
+        return HI_FAILURE;
+    }
+
+    return HI_MPI_VPSS_GetChnFrame(VpssGrp, VpssChn,pstVideoFrame, s32MilliSec);
+}
+
+HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_ReleaseChnFrame(VPSS_GRP VpssGrp, VPSS_CHN VpssChn,VIDEO_FRAME_INFO_S *pstVideoFrame)
+{
+    if(m_Grp_MaxTable[VpssGrp] != 1){
+        SAMPLE_PRT("Group %d not create!\n",VpssGrp);
+        return HI_FAILURE;
+    }
+
+    return HI_MPI_VPSS_ReleaseChnFrame(VpssGrp,VpssChn,pstVideoFrame);
+}
+
+HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_GetChnFrame(VPSS_GRP VpssGrp, VPSS_CHN VpssChn, unsigned char *frame, int len )
+{
+    HI_S32 s32MilliSec = 100;
+    HI_S32 s32Ret = HI_SUCCESS;
+    VIDEO_FRAME_INFO_S stVideoFrame;
+    HI_VOID* yPtr;
+
+    if(m_Grp_MaxTable[VpssGrp] != 1){
+        SAMPLE_PRT("Group %d not create!\n",VpssGrp);
+        return HI_FAILURE;
+    }
+
+    s32Ret = HI_MPI_VPSS_GetChnFrame(VpssGrp, VpssChn,&stVideoFrame, s32MilliSec);
+    if(s32Ret != HI_SUCCESS){
+        SAMPLE_PRT("HI_MPI_VPSS_GetChnFrame failed with %#x!\n",s32Ret);
+        return HI_FAILURE;
+    }
+    yPtr = HI_MPI_SYS_Mmap(stVideoFrame.stVFrame.u32PhyAddr[0], len);
+
+    memcpy(frame,yPtr,len);
+    HI_MPI_SYS_Munmap(yPtr, len);
+
+    s32Ret = HI_MPI_VPSS_ReleaseChnFrame(VpssGrp, VpssChn,&stVideoFrame);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("HI_MPI_VPSS_GetChnFrame failed with %d!\n", s32Ret);
+
+    }
+
+    return s32Ret;
+
+}
