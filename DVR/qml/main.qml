@@ -78,8 +78,8 @@ Rectangle {
 
             onClicked: {
 
-                stackview.pop(null)
-                hidqmlsignal()
+                stackview.pop()
+//                hidqmlsignal()
             }
         }
 

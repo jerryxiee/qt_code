@@ -30,22 +30,22 @@ Rectangle {
                 }
                 ListElement {
                     title: "网络配置"
-                    page: "content/ProgressBarPage.qml"
+                    page: "content/Net/NetSet.qml"
                     source:""
                 }
                 ListElement {
                     title: "系统时间配置"
-                    page: "content/ProgressBarPage.qml"
+                    page: "content/Time/TimeSetting.qml"
                     source:""
                 }
                 ListElement {
                     title: "预览配置"
-                    page: "content/ProgressBarPage.qml"
+                    page: "content/PreView/PreViewSetting.qml"
                     source:""
                 }
                 ListElement {
-                    title: "报警配置"
-                    page: "content/ProgressBarPage.qml"
+                    title: "平台配置"
+                    page: "content/Platform/PlatformSetting.qml"
                     source:""
                 }
 
@@ -126,10 +126,7 @@ Rectangle {
             text:qsTr("应用")
 
             onClicked:{
-//                load.item.set()
                 suresignal()
-//                VideoControl.setVencAttr(setchnBox.currentText,setStreamBox.currentText,setStreamTypeBox.currentText,resolutionBox.currentText
-//                                         ,bitRateTyprBox.currentText,imageQualityBox.currentText,frameRateBox.currentText,bitRateBox.currentText)
             }
         }
 

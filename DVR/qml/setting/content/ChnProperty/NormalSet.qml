@@ -35,6 +35,7 @@ Item {
         height:setchn.height
         model: ["模拟通道0","模拟通道1","模拟通道2","模拟通道3",
             "模拟通道4","模拟通道5","模拟通道6","模拟通道7"]
+
     }
 
     Text{
@@ -143,6 +144,27 @@ Item {
         anchors.top: timetype.top
         height:timetype.height
         model: ["24小时制","12小时制"]
+    }
+
+    Text{
+        id:timeposition
+        anchors.top: timetype.bottom
+        anchors.topMargin: 20
+        anchors.left: timetype.left
+//        anchors.leftMargin: 100
+        text:qsTr("显示位置")
+        font.pixelSize: fontpixelSize
+    }
+
+    Button{
+        id:timepositionBox
+        width: boxwidth
+        anchors.left: timeposition.right
+        anchors.leftMargin: 100
+        anchors.top: timeposition.top
+        height:timeposition.height
+        text:qsTr("位置设置")
+
     }
 
 

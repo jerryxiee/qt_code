@@ -56,5 +56,11 @@
         <file>qml/Controls/MyButton.qml</file>
         <file>qml/Controls/NaviButton.qml</file>
         <file>qml/setting/images/set.jpg</file>
+        <file>qml/setting/content/Net/NetSet.qml</file>
+        <file>qml/setting/content/Time/TimeSetting.qml</file>
+        <file>qml/setting/content/PreView/PreViewSetting.qml</file>
+        <file>qml/setting/content/PreView/NormalSet.qml</file>
+        <file>qml/setting/content/PreView/Other.qml</file>
+        <file>qml/setting/content/Platform/PlatformSetting.qml</file>
     </qresource>
 </RCC>

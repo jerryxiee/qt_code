@@ -49,9 +49,9 @@ public:
 
 private:
 #ifndef LUNUX_WIN
-    const HI_CHAR * VIO_CONFIG_PATH = "/usr/dvr_config/video.ini";
+    const HI_CHAR * VIO_CONFIG_PATH = "/usr/dvr_config/.video.ini";
 #else
-    const HI_CHAR * VIO_CONFIG_PATH = "/home/abhw/nfsroot/dvr_config/video.ini";
+    const HI_CHAR * VIO_CONFIG_PATH = "/home/abhw/nfsroot/dvr_config/.video.ini";
 #endif
 
 };
