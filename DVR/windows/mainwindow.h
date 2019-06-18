@@ -31,6 +31,7 @@ signals:
 //    void hidQmlSignal();
 
 public slots:
+    void onDispChnSlot(int Chn);
 
 private slots:
     void onHidQmlSlot();

@@ -23,6 +23,7 @@ Widget::Widget(QWidget *parent) :
     if(pRoot){
         connect(pRoot,SIGNAL(hidqmlsignal()),this,SLOT(onHidQmlSlot()));
         connect(pRoot,SIGNAL(videoDispSignal(QString)),this,SLOT(onVideoDispSlot(QString)));
+        connect(pRoot,SIGNAL(regionSetSignal(int,QString)),this,SLOT(onRegionSetSlot(int,QString)));
     }
     QQmlContext *context = mQuickWidget->rootContext();
     if(context){
@@ -32,9 +33,7 @@ Widget::Widget(QWidget *parent) :
 
 #ifndef LUNUX_WIN
     mvideoControl.videoStart();
-//    QObject::connect(this,SIGNAL(ChnDispToWinSignal(QMap<VO_CHN, RECT_S> &)),&mvideoControl,SLOT(onDispChnToWin(QMap<VO_CHN, RECT_S> &)));
-    QObject::connect(this,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&mvideoControl,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
-//    QObject::connect(this,SIGNAL(StopVoSignal()),&mvideoControl,SLOT(onStopVoSlot()));
+    connect(this,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&mvideoControl,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
 #endif
 
     InitWindows();
@@ -58,15 +57,24 @@ void Widget::InitWindows()
     mWindows->addWidget(mMainWidow);
 
     mVideoDisplay = new VideoDisplay;
-    connect(mVideoDisplay, SIGNAL(exitClicked()), this, SLOT(onVideoExitClickSlot()));
+    connect(mVideoDisplay, SIGNAL(exitClicked()), this, SLOT(onShowQml()));
 
     mWindows->addWidget(mVideoDisplay);
+
+    mRegionManage = new RegionManage;
+    connect(this, SIGNAL(regionSetSignal(int,QString)), mRegionManage, SLOT(onRegionSetSlot(int,QString)));
+    connect(mRegionManage, SIGNAL(exitSignal()), this, SLOT(onShowQml()));
+
+    mWindows->addWidget(mRegionManage);
+
 
 
 #ifndef LUNUX_WIN
     connect(mMainWidow,SIGNAL(ChnDispToWinSignal(QMap<VO_CHN, RECT_S> &)),&mvideoControl,SLOT(onDispChnToWin(QMap<VO_CHN, RECT_S> &)));
+    connect(this,SIGNAL(dispChnSignal(int)),mMainWidow,SLOT(onDispChnSlot(int)));
     connect(mMainWidow,SIGNAL(StopVoSignal()),&mvideoControl,SLOT(onStopVoSlot()));
     connect(this,SIGNAL(VideoDispSignal(QString)),mVideoDisplay,SLOT(onVideoDispSignalSlot(QString)));
+
 
 #endif
     connect(this,SIGNAL(hidQmlSignal()),mMainWidow,SLOT(onHidQmlSlot()));
@@ -106,6 +114,13 @@ void Widget::onVideoExitClickSlot()
     mWindows->hide();
     mQuickWidget->show();
 }
+void Widget::onShowQml()
+{
+    mWindows->hide();
+    mQuickWidget->show();
+//    emit StopVoSignal();
+
+}
 
 void Widget::onVideoDispSlot(QString filepath)
 {
@@ -117,12 +132,22 @@ void Widget::onVideoDispSlot(QString filepath)
 
 }
 
+void Widget::onRegionSetSlot(int Chn, QString type)
+{
+    mWindows->setCurrentWidget(mRegionManage);
+    mWindows->show();
+    mQuickWidget->setHidden(true);
+    emit dispChnSignal(Chn);
+    emit regionSetSignal(Chn,type);
+
+}
+
 void Widget::onMainMenuSlot()
 {
     mWindows->hide();
     mQuickWidget->show();
 
-    emit StopVoSignal();
+//    emit StopVoSignal();
 }
 
 

@@ -164,6 +164,7 @@ Item {
         anchors.top: timeposition.top
         height:timeposition.height
         text:qsTr("位置设置")
+        onClicked: regionSetSignal(setchnBox.currentIndex,"display")
 
     }
 

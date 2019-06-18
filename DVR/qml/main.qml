@@ -14,6 +14,7 @@ Rectangle {
 
     signal hidqmlsignal()
     signal videoDispSignal(string filename)
+    signal regionSetSignal(int Chn,string type)
     property string title
 
 

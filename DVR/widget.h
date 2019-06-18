@@ -10,6 +10,7 @@
 #include "windows/CustomControls/animationbutton.h"
 #include "windows/mainwindow.h"
 #include "windows/videodisplay.h"
+#include "windows/regionmanage.h"
 #include "video/videocontrol.h"
 #include "common/sample_comm.h"
 
@@ -35,6 +36,8 @@ signals:
     void StopVoSignal();
     void hidQmlSignal();
     void VideoDispSignal(QString);
+    void regionSetSignal(int,QString);
+    void dispChnSignal(int);
 
 private:
     void InitWindows();
@@ -46,6 +49,8 @@ private slots:
     void onHidQmlSlot();
     void onMainMenuSlot();
     void onVideoExitClickSlot();
+    void onShowQml();
+    void onRegionSetSlot(int Chn,QString type);
 
 private:
     Ui::Widget *ui;
@@ -55,6 +60,7 @@ private:
     QStackedWidget *mWindows;
     MainWindow *mMainWidow;
     VideoDisplay  *mVideoDisplay;
+    RegionManage *mRegionManage;
 
 };
 

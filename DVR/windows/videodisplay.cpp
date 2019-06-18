@@ -18,10 +18,8 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
     QPainter painter(this);// 创建QPainter一个对象
 
 #ifndef LUNUX_WIN
-//    if(mMainWin){
         painter.setCompositionMode( QPainter::CompositionMode_Clear );
         painter.fillRect( 0, 0, width(), height(), Qt::SolidPattern );
-//    }
 #endif
 
 }

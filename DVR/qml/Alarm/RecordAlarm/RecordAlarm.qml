@@ -78,6 +78,7 @@ Item {
                     anchors.top: rectposition.top
                     height:rectposition.height
                     text:qsTr("位置设置")
+                    onClicked: regionSetSignal(recordalarmBox.currentIndex,"region")
 
                 }
 

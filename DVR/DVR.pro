@@ -43,7 +43,8 @@ SOURCES += \
     settings/vencset.cpp \
     video/yuvframeprovider.cpp \
     windows/mainwindow.cpp \
-    windows/videodisplay.cpp
+    windows/videodisplay.cpp \
+    windows/regionmanage.cpp
 
 
 
@@ -57,7 +58,8 @@ HEADERS += \
     settings/vencset.h \
     video/yuvframeprovider.h \
     windows/mainwindow.h \
-    windows/videodisplay.h
+    windows/videodisplay.h \
+    windows/regionmanage.h
 
 
 
