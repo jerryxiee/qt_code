@@ -78,7 +78,12 @@ Rectangle {
 
             onClicked: {
 
-                stackview.pop()
+                if(stackview.depth > 1){
+                    stackview.pop(null)
+                }else{
+                    hidqmlsignal()
+                }
+//                stackview.pop()
 //                hidqmlsignal()
             }
         }

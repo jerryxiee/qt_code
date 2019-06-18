@@ -66,7 +66,7 @@ FocusScope {
             if(checkrunnian(Number(strlist[0]))){
                     console.log("yes run")
             }
-            console.log("dat:"+Number(strlist[2]))
+//            console.log("dat:"+Number(strlist[2]))
             if(strlist[2] === "" || Number(strlist[1])!==2 && Number(strlist[2]) > datan[Number(strlist[1])-1]){
 //                num = datan[Number(strlist[1])-1]
                 strlist[2] = datan[Number(strlist[1])-1].toString()
@@ -101,7 +101,7 @@ FocusScope {
 
         if(type == "date"){
             strlist = str.split("/");
-            console.log(strlist[0] + strlist[1] + strlist[2]);
+//            console.log(strlist[0] + strlist[1] + strlist[2]);
 
 //            switch(curindex){
 //            case 0:
@@ -129,7 +129,7 @@ FocusScope {
 
         }else{
             strlist = str.split(":");
-            console.log(strlist[0] + strlist[1] + strlist[2]);
+//            console.log(strlist[0] + strlist[1] + strlist[2]);
         }
 
         switch(curindex){
@@ -160,7 +160,7 @@ FocusScope {
             retstr = strlist[0]+":"+strlist[1]+":"+strlist[2];
         }
 
-        console.log(retstr)
+//        console.log(retstr)
         return retstr;
     }
     function dec(str){
@@ -170,7 +170,7 @@ FocusScope {
 
         if(type == "date"){
             strlist = str.split("/");
-            console.log(strlist[0] + strlist[1] + strlist[2]);
+//            console.log(strlist[0] + strlist[1] + strlist[2]);
 
             switch(curindex){
             case 0:
@@ -202,7 +202,7 @@ FocusScope {
 
         }else{
             strlist = str.split(":");
-            console.log(strlist[0] + strlist[1] + strlist[2]);
+//            console.log(strlist[0] + strlist[1] + strlist[2]);
 
             switch(curindex){
             case 0:
@@ -235,7 +235,7 @@ FocusScope {
 
         }
 
-        console.log(retstr)
+//        console.log(retstr)
         return retstr;
     }
 
@@ -319,8 +319,8 @@ FocusScope {
 
         onCursorPositionChanged: {
             calcindex(cursorPosition)
-            console.log("curindex "+curindex)
-            console.log("curposition change "+cursorPosition)
+//            console.log("curindex "+curindex)
+//            console.log("curposition change "+cursorPosition)
         }
 
 
@@ -333,7 +333,7 @@ FocusScope {
             textfield.text = value
             selecttext(preindex)
 //        }
-        console.log("value: "+value)
+//        console.log("value: "+value)
 //        console.log(((new Date()).toLocaleString(Qt.locale(), "hh:mm:ss")))
     }
 

@@ -41,7 +41,9 @@ SOURCES += \
     video/videocontrol.cpp \
     settings/settings.cpp \
     settings/vencset.cpp \
-    video/yuvframeprovider.cpp
+    video/yuvframeprovider.cpp \
+    windows/mainwindow.cpp \
+    windows/videodisplay.cpp
 
 
 
@@ -53,7 +55,9 @@ HEADERS += \
     video/videocontrol.h \
     settings/settings.h \
     settings/vencset.h \
-    video/yuvframeprovider.h
+    video/yuvframeprovider.h \
+    windows/mainwindow.h \
+    windows/videodisplay.h
 
 
 
