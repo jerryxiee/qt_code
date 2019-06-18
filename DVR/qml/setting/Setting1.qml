@@ -82,6 +82,7 @@ Rectangle {
             width:setparent.width - setSelect.width
             height:setparent.height - button.height
             anchors.left: setSelect.right
+            color:"lightBlue"
 
             Loader{
                 id:load

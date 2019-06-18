@@ -97,6 +97,7 @@ Rectangle {
                 ComboBox{
                     id:findtypeBox
                     x:findtype.width + 20; y:findtype.y
+                    width: 150
                     model: ListModel{
                         ListElement{text:qsTr("常规查询")}
                     }
@@ -113,6 +114,7 @@ Rectangle {
 
                 ComboBox{
                     id:chnSelectBox
+                    width: 150
                     x:chnSelect.width + 20; y:chnSelect.y
                     model: ListModel{
                         ListElement{text:qsTr("Chn0")}
@@ -136,6 +138,7 @@ Rectangle {
 //
                 ComboBox{
                     id:fileTypeBox
+                    width: 150
                     x:fileType.width + 20; y:fileType.y
                     model: ListModel{
                         ListElement{text:qsTr("全部文件")}

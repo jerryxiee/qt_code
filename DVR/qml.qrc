@@ -62,5 +62,14 @@
         <file>qml/setting/content/PreView/NormalSet.qml</file>
         <file>qml/setting/content/PreView/Other.qml</file>
         <file>qml/setting/content/Platform/PlatformSetting.qml</file>
+        <file>qml/Alarm/AlarmSet.qml</file>
+        <file>qml/Alarm/IOAlarm/IOAlarm.qml</file>
+        <file>qml/Alarm/RecordAlarm/RecordAlarm.qml</file>
+        <file>qml/Alarm/ExceAlarm/ExceAlarm.qml</file>
+        <file>qml/Alarm/IOAlarm/Input.qml</file>
+        <file>qml/Alarm/IOAlarm/Output.qml</file>
+        <file>qml/State/ChnState/ChnState.qml</file>
+        <file>qml/State/AlarmState/AlarmState.qml</file>
+        <file>qml/State/PlatformState/PlatformState.qml</file>
     </qresource>
 </RCC>

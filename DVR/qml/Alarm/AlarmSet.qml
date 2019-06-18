@@ -3,7 +3,7 @@ import QtQuick.Controls 2.2
 import "../delegate"
 
 Rectangle {
-    id:stateroot
+    id:alarmsetroot
 
     property bool press: false
     signal suresignal
@@ -12,25 +12,25 @@ Rectangle {
 //    Row{
         Rectangle {
             id: setSelect
-            width:stateroot.width/5
-            height:stateroot.height - button.height
+            width:alarmsetroot.width/5
+            height:alarmsetroot.height - button.height
             color: "#DDDDDD"
 
             ListModel {
                 id: pageModel
                 ListElement {
-                    title: "通道状态"
-                    page: "ChnState/ChnState.qml"
+                    title: "IO报警配置"
+                    page: "IOAlarm/IOAlarm.qml"
                     source:""
                 }
                 ListElement {
-                    title: "报警状态"
-                    page: "AlarmState/AlarmState.qml"
+                    title: "录像报警配置"
+                    page: "RecordAlarm/RecordAlarm.qml"
                     source:""
                 }
                 ListElement {
-                    title: "平台接入状态"
-                    page: "PlatformState/PlatformState.qml"
+                    title: "异常报警配置"
+                    page: "ExceAlarm/ExceAlarm.qml"
                     source:""
                 }
 
@@ -64,15 +64,15 @@ Rectangle {
 
         Rectangle {
             id:setAttr
-            width:stateroot.width - setSelect.width
-            height:stateroot.height - button.height
+            width:alarmsetroot.width - setSelect.width
+            height:alarmsetroot.height - button.height
             anchors.left: setSelect.right
             color:"lightBlue"
 
             Loader{
                 id:load
                 anchors.fill: setAttr
-                source: "ChnState/ChnState.qml"
+                source: "IOAlarm/IOAlarm.qml"
             }
 
         }
@@ -80,10 +80,10 @@ Rectangle {
 
     Rectangle{
         id:button
-        width: stateroot.width
+        width: alarmsetroot.width
         height: 40
         color: "#BBBBBB"
-        anchors.bottom: stateroot.bottom
+        anchors.bottom: alarmsetroot.bottom
 
         Button{
             id:cancel

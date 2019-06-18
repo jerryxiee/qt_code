@@ -23,6 +23,12 @@ Rectangle {
         }
         ListElement{
             flag:"qml"
+            name:"报警设置"
+            icon:"qrc:/qml/setting/images/set.jpg"
+            page:"qrc:/qml/Alarm/AlarmSet.qml"
+        }
+        ListElement{
+            flag:"qml"
             name:"状态管理"
             icon:"qrc:/qml/setting/images/settings.png"
             page:"qrc:/qml/State/StateManage.qml"
@@ -63,8 +69,8 @@ Rectangle {
                 enabled: true
                 imageSource: icon
                 anchors.fill: parent
-                imageheight: 80
-                imagewidth: 80
+                imageheight: 90
+                imagewidth: 90
 
                 onClicked: {
                     if(grid.currentItem){
@@ -79,7 +85,7 @@ Rectangle {
                 font.pixelSize: 16
 //                color:"white"
                 anchors.horizontalCenter: mavibut.horizontalCenter
-                anchors.bottom: mavibut.bottom
+                anchors.top: mavibut.bottom
             }
         }
     }
