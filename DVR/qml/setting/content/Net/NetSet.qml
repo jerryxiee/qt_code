@@ -17,7 +17,7 @@ Item {
         Tab{
             title: "Normal"
             Item{
-
+                property bool change: false
                 ExclusiveGroup{
                     id:boxexcl
                 }
@@ -33,6 +33,7 @@ Item {
                     pixSize:fontpixelSize
 
                     str:qsTr("DHCP")
+                    onCheckedChanged:change = true
 
                 }
 
@@ -43,6 +44,7 @@ Item {
                     anchors.leftMargin: 50
                     exclusiveGroup:boxexcl
                     pixSize:fontpixelSize
+
 
 
                     str:qsTr("手动设置")
@@ -76,6 +78,7 @@ Item {
                     onPressed: {
                         console.log("curpos "+cursorPosition)
                     }
+
 
                     validator: RegExpValidator{regExp:/(?=(\b|\D))(((\d{1,2})|(1\d{1,2})|(2[0-4]\d)|(25[0-5]))\.){3}((\d{1,2})|(1\d{1,2})|(2[0-4]\d)|(25[0-5]))(?=(\b|\D))/}
                 }
@@ -199,6 +202,27 @@ Item {
 
                 }
 
+                Connections{
+                    target: setparent
+                    onSuresignal:{
+                        if(change){
+                            if(netauto.checked){
+                                SystemConfig.dhcp = netauto.checked;
+                            }else{
+                                SystemConfig.setSystemNet(netauto.checked,textfield_textip.text,textfield_textmask.text,
+                                                          textfield_gatewayip.text,textfield_dnsip.text,textfield_mac.text)
+
+                            }
+                        }
+            //            pressed(tabView.currentIndex)
+                        console.log("net set")
+                    }
+                    onCancelsignal:{
+
+                        console.log("cancel press")
+                    }
+                }
+
 
 
 
@@ -208,17 +232,17 @@ Item {
 
     }
 
-    Connections{
-        target: setparent
-        onSuresignal:{
-//            pressed(tabView.currentIndex)
-            console.log("net set")
-        }
-        onCancelsignal:{
+//    Connections{
+//        target: setparent
+//        onSuresignal:{
+////            pressed(tabView.currentIndex)
+//            console.log("net set")
+//        }
+//        onCancelsignal:{
 
-            console.log("cancel press")
-        }
-    }
+//            console.log("cancel press")
+//        }
+//    }
 
 
 }

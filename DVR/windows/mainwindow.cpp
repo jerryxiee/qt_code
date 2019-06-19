@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 
 MainWindow::~MainWindow()
 {
+    qDebug()<<"exit mainWindows";
 
 }
 
@@ -186,7 +187,7 @@ void MainWindow::DispToWin(int StartChn,int count)
         index = mVo_Index+i;
         ChnPos.insert(index%VI_CNT,pos);
         mOneMenuAct[index]->setChecked(true);
-        qDebug()<<"display channel:"<<StartChn<<"height"<<pos.u32Height<<"width"<<pos.u32Width;
+//        qDebug()<<"display channel:"<<StartChn<<"height"<<pos.u32Height<<"width"<<pos.u32Width;
     }
 
     if(s32Square < 3){

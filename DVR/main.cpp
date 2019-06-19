@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
     }
     qmlRegisterType<MyTableModel>("MyTableViewModel", 1, 0, "MyTableViewModel");
     qmlRegisterType<YuvFrameProvider>("FrameProvider", 1, 0, "FrameProvider");
+//    qmlRegisterType<SystemSet>("SystemConfig", 1, 0, "SystemConfig");
 
     Widget w;
     w.show();

@@ -17,6 +17,16 @@ Item {
             title: "Normal"
             Item{
 
+                function datetime(){
+                    var strlistd
+                    var strlistt
+
+                    strlistd = startd.text.split("/")
+                    strlistt = startt.text.split(":")
+                   return strlistd[0]+strlistd[1]+strlistd[2]+strlistt[0]+strlistt[1]
+
+
+                }
                 ExclusiveGroup{
                     id:boxexcl
                 }
@@ -136,20 +146,41 @@ Item {
 
                 }
 
+                Connections{
+                    target: setparent
+                    onSuresignal:{
+            //            pressed(tabView.currentIndex)
+                        console.log("time set")
+                        if(!timeauto.checked){
+
+                            SystemConfig.setSystemTime(datetime());
+                            SystemConfig.UTC = texttimeBox.currentText;
+                        }
+                    }
+                    onCancelsignal:{
+
+                        console.log("cancel press")
+                    }
+                }
+
             }
         }
     }
 
-    Connections{
-        target: setparent
-        onSuresignal:{
-//            pressed(tabView.currentIndex)
-            console.log("time set")
-        }
-        onCancelsignal:{
+//    Connections{
+//        target: setparent
+//        onSuresignal:{
+////            pressed(tabView.currentIndex)
+//            console.log("time set")
+//            if(!timeauto.checked){
+//                SystemConfig.setSystemTime(startd.text);
+//                SystemConfig.UTC = texttimeBox.currentText;
+//            }
+//        }
+//        onCancelsignal:{
 
-            console.log("cancel press")
-        }
-    }
+//            console.log("cancel press")
+//        }
+//    }
 
 }

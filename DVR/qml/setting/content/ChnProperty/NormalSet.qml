@@ -11,6 +11,8 @@ Item {
         target: channelset
         onPressed:{
             if(setindex == index){
+                DispSet.setConfig(setchnBox.currentIndex,chnname.text,nameCheckbox.checked,
+                                  dateCheckbox.checked,weekCheckbox.checked,datetypeBox.currentText,timetypeBox.currentIndex)
 
             }
         }

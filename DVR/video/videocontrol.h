@@ -16,13 +16,8 @@
 class VideoControl : public QObject
 {
 
-
     Q_OBJECT
-
 public:
-
-
-
     explicit VideoControl(QObject *parent = nullptr);
     ~VideoControl();
 
@@ -47,14 +42,10 @@ public:
 private:
 
 #ifndef LUNUX_WIN
-    const HI_CHAR * VIO_CONFIG_PATH = "/usr/dvr_config/video.ini";
-
     VIDEO_NORM_E m_enNorm;
     Vio vio;
     Sample_Common_Vpss *m_pVpss;
 //    Vdec mVdec;
-#else
-    const HI_CHAR * VIO_CONFIG_PATH = "/home/abhw/nfsroot/dvr_config/video.ini";
 #endif
     VencSet *m_VencSet;
 

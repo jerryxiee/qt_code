@@ -44,7 +44,10 @@ SOURCES += \
     video/yuvframeprovider.cpp \
     windows/mainwindow.cpp \
     windows/videodisplay.cpp \
-    windows/regionmanage.cpp
+    windows/regionmanage.cpp \
+    settings/dispset.cpp \
+    settings/config.cpp \
+    settings/systemset.cpp
 
 
 
@@ -59,7 +62,10 @@ HEADERS += \
     video/yuvframeprovider.h \
     windows/mainwindow.h \
     windows/videodisplay.h \
-    windows/regionmanage.h
+    windows/regionmanage.h \
+    settings/dispset.h \
+    settings/config.h \
+    settings/systemset.h
 
 
 

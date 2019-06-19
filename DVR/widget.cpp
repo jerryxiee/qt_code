@@ -28,12 +28,14 @@ Widget::Widget(QWidget *parent) :
     QQmlContext *context = mQuickWidget->rootContext();
     if(context){
         context->setContextProperty("VencControl",Settings::getVencIni());
+        context->setContextProperty("DispSet",Settings::getDispSetIni());
+        context->setContextProperty("SystemConfig",Settings::getSystemSetIni());
     }
 
 
 #ifndef LUNUX_WIN
     mvideoControl.videoStart();
-    connect(this,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&mvideoControl,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
+//    connect(this,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&mvideoControl,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
 #endif
 
     InitWindows();
