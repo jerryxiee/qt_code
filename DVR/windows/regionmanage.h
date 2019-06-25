@@ -35,6 +35,7 @@ public slots:
     void onSetTimeSlot();
     void onOverlaySetPosSlot(int Chn);
     void onSetRgnChangedSlot();
+    void onHidQmlSlot();
 
 private:
     const QString SET_REGION = "region";

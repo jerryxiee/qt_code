@@ -190,3 +190,7 @@ void RegionManage::onSetRgnChangedSlot()
     mChange = false;
 }
 
+void RegionManage::onHidQmlSlot()
+{
+
+}

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui quickwidgets multimedia
+QT       += core gui quickwidgets multimedia network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -47,7 +47,8 @@ SOURCES += \
     windows/regionmanage.cpp \
     settings/dispset.cpp \
     settings/config.cpp \
-    settings/systemset.cpp
+    settings/systemset.cpp \
+    settings/netconfig.cpp
 
 
 
@@ -66,7 +67,8 @@ HEADERS += \
     windows/regionmanage.h \
     settings/dispset.h \
     settings/config.h \
-    settings/systemset.h
+    settings/systemset.h \
+    settings/netconfig.h
 
 
 

@@ -22,6 +22,19 @@ Item {
                     id:boxexcl
                 }
 
+                function checknet(str){
+                    var strlist = str.split(".");
+
+//                    console.log(strlist.length)
+                    return strlist.length < 4 ? false:true
+                }
+
+                function checkmac(str){
+                    var strlist = str.split(":")
+
+                    return strlist.length < 6 ? false:true
+                }
+
                 MyCheckBox{
                     id:netauto
                     anchors.top: parent.top
@@ -202,6 +215,42 @@ Item {
 
                 }
 
+                Rectangle{
+                    id:warning
+                    height: 100
+                    width: 200
+                    visible: false
+                    color: "lightblue"
+                    border.color: "black"
+                    border.width: 2
+
+                    anchors.centerIn: parent
+
+                    Button{
+                        id:warningsure
+                        height: 30
+                        width: 50
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 5
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: qsTr("sure")
+
+                        onClicked: parent.visible = false
+                    }
+
+                    Text {
+                        anchors.top: parent.top
+                        anchors.topMargin: 10
+                        anchors.horizontalCenter: parent.horizontalCenter
+//                        width: parent.width
+//                        height:parent.height - warningsure.height
+                        id: warntext
+                        text: qsTr("warning")
+                    }
+
+
+                }
+
                 Connections{
                     target: setparent
                     onSuresignal:{
@@ -209,8 +258,37 @@ Item {
                             if(netauto.checked){
                                 SystemConfig.dhcp = netauto.checked;
                             }else{
-                                SystemConfig.setSystemNet(netauto.checked,textfield_textip.text,textfield_textmask.text,
-                                                          textfield_gatewayip.text,textfield_dnsip.text,textfield_mac.text)
+                                if(!checknet(textfield_textip.text)){
+                                    warntext.text = "ip error"
+                                    warning.visible = true
+                                }else{
+                                    if(!checknet(textfield_textmask.text)){
+                                        warntext.text = "mask error"
+                                        warning.visible = true
+                                    }else{
+                                        if(!checknet(textfield_gatewayip.text)){
+                                            warntext.text = "gatewayip error"
+                                            warning.visible = true
+                                        }else{
+                                            if(!checknet(textfield_dnsip.text)){
+                                                warntext.text = "dnsip error"
+                                                warning.visible = true
+                                            }else{
+                                                if(!checkmac(textfield_mac.text)){
+                                                    warntext.text = "macaddr error"
+                                                    warning.visible = true
+                                                }else{
+                                                    SystemConfig.setSystemNet(netauto.checked,textfield_textip.text,textfield_textmask.text,
+                                                                              textfield_gatewayip.text,textfield_dnsip.text,textfield_mac.text)
+                                                }
+
+
+                                            }
+
+                                        }
+                                    }
+                                }
+
 
                             }
                         }

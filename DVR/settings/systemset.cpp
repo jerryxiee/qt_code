@@ -1,5 +1,6 @@
 #include "systemset.h"
 #include "QDebug"
+#include <QRegExp>
 
 SystemSet::SystemSet(QObject *parent, const QString &filename) : QObject(parent),Config (filename)
 {

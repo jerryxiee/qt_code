@@ -82,6 +82,7 @@ void Widget::InitWindows()
 
 #endif
     connect(this,SIGNAL(hidQmlSignal()),mMainWidow,SLOT(onHidQmlSlot()));
+    connect(this,SIGNAL(hidQmlSignal()),mRegionManage,SLOT(onHidQmlSlot()));
     mWindows->resize(this->width(),this->height());
 }
 
