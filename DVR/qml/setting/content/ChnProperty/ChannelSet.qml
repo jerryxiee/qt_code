@@ -46,4 +46,6 @@ Item {
         }
     }
 
+//    onDestroyed: console.log("chnset destroyed")
+
 }

@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <QDateTime>
 #include <QFontDatabase>
+#include <QTextCodec>
 #include "windows/MyModel/mytablemodel.h"
 #include "video/yuvframeprovider.h"
 //#ifndef LUNUX_WIN
@@ -41,11 +42,7 @@ int main(int argc, char *argv[])
 #endif
 
 
-    QDateTime current_date_time =QDateTime::currentDateTime();
-    QString current_date =current_date_time.toString("yyyy-MM-dd-hh-mm-ss");
-    qDebug()<<current_date;
-//    qDebug()<<current_date_time.toTime_t();
-//    qDebug()<<QDateTime::fromString(current_date,"yyyy-MM-dd-hh-mm-ss").toTime_t();
+
     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
 
     QApplication a(argc, argv);
@@ -61,6 +58,16 @@ int main(int argc, char *argv[])
         a.setFont(fontThis);
         }
     }
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf-8"));
+
+    QDateTime current_date_time =QDateTime::currentDateTime();
+    QString current_date =QDateTime::currentDateTime().toString("ddd yyyy年MM月dd日 hh时mm分ss秒 AP");
+    qDebug()<<current_date;
+    QByteArray time = current_date.toLocal8Bit();
+    qDebug("%s",time.data());
+//    qDebug()<<current_date_time.toTime_t();
+//    qDebug()<<QDateTime::fromString(current_date,"yyyy-MM-dd-hh-mm-ss").toTime_t();
+
     qmlRegisterType<MyTableModel>("MyTableViewModel", 1, 0, "MyTableViewModel");
     qmlRegisterType<YuvFrameProvider>("FrameProvider", 1, 0, "FrameProvider");
 //    qmlRegisterType<SystemSet>("SystemConfig", 1, 0, "SystemConfig");

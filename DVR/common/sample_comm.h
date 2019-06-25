@@ -124,6 +124,16 @@ extern "C"{
 #define SAMPLE_AUDIO_TLV320_AO_DEV 0
 
 //add
+#define OVERLAYRGN_TIMEPOSX  100
+#define OVERLAYRGN_TIMEPOSY  50
+#define OVERLAYRGN_TIMEW  432
+#define OVERLAYRGN_TIMEH  38
+
+#define OVERLAYRGN_NAMEPOSX  900
+#define OVERLAYRGN_NAMEPOSY  600
+#define OVERLAYRGN_NAMEW  240
+#define OVERLAYRGN_NAMEH  38
+
 #define AI_DEV 1
 #define AO_DEV 0
 #define WIDTH                  1280

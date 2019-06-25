@@ -52,7 +52,7 @@ HI_BOOL VideoControl::videoStart()
         goto END_VPSS_START;
     }
 
-    vio.Vi_Start(VIDEO_ENCODING_MODE_AUTO,m_pVpss);
+    vio.Vi_Start(VIDEO_ENCODING_MODE_PAL,m_pVpss);
     vio.Vo_Start();
     for(int i = 0; i < m_VencSet->m_Vdec_Param[0].count();i++){
         vio.Vi_Venc_Start(i,m_VencSet->m_Vdec_Param[0][i].mvencSize,m_VencSet->m_Vdec_Param[0][i].menRcMode,
@@ -65,6 +65,9 @@ HI_BOOL VideoControl::videoStart()
 
     QObject::connect(&vio,SIGNAL(VistatusChanged(VI_CHN)),&vio,SLOT(onChangeStatus(VI_CHN)));
     QObject::connect(&vio,SIGNAL(MakeNewFile(VI_CHN)),&vio,SLOT(onMakeNewFile(VI_CHN)));
+
+    connect(this,SIGNAL(timePosChanged(int,QPoint)),&vio,SLOT(onMoveTimePosChanged(int,QPoint)));
+    connect(this,SIGNAL(namePosChanged(int,QPoint)),&vio,SLOT(onMoveNamePosChanged(int,QPoint)));
 
 
 #endif
@@ -125,4 +128,14 @@ void VideoControl::onVencStatusChanged(VI_CHN Chn,bool start)
 #ifndef LUNUX_WIN
     vio.Vi_Venc_SetStatus(Chn,start);
 #endif
+}
+
+void VideoControl::onOverlayTimePosChanged(int Chn,QPoint point)
+{
+    emit timePosChanged(Chn,point);
+}
+
+void VideoControl::onOverlayNamePosChanged(int Chn,QPoint point)
+{
+    emit namePosChanged(Chn,point);
 }

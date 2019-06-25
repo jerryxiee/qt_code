@@ -76,6 +76,8 @@ void Widget::InitWindows()
     connect(this,SIGNAL(dispChnSignal(int)),mMainWidow,SLOT(onDispChnSlot(int)));
     connect(mMainWidow,SIGNAL(StopVoSignal()),&mvideoControl,SLOT(onStopVoSlot()));
     connect(this,SIGNAL(VideoDispSignal(QString)),mVideoDisplay,SLOT(onVideoDispSignalSlot(QString)));
+    connect(mRegionManage,SIGNAL(timePosChange(int,QPoint)),&mvideoControl,SLOT(onOverlayTimePosChanged(int,QPoint)));
+    connect(mRegionManage,SIGNAL(namePosChange(int,QPoint)),&mvideoControl,SLOT(onOverlayNamePosChanged(int,QPoint)));
 
 
 #endif

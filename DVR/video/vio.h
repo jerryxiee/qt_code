@@ -14,11 +14,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <QFileSystemWatcher>
+#include "settings/settings.h"
 
 
 #include "common/sample_common_sys.h"
 #include <video/videoplay.h>
 #include "common/sample_common_vi.h"
+#include "regionctr.h"
 
 class Vio :public QThread
 {
@@ -49,6 +51,7 @@ public:
 private:
     HI_BOOL make_file();
     void Init();
+    HI_S32 OverlayInit();
 
 protected:
     virtual void run();
@@ -62,6 +65,10 @@ public slots:
     void onMakeNewFile(VI_CHN ViChn);
     void onDispChnToWin(QMap<VO_CHN, RECT_S> &);
     void onStopVoSlot();
+    void onOverlayTimeTypeChanged(QString type);
+    void onOverlayNameChanged(int Chn,QString name);
+    void onMoveTimePosChanged(int Chn,QPoint point);
+    void onMoveNamePosChanged(int Chn,QPoint point);
 
 signals:
     void VistatusChanged(VI_CHN ViChn);
@@ -93,6 +100,8 @@ private:
     const HI_S32 TIMEOUT = 1000*1;
     const HI_U32 LUMCONST = 14745600;
     const HI_U32 MAXSIZE = 1024*1024*20;
+    const RGN_HANDLE TIMEHAND = 0;
+    const RGN_HANDLE NAMEHAND = 1;
 
     VIDEO_NORM_E m_enNorm;
     PAYLOAD_TYPE_E m_enType;
@@ -104,7 +113,7 @@ private:
     QMutex m_file_mutex;
     QVector<FILE*> m_pFile;
     QList<Venc_Data> m_VencChnPara;
-    QMap<QString,bool> m_ViStatus;
+    QMap<QString,HI_BOOL> m_ViStatus;
     QMap<QString,bool> m_VencStatus;
     HI_BOOL m_ViStatusChanged;
     HI_S32 m_maxfd;
@@ -112,6 +121,10 @@ private:
 //    VideoPlay mVdec;
 //    FILE* m_pFile[VENC_MAX_CHN_NUM];
 //    array <FILE*,VENC_MAX_CHN_NUM> m_pFile;
+    RegionCtr m_RegionCtr;
+    PIXEL_FORMAT_E m_OverlayPixFmt;
+    QString mOverlayTimeType = "ddd yyyy-MM-dd hh:mm:ss";
+    QMutex mMutexTimeType;
 
 
 };

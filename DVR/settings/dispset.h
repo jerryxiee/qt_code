@@ -9,6 +9,9 @@
 class DispSet : public QObject ,public Config
 {
     Q_OBJECT
+//    Q_PROPERTY(bool entime WRITE enableTime /*NOTIFY onTimeChanged*/)
+//    Q_PROPERTY(bool enweek WRITE enableWeek /*NOTIFY onWeekChanged*/)
+//    Q_PROPERTY(bool enname WRITE enableName /*NOTIFY onNameChanged*/)
 public:
     explicit DispSet(QObject *parent = nullptr,const QString &filename = ".dispset.ini");
 
@@ -17,10 +20,21 @@ public:
 
     Q_INVOKABLE void  setConfig(int Chn, QString name, bool dispname, bool dispdate,
                                 bool dispweek, QString datetype, int value);
+    void setConfig(const QString &rootName,const QString &name,const QVariant &Value);
 
+    Q_INVOKABLE void  preSetConfig(int Chn, QString name, bool dispname, bool dispdate,
+                                bool dispweek, QString datetype, int value);
+
+    Q_INVOKABLE void enableTime(int Chn, bool enable);
+    Q_INVOKABLE void enableWeek(int Chn, bool enable);
+    Q_INVOKABLE void enableName(int Chn, bool enable);
 signals:
+    void overlayTimeTypeChange(QString);
+    void overlayNameChange(int, QString);
+    void overlaySetPos(int);
 
 public slots:
+//    void resumeset();
 
 
 public:

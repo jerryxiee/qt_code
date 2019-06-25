@@ -22,6 +22,7 @@ public:
 
     static HI_S32 SAMPLE_COMM_VPSS_GetChnMode(VPSS_GRP VpssGrp,VPSS_CHN VpssChn,VPSS_CHN_MODE_S *pstVpssMode);
     static HI_S32 SAMPLE_COMM_VPSS_SetChnMode(VPSS_GRP VpssGrp,VPSS_CHN VpssChn,VPSS_CHN_MODE_S *pstVpssMode,HI_U32 u32Depth);
+//    static HI_S32 SAMPLE_COMM_VPSS_SetChnToUser(VPSS_GRP VpssGrp,VPSS_CHN VpssChn,HI_U32 u32Depth);
     static HI_S32 SAMPLE_COMM_VPSS_GetChnFrame(VPSS_GRP VpssGrp, VPSS_CHN VpssChn,VIDEO_FRAME_INFO_S *pstVideoFrame, HI_S32 s32MilliSec);
     static HI_S32 SAMPLE_COMM_VPSS_GetChnFrame(VPSS_GRP VpssGrp, VPSS_CHN VpssChn,unsigned char *frame,int len );
     static HI_S32 SAMPLE_COMM_VPSS_ReleaseChnFrame(VPSS_GRP VpssGrp, VPSS_CHN VpssChn,VIDEO_FRAME_INFO_S *pstVideoFrame);

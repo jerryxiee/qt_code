@@ -52,6 +52,7 @@ SOURCES += \
 
 
 
+
 HEADERS += \
         widget.h \
     windows/CustomControls/animationbutton.h \
@@ -69,10 +70,13 @@ HEADERS += \
 
 
 
+
+
 INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
                 /home/abhw/haisi/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/include \
                 /home/abhw/haisi/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/nvp6134_ex \
-                /home/abhw/haisi/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/tlv320aic31
+                /home/abhw/haisi/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/tlv320aic31 \
+                /home/abhw/nfsroot/lib/install/include
 
 
 if(contains(DEFINES,LUNUX_WIN)){
@@ -88,7 +92,8 @@ SOURCES +=common/sample_common_sys.cpp \
             common/sample_common_vo.cpp \
             video/venc.cpp \
             video/vio.cpp \
-            video/videoplay.cpp
+            video/videoplay.cpp \
+            video/regionctr.cpp
 
 HEADERS +=common/loadbmp.h \
             common/sample_common_sys.h \
@@ -100,7 +105,8 @@ HEADERS +=common/loadbmp.h \
             common/sample_common_vo.h \
             video/venc.h \
             video/vio.h \
-            video/videoplay.h
+            video/videoplay.h \
+            video/regionctr.h
 
 
 LIBS += -lpthread
@@ -116,7 +122,11 @@ LIBS += /usr/lib/libmpi.so \
         /usr/lib/libmd.so \
         /usr/lib/libpciv.so \
         /usr/lib/libaacenc.so \
-        /usr/lib/libaacdec.so
+        /usr/lib/libaacdec.so \
+        /home/abhw/nfsroot/lib/install/lib/libfreetype.so \
+        /home/abhw/nfsroot/lib/install/lib/libfreetype.so.6 \
+        /home/abhw/nfsroot/lib/install/lib/libSDL2_ttf-2.0.so.0 \
+        /home/abhw/nfsroot/lib/install/lib/libSDL2-2.0.so.0
 
     message("arm platform")
 

@@ -27,6 +27,8 @@ public:
 
 signals:
     void vencAttrChanged(VI_CHN Chn,HI_U32 stream);
+        void timePosChanged(int,QPoint);
+        void namePosChanged(int,QPoint);
 
 public slots:
     void onSet_VoMode(SAMPLE_VO_MODE_E &enVoMode);
@@ -34,6 +36,8 @@ public slots:
     void onStopVoSlot();
     void onVencAttrChangedSlot(VI_CHN Chn,HI_U32 stream);
     void onVencStatusChanged(VI_CHN Chn,bool start);
+    void onOverlayTimePosChanged(int Chn,QPoint point);
+    void onOverlayNamePosChanged(int Chn,QPoint point);
 
 
 public:

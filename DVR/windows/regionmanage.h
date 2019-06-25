@@ -17,15 +17,24 @@ public:
 
 protected:
     void contextMenuEvent(QContextMenuEvent* e);
+    void mousePressEvent(QMouseEvent * event);
+    void mouseReleaseEvent(QMouseEvent * event);
+    void mouseMoveEvent(QMouseEvent * event);
+
 
 signals:
     void exitSignal();
+    void timePosChange(int,QPoint);
+    void namePosChange(int,QPoint);
+    void setRgnChange();
 
 public slots:
     void onRegionSetSlot(int Chn, QString type);
     void onExitSlot();
     void onSetNameSlot();
     void onSetTimeSlot();
+    void onOverlaySetPosSlot(int Chn);
+    void onSetRgnChangedSlot();
 
 private:
     const QString SET_REGION = "region";
@@ -34,12 +43,18 @@ private:
     QAction *mExit;
     QAction *mSetName;
     QAction *mSetTime;
+    QActionGroup *mActionGrp;
     bool mSetDsipName;
     bool mSetDispTime;
     QString mSetType;
     int mChn;
     QPoint mStartPoint;
     QPoint mEndPoint;
+    QPoint mTempPoint;
+    QRect mTimeRect;
+    QRect mNameRect;
+    bool mMove;
+    bool mChange;
 };
 
 #endif // REGIONMANAGE_H

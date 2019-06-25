@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <QByteArray>
+#include "SDL2/SDL.h"
 
 
 Vio::Vio(QObject *parent):QThread(parent),
@@ -76,9 +77,9 @@ void Vio::Init()
 //    m_ViDetect = new QFileSystemWatcher(this);
 //    m_ViDetect->addPath(QString::fromLatin1(VI_STATUS_FILE));
 //    connect(this,SIGNAL(VistatusChanged(VI_CHN)),this,SLOT(onChangeStatus(VI_CHN)));
-    for(int i; i < m_ViChnCnt;i++){
-        m_ViStatus.insert("channel"+QString::number(i),false);
-        m_VencStatus.insert("channel"+QString::number(i),false);
+    for(VI_CHN i = 0; i < m_ViChnCnt;i++){
+        m_ViStatus.insert("channel"+QString::number(i),HI_FALSE);
+        m_VencStatus.insert("channel"+QString::number(i),HI_FALSE);
     }
     m_ViStatusChanged = HI_FALSE;
 
@@ -259,7 +260,18 @@ void Vio::onTimeHander()
     HI_S32 s32Ret;
     HI_S32 i;
     VI_CHN_LUM_S stLuma;
-    bool status;
+    HI_BOOL status;
+
+//    QDateTime current_date_time =QDateTime::currentDateTime();
+    mMutexTimeType.lock();
+    QString current_date =QDateTime::currentDateTime().toString(mOverlayTimeType);
+    if(!current_date.isEmpty()){
+        QByteArray time = current_date.toLocal8Bit();
+//        qDebug()<<mOverlayTimeType;
+    //    qDebug("%s",time.data());
+        mMutexTimeType.unlock();
+        m_RegionCtr.SAMPLE_RGN_DispTextToOverlay(0,time.data());
+    }
 
     for(i = 0; i < m_ViChnCnt;i++){
         s32Ret = m_Vi.SAMPLE_COMM_VI_GetChnLuma(enViMode,i, &stLuma);
@@ -268,9 +280,9 @@ void Vio::onTimeHander()
         }
         status = m_ViStatus.value("channel"+QString::number(i));
         if(LUMCONST < stLuma.u32Lum){
-            m_ViStatus["channel"+QString::number(i)] = true;
+            m_ViStatus["channel"+QString::number(i)] = HI_TRUE;
         }else{
-            m_ViStatus["channel"+QString::number(i)] = false;
+            m_ViStatus["channel"+QString::number(i)] = HI_FALSE;
         }
         if(status != m_ViStatus.value("channel"+QString::number(i))){
             qDebug()<<"vi"<<i<<"status changed";
@@ -317,12 +329,15 @@ void Vio::onTimeHander()
 void Vio::onChangeStatus(VI_CHN ViChn)
 {
     qDebug()<<"video "<<ViChn<<"changed";
-    if(m_ViStatus.value("channel"+QString::number(ViChn)) == true
-            &&m_VencStatus.value("channel"+QString::number(ViChn)) == true){
+    if(m_ViStatus.value("channel"+QString::number(ViChn)) == HI_TRUE
+            &&m_VencStatus.value("channel"+QString::number(ViChn)) == HI_TRUE){
         Venc_CreatNewFile(ViChn);
     }else{
         Venc_Save_file_Stop(ViChn);
     }
+
+    m_RegionCtr.SAMPLE_RGN_ShowOverlay(TIMEHAND,m_Vpss.m_Grp_Tab[ViChn],m_ViStatus.value("channel"+QString::number(ViChn)));
+    m_RegionCtr.SAMPLE_RGN_ShowOverlay(NAMEHAND + ViChn,m_Vpss.m_Grp_Tab[ViChn],m_ViStatus.value("channel"+QString::number(ViChn)));
 
 }
 void Vio::onMakeNewFile(VI_CHN ViChn)
@@ -508,12 +523,191 @@ END_VI_START:
 }
 #endif
 
+
+void Vio::onOverlayTimeTypeChanged(QString type)
+{
+    qDebug()<<"TimeType:"<<type;
+    mMutexTimeType.lock();
+    if(!type.isEmpty())
+        mOverlayTimeType = type;
+    mMutexTimeType.unlock();
+}
+
+void Vio::onMoveTimePosChanged(int Chn, QPoint point)
+{
+    POINT_S stPoint;
+
+    qDebug()<<"time pos change";
+    stPoint.s32X = point.x();
+    stPoint.s32Y = point.y();
+    m_RegionCtr.SAMPLE_RGN_SetOverlayPosToVpss(TIMEHAND,m_Vpss.m_Grp_Tab[Chn],stPoint);
+}
+
+void Vio::onMoveNamePosChanged(int Chn, QPoint point)
+{
+    POINT_S stPoint;
+
+    qDebug()<<"time pos change";
+    stPoint.s32X = point.x();
+    stPoint.s32Y = point.y();
+    m_RegionCtr.SAMPLE_RGN_SetOverlayPosToVpss(NAMEHAND+Chn,m_Vpss.m_Grp_Tab[Chn],stPoint);
+}
+
+
+void Vio::onOverlayNameChanged(int Chn, QString name)
+{
+    if(!name.isEmpty()){
+        qDebug()<<"name change:"<<name;
+        QByteArray namestr = name.toLocal8Bit();
+        m_RegionCtr.SAMPLE_RGN_DispTextToOverlay(NAMEHAND+Chn,namestr.data());
+    }
+}
+
+HI_S32 Vio::OverlayInit()
+{
+    HI_S32 s32Ret = HI_SUCCESS;
+    VI_CHN i;
+    RGN_ATTR_S stRgnAttrSet;
+    RGN_CHN_ATTR_S stChnAttr;
+    SDL_Color textColor = {0x80,0x0,0xff,0xff};
+    QDateTime current_date_time;
+    QString current_date;
+    QByteArray time;
+//    SIZE_S overlaysize = {0,0};
+    QString str;
+    DispSet *OverlayDisp = Settings::getDispSetIni();
+    QRect rgnRect;
+//    QRect nameRect;
+
+    connect(OverlayDisp,SIGNAL(overlayTimeTypeChange(QString)),this,SLOT(onOverlayTimeTypeChanged(QString)));
+    connect(OverlayDisp,SIGNAL(overlayNameChange(int, QString)),this,SLOT(onOverlayNameChanged(int,QString)));
+
+    str = OverlayDisp->getConfig(OverlayDisp->RootName+QString::number(0),OverlayDisp->DateType).toString();
+    if(str.length() >= strlen("yyyy-MM-dd hh:mm:ss")){
+        if(OverlayDisp->getConfig(OverlayDisp->RootName+QString::number(0),OverlayDisp->DispWeek).toBool())
+            mOverlayTimeType = "ddd ";
+        if(OverlayDisp->getConfig(OverlayDisp->RootName+QString::number(0),OverlayDisp->DispDate).toBool()){
+            mOverlayTimeType.append(str);
+            if(OverlayDisp->getConfig(OverlayDisp->RootName+QString::number(0),OverlayDisp->DateType).toInt() == 1){
+                mOverlayTimeType.append(" AP");
+            }
+        }
+    }
+
+    qDebug()<<mOverlayTimeType;
+
+
+    s32Ret = m_RegionCtr.SAMPLE_RGN_DispTextInit("/opt/Qt5.9.8-Arm/lib/fonts/my.ttf",32,textColor,m_OverlayPixFmt);
+    if(s32Ret == HI_SUCCESS){
+        current_date =QDateTime::currentDateTime().toString(mOverlayTimeType);
+        time = current_date.toLocal8Bit();
+//        m_RegionCtr.SAMPLE_RGN_GetFontSize(time.data(),overlaysize);
+
+//        qDebug("w:%d h:%d\n",overlaysize.u32Width,overlaysize.u32Height);
+        stRgnAttrSet.enType = OVERLAY_RGN;
+        stRgnAttrSet.unAttr.stOverlay.enPixelFmt       = m_OverlayPixFmt;//PIXEL_FORMAT_RGB_1555;
+        stRgnAttrSet.unAttr.stOverlay.stSize.u32Width  = ALIGN_UP(OVERLAYRGN_TIMEW,2);
+        stRgnAttrSet.unAttr.stOverlay.stSize.u32Height = ALIGN_UP(OVERLAYRGN_TIMEH,2);
+        stRgnAttrSet.unAttr.stOverlay.u32BgColor       = 0x0;
+
+        stChnAttr.bShow  = m_ViStatus.value("channel0");
+        stChnAttr.enType = OVERLAY_RGN;
+        stChnAttr.unChnAttr.stOverlayChn.stPoint.s32X = 100;
+        stChnAttr.unChnAttr.stOverlayChn.stPoint.s32Y = 50;
+        stChnAttr.unChnAttr.stOverlayChn.u32BgAlpha   = 255;
+        stChnAttr.unChnAttr.stOverlayChn.u32FgAlpha   = 255;
+        stChnAttr.unChnAttr.stOverlayChn.u32Layer     = 0;
+
+        //display time
+        s32Ret = m_RegionCtr.SAMPLE_RGN_CreateRegion(TIMEHAND,&stRgnAttrSet);
+//        s32Ret = m_RegionCtr.SAMPLE_RGN_CreateRegionForVpss(0,0,TIMEHAND,&stRgnAttrSet,&stChnAttr);
+        if(s32Ret == HI_SUCCESS){
+            for (i = 0;i < m_ViChnCnt;i++) {
+                rgnRect = OverlayDisp->getConfig(OverlayDisp->RootName+QString::number(i),OverlayDisp->TimePos).toRect();
+                if(rgnRect.isEmpty()){
+                    stChnAttr.unChnAttr.stOverlayChn.stPoint.s32X = OVERLAYRGN_TIMEPOSX;
+                    stChnAttr.unChnAttr.stOverlayChn.stPoint.s32Y = OVERLAYRGN_TIMEPOSY;
+
+                    rgnRect.setRect(OVERLAYRGN_TIMEPOSX,OVERLAYRGN_TIMEPOSY,stRgnAttrSet.unAttr.stOverlay.stSize.u32Width,stRgnAttrSet.unAttr.stOverlay.stSize.u32Height);
+                    OverlayDisp->setConfig(OverlayDisp->RootName+QString::number(i),OverlayDisp->TimePos,rgnRect);
+                }else{
+                    stChnAttr.unChnAttr.stOverlayChn.stPoint.s32X = ALIGN_UP(rgnRect.x(),2);
+                    stChnAttr.unChnAttr.stOverlayChn.stPoint.s32Y = ALIGN_UP(rgnRect.y(),2);
+
+                }
+                stChnAttr.bShow = m_ViStatus.value("channel"+QString::number(i));
+                m_RegionCtr.SAMPLE_RGN_OverlayAttachToChn(TIMEHAND,m_Vpss.m_Grp_Tab[i],&stChnAttr);
+            }
+            m_RegionCtr.SAMPLE_RGN_DispTextToOverlay(TIMEHAND,time.data());
+        }else{
+            qDebug()<<"time SAMPLE_RGN_CreateRegion failed";
+        }
+
+
+
+        //display name
+//        m_RegionCtr.SAMPLE_RGN_GetFontSize("aaaaaaaaaa",overlaysize);
+        stRgnAttrSet.unAttr.stOverlay.stSize.u32Width  = ALIGN_UP(OVERLAYRGN_NAMEW,2);
+        stRgnAttrSet.unAttr.stOverlay.stSize.u32Height = ALIGN_UP(OVERLAYRGN_NAMEH,2);
+
+        stChnAttr.unChnAttr.stOverlayChn.u32Layer     = 1;
+
+        for(i = 0;i < m_ViChnCnt;i++){
+            s32Ret = m_RegionCtr.SAMPLE_RGN_CreateRegion(NAMEHAND+i,&stRgnAttrSet);
+            if(s32Ret == HI_SUCCESS){
+                rgnRect = OverlayDisp->getConfig(OverlayDisp->RootName+QString::number(i),OverlayDisp->NamePos).toRect();
+                qDebug()<<"rgnRect:"<<rgnRect;
+                if(rgnRect.isEmpty()){
+                    qDebug("rgnRect isEmpty");
+                    stChnAttr.unChnAttr.stOverlayChn.stPoint.s32X = OVERLAYRGN_NAMEPOSX;
+                    stChnAttr.unChnAttr.stOverlayChn.stPoint.s32Y = OVERLAYRGN_NAMEPOSY;
+
+
+                    rgnRect.setRect(OVERLAYRGN_NAMEPOSX,OVERLAYRGN_NAMEPOSY,
+                                    OVERLAYRGN_NAMEW,OVERLAYRGN_NAMEH);
+                    OverlayDisp->setConfig(OverlayDisp->RootName+QString::number(i),OverlayDisp->NamePos,rgnRect);
+                }else {
+                    stChnAttr.unChnAttr.stOverlayChn.stPoint.s32X = ALIGN_UP(rgnRect.x(),2);
+                    stChnAttr.unChnAttr.stOverlayChn.stPoint.s32Y = ALIGN_UP(rgnRect.y(),2);
+
+                }
+                m_RegionCtr.SAMPLE_RGN_OverlayAttachToChn(NAMEHAND+i,m_Vpss.m_Grp_Tab[i],&stChnAttr);
+                str = OverlayDisp->getConfig(OverlayDisp->RootName+QString::number(i),OverlayDisp->ChnName).toString();
+                if(str.isEmpty()){
+                    str = "video"+QString::number(i);
+                }
+                QByteArray namestr = str.toLocal8Bit();
+                m_RegionCtr.SAMPLE_RGN_DispTextToOverlay(NAMEHAND+i,namestr.data());
+            }else {
+                qDebug()<<"name SAMPLE_RGN_CreateRegion failed";
+            }
+        }
+
+
+    }
+
+
+    return s32Ret;
+
+}
+
+
 HI_BOOL Vio::Vi_Start(VIDEO_NORM_E enNorm,Sample_Common_Vpss *vpss)
 {
     HI_S32 s32Ret = HI_SUCCESS;
+//    RGN_ATTR_S stRgnAttrSet;
+//    RGN_CHN_ATTR_S stChnAttr;
+//    SDL_Color textColor = {0x80,0x0,0xff,0xff};
+//    QDateTime current_date_time;
+//    QString current_date;
+//    QByteArray time;
+//    SIZE_S overlaysize = {0,0};
+
 
     m_enNorm = enNorm;
     m_Vpss = vpss;
+
+    m_OverlayPixFmt = PIXEL_FORMAT_RGB_8888;
     /*** Start AD ***/
     s32Ret = m_Vi.SAMPLE_COMM_VI_ADStart(enViMode, enNorm);
     if (HI_SUCCESS !=s32Ret)
@@ -536,6 +730,35 @@ HI_BOOL Vio::Vi_Start(VIDEO_NORM_E enNorm,Sample_Common_Vpss *vpss)
         goto END_VI_START;
     }
 
+    OverlayInit();
+//    s32Ret = m_RegionCtr.SAMPLE_RGN_DispTextInit("/opt/Qt5.9.8-Arm/lib/fonts/my.ttf",32,textColor,m_OverlayPixFmt);
+//    if(s32Ret == HI_SUCCESS){
+//        current_date =QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss ddd");
+//        time = current_date.toLocal8Bit();
+//        m_RegionCtr.SAMPLE_RGN_GetFontSize(time.data(),overlaysize);
+
+//        qDebug("w:%d h:%d\n",overlaysize.u32Width,overlaysize.u32Height);
+//        stRgnAttrSet.enType = OVERLAY_RGN;
+//        stRgnAttrSet.unAttr.stOverlay.enPixelFmt       = m_OverlayPixFmt;//PIXEL_FORMAT_RGB_1555;
+//        stRgnAttrSet.unAttr.stOverlay.stSize.u32Width  = ALIGN_BACK(overlaysize.u32Width,2);
+//        stRgnAttrSet.unAttr.stOverlay.stSize.u32Height = ALIGN_BACK(overlaysize.u32Height,2);
+//        stRgnAttrSet.unAttr.stOverlay.u32BgColor       = 0x0;
+
+//        stChnAttr.bShow  = HI_TRUE;
+//        stChnAttr.enType = OVERLAY_RGN;
+//        stChnAttr.unChnAttr.stOverlayChn.stPoint.s32X = 100;
+//        stChnAttr.unChnAttr.stOverlayChn.stPoint.s32Y = 50;
+//        stChnAttr.unChnAttr.stOverlayChn.u32BgAlpha   = 255;
+//        stChnAttr.unChnAttr.stOverlayChn.u32FgAlpha   = 255;
+//        stChnAttr.unChnAttr.stOverlayChn.u32Layer     = 0;
+
+//        s32Ret = m_RegionCtr.SAMPLE_RGN_CreateRegionForVpss(0,0,0,&stRgnAttrSet,&stChnAttr);
+//        if(s32Ret == HI_SUCCESS){
+//            m_RegionCtr.SAMPLE_RGN_DispTextToOverlay(0,time.data());
+//        }
+
+//        m_RegionCtr.SAMPLE_RGN_OverlayAttachToChn(0,1,&stChnAttr);
+//    }
 
     return HI_TRUE;
 
@@ -611,7 +834,7 @@ HI_S32 Vio::Set_VencAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,
     }
 
 END:
-    if(m_ViStatus["channel"+QString::number(ViChnCnt)] == true){
+    if(m_ViStatus["channel"+QString::number(ViChnCnt)] == HI_TRUE){
         Venc_CreatNewFile(ViChnCnt);
     }
 

@@ -7,12 +7,14 @@ Item {
     property int fontpixelSize : 32
     property int boxwidth: 300
     property int index: 0
+    property bool valueChanged: false
     Connections{
         target: channelset
         onPressed:{
             if(setindex == index){
                 DispSet.setConfig(setchnBox.currentIndex,chnname.text,nameCheckbox.checked,
                                   dateCheckbox.checked,weekCheckbox.checked,datetypeBox.currentText,timetypeBox.currentIndex)
+
 
             }
         }
@@ -57,6 +59,12 @@ Item {
         anchors.leftMargin: 100
         anchors.top: setchnname.top
         height:setchnname.height
+//        onTextChanged:{
+//            console.log("name change")
+//        }
+//        onDataChanged: {
+//            console.log("name change")
+//        }
     }
 
     Text{
@@ -91,6 +99,9 @@ Item {
         height: nameCheckbox.height
         checked: true
         pixSize:fontpixelSize
+//        onCheckedChanged: {
+//            valueChanged = !valueChanged
+//        }
 
         str: qsTr("日期")
     }
@@ -104,6 +115,9 @@ Item {
         height: dateCheckbox.height
         checked: true
         pixSize:fontpixelSize
+//        onCheckedChanged:{
+//            valueChanged = !valueChanged
+//        }
 
         str: qsTr("星期")
     }
@@ -125,7 +139,7 @@ Item {
         anchors.leftMargin: 100
         anchors.top: datetype.top
         height:datetype.height
-        model: ["YYYY/MM/DD","YYYY-MM-DD","YYYY年MM月DD日"]
+        model: ["yyyy-MM-dd hh:mm:ss","yyyy/MM/dd hh/mm/ss","yyyy年MM月dd日 hh时mm分ss秒"]
     }
 
     Text{
@@ -146,6 +160,7 @@ Item {
         anchors.top: timetype.top
         height:timetype.height
         model: ["24小时制","12小时制"]
+//        onCurrentIndexChanged: valueChanged = !valueChanged
     }
 
     Text{
@@ -166,10 +181,18 @@ Item {
         anchors.top: timeposition.top
         height:timeposition.height
         text:qsTr("位置设置")
-        onClicked: regionSetSignal(setchnBox.currentIndex,"display")
+        onClicked: {
+            valueChanged = !valueChanged
+            regionSetSignal(setchnBox.currentIndex,"display")
+        }
 
     }
 
+
+    onValueChangedChanged:{
+        DispSet.preSetConfig(setchnBox.currentIndex,chnname.text,nameCheckbox.checked,
+                             dateCheckbox.checked,weekCheckbox.checked,datetypeBox.currentText,timetypeBox.currentIndex)
+    }
 
 
 }

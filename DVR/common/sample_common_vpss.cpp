@@ -175,6 +175,7 @@ HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_Start(HI_U32 u32GrpIndex, SIZE_S *ps
     VPSS_CHN_ATTR_S stChnAttr = {0};
     VPSS_GRP_PARAM_S stVpssParam = {0};
     HI_S32 s32Ret;
+    HI_U32 u32OverlayMask;
     HI_S32 i, j;
 
     /*** Set Vpss Grp Attr ***/
@@ -252,6 +253,14 @@ HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_Start(HI_U32 u32GrpIndex, SIZE_S *ps
             {
                 SAMPLE_PRT("HI_MPI_VPSS_EnableChn failed with %#x\n", s32Ret);
                 return HI_FAILURE;
+            }
+
+            u32OverlayMask = 255;
+            s32Ret = HI_MPI_VPSS_SetChnOverlay(u32GrpIndex, VpssChn, u32OverlayMask);
+            if (HI_SUCCESS != s32Ret)
+            {
+                printf("HI_MPI_VPSS_SetChnOverlay fail! Grp: %d, Chn: %d! s32Ret: 0x%x.\n", u32GrpIndex, VpssChn, s32Ret);
+                return s32Ret;
             }
         }
 
