@@ -25,7 +25,7 @@ signals:
     void sigLookUpHostResult(bool);
 
 public slots:
-//    void netAuto();
+    void netAuto();
     void checkNetWorkOnline(QString ip);
     void onLookupHost(QHostInfo host);
     void onNetStateChangedSlot(bool isOnline);

@@ -1,11 +1,42 @@
 #include "netconfig.h"
 
-NetConfig::NetConfig(QObject *parent) : QObject(parent)
+NetConfig::NetConfig(QObject *parent) : QObject(parent),mTimer(nullptr)
 {
     connect(&mNetManage,SIGNAL(onlineStateChanged(bool)),this,SLOT(onNetStateChangedSlot(bool)));
 
 }
 
+
+void NetConfig::netAuto()
+{
+    mProcess = new QProcess(this);
+    mProcess->startDetached("udhcpc -i eth0 -n 2");
+    delete mProcess;
+
+}
+
+void NetConfig::netSet(bool dhcp)
+{
+//    if(!isOnline()){
+        if(dhcp){
+            mTimer = new QTimer(this);
+            connect(mTimer,SIGNAL(timeout()),this,SLOT(netAuto()));
+            netAuto();
+            mTimer->start(10000);
+        }
+//    }else {
+//        stopAuto();
+//    }
+
+}
+void NetConfig::stopAuto()
+{
+    if(mTimer){
+        mTimer->stop();
+        disconnect(mTimer,SIGNAL(timeout()),this,SLOT(netAuto()));
+        mTimer = nullptr;
+    }
+}
 
 void NetConfig::netcfg(QString ip,QString mask,QString route,QString mac)
 {
@@ -79,5 +110,7 @@ void NetConfig::onLookupHost(QHostInfo host)
 
 void NetConfig::onNetStateChangedSlot(bool isOnline)
 {
-
+    qDebug()<<"onNetStateChangedSlot";
+    if(isOnline)
+        stopAuto();
 }
