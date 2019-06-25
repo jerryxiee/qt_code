@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "config.h"
+#include "netconfig.h"
 
 class SystemSet : public QObject ,public Config
 {
@@ -37,6 +38,8 @@ private:
     const QString DNS  = "dns";
     const QString MAC = "mac";
     const QString DHCP = "dhcp";
+
+    NetConfig netcfg;
 };
 
 #endif // SYSTEMSET_H

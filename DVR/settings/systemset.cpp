@@ -39,6 +39,8 @@ void SystemSet::setSystemNet(bool dhcp,QString ip,QString mask,QString route,QSt
     Config::setConfig(ROOTNET,DNS,dns);
     Config::setConfig(ROOTNET,MAC,mac);
 
+    netcfg.netcfg(ip,mask,route,mac);
+
 
 }
 
@@ -53,4 +55,5 @@ void SystemSet::setDhcp(const bool value)
         Config::setConfig(ROOTNET,DHCP,value);
         qDebug()<<"DHCP:"<<value;
     }
+
 }
