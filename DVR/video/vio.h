@@ -99,7 +99,7 @@ private:
     const HI_CHAR *VENC_PATH = "/mnt/sda1/venc";
     const HI_S32 TIMEOUT = 1000*1;
     const HI_U32 LUMCONST = 14745600;
-    const HI_U32 MAXSIZE = 1024*1024*20;
+    const HI_U32 MAXSIZE = 1024*1024*100;
     const RGN_HANDLE TIMEHAND = 0;
     const RGN_HANDLE NAMEHAND = 1;
 

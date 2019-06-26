@@ -988,8 +988,8 @@ void Vio::run()
         for(i = 0; i < m_VencChnPara.count(); i++){
             FD_SET(m_VencChnPara[i].VencFd, &read_fds);
         }
-        TimeoutVal.tv_sec  = 2;
-        TimeoutVal.tv_usec = 0;
+        TimeoutVal.tv_sec  = 0;
+        TimeoutVal.tv_usec = 200000;
         s32Ret = select(m_maxfd + 1, &read_fds, nullptr, nullptr, &TimeoutVal);
         if (s32Ret < 0)
         {
@@ -1004,6 +1004,7 @@ void Vio::run()
         }
         else
         {
+
             for (i = 0; i < m_VencChnPara.count(); i++)
             {
                 if (FD_ISSET(m_VencChnPara[i].VencFd, &read_fds))
@@ -1082,6 +1083,7 @@ void Vio::run()
             }
         }
         m_file_mutex.unlock();
+        usleep(20000);
     }
     qDebug()<<"exit venc thread";
     /*******************************************************
