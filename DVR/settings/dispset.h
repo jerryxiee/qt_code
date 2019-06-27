@@ -28,6 +28,22 @@ public:
     Q_INVOKABLE void enableTime(int Chn, bool enable);
     Q_INVOKABLE void enableWeek(int Chn, bool enable);
     Q_INVOKABLE void enableName(int Chn, bool enable);
+
+    void setNameRect(int Chn,QRect &rect);
+    QRect &getNameRect(int Chn,QRect &rect);
+    void setTimeRect(int Chn,QRect &rect);
+    QRect &getTimeRect(int Chn, QRect &rect);
+    void setTimeShowEnabled(int Chn,bool enable);
+    bool getTimeShowEnabled(int Chn);
+    void setNameShowEnabled(int Chn,bool enable);
+    bool getNameShowEnabled(int Chn);
+    void setWeekShowEnabled(int Chn,bool enable);
+    bool getWeekShowEnabled(int Chn);
+    void setTimeType(int Chn,QString &type);
+    QString &getTimeType(int Chn, QString &type);
+    void setDateType(int Chn,int type);
+    int getDateType(int Chn);
+
 signals:
     void overlayTimeTypeChange(QString);
     void overlayNameChange(int, QString);

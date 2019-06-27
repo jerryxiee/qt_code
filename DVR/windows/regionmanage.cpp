@@ -2,7 +2,7 @@
 #include <QPainter>
 #include <QDebug>
 
-RegionManage::RegionManage(QWidget *parent) : QWidget(parent),mMove(false),mSetDispTime(false),mChange(false)
+RegionManage::RegionManage(QWidget *parent) : QWidget(parent),mSetDispTime(false),mMove(false),mChange(false)
 {
     this->resize(1280,720);
 
@@ -125,13 +125,15 @@ void RegionManage::onRegionSetSlot(int Chn,QString type)
         }else {
     //        DispSet *dispSetIni = Settings::getDispSetIni();
 
-            mTimeRect = mDispSetIni->getConfig(mDispSetIni->RootName+QString::number(Chn),mDispSetIni->TimePos).toRect();
+//            mTimeRect = mDispSetIni->getConfig(mDispSetIni->RootName+QString::number(Chn),mDispSetIni->TimePos).toRect();
+            mDispSetIni->getTimeRect(Chn,mTimeRect);
             if(mTimeRect.isEmpty()){
                 qDebug()<<"onRegionSetSlot mTimeRect isEmpty";
                 mTimeRect.setRect(OVERLAYRGN_TIMEPOSX,OVERLAYRGN_TIMEPOSY,OVERLAYRGN_TIMEW,OVERLAYRGN_TIMEH);
             }
             qDebug()<<"TimeRect"<<mTimeRect;
-            mNameRect = mDispSetIni->getConfig(mDispSetIni->RootName+QString::number(Chn),mDispSetIni->NamePos).toRect();
+//            mNameRect = mDispSetIni->getConfig(mDispSetIni->RootName+QString::number(Chn),mDispSetIni->NamePos).toRect();
+            mDispSetIni->getNameRect(Chn,mNameRect);
             if(mNameRect.isEmpty()){
                 qDebug()<<"onRegionSetSlot mNameRect isEmpty";
                 mNameRect.setRect(OVERLAYRGN_NAMEPOSX,OVERLAYRGN_NAMEPOSY,OVERLAYRGN_NAMEW,OVERLAYRGN_NAMEH);
@@ -173,8 +175,10 @@ void RegionManage::onOverlaySetPosSlot(int Chn)
         if(mSetType == SET_REGION){
 
         }else if(!mSetType.isEmpty() ){
-            mDispSetIni->setConfig(mDispSetIni->RootName+QString::number(Chn),mDispSetIni->TimePos,mTimeRect);
-            mDispSetIni->setConfig(mDispSetIni->RootName+QString::number(Chn),mDispSetIni->NamePos,mNameRect);
+            mDispSetIni->setTimeRect(Chn,mTimeRect);
+            mDispSetIni->setNameRect(Chn,mNameRect);
+//            mDispSetIni->setConfig(mDispSetIni->RootName+QString::number(Chn),mDispSetIni->TimePos,mTimeRect);
+//            mDispSetIni->setConfig(mDispSetIni->RootName+QString::number(Chn),mDispSetIni->NamePos,mNameRect);
         }
 
         mChange = false;

@@ -553,6 +553,11 @@ void Vio::onMoveNamePosChanged(int Chn, QPoint point)
     m_RegionCtr.SAMPLE_RGN_SetOverlayPosToVpss(NAMEHAND+Chn,m_Vpss.m_Grp_Tab[Chn],stPoint);
 }
 
+void Vio::onRgnOverlayShowSlot(int Chn,bool timeshow,bool nameshow)
+{
+    m_RegionCtr.SAMPLE_RGN_ShowOverlay(TIMEHAND,m_Vpss.m_Grp_Tab[Chn],timeshow?HI_TRUE:HI_FALSE);
+    m_RegionCtr.SAMPLE_RGN_ShowOverlay(NAMEHAND + Chn,m_Vpss.m_Grp_Tab[Chn],nameshow?HI_TRUE:HI_FALSE);
+}
 
 void Vio::onOverlayNameChanged(int Chn, QString name)
 {

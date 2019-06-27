@@ -38,6 +38,7 @@ public slots:
     void onVencStatusChanged(VI_CHN Chn,bool start);
     void onOverlayTimePosChanged(int Chn,QPoint point);
     void onOverlayNamePosChanged(int Chn,QPoint point);
+    void onRgnOverlayShowSlot(int Chn,bool enable);
 
 
 public:

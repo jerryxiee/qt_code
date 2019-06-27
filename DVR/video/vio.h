@@ -69,6 +69,7 @@ public slots:
     void onOverlayNameChanged(int Chn,QString name);
     void onMoveTimePosChanged(int Chn,QPoint point);
     void onMoveNamePosChanged(int Chn,QPoint point);
+    void onRgnOverlayShowSlot(int Chn, bool timeshow, bool nameshow);
 
 signals:
     void VistatusChanged(VI_CHN ViChn);

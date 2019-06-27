@@ -1,5 +1,6 @@
 #include "dispset.h"
 #include <QDebug>
+#include <QRect>
 
 DispSet::DispSet(QObject *parent, const QString &filename) : QObject(parent),Config(filename)
 {
@@ -89,4 +90,77 @@ void DispSet::enableWeek(int Chn, bool enable)
 void DispSet::enableName(int Chn, bool enable)
 {
 
+}
+
+void DispSet::setNameRect(int Chn,QRect &rect)
+{
+    Config::setConfig(RootName+QString::number(Chn),NamePos,rect);
+}
+
+QRect &DispSet::getNameRect(int Chn, QRect &rect)
+{
+    rect = Config::getConfig(RootName+QString::number(Chn),NamePos).toRect();
+
+    return rect;
+}
+
+void DispSet::setTimeRect(int Chn, QRect &rect)
+{
+    Config::setConfig(RootName+QString::number(Chn),TimePos,rect);
+}
+
+QRect &DispSet::getTimeRect(int Chn, QRect &rect)
+{
+    rect = Config::getConfig(RootName+QString::number(Chn),TimePos).toRect();
+
+    return rect;
+}
+
+void DispSet::setTimeShowEnabled(int Chn, bool enable)
+{
+    Config::setConfig(RootName+QString::number(Chn),DispDate,enable);
+}
+
+bool DispSet::getTimeShowEnabled(int Chn )
+{
+    return Config::getConfig(RootName+QString::number(Chn),DispDate).toBool();
+}
+
+void DispSet::setNameShowEnabled(int Chn, bool enable)
+{
+    Config::setConfig(RootName+QString::number(Chn),DispName,enable);
+}
+bool DispSet::getNameShowEnabled(int Chn)
+{
+    return Config::getConfig(RootName+QString::number(Chn),DispName).toBool();
+}
+void DispSet::setWeekShowEnabled(int Chn, bool enable)
+{
+    Config::setConfig(RootName+QString::number(Chn),DispWeek,enable);
+}
+bool DispSet::getWeekShowEnabled(int Chn)
+{
+    return Config::getConfig(RootName+QString::number(Chn),DispWeek).toBool();
+}
+
+void DispSet::setTimeType(int Chn, QString &type)
+{
+    Config::setConfig(RootName+QString::number(Chn),TimeType,type);
+}
+
+QString &DispSet::getTimeType(int Chn, QString &type)
+{
+    type = Config::getConfig(RootName+QString::number(Chn),TimeType).toString();
+
+    return type;
+}
+
+void DispSet::setDateType(int Chn, int type)
+{
+    Config::setConfig(RootName+QString::number(Chn),DateType,type);
+}
+
+int DispSet::getDateType(int Chn)
+{
+    return Config::getConfig(RootName+QString::number(Chn),DateType).toInt();
 }
