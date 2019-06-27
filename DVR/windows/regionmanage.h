@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QMouseEvent>
 #include <QRect>
+#include <QLabel>
 #include "settings/settings.h"
 
 class RegionManage : public QWidget
@@ -56,6 +57,8 @@ private:
     QRect mNameRect;
     bool mMove;
     bool mChange;
+    QLabel *mTimeLabel;
+    QLabel *mNameLabel;
 };
 
 #endif // REGIONMANAGE_H

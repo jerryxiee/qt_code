@@ -2,7 +2,8 @@
 #include <QPainter>
 #include <QDebug>
 
-RegionManage::RegionManage(QWidget *parent) : QWidget(parent),mSetDispTime(false),mMove(false),mChange(false)
+
+RegionManage::RegionManage(QWidget *parent) : QWidget(parent),mSetDsipName(false),mSetDispTime(false),mMove(false),mChange(false)
 {
     this->resize(1280,720);
 
@@ -29,6 +30,14 @@ RegionManage::RegionManage(QWidget *parent) : QWidget(parent),mSetDispTime(false
 
     connect(this,SIGNAL(setRgnChange()),this,SLOT(onSetRgnChangedSlot()));
 
+    mTimeLabel = new QLabel(this);
+    mTimeLabel->setStyleSheet("background-color: red");
+    mTimeLabel->hide();
+    mNameLabel = new QLabel(this);
+    mNameLabel->setStyleSheet("background-color: red");
+    mNameLabel->hide();
+
+
 
 }
 
@@ -42,6 +51,18 @@ void RegionManage::paintEvent(QPaintEvent *event)
         painter.setCompositionMode( QPainter::CompositionMode_Clear );
         painter.fillRect( 0, 0, width(), height(), Qt::SolidPattern );
 #endif
+
+//        if(mSetDispTime){
+//            painter.setBrush(QBrush(Qt::red,Qt::SolidPattern));
+//            painter.setPen(QColor(Qt::red));
+//            painter.drawRect(mTimeRect);
+
+//        }
+//        if(mSetDsipName){
+//            painter.setBrush(QBrush(Qt::red,Qt::SolidPattern));
+//            painter.setPen(QColor(Qt::red));
+//            painter.drawRect(mNameRect);
+//        }
 
 }
 
@@ -93,21 +114,26 @@ void RegionManage::mouseMoveEvent(QMouseEvent * event)
     if(mMove){
         mEndPoint = mTempPoint + event->pos() - mStartPoint;
         if(mSetDispTime){
-            emit timePosChange(mChn,mEndPoint);
+//            emit timePosChange(mChn,mEndPoint);
+            mTimeLabel->move(mEndPoint);
             mTimeRect.setRect(mEndPoint.x(),mEndPoint.y(),mTimeRect.width(),mTimeRect.height());
         }else if(mSetDsipName){
-            emit namePosChange(mChn,mEndPoint);
+//            emit namePosChange(mChn,mEndPoint);
+            mNameLabel->move(mEndPoint);
             mNameRect.setRect(mEndPoint.x(),mEndPoint.y(),mNameRect.width(),mNameRect.height());
             qDebug()<<"Move mNameRect"<<mNameRect;
         }
 
         mChange = true;
+        update();
     }
 }
 
 void RegionManage::onRegionSetSlot(int Chn,QString type)
 {
     qDebug()<<"chn:"<<Chn<<"region type:"<<type;
+
+    update();
 
     if(mChn != Chn || type != mSetType){
         mChange = false;
@@ -138,6 +164,11 @@ void RegionManage::onRegionSetSlot(int Chn,QString type)
                 qDebug()<<"onRegionSetSlot mNameRect isEmpty";
                 mNameRect.setRect(OVERLAYRGN_NAMEPOSX,OVERLAYRGN_NAMEPOSY,OVERLAYRGN_NAMEW,OVERLAYRGN_NAMEH);
             }
+
+            mTimeLabel->resize(mTimeRect.width(),mTimeRect.height());
+            mTimeLabel->move(mTimeRect.x(),mTimeRect.y());
+            mNameLabel->resize(mNameRect.width(),mNameRect.height());
+            mNameLabel->move(mNameRect.x(),mNameRect.y());
             qDebug()<<"mNameRect"<<mNameRect;
         }
     }
@@ -146,6 +177,10 @@ void RegionManage::onRegionSetSlot(int Chn,QString type)
 
 void RegionManage::onExitSlot()
 {
+    mSetDsipName = false;
+    mSetDispTime = false;
+    mNameLabel->hide();
+    mTimeLabel->hide();
     emit exitSignal();
 }
 
@@ -156,6 +191,9 @@ void RegionManage::onSetNameSlot()
     mTempPoint = mEndPoint;
     mSetDsipName = true;
     mSetDispTime = false;
+    mNameLabel->show();
+    mTimeLabel->hide();
+    update();
 }
 
 void RegionManage::onSetTimeSlot()
@@ -165,6 +203,9 @@ void RegionManage::onSetTimeSlot()
     mTempPoint = mEndPoint;
     mSetDsipName = false;
     mSetDispTime = true;
+    mTimeLabel->show();
+    mNameLabel->hide();
+    update();
 
 }
 
@@ -177,6 +218,8 @@ void RegionManage::onOverlaySetPosSlot(int Chn)
         }else if(!mSetType.isEmpty() ){
             mDispSetIni->setTimeRect(Chn,mTimeRect);
             mDispSetIni->setNameRect(Chn,mNameRect);
+            emit timePosChange(mChn,QPoint(mTimeRect.x(),mTimeRect.y()));
+            emit namePosChange(mChn,QPoint(mNameRect.x(),mNameRect.y()));
 //            mDispSetIni->setConfig(mDispSetIni->RootName+QString::number(Chn),mDispSetIni->TimePos,mTimeRect);
 //            mDispSetIni->setConfig(mDispSetIni->RootName+QString::number(Chn),mDispSetIni->NamePos,mNameRect);
         }
