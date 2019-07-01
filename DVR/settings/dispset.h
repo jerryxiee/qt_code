@@ -48,6 +48,7 @@ signals:
     void overlayTimeTypeChange(QString);
     void overlayNameChange(int, QString);
     void overlaySetPos(int);
+    void rgnOverlayShow(int);
 
 public slots:
 //    void resumeset();

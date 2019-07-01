@@ -328,6 +328,7 @@ void Vio::onTimeHander()
 
 void Vio::onChangeStatus(VI_CHN ViChn)
 {
+
     qDebug()<<"video "<<ViChn<<"changed";
     if(m_ViStatus.value("channel"+QString::number(ViChn)) == HI_TRUE
             &&m_VencStatus.value("channel"+QString::number(ViChn)) == HI_TRUE){
@@ -336,8 +337,9 @@ void Vio::onChangeStatus(VI_CHN ViChn)
         Venc_Save_file_Stop(ViChn);
     }
 
-    m_RegionCtr.SAMPLE_RGN_ShowOverlay(TIMEHAND,m_Vpss.m_Grp_Tab[ViChn],m_ViStatus.value("channel"+QString::number(ViChn)));
-    m_RegionCtr.SAMPLE_RGN_ShowOverlay(NAMEHAND + ViChn,m_Vpss.m_Grp_Tab[ViChn],m_ViStatus.value("channel"+QString::number(ViChn)));
+    onRgnOverlayShowSlot(ViChn);
+//    m_RegionCtr.SAMPLE_RGN_ShowOverlay(TIMEHAND,m_Vpss.m_Grp_Tab[ViChn],showtime);
+//    m_RegionCtr.SAMPLE_RGN_ShowOverlay(NAMEHAND + ViChn,m_Vpss.m_Grp_Tab[ViChn],showname);
 
 }
 void Vio::onMakeNewFile(VI_CHN ViChn)
@@ -553,10 +555,20 @@ void Vio::onMoveNamePosChanged(int Chn, QPoint point)
     m_RegionCtr.SAMPLE_RGN_SetOverlayPosToVpss(NAMEHAND+Chn,m_Vpss.m_Grp_Tab[Chn],stPoint);
 }
 
-void Vio::onRgnOverlayShowSlot(int Chn,bool timeshow,bool nameshow)
+void Vio::onRgnOverlayShowSlot(int Chn)
 {
-    m_RegionCtr.SAMPLE_RGN_ShowOverlay(TIMEHAND,m_Vpss.m_Grp_Tab[Chn],timeshow?HI_TRUE:HI_FALSE);
-    m_RegionCtr.SAMPLE_RGN_ShowOverlay(NAMEHAND + Chn,m_Vpss.m_Grp_Tab[Chn],nameshow?HI_TRUE:HI_FALSE);
+    HI_BOOL showname = HI_FALSE;
+    HI_BOOL showtime = HI_FALSE;
+
+    if(Settings::getDispSetIni()->getNameShowEnabled(Chn) && m_ViStatus.value("channel"+QString::number(Chn))){
+        showname = HI_TRUE;
+    }
+    if(Settings::getDispSetIni()->getTimeShowEnabled(Chn) && m_ViStatus.value("channel"+QString::number(Chn))){
+        showtime = HI_TRUE;
+    }
+
+    m_RegionCtr.SAMPLE_RGN_ShowOverlay(TIMEHAND,m_Vpss.m_Grp_Tab[Chn],showtime);
+    m_RegionCtr.SAMPLE_RGN_ShowOverlay(NAMEHAND + Chn,m_Vpss.m_Grp_Tab[Chn],showname);
 }
 
 void Vio::onOverlayNameChanged(int Chn, QString name)
@@ -586,6 +598,7 @@ HI_S32 Vio::OverlayInit()
 
     connect(OverlayDisp,SIGNAL(overlayTimeTypeChange(QString)),this,SLOT(onOverlayTimeTypeChanged(QString)));
     connect(OverlayDisp,SIGNAL(overlayNameChange(int, QString)),this,SLOT(onOverlayNameChanged(int,QString)));
+    connect(OverlayDisp,SIGNAL(rgnOverlayShow(int)),this,SLOT(onRgnOverlayShowSlot(int)));
 
     str = OverlayDisp->getConfig(OverlayDisp->RootName+QString::number(0),OverlayDisp->DateType).toString();
     if(str.length() >= strlen("yyyy-MM-dd hh:mm:ss")){

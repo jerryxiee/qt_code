@@ -18,6 +18,7 @@ void DispSet::setConfig(int Chn,QString name,bool dispname,bool dispdate,bool di
     Config::setConfig(RootName+QString::number(Chn),TimeType,value);
 
     preSetConfig(Chn,name, dispname, dispdate,dispweek, datetype, value);
+    emit rgnOverlayShow(Chn);
     emit overlaySetPos(Chn);
 
 }
