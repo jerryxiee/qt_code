@@ -58,6 +58,7 @@ Vio::~Vio()
     }
 //    qDebug()<<"delete timer";
 
+    m_Record.RecordExit();
     m_Vi.SAMPLE_COMM_VI_UnBindVpss(enViMode,m_Vpss.m_Grp_Tab,m_ViChnCnt);
     for(i=0;i<m_ViChnCnt;i++){
         m_Vo.SAMPLE_COMM_VO_UnBindVpss(i,m_Vpss.m_Grp_Tab[i],m_VoBindVpss);
@@ -691,7 +692,7 @@ END_1:
 
 void Vio::Vi_Venc_SetStatus(VI_CHN ViChn, bool start)
 {
-    qDebug("%s:%d",__FUNCTION__,__LINE__);
+//    qDebug("%s:%d",__FUNCTION__,__LINE__);
     if(m_VencStatus.value("channel"+QString::number(ViChn)) !=  start){
         m_VencStatus["channel"+QString::number(ViChn)] = start;
         emit VistatusChanged(ViChn);

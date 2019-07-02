@@ -13,6 +13,7 @@ class Record : public QThread
     Q_OBJECT
 public:
     explicit Record(QObject *parent = nullptr);
+    void RecordExit();
 
     HI_BOOL addChnToRecord(VENC_CHN VencChn);
     HI_BOOL deleteChnFromRecord(VENC_CHN VencChn);
@@ -43,6 +44,7 @@ private:
         VENC_CHN Venc_Chn;
         HI_S32 VencFd;
         FILE *pFile;
+        int framnum;
     } Venc_Data;
 
     PAYLOAD_TYPE_E m_enType;

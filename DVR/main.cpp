@@ -72,10 +72,11 @@ int main(int argc, char *argv[])
     qmlRegisterType<YuvFrameProvider>("FrameProvider", 1, 0, "FrameProvider");
 //    qmlRegisterType<SystemSet>("SystemConfig", 1, 0, "SystemConfig");
 
-    Widget w;
-    w.show();
+    try {
+        Widget w;
+        w.show();
 
-    signal(SIGINT,sign);
+        signal(SIGINT,sign);
 #ifndef LUNUX_WIN
 //    vio.Vi_Start(VIDEO_ENCODING_MODE_PAL);
 //    vio.Vo_Start();
@@ -87,7 +88,11 @@ int main(int argc, char *argv[])
 //    QObject::connect(&w,SIGNAL(StopVoSignal()),&vio,SLOT(onStopVoSlot()));
 #endif
 
-    ret = a.exec();
+        ret = a.exec();
+    } catch(...) {
+        qDebug()<<"QApplication::quit";
+        QApplication::quit();
+    }
 #ifndef LUNUX_WIN
 //    vio.Venc_exit();
 //    vio.wait();
