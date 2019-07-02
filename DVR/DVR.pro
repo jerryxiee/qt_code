@@ -92,10 +92,10 @@ SOURCES +=common/sample_common_sys.cpp \
             common/sample_common_venc.cpp \
             common/sample_common_vi.cpp \
             common/sample_common_vo.cpp \
-            video/venc.cpp \
             video/vio.cpp \
             video/videoplay.cpp \
-            video/regionctr.cpp
+            video/regionctr.cpp \
+            video/record.cpp
 
 HEADERS +=common/loadbmp.h \
             common/sample_common_sys.h \
@@ -105,10 +105,10 @@ HEADERS +=common/loadbmp.h \
             common/sample_common_venc.h \
             common/sample_common_vi.h \
             common/sample_common_vo.h \
-            video/venc.h \
             video/vio.h \
             video/videoplay.h \
-            video/regionctr.h
+            video/regionctr.h \
+            video/record.h
 
 
 LIBS += -lpthread

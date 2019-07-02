@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QTimerEvent>
 #include <QTimer>
-#include <QThread>
+//#include <QThread>
 #include <QDebug>
 #include <QMutex>
 #include <QList>
@@ -21,8 +21,9 @@
 #include <video/videoplay.h>
 #include "common/sample_common_vi.h"
 #include "regionctr.h"
+#include "record.h"
 
-class Vio :public QThread
+class Vio :public QObject
 {
     Q_OBJECT
 public:
@@ -44,17 +45,16 @@ public:
     HI_S32 Vi_Venc_Start(VI_CHN ViChnCnt, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_FR32 frmRate, HI_U32 u32Profile);
     void Vi_Venc_SetStatus(VI_CHN ViChn,bool start);
     HI_S32 Vi_Venc_Stop(VI_CHN ViChnCnt);
-    HI_BOOL Venc_CreatNewFile(VI_CHN ViChn);
-    HI_BOOL Venc_Save_file_Stop(VI_CHN ViChn);
+//    HI_BOOL Venc_CreatNewFile(VI_CHN ViChn);
+//    HI_BOOL Venc_Save_file_Stop(VI_CHN ViChn);
     HI_S32 Venc_exit();
 
 private:
-    HI_BOOL make_file();
     void Init();
     HI_S32 OverlayInit();
 
 protected:
-    virtual void run();
+//    virtual void run();
 
 public slots:
     //test
@@ -62,7 +62,7 @@ public slots:
     void onTimeHander();
     void onfinish();
     void onChangeStatus(VI_CHN ViChn);
-    void onMakeNewFile(VI_CHN ViChn);
+//    void onMakeNewFile(VI_CHN ViChn);
     void onDispChnToWin(QMap<VO_CHN, RECT_S> &);
     void onStopVoSlot();
     void onOverlayTimeTypeChanged(QString type);
@@ -73,7 +73,7 @@ public slots:
 
 signals:
     void VistatusChanged(VI_CHN ViChn);
-    void MakeNewFile(VI_CHN ViChn);
+//    void MakeNewFile(VI_CHN ViChn);
 public:
     const SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_720P;
 //    const VIDEO_NORM_E enNorm = VIDEO_ENCODING_MODE_PAL;
@@ -87,23 +87,14 @@ public:
     SAMPLE_VO_MODE_E m_enVoMode;
     Sample_Common_Vpss m_Vpss;
     Sample_Common_Venc *m_pVenc[VENC_MAX_CHN_NUM];
-    //Sample_Common_Vpss *m_pVpss[VPSS_MAX_GRP_NUM];
 
 private:
-    typedef struct{
-        VI_CHN Vi_Chn;
-        VENC_CHN Venc_Chn;
-        HI_S32 VencFd;
-        FILE *pFile;
-    } Venc_Data;
-//    const HI_CHAR *VI_STATUS_FILE="/dev/vi_status";
-    const HI_CHAR *VENC_PATH = "/mnt/sda1/venc";
     const HI_S32 TIMEOUT = 1000*1;
     const HI_U32 LUMCONST = 14745600;
-    const HI_U32 MAXSIZE = 1024*1024*100;
     const RGN_HANDLE TIMEHAND = 0;
     const RGN_HANDLE NAMEHAND = 1;
 
+    Record m_Record;
     VIDEO_NORM_E m_enNorm;
     PAYLOAD_TYPE_E m_enType;
     PIC_SIZE_E m_enSize;
@@ -111,17 +102,9 @@ private:
     HI_U32  m_u32Profile;
     HI_BOOL m_Venc_Run;
     QTimer *m_timer;
-    QMutex m_file_mutex;
-    QVector<FILE*> m_pFile;
-    QList<Venc_Data> m_VencChnPara;
+
     QMap<QString,HI_BOOL> m_ViStatus;
     QMap<QString,bool> m_VencStatus;
-    HI_BOOL m_ViStatusChanged;
-    HI_S32 m_maxfd;
-    QFileSystemWatcher *m_ViDetect;
-//    VideoPlay mVdec;
-//    FILE* m_pFile[VENC_MAX_CHN_NUM];
-//    array <FILE*,VENC_MAX_CHN_NUM> m_pFile;
     RegionCtr m_RegionCtr;
     PIXEL_FORMAT_E m_OverlayPixFmt;
     QString mOverlayTimeType = "ddd yyyy-MM-dd hh:mm:ss";
