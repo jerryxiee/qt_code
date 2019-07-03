@@ -19,6 +19,13 @@ void Record::Init()
     m_enType = PT_H264;
     m_enSize = PIC_HD720;
 
+    QDir dir(ALARM_FILE_PATH);
+    if(!dir.exists()){
+        if(!dir.mkpath(ALARM_FILE_PATH)){
+            SAMPLE_PRT("mkpath %s failed\n",ALARM_FILE_PATH);
+        }
+    }
+
     m_VencSet = Settings::getVencIni();
 
     for (int i = 0;i < m_VencSet->m_Vdec_Param[0].count();i++) {
@@ -28,7 +35,7 @@ void Record::Init()
     connect(m_VencSet,SIGNAL(vencAttrChanged(VI_CHN,HI_U32)),this,SLOT(onVencAttrChangedSlot(VI_CHN,HI_U32)));
     connect(m_VencSet,SIGNAL(vencStatusChanged(VI_CHN,bool)),this,SLOT(onVencStatusChanged(VI_CHN,bool)));
 
-    connect(this,SIGNAL(createNewFile(VENC_CHN)),this,SLOT(onCreatNewFileSlot(VENC_CHN)));
+    connect(this,SIGNAL(createNewFile(VI_CHN)),this,SLOT(onCreatNewFileSlot(VI_CHN)));
 
 }
 
@@ -127,7 +134,7 @@ HI_S32 Record::setRecordAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcM
     HI_BOOL deleteRecord = HI_TRUE;
 
 //    Venc_Save_file_Stop(ViChnCnt);
-    deleteRecord = deleteChnFromRecord(m_pVenc[ViChnCnt]->m_Venc_Chn);
+    deleteRecord = deleteChnFromRecord(ViChnCnt);
 
     s32Ret = stopRecordChn(ViChnCnt);
     if (HI_SUCCESS != s32Ret)
@@ -170,7 +177,7 @@ HI_S32 Record::setRecordAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcM
 END:
     if(deleteRecord == HI_TRUE){
 //        Venc_CreatNewFile(ViChnCnt);
-        addChnToRecord(m_pVenc[ViChnCnt]->m_Venc_Chn);
+        addChnToRecord(ViChnCnt);
     }
 
     return s32Ret;
@@ -180,7 +187,7 @@ void Record::setRecordStatus(VI_CHN ViChn,bool start)
 {
     if(m_VencStatus.value("channel"+QString::number(ViChn)) !=  start){
         m_VencStatus["channel"+QString::number(ViChn)] = start;
-        addChnToRecord(m_pVenc[ViChn]->m_Venc_Chn);
+        addChnToRecord(ViChn);
 
     }
 }
@@ -195,9 +202,9 @@ void Record::onViStatusChangedSlot(VI_CHN Chn,HI_BOOL status)
 {
     qDebug("%s:%d\n",__FUNCTION__,__LINE__);
     if(status){
-        addChnToRecord(m_pVenc[Chn]->m_Venc_Chn);
+        addChnToRecord(Chn);
     }else {
-        deleteChnFromRecord(m_pVenc[Chn]->m_Venc_Chn);
+        deleteChnFromRecord(Chn);
     }
 }
 
@@ -210,18 +217,38 @@ void Record::onVencAttrChangedSlot(VI_CHN Chn,HI_U32 stream)
                       m_VencSet->m_Vdec_Param[stream][Chn].mu32Profile);
 }
 
+void Record::onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool change)
+{
+    m_EventFileMutex.lock();
+    if(change){
+        VIDEO_FILE_INFO fileinfo;
 
-HI_BOOL Record::addChnToRecord(VENC_CHN VencChn)
+        fileinfo.type = type;
+        m_VideoEventFileInfoList[Chn].append(fileinfo);
+    }else {
+        for (int i = 0;i < m_VideoEventFileInfoList[Chn].count();i++) {
+            if(m_VideoEventFileInfoList[Chn].at(i).type == type){
+                m_VideoEventFileInfoList[Chn].removeAt(i);
+                break;
+            }
+        }
+    }
+    m_EventFileMutex.unlock();
+    addChnToRecord(Chn);
+
+}
+
+HI_BOOL Record::addChnToRecord(VI_CHN Chn)
 {
     HI_BOOL result = HI_FALSE;
 
-    if(!m_VencStatus.value("channel"+QString::number(VencChn))){
-        qDebug()<<"Chn "<<VencChn<<"record not open";
-        deleteChnFromRecord(VencChn);
+    if(!m_VencStatus.value("channel"+QString::number(Chn))){
+        qDebug()<<"Chn "<<Chn<<"record not open";
+        deleteChnFromRecord(Chn);
         return HI_FALSE;
     }
 
-    result = onCreatNewFileSlot(VencChn);
+    result = onCreatNewFileSlot(Chn);
     if(result){
         start();
     }
@@ -229,19 +256,19 @@ HI_BOOL Record::addChnToRecord(VENC_CHN VencChn)
     return result;
 }
 
-HI_BOOL Record::deleteChnFromRecord(VENC_CHN VencChn)
+HI_BOOL Record::deleteChnFromRecord(VI_CHN Chn)
 {
     HI_BOOL result = HI_TRUE;
 
     m_file_mutex.lock();
-    result = onSaveFileStopSlot(VencChn);
+    result = onSaveFileStopSlot(Chn);
     m_file_mutex.unlock();
 
     return result;
 }
 
 
-HI_BOOL Record::onCreatNewFileSlot(VENC_CHN VencChn)
+HI_BOOL Record::onCreatNewFileSlot(VI_CHN Chn)
 {
     Venc_Data VencD;
     HI_S32 s32Ret;
@@ -249,9 +276,9 @@ HI_BOOL Record::onCreatNewFileSlot(VENC_CHN VencChn)
     HI_CHAR venc_path_name[64];
     HI_CHAR venc_file_name[64];
 
-    VencD.Venc_Chn = VencChn;
-    VencD.VencFd   = HI_MPI_VENC_GetFd(VencChn);
-    VencD.framnum  = 0;
+    VencD.ViChn   = Chn;
+    VencD.Venc_Chn = m_pVenc[Chn]->m_Venc_Chn;
+    VencD.VencFd   = HI_MPI_VENC_GetFd(VencD.Venc_Chn);
     if (VencD.VencFd < 0)
     {
         SAMPLE_PRT("HI_MPI_VENC_GetFd failed with %#x!\n",VencD.VencFd);
@@ -270,7 +297,7 @@ HI_BOOL Record::onCreatNewFileSlot(VENC_CHN VencChn)
     QDateTime current_date_time =QDateTime::currentDateTime();
     QString current_date =current_date_time.toString("yyyy-MM-dd-hh-mm-ss");
 
-    sprintf(venc_path_name,"%s/channel%d/",VENC_PATH,VencChn);
+    sprintf(venc_path_name,"%s/channel%d/",VENC_PATH,Chn);
     QDir dir(venc_path_name);
     if(!dir.exists()){
         if(!dir.mkpath(venc_path_name)){
@@ -303,7 +330,7 @@ HI_BOOL Record::onCreatNewFileSlot(VENC_CHN VencChn)
 //            qDebug("channel %d begin new file",VencChn);
 //        }
 //    }
-    onSaveFileStopSlot(VencChn);
+    onSaveFileStopSlot(Chn);
     m_VencChnPara.append(VencD);
 
     m_file_mutex.unlock();
@@ -311,7 +338,7 @@ HI_BOOL Record::onCreatNewFileSlot(VENC_CHN VencChn)
 
     return HI_TRUE;
 }
-HI_BOOL Record::onSaveFileStopSlot(VENC_CHN VencChn)
+HI_BOOL Record::onSaveFileStopSlot(VI_CHN Chn)
 {
 //    HI_S32 s32Ret = HI_SUCCESS;
 //    MYVIDEO_HEAD videohead;
@@ -364,14 +391,14 @@ HI_BOOL Record::onSaveFileStopSlot(VENC_CHN VencChn)
 
 
     for(HI_S32 i = 0 ;i < m_VencChnPara.count();i++){
-        if(m_VencChnPara[i].Venc_Chn == VencChn){
+        if(m_VencChnPara[i].ViChn == Chn ){
 //            videohead.framnum = m_VencChnPara[i].framnum;
 //            fseek(m_VencChnPara[i].pFile,0,SEEK_SET);
 //            fwrite((void *)&videohead,sizeof (videohead),1,m_VencChnPara[i].pFile);
 
             fclose(m_VencChnPara[i].pFile);
             m_VencChnPara.removeAt(i);
-            qDebug("stop channel(%d) save file ",VencChn);
+            qDebug("stop channel(%d) save file ",Chn);
             return HI_TRUE;
         }
     }
@@ -379,10 +406,10 @@ HI_BOOL Record::onSaveFileStopSlot(VENC_CHN VencChn)
     return HI_FALSE;
 }
 
-HI_S32 Record::getFileSize(VENC_CHN VencChn)
+HI_S32 Record::getFileSize(VI_CHN Chn)
 {
     for(int i = 0; i < m_VencChnPara.count();i++){
-        if(m_VencChnPara[i].Venc_Chn == VencChn)
+        if(m_VencChnPara[i].ViChn == Chn)
             return ftell(m_VencChnPara[i].pFile);
     }
 
@@ -394,7 +421,7 @@ void Record::checkFileSize()
     for(int i = 0;i < m_VencChnPara.count();i++){
         if(ftell(m_VencChnPara[i].pFile) > MAXSIZE){
             qDebug()<<"channel"<<m_VencChnPara[i].Venc_Chn<<"make new file";
-            emit createNewFile(m_VencChnPara[i].Venc_Chn);
+            emit createNewFile(m_VencChnPara[i].ViChn);
         }
     }
 

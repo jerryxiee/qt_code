@@ -21,11 +21,11 @@ public:
     HI_S32 startRecordChn(VI_CHN Chn,VIDEO_NORM_E enNorm);
     HI_S32 stopRecordChn(VI_CHN Chn);
 
-    HI_BOOL addChnToRecord(VENC_CHN VencChn);
-    HI_BOOL deleteChnFromRecord(VENC_CHN VencChn);
+    HI_BOOL addChnToRecord(VI_CHN Chn);
+    HI_BOOL deleteChnFromRecord(VI_CHN Chn);
 //    HI_BOOL CreatNewFile(VENC_CHN VencChn);
 //    HI_BOOL Save_file_Stop(VENC_CHN VencChn);
-    HI_S32 getFileSize(VENC_CHN VencChn);
+    HI_S32 getFileSize(VI_CHN Chn);
     void checkFileSize();
 
 protected:
@@ -37,27 +37,32 @@ private:
     HI_S32 startRecordChn(VI_CHN ViChnCnt, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_FR32 frmRate, HI_U32 u32Profile);
 
 signals:
-    void createNewFile(VENC_CHN VencChn);
+    void createNewFile(VI_CHN Chn);
 
 public slots:
-    HI_BOOL onCreatNewFileSlot(VENC_CHN VencChn);
-    HI_BOOL onSaveFileStopSlot(VENC_CHN VencChn);
+    HI_BOOL onCreatNewFileSlot(VI_CHN Chn);
+    HI_BOOL onSaveFileStopSlot(VI_CHN Chn);
     void onTimeHander();
     void onVencAttrChangedSlot(VI_CHN Chn,HI_U32 stream);
     void onVencStatusChanged(VI_CHN Chn,bool start);
     void onViStatusChangedSlot(VI_CHN Chn,HI_BOOL status);
+    void onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool change);
+
 
 
 private:
+    const HI_CHAR *ALARM_FILE_PATH = "/opt/alarm";
+    const HI_CHAR *IO_FILE = ".io_alarm";
+    const HI_CHAR *MOVED_FILE = ".move_alarm";
     const HI_CHAR *VENC_PATH = "/mnt/sda1/venc";
     const HI_U32 MAXSIZE = 1024*1024*20;
     const VPSS_CHN m_VencBindVpss = VPSS_CHN0;   //主码流绑定到通道0
 
     typedef struct{
+        VI_CHN ViChn;
         VENC_CHN Venc_Chn;
         HI_S32 VencFd;
         FILE *pFile;
-        int framnum;
     } Venc_Data;
 
     VencSet *m_VencSet;
@@ -69,8 +74,10 @@ private:
     HI_S32 m_maxfd;
     QMutex m_file_mutex;
     Sample_Common_Vpss m_Vpss;
-    Sample_Common_Venc *m_pVenc[VENC_MAX_CHN_NUM];
+    Sample_Common_Venc *m_pVenc[VIDEO_MAX_NUM];
     QMap<QString,bool> m_VencStatus;
+    QList<VIDEO_FILE_INFO> m_VideoEventFileInfoList[VIDEO_MAX_NUM];
+    QMutex m_EventFileMutex;
 };
 
 #endif // RECORD_H

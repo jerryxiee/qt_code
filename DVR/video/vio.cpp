@@ -7,7 +7,7 @@
 
 
 Vio::Vio(QObject *parent):QObject(parent),
-    m_ViChnCnt(8),m_enVoMode(VO_MODE_9MUX)
+    m_ViChnCnt(VIDEO_MAX_NUM),m_enVoMode(VO_MODE_9MUX)
 {
     Init();
 
