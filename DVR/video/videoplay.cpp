@@ -52,6 +52,11 @@ char* VideoPlay::Get_FileType(char *filename)
     return filetype;
 }
 
+bool VideoPlay::dealFileHead(char *filename)
+{
+
+}
+
 HI_BOOL VideoPlay::Start_Vdec(char *filename, VPSS_GRP VpssGrp, VPSS_CHN VpssChn)
 {
     char* filetype = nullptr;
@@ -236,7 +241,7 @@ void VideoPlay::run()
      m_Vdec_Run = true;
     while (m_Vdec_Run)
     {
-        usleep(20000);
+//        usleep(20000);
         if (m_Thread_Attr.eCtrlSinal == VDEC_CTRL_STOP)
         {
 //            break;
@@ -580,7 +585,7 @@ void VideoPlay::run()
             }
         }
 
-        stStream.u64PTS  = u64pts;
+        stStream.u64PTS  = 0;
         stStream.pu8Addr = pu8Buf + start;
         if(m_Thread_Attr.enType == PT_MJPEG)
         {

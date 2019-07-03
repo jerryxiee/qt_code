@@ -19,13 +19,207 @@ void Record::Init()
     m_enType = PT_H264;
     m_enSize = PIC_HD720;
 
+    m_VencSet = Settings::getVencIni();
+
+    for (int i = 0;i < m_VencSet->m_Vdec_Param[0].count();i++) {
+        m_VencStatus.insert("channel"+QString::number(i),m_VencSet->m_Vdec_Param[0][i].mopen);
+    }
+
+    connect(m_VencSet,SIGNAL(vencAttrChanged(VI_CHN,HI_U32)),this,SLOT(onVencAttrChangedSlot(VI_CHN,HI_U32)));
+    connect(m_VencSet,SIGNAL(vencStatusChanged(VI_CHN,bool)),this,SLOT(onVencStatusChanged(VI_CHN,bool)));
+
     connect(this,SIGNAL(createNewFile(VENC_CHN)),this,SLOT(onCreatNewFileSlot(VENC_CHN)));
 
 }
 
+void Record::onTimeHander()
+{
+    checkFileSize();
+}
+
+void Record::setRecordSrc(Sample_Common_Vpss *vpss)
+{
+    m_Vpss = vpss;
+}
+
+void Record::setRecordSrc(Sample_Common_Vpss &vpss)
+{
+    m_Vpss = vpss;
+}
+
+HI_S32 Record::startRecordChn(VI_CHN Chn,VIDEO_NORM_E enNorm)
+{
+    m_enNorm = enNorm;
+
+    if(Chn > m_VencSet->m_Vdec_Param[0].count()){
+        qDebug()<<"startRecordChn failed";
+        return HI_FAILURE;
+    }
+
+    return startRecordChn(Chn, m_VencSet->m_Vdec_Param[0][Chn].mvencSize,m_VencSet->m_Vdec_Param[0][Chn].menRcMode,
+            m_VencSet->m_Vdec_Param[0][Chn].mu32BitRate,m_VencSet->m_Vdec_Param[0][Chn].mfr32DstFrmRate,m_VencSet->m_Vdec_Param[0][Chn].mu32Profile);
+}
+
+HI_S32 Record::stopRecordChn(VI_CHN Chn)
+{
+    HI_S32 s32Ret;
+
+
+    s32Ret = m_pVenc[Chn]->SAMPLE_COMM_VENC_UnBindVpss(m_Vpss.m_Grp_Tab[Chn], m_VencBindVpss);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("SAMPLE_COMM_VENC_UnBindVpss failed!\n");
+    }
+
+    s32Ret = m_pVenc[Chn]->SAMPLE_COMM_VENC_Stop();
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("SAMPLE_COMM_VENC_Stop failed!\n");
+    }
+
+    delete m_pVenc[Chn];
+
+
+    return s32Ret;
+
+}
+
+HI_S32 Record::startRecordChn(VI_CHN ViChnCnt, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_FR32 frmRate, HI_U32 u32Profile)
+{
+
+    HI_S32 s32Ret;
+//    qDebug()<<"start venc chn "<<ViChnCnt;
+    m_pVenc[ViChnCnt] = new Sample_Common_Venc();
+    m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_SetAttr(m_enType,m_enNorm, enSize, enRcMode,u32BitRate,frmRate,u32Profile);
+    s32Ret = m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_Start();
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start Venc failed!\n");
+        goto END_1;
+    }
+
+    if(m_Vpss.m_Grp_Num == 0){
+        SAMPLE_PRT("vpss not init!\n");
+        goto END_1;
+    }
+
+    s32Ret = m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_BindVpss(m_Vpss.m_Grp_Tab[ViChnCnt], m_VencBindVpss);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Start Venc failed!\n");
+        goto END_2;
+    }
+
+    return s32Ret;
+END_2:
+    m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_UnBindVpss(m_Vpss.m_Grp_Tab[ViChnCnt], m_VencBindVpss);
+END_1:
+    m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_Stop();
+    return s32Ret;
+}
+
+HI_S32 Record::setRecordAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32BitRate,HI_FR32 frmRate,HI_U32 u32Profile)
+{
+
+    VPSS_CHN_MODE_S stVpssMode;
+    SIZE_S stPicSize;
+    HI_S32 s32Ret;
+    HI_BOOL deleteRecord = HI_TRUE;
+
+//    Venc_Save_file_Stop(ViChnCnt);
+    deleteRecord = deleteChnFromRecord(m_pVenc[ViChnCnt]->m_Venc_Chn);
+
+    s32Ret = stopRecordChn(ViChnCnt);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("GetChnMod failed!\n");
+        goto END;
+    }
+
+    s32Ret = m_Vpss.SAMPLE_COMM_VPSS_GetChnMod(ViChnCnt,m_VencBindVpss,&stVpssMode);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("GetChnMod failed!\n");
+        return HI_FAILURE;
+    }
+
+    s32Ret = Sample_Common_Sys::SAMPLE_COMM_SYS_GetPicSize(m_enNorm, enSize, &stPicSize);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Get picture size failed!\n");
+        return HI_FAILURE;
+    }
+    //根据编码图像大小设置VPSS输出大小
+    stVpssMode.u32Width = stPicSize.u32Width;
+    stVpssMode.u32Height = stPicSize.u32Height;
+
+    s32Ret = m_Vpss.SAMPLE_COMM_VPSS_SetChnMod(ViChnCnt,m_VencBindVpss,&stVpssMode,0);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("SetChnMod failed!\n");
+        return HI_FAILURE;
+    }
+
+    s32Ret = startRecordChn(ViChnCnt,enSize,enRcMode,u32BitRate,frmRate,u32Profile);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT("Vi_Venc_Start failed!\n");
+        return HI_FAILURE;
+    }
+
+END:
+    if(deleteRecord == HI_TRUE){
+//        Venc_CreatNewFile(ViChnCnt);
+        addChnToRecord(m_pVenc[ViChnCnt]->m_Venc_Chn);
+    }
+
+    return s32Ret;
+}
+
+void Record::setRecordStatus(VI_CHN ViChn,bool start)
+{
+    if(m_VencStatus.value("channel"+QString::number(ViChn)) !=  start){
+        m_VencStatus["channel"+QString::number(ViChn)] = start;
+        addChnToRecord(m_pVenc[ViChn]->m_Venc_Chn);
+
+    }
+}
+
+void Record::onVencStatusChanged(VI_CHN Chn,bool start)
+{
+    qDebug("%s:%d\n",__FUNCTION__,__LINE__);
+    setRecordStatus(Chn,start);
+}
+
+void Record::onViStatusChangedSlot(VI_CHN Chn,HI_BOOL status)
+{
+    qDebug("%s:%d\n",__FUNCTION__,__LINE__);
+    if(status){
+        addChnToRecord(m_pVenc[Chn]->m_Venc_Chn);
+    }else {
+        deleteChnFromRecord(m_pVenc[Chn]->m_Venc_Chn);
+    }
+}
+
+
+void Record::onVencAttrChangedSlot(VI_CHN Chn,HI_U32 stream)
+{
+    qDebug("%s:%d",__FUNCTION__,__LINE__);
+    setRecordAttr(Chn,m_VencSet->m_Vdec_Param[stream][Chn].mvencSize,m_VencSet->m_Vdec_Param[stream][Chn].menRcMode,
+                  m_VencSet->m_Vdec_Param[stream][Chn].mu32BitRate,m_VencSet->m_Vdec_Param[stream][Chn].mfr32DstFrmRate,
+                      m_VencSet->m_Vdec_Param[stream][Chn].mu32Profile);
+}
+
+
 HI_BOOL Record::addChnToRecord(VENC_CHN VencChn)
 {
     HI_BOOL result = HI_FALSE;
+
+    if(!m_VencStatus.value("channel"+QString::number(VencChn))){
+        qDebug()<<"Chn "<<VencChn<<"record not open";
+        deleteChnFromRecord(VencChn);
+        return HI_FALSE;
+    }
 
     result = onCreatNewFileSlot(VencChn);
     if(result){
@@ -94,10 +288,10 @@ HI_BOOL Record::onCreatNewFileSlot(VENC_CHN VencChn)
         SAMPLE_PRT("open file[%s] failed!\n",venc_file_name);
         return HI_FALSE;
     }
-    if(fseek(VencD.pFile,sizeof (MYVIDEO_HEAD),SEEK_SET)){
-        fclose(VencD.pFile);
-        return HI_FALSE;
-    }
+//    if(fseek(VencD.pFile,sizeof (MYVIDEO_HEAD),SEEK_SET)){
+//        fclose(VencD.pFile);
+//        return HI_FALSE;
+//    }
     SAMPLE_PRT("open file[%s] sucess!\n",venc_file_name);
 
     m_file_mutex.lock();
@@ -119,46 +313,46 @@ HI_BOOL Record::onCreatNewFileSlot(VENC_CHN VencChn)
 }
 HI_BOOL Record::onSaveFileStopSlot(VENC_CHN VencChn)
 {
-    HI_S32 s32Ret = HI_SUCCESS;
-    MYVIDEO_HEAD videohead;
-//    VENC_FRAME_RATE_S frameRate;
-    VENC_CHN_ATTR_S vencAttr;
+//    HI_S32 s32Ret = HI_SUCCESS;
+//    MYVIDEO_HEAD videohead;
+////    VENC_FRAME_RATE_S frameRate;
+//    VENC_CHN_ATTR_S vencAttr;
 
-    s32Ret = HI_MPI_VENC_GetChnAttr(VencChn, &vencAttr);
-    if(s32Ret != HI_SUCCESS){
-        qDebug("HI_MPI_VENC_GetChnAttr failed with %#x!",s32Ret);
-    }else {
-        videohead.payload_type =  vencAttr.stVeAttr.enType;
-        switch (vencAttr.stVeAttr.enType) {
-            case PT_H264:
-            {
-                videohead.width  = vencAttr.stVeAttr.stAttrH264e.u32PicWidth;
-                videohead.height = vencAttr.stVeAttr.stAttrH264e.u32PicHeight;
-                if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H264CBR){
-                    videohead.framerate = vencAttr.stRcAttr.stAttrH264Cbr.fr32DstFrmRate;
-                }else if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H264VBR) {
-                    videohead.framerate = vencAttr.stRcAttr.stAttrH264Vbr.fr32DstFrmRate;
-                }else if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H264FIXQP){
-                    videohead.framerate = vencAttr.stRcAttr.stAttrH264FixQp.fr32DstFrmRate;
-                }
-                break;
-            }
-            case PT_H265:
-            {
-                videohead.width  = vencAttr.stVeAttr.stAttrH265e.u32PicWidth;
-                videohead.height = vencAttr.stVeAttr.stAttrH265e.u32PicHeight;
-                if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H265CBR){
-                    videohead.framerate = vencAttr.stRcAttr.stAttrH265Cbr.fr32DstFrmRate;
-                }else if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H265VBR) {
-                    videohead.framerate = vencAttr.stRcAttr.stAttrH265Vbr.fr32DstFrmRate;
-                }else if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H265FIXQP){
-                    videohead.framerate = vencAttr.stRcAttr.stAttrH265FixQp.fr32DstFrmRate;
-                }
-                break;
-            }
-        }
+//    s32Ret = HI_MPI_VENC_GetChnAttr(VencChn, &vencAttr);
+//    if(s32Ret != HI_SUCCESS){
+//        qDebug("HI_MPI_VENC_GetChnAttr failed with %#x!",s32Ret);
+//    }else {
+//        videohead.payload_type =  vencAttr.stVeAttr.enType;
+//        switch (vencAttr.stVeAttr.enType) {
+//            case PT_H264:
+//            {
+//                videohead.width  = vencAttr.stVeAttr.stAttrH264e.u32PicWidth;
+//                videohead.height = vencAttr.stVeAttr.stAttrH264e.u32PicHeight;
+//                if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H264CBR){
+//                    videohead.framerate = vencAttr.stRcAttr.stAttrH264Cbr.fr32DstFrmRate;
+//                }else if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H264VBR) {
+//                    videohead.framerate = vencAttr.stRcAttr.stAttrH264Vbr.fr32DstFrmRate;
+//                }else if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H264FIXQP){
+//                    videohead.framerate = vencAttr.stRcAttr.stAttrH264FixQp.fr32DstFrmRate;
+//                }
+//                break;
+//            }
+//            case PT_H265:
+//            {
+//                videohead.width  = vencAttr.stVeAttr.stAttrH265e.u32PicWidth;
+//                videohead.height = vencAttr.stVeAttr.stAttrH265e.u32PicHeight;
+//                if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H265CBR){
+//                    videohead.framerate = vencAttr.stRcAttr.stAttrH265Cbr.fr32DstFrmRate;
+//                }else if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H265VBR) {
+//                    videohead.framerate = vencAttr.stRcAttr.stAttrH265Vbr.fr32DstFrmRate;
+//                }else if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H265FIXQP){
+//                    videohead.framerate = vencAttr.stRcAttr.stAttrH265FixQp.fr32DstFrmRate;
+//                }
+//                break;
+//            }
+//        }
 
-    }
+//    }
 
 
 //    s32Ret = HI_MPI_VENC_GetFrameRate(VencChn, &frameRate);
@@ -171,18 +365,18 @@ HI_BOOL Record::onSaveFileStopSlot(VENC_CHN VencChn)
 
     for(HI_S32 i = 0 ;i < m_VencChnPara.count();i++){
         if(m_VencChnPara[i].Venc_Chn == VencChn){
-            videohead.framnum = m_VencChnPara[i].framnum;
-            fseek(m_VencChnPara[i].pFile,0,SEEK_SET);
-            fwrite((void *)&videohead,sizeof (videohead),1,m_VencChnPara[i].pFile);
+//            videohead.framnum = m_VencChnPara[i].framnum;
+//            fseek(m_VencChnPara[i].pFile,0,SEEK_SET);
+//            fwrite((void *)&videohead,sizeof (videohead),1,m_VencChnPara[i].pFile);
 
             fclose(m_VencChnPara[i].pFile);
             m_VencChnPara.removeAt(i);
             qDebug("stop channel(%d) save file ",VencChn);
-            break;
+            return HI_TRUE;
         }
     }
 
-    return HI_TRUE;
+    return HI_FALSE;
 }
 
 HI_S32 Record::getFileSize(VENC_CHN VencChn)
@@ -209,9 +403,9 @@ void Record::checkFileSize()
 void Record::run()
 {
     HI_S32 i = 0;
-    HI_S32 j = 0;
-    HI_S32 framesize = 0;
-    HI_S32 count;
+//    HI_S32 j = 0;
+//    HI_S32 framesize = 0;
+//    HI_S32 count;
     struct timeval TimeoutVal;
     fd_set read_fds;
 
@@ -307,15 +501,15 @@ void Record::run()
                                    s32Ret);
                         break;
                     }
-                    m_VencChnPara[i].framnum ++;
+//                    m_VencChnPara[i].framnum ++;
                     /*******************************************************
                      step 2.5 : save frame to file
                     *******************************************************/
-                    framesize = 0;
-                    for(j = 0;j < stStream.u32PackCount;j++){
-                        framesize += stStream.pstPack[j].u32Len - stStream.pstPack[j].u32Offset;
-                    }
-                    fwrite((void *)&framesize,sizeof (framesize),1,m_VencChnPara[i].pFile);
+//                    framesize = 0;
+//                    for(j = 0;j < stStream.u32PackCount;j++){
+//                        framesize += stStream.pstPack[j].u32Len - stStream.pstPack[j].u32Offset;
+//                    }
+//                    fwrite((void *)&framesize,sizeof (framesize),1,m_VencChnPara[i].pFile);
 
                     s32Ret = Sample_Common_Venc::SAMPLE_COMM_VENC_SaveStream(m_enType, m_VencChnPara[i].pFile, &stStream);
                     if (HI_SUCCESS != s32Ret)

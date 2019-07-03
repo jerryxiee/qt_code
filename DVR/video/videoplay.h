@@ -19,6 +19,7 @@ public:
 
 private:
     char* Get_FileType(char *filename);
+    bool dealFileHead(char *filename);
 protected:
     virtual void run();
 
@@ -37,6 +38,9 @@ private:
     Sample_Common_Vdec *m_pVdec = nullptr;
     VdecThreadParam m_Thread_Attr;
     bool m_Vdec_Run;
+    int m_frameRate;
+    PAYLOAD_TYPE_E m_enType;
+    SIZE_S  m_PicSize;
 };
 
 #endif // VDECPLAY_H

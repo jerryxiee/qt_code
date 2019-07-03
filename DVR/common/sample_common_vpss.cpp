@@ -76,7 +76,7 @@ Sample_Common_Vpss & Sample_Common_Vpss::operator = (const Sample_Common_Vpss & 
 
 Sample_Common_Vpss & Sample_Common_Vpss::operator = (const Sample_Common_Vpss * Sample_Vpss)
 {
-    qDebug("%s:%d\n",__FUNCTION__,__LINE__);
+//    qDebug("%s:%d\n",__FUNCTION__,__LINE__);
     if(this != Sample_Vpss){
         m_Chn_Num   = Sample_Vpss->m_Chn_Num;
         m_Grp_Num   = Sample_Vpss->m_Grp_Num;

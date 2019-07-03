@@ -12,6 +12,9 @@
 #include "common/sample_common_sys.h"
 #include "video/vio.h"
 //#endif
+#include <iostream>
+#include <exception>
+using namespace std;
 
 
 void sign(int signal)
@@ -77,6 +80,7 @@ int main(int argc, char *argv[])
         w.show();
 
         signal(SIGINT,sign);
+        signal(SIGSEGV, sign);
 #ifndef LUNUX_WIN
 //    vio.Vi_Start(VIDEO_ENCODING_MODE_PAL);
 //    vio.Vo_Start();
@@ -89,16 +93,16 @@ int main(int argc, char *argv[])
 #endif
 
         ret = a.exec();
-    } catch(...) {
+    } catch(exception &e) {
         qDebug()<<"QApplication::quit";
         QApplication::quit();
     }
 #ifndef LUNUX_WIN
 //    vio.Venc_exit();
 //    vio.wait();
-    qDebug()<<"exit main";
-    QThread::sleep(2);
-#endif
 
+//    QThread::sleep(2);
+#endif
+    qDebug()<<"exit main";
     return ret;
 }
