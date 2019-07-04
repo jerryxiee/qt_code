@@ -41,8 +41,9 @@ private:
     HI_S32 saveAlarmFile(VI_CHN Chn);
     HI_BOOL createNewFile(VI_CHN Chn);
     HI_S32 checkRecordChn(VI_CHN Chn);
+    int checkVideoAlarmList(VI_CHN Chn,VIDEO_TYPE type);
     bool removeVideoAlarmEventFromlist(VI_CHN Chn);
-    void addVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type);
+    bool addVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type);
     bool removeVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type);
 
 signals:

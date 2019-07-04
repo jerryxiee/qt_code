@@ -230,6 +230,19 @@ void Record::onVencAttrChangedSlot(VI_CHN Chn,HI_U32 stream)
                   m_VencSet->m_Vdec_Param[stream][Chn].mu32BitRate,m_VencSet->m_Vdec_Param[stream][Chn].mfr32DstFrmRate,
                       m_VencSet->m_Vdec_Param[stream][Chn].mu32Profile);
 }
+
+int Record::checkVideoAlarmList(VI_CHN Chn,VIDEO_TYPE type)
+{
+    for (int i = 0;i < m_VideoEventFileInfoList[Chn].count();i++) {
+        if(m_VideoEventFileInfoList[Chn].at(i).type == type){
+            return i;
+        }
+    }
+
+    return -1;
+
+}
+
 bool Record::removeVideoAlarmEventFromlist(VI_CHN Chn)
 {
     m_EventFileMutex.lock();
@@ -240,35 +253,50 @@ bool Record::removeVideoAlarmEventFromlist(VI_CHN Chn)
 
 bool Record::removeVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type)
 {
-    for (int i = 0;i < m_VideoEventFileInfoList[Chn].count();i++) {
-        if(m_VideoEventFileInfoList[Chn].at(i).type == type){
-            m_EventFileMutex.lock();
-            m_VideoEventFileInfoList[Chn].removeAt(i);
-            m_EventFileMutex.unlock();
-            return true;
-        }
+    int index;
+
+    index = checkVideoAlarmList(Chn,type);
+    if(index < 0){
+        return false;
+    }
+
+    m_EventFileMutex.lock();
+    m_VideoEventFileInfoList[Chn].removeAt(index);
+    m_EventFileMutex.unlock();
+    return true;
+
+
+}
+
+bool Record::addVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type)
+{
+    VIDEO_FILE_INFO fileinfo;
+    int index;
+
+    index = checkVideoAlarmList(Chn,type);
+    if(index < 0){
+        fileinfo.type = type;
+        m_EventFileMutex.lock();
+        m_VideoEventFileInfoList[Chn].append(fileinfo);
+        m_EventFileMutex.unlock();
+
+        return true;
     }
 
     return false;
 }
 
-void Record::addVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type)
-{
-    VIDEO_FILE_INFO fileinfo;
-
-    fileinfo.type = type;
-    m_EventFileMutex.lock();
-    m_VideoEventFileInfoList[Chn].append(fileinfo);
-    m_EventFileMutex.unlock();
-}
-
 void Record::onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool change)
 {
+    if(m_VideoEventFileInfoList[Chn].count()){
+        saveAlarmFile(Chn);
+    }
     if(change){
-        addVideoAlarmEventFromlist(Chn,type);
+        if(!addVideoAlarmEventFromlist(Chn,type)){
+            return;
+        }
     }else {
 
-        saveAlarmFile(Chn);
         if(!removeVideoAlarmEventFromlist(Chn,type)){
             return;
         }
@@ -281,6 +309,13 @@ void Record::onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool change
 HI_BOOL Record::addRecordList(VI_CHN Chn)
 {
     Venc_Data VencD;
+    HI_S32 index;
+
+    index = checkRecordChn(Chn);
+    if(index >= 0){
+        qDebug()<<"alread in list video "<<Chn;
+        return HI_FALSE;
+    }
 
     VencD.ViChn   = Chn;
     VencD.pFile   = nullptr;
@@ -531,7 +566,7 @@ HI_BOOL Record::onSaveFileStopSlot(VI_CHN Chn)
 HI_S32 Record::getFileSize(VI_CHN Chn)
 {
     for(int i = 0; i < m_VencChnPara.count();i++){
-        if(m_VencChnPara[i].ViChn == Chn)
+        if(m_VencChnPara[i].ViChn == Chn && m_VencChnPara[i].pFile)
             return ftell(m_VencChnPara[i].pFile);
     }
 
@@ -541,7 +576,7 @@ HI_S32 Record::getFileSize(VI_CHN Chn)
 void Record::checkFileSize()
 {
     for(int i = 0;i < m_VencChnPara.count();i++){
-        if(ftell(m_VencChnPara[i].pFile) > MAXSIZE){
+        if(m_VencChnPara[i].pFile && ftell(m_VencChnPara[i].pFile) > MAXSIZE){
             qDebug()<<"channel"<<m_VencChnPara[i].Venc_Chn<<"make new file";
             emit createNewFileSignal(m_VencChnPara[i].ViChn);
         }
