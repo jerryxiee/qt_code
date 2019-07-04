@@ -115,3 +115,10 @@ void VideoControl::onRgnOverlayShowSlot(int Chn,bool enable)
 #endif
 
 }
+
+void VideoControl::onTestVideoAlarmSlot(VI_CHN Chn,VIDEO_TYPE type,bool change)
+{
+#ifndef LUNUX_WIN
+    m_Record.onVideoAlarmEventChangedSlot(Chn,type,change);
+#endif
+}

@@ -22,6 +22,8 @@ public:
     HI_S32 stopRecordChn(VI_CHN Chn);
 
     HI_BOOL addChnToRecord(VI_CHN Chn);
+    HI_BOOL addRecordList(VI_CHN Chn);
+    HI_BOOL deleteFromRecordList(VI_CHN Chn);
     HI_BOOL deleteChnFromRecord(VI_CHN Chn);
 //    HI_BOOL CreatNewFile(VENC_CHN VencChn);
 //    HI_BOOL Save_file_Stop(VENC_CHN VencChn);
@@ -35,9 +37,16 @@ private:
     void Init();
     HI_S32 setRecordAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32BitRate,HI_FR32 frmRate,HI_U32 u32Profile);
     HI_S32 startRecordChn(VI_CHN ViChnCnt, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_FR32 frmRate, HI_U32 u32Profile);
+    HI_S32 getAlarmFileName(VI_CHN Chn,VIDEO_TYPE type,char *filename,int len);
+    HI_S32 saveAlarmFile(VI_CHN Chn);
+    HI_BOOL createNewFile(VI_CHN Chn);
+    HI_S32 checkRecordChn(VI_CHN Chn);
+    bool removeVideoAlarmEventFromlist(VI_CHN Chn);
+    void addVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type);
+    bool removeVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type);
 
 signals:
-    void createNewFile(VI_CHN Chn);
+    void createNewFileSignal(VI_CHN Chn);
 
 public slots:
     HI_BOOL onCreatNewFileSlot(VI_CHN Chn);

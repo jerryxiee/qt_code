@@ -48,7 +48,8 @@ SOURCES += \
     settings/dispset.cpp \
     settings/config.cpp \
     settings/systemset.cpp \
-    settings/netconfig.cpp
+    settings/netconfig.cpp \
+    test/test.cpp
 
 
 
@@ -68,7 +69,8 @@ HEADERS += \
     settings/dispset.h \
     settings/config.h \
     settings/systemset.h \
-    settings/netconfig.h
+    settings/netconfig.h \
+    test/test.h
 
 
 

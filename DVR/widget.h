@@ -13,6 +13,7 @@
 #include "windows/regionmanage.h"
 #include "video/videocontrol.h"
 #include "common/sample_comm.h"
+#include "test/test.h"
 
 
 namespace Ui {
@@ -61,6 +62,8 @@ private:
     MainWindow *mMainWidow;
     VideoDisplay  *mVideoDisplay;
     RegionManage *mRegionManage;
+
+    Test Alarmtest;
 
 };
 

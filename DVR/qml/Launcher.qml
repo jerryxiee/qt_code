@@ -33,6 +33,13 @@ Rectangle {
             icon:"qrc:/qml/setting/images/settings.png"
             page:"qrc:/qml/State/StateManage.qml"
         }
+
+        ListElement{
+            flag:"qml"
+            name:"test"
+            icon:"qrc:/qml/setting/images/settings.png"
+            page:"qrc:/qml/AlarmTest.qml"
+        }
 //        ListElement{name:"video1";icon:"qrc:images/1.png"}
     }
 

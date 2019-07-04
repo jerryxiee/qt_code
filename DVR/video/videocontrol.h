@@ -39,6 +39,7 @@ public slots:
     void onOverlayTimePosChanged(int Chn,QPoint point);
     void onOverlayNamePosChanged(int Chn,QPoint point);
     void onRgnOverlayShowSlot(int Chn,bool enable);
+    void onTestVideoAlarmSlot(VI_CHN Chn,VIDEO_TYPE type,bool change);
 
 
 public:

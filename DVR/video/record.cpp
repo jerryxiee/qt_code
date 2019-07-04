@@ -35,7 +35,7 @@ void Record::Init()
     connect(m_VencSet,SIGNAL(vencAttrChanged(VI_CHN,HI_U32)),this,SLOT(onVencAttrChangedSlot(VI_CHN,HI_U32)));
     connect(m_VencSet,SIGNAL(vencStatusChanged(VI_CHN,bool)),this,SLOT(onVencStatusChanged(VI_CHN,bool)));
 
-    connect(this,SIGNAL(createNewFile(VI_CHN)),this,SLOT(onCreatNewFileSlot(VI_CHN)));
+    connect(this,SIGNAL(createNewFileSignal(VI_CHN)),this,SLOT(onCreatNewFileSlot(VI_CHN)));
 
 }
 
@@ -44,6 +44,17 @@ void Record::onTimeHander()
     checkFileSize();
 }
 
+HI_S32 Record::checkRecordChn(VI_CHN Chn)
+{
+    for(HI_S32 i = 0 ;i < m_VencChnPara.count();i++){
+        if(m_VencChnPara[i].ViChn == Chn ){
+            qDebug("Video(%d) active ",Chn);
+            return i;
+        }
+    }
+
+    return HI_FAILURE;
+}
 void Record::setRecordSrc(Sample_Common_Vpss *vpss)
 {
     m_Vpss = vpss;
@@ -202,9 +213,12 @@ void Record::onViStatusChangedSlot(VI_CHN Chn,HI_BOOL status)
 {
     qDebug("%s:%d\n",__FUNCTION__,__LINE__);
     if(status){
+        addRecordList(Chn);
         addChnToRecord(Chn);
     }else {
         deleteChnFromRecord(Chn);
+        deleteFromRecordList(Chn);
+        removeVideoAlarmEventFromlist(Chn);
     }
 }
 
@@ -216,27 +230,94 @@ void Record::onVencAttrChangedSlot(VI_CHN Chn,HI_U32 stream)
                   m_VencSet->m_Vdec_Param[stream][Chn].mu32BitRate,m_VencSet->m_Vdec_Param[stream][Chn].mfr32DstFrmRate,
                       m_VencSet->m_Vdec_Param[stream][Chn].mu32Profile);
 }
+bool Record::removeVideoAlarmEventFromlist(VI_CHN Chn)
+{
+    m_EventFileMutex.lock();
+    m_VideoEventFileInfoList[Chn].clear();
+    m_EventFileMutex.unlock();
+    return true;
+}
+
+bool Record::removeVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type)
+{
+    for (int i = 0;i < m_VideoEventFileInfoList[Chn].count();i++) {
+        if(m_VideoEventFileInfoList[Chn].at(i).type == type){
+            m_EventFileMutex.lock();
+            m_VideoEventFileInfoList[Chn].removeAt(i);
+            m_EventFileMutex.unlock();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void Record::addVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type)
+{
+    VIDEO_FILE_INFO fileinfo;
+
+    fileinfo.type = type;
+    m_EventFileMutex.lock();
+    m_VideoEventFileInfoList[Chn].append(fileinfo);
+    m_EventFileMutex.unlock();
+}
 
 void Record::onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool change)
 {
-    m_EventFileMutex.lock();
     if(change){
-        VIDEO_FILE_INFO fileinfo;
-
-        fileinfo.type = type;
-        m_VideoEventFileInfoList[Chn].append(fileinfo);
+        addVideoAlarmEventFromlist(Chn,type);
     }else {
-        for (int i = 0;i < m_VideoEventFileInfoList[Chn].count();i++) {
-            if(m_VideoEventFileInfoList[Chn].at(i).type == type){
-                m_VideoEventFileInfoList[Chn].removeAt(i);
-                break;
-            }
+
+        saveAlarmFile(Chn);
+        if(!removeVideoAlarmEventFromlist(Chn,type)){
+            return;
         }
     }
-    m_EventFileMutex.unlock();
+
     addChnToRecord(Chn);
 
 }
+
+HI_BOOL Record::addRecordList(VI_CHN Chn)
+{
+    Venc_Data VencD;
+
+    VencD.ViChn   = Chn;
+    VencD.pFile   = nullptr;
+    VencD.Venc_Chn = m_pVenc[Chn]->m_Venc_Chn;
+    VencD.VencFd   = HI_MPI_VENC_GetFd(VencD.Venc_Chn);
+    if (VencD.VencFd < 0)
+    {
+        SAMPLE_PRT("HI_MPI_VENC_GetFd failed with %#x!\n",VencD.VencFd);
+        return HI_FALSE;
+    }
+    if(m_maxfd < VencD.VencFd)
+        m_maxfd = VencD.VencFd;
+
+    m_file_mutex.lock();
+    m_VencChnPara.append(VencD);
+    m_file_mutex.unlock();
+
+    return HI_TRUE;
+
+
+}
+
+HI_BOOL Record::deleteFromRecordList(VI_CHN Chn)
+{
+    HI_S32 index;
+
+    index = checkRecordChn(Chn);
+    if(index < 0){
+        qDebug()<<"Record list not video "<<Chn;
+        return HI_FALSE;
+    }
+
+    m_VencChnPara.removeAt(index);
+    return HI_TRUE;
+
+}
+
 
 HI_BOOL Record::addChnToRecord(VI_CHN Chn)
 {
@@ -248,7 +329,7 @@ HI_BOOL Record::addChnToRecord(VI_CHN Chn)
         return HI_FALSE;
     }
 
-    result = onCreatNewFileSlot(Chn);
+    result = createNewFile(Chn);
     if(result){
         start();
     }
@@ -260,6 +341,7 @@ HI_BOOL Record::deleteChnFromRecord(VI_CHN Chn)
 {
     HI_BOOL result = HI_TRUE;
 
+    saveAlarmFile(Chn);
     m_file_mutex.lock();
     result = onSaveFileStopSlot(Chn);
     m_file_mutex.unlock();
@@ -268,24 +350,53 @@ HI_BOOL Record::deleteChnFromRecord(VI_CHN Chn)
 }
 
 
-HI_BOOL Record::onCreatNewFileSlot(VI_CHN Chn)
+HI_S32 Record::getAlarmFileName(VI_CHN Chn, VIDEO_TYPE type, char *filename, int len)
 {
-    Venc_Data VencD;
+    char file[VIDEO_FILENAME_SIZE];
+
+    switch (type) {
+        case VIDEO_MOVEDETECT:
+        {
+            sprintf(file,"%s/%s%d",ALARM_FILE_PATH,MOVED_FILE,Chn);
+            break;
+        }
+        case VIDEO_IO0:
+        case VIDEO_IO1:
+        case VIDEO_IO2:
+        case VIDEO_IO3:
+        {
+            sprintf(file,"%s/%s%d%d",ALARM_FILE_PATH,IO_FILE,type,Chn);
+            break;
+        }
+    default:{
+        return HI_FAILURE;
+    }
+    }
+    if(len < strlen(file)){
+        return HI_FAILURE;
+    }
+    strcpy(filename,file);
+
+    return HI_SUCCESS;
+}
+
+HI_BOOL Record::createNewFile(VI_CHN Chn)
+{
+//    Venc_Data VencD;
+    FILE *VencFile;
+    HI_S32 index = HI_FAILURE;
     HI_S32 s32Ret;
     HI_CHAR szFilePostfix[10];
-    HI_CHAR venc_path_name[64];
-    HI_CHAR venc_file_name[64];
+    HI_CHAR venc_path_name[VIDEO_FILENAME_SIZE];
+    HI_CHAR venc_file_name[VIDEO_FILENAME_SIZE];
+    HI_CHAR alarm_path[VIDEO_FILENAME_SIZE];
 
-    VencD.ViChn   = Chn;
-    VencD.Venc_Chn = m_pVenc[Chn]->m_Venc_Chn;
-    VencD.VencFd   = HI_MPI_VENC_GetFd(VencD.Venc_Chn);
-    if (VencD.VencFd < 0)
-    {
-        SAMPLE_PRT("HI_MPI_VENC_GetFd failed with %#x!\n",VencD.VencFd);
+
+    index = checkRecordChn(Chn);
+    if(index < 0){
+        qDebug()<<"recordlist not video "<<Chn;
         return HI_FALSE;
     }
-    if(m_maxfd < VencD.VencFd)
-        m_maxfd = VencD.VencFd;
 
     s32Ret = Sample_Common_Venc::SAMPLE_COMM_VENC_GetFilePostfix(m_enType, szFilePostfix);
     if (s32Ret != HI_SUCCESS)
@@ -308,99 +419,110 @@ HI_BOOL Record::onCreatNewFileSlot(VI_CHN Chn)
 
     QByteArray file_name = current_date.toLatin1();
     sprintf(venc_file_name,"%s%s%s",venc_path_name,file_name.data(),szFilePostfix);
-    VencD.pFile = fopen(venc_file_name, "wb");
-    if (!VencD.pFile)
+    VencFile = fopen(venc_file_name, "wb");
+    if (!VencFile)
     {
-        fclose(VencD.pFile);
+        fclose(VencFile);
         SAMPLE_PRT("open file[%s] failed!\n",venc_file_name);
         return HI_FALSE;
     }
-//    if(fseek(VencD.pFile,sizeof (MYVIDEO_HEAD),SEEK_SET)){
-//        fclose(VencD.pFile);
-//        return HI_FALSE;
-//    }
     SAMPLE_PRT("open file[%s] sucess!\n",venc_file_name);
 
     m_file_mutex.lock();
-
-//    for(HI_S32 i = 0 ;i < m_VencChnPara.count();i++){
-//        if(m_VencChnPara[i].Venc_Chn == VencD.Venc_Chn){
-//            fclose(m_VencChnPara[i].pFile);
-//            m_VencChnPara.removeAt(i);
-//            qDebug("channel %d begin new file",VencChn);
-//        }
-//    }
-    onSaveFileStopSlot(Chn);
-    m_VencChnPara.append(VencD);
+    if(m_VencChnPara[index].pFile){
+        fclose(m_VencChnPara.at(index).pFile);
+    }
+    m_VencChnPara[index].pFile = VencFile;
 
     m_file_mutex.unlock();
+
+    m_EventFileMutex.lock();
+    for (int i = 0;i < m_VideoEventFileInfoList[Chn].count();i++) {
+        s32Ret = getAlarmFileName(Chn,m_VideoEventFileInfoList[Chn].at(i).type, alarm_path,VIDEO_FILENAME_SIZE);
+        if(s32Ret != HI_SUCCESS){
+            qDebug()<<"getAlarmFileName failed";
+            m_VideoEventFileInfoList[Chn].removeAt(i);
+            continue;
+        }
+        strcpy(m_VideoEventFileInfoList[Chn][i].filename,venc_file_name);
+        m_VideoEventFileInfoList[Chn][i].ctime = current_date_time.toTime_t();
+        qDebug("create alarm file[%s]",alarm_path);
+
+        QFileInfo alarmFile(alarm_path);
+        if(!alarmFile.exists()){
+            VIDEO_HEAD videoFileHead;
+            videoFileHead.type = m_VideoEventFileInfoList[Chn].at(i).type;
+            videoFileHead.cTime = current_date_time.toTime_t();
+            FILE *file = fopen(alarm_path,"wb");
+            fwrite((char *)&videoFileHead,sizeof (VIDEO_HEAD),1,file);
+            fclose(file);
+
+        }
+    }
+    m_EventFileMutex.unlock();
 
 
     return HI_TRUE;
 }
+
+HI_S32 Record::saveAlarmFile(VI_CHN Chn)
+{
+    HI_S32 s32Ret = HI_SUCCESS;
+    HI_CHAR alarm_path[VIDEO_FILENAME_SIZE];
+
+    if(checkRecordChn(Chn) < 0){
+        qDebug("video %d not active",Chn);
+        return HI_FAILURE;
+    }
+
+    m_EventFileMutex.lock();
+    for(int i = 0;i < m_VideoEventFileInfoList[Chn].count();i++) {
+        s32Ret = getAlarmFileName(Chn,m_VideoEventFileInfoList[Chn].at(i).type, alarm_path,VIDEO_FILENAME_SIZE);
+        if(s32Ret != HI_SUCCESS){
+            qDebug()<<"getAlarmFileName failed";
+            continue;
+        }
+        qDebug("write file[%s]",alarm_path);
+        FILE *alarmFile = fopen(alarm_path,"rb+");
+        if(alarmFile){
+            VIDEO_HEAD videoFileHead;
+            fread((char *)&videoFileHead,sizeof (VIDEO_HEAD),1,alarmFile);
+            videoFileHead.mtime = QDateTime::currentDateTime().toTime_t();
+            videoFileHead.num++;
+            fseek(alarmFile,0,SEEK_SET);
+            fwrite((char *)&videoFileHead,sizeof (VIDEO_HEAD),1,alarmFile);
+
+            fseek(alarmFile,0,SEEK_END);
+            m_VideoEventFileInfoList[Chn][i].mtime = videoFileHead.mtime;
+            fwrite((char *)(&m_VideoEventFileInfoList[Chn].at(i)),sizeof (VIDEO_FILE_INFO),1,alarmFile);
+            fclose(alarmFile);
+
+            qDebug("write file[%s] sucess",alarm_path);
+        }
+    }
+    m_EventFileMutex.unlock();
+
+    return s32Ret;
+}
+
+HI_BOOL Record::onCreatNewFileSlot(VI_CHN Chn)
+{
+    saveAlarmFile(Chn);
+    return createNewFile(Chn);
+}
+
 HI_BOOL Record::onSaveFileStopSlot(VI_CHN Chn)
 {
-//    HI_S32 s32Ret = HI_SUCCESS;
-//    MYVIDEO_HEAD videohead;
-////    VENC_FRAME_RATE_S frameRate;
-//    VENC_CHN_ATTR_S vencAttr;
 
-//    s32Ret = HI_MPI_VENC_GetChnAttr(VencChn, &vencAttr);
-//    if(s32Ret != HI_SUCCESS){
-//        qDebug("HI_MPI_VENC_GetChnAttr failed with %#x!",s32Ret);
-//    }else {
-//        videohead.payload_type =  vencAttr.stVeAttr.enType;
-//        switch (vencAttr.stVeAttr.enType) {
-//            case PT_H264:
-//            {
-//                videohead.width  = vencAttr.stVeAttr.stAttrH264e.u32PicWidth;
-//                videohead.height = vencAttr.stVeAttr.stAttrH264e.u32PicHeight;
-//                if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H264CBR){
-//                    videohead.framerate = vencAttr.stRcAttr.stAttrH264Cbr.fr32DstFrmRate;
-//                }else if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H264VBR) {
-//                    videohead.framerate = vencAttr.stRcAttr.stAttrH264Vbr.fr32DstFrmRate;
-//                }else if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H264FIXQP){
-//                    videohead.framerate = vencAttr.stRcAttr.stAttrH264FixQp.fr32DstFrmRate;
-//                }
-//                break;
-//            }
-//            case PT_H265:
-//            {
-//                videohead.width  = vencAttr.stVeAttr.stAttrH265e.u32PicWidth;
-//                videohead.height = vencAttr.stVeAttr.stAttrH265e.u32PicHeight;
-//                if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H265CBR){
-//                    videohead.framerate = vencAttr.stRcAttr.stAttrH265Cbr.fr32DstFrmRate;
-//                }else if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H265VBR) {
-//                    videohead.framerate = vencAttr.stRcAttr.stAttrH265Vbr.fr32DstFrmRate;
-//                }else if(vencAttr.stRcAttr.enRcMode == VENC_RC_MODE_H265FIXQP){
-//                    videohead.framerate = vencAttr.stRcAttr.stAttrH265FixQp.fr32DstFrmRate;
-//                }
-//                break;
-//            }
-//        }
+    HI_S32 index = HI_FAILURE;
 
-//    }
-
-
-//    s32Ret = HI_MPI_VENC_GetFrameRate(VencChn, &frameRate);
-//    if(s32Ret != HI_SUCCESS){
-//        qDebug("HI_MPI_VENC_GetFrameRate failed with %#x!",s32Ret);
-//    }else {
-//        videohead.framerate = frameRate.s32DstFrmRate;
-//    }
-
-
-    for(HI_S32 i = 0 ;i < m_VencChnPara.count();i++){
-        if(m_VencChnPara[i].ViChn == Chn ){
-//            videohead.framnum = m_VencChnPara[i].framnum;
-//            fseek(m_VencChnPara[i].pFile,0,SEEK_SET);
-//            fwrite((void *)&videohead,sizeof (videohead),1,m_VencChnPara[i].pFile);
-
-            fclose(m_VencChnPara[i].pFile);
-            m_VencChnPara.removeAt(i);
-            qDebug("stop channel(%d) save file ",Chn);
-            return HI_TRUE;
-        }
+    index = checkRecordChn(Chn);
+    if(index >= 0){
+        if(m_VencChnPara[index].pFile)
+            fclose(m_VencChnPara[index].pFile);
+        m_VencChnPara[index].pFile = nullptr;
+        qDebug("stop channel(%d) save file ",Chn);
+        return HI_TRUE;
     }
 
     return HI_FALSE;
@@ -421,7 +543,7 @@ void Record::checkFileSize()
     for(int i = 0;i < m_VencChnPara.count();i++){
         if(ftell(m_VencChnPara[i].pFile) > MAXSIZE){
             qDebug()<<"channel"<<m_VencChnPara[i].Venc_Chn<<"make new file";
-            emit createNewFile(m_VencChnPara[i].ViChn);
+            emit createNewFileSignal(m_VencChnPara[i].ViChn);
         }
     }
 
@@ -430,9 +552,6 @@ void Record::checkFileSize()
 void Record::run()
 {
     HI_S32 i = 0;
-//    HI_S32 j = 0;
-//    HI_S32 framesize = 0;
-//    HI_S32 count;
     struct timeval TimeoutVal;
     fd_set read_fds;
 
@@ -450,16 +569,11 @@ void Record::run()
     while (m_Venc_Run)
     {
         FD_ZERO(&read_fds);
-//        for (i = 0; i < m_ViChnCnt; i++)
-//        {
-//            FD_SET(VencFd[i], &read_fds);
-//        }
         m_file_mutex.lock();
         if(m_VencChnPara.count() == 0){
             m_file_mutex.unlock();
             break;
         }
-
 
         for(i = 0; i < m_VencChnPara.count(); i++){
             FD_SET(m_VencChnPara[i].VencFd, &read_fds);
@@ -572,11 +686,10 @@ void Record::run()
      step 3 : close save-file
     *******************************************************/
 
-    m_file_mutex.lock();
-    while (m_VencChnPara.count()) {
-        onSaveFileStopSlot(m_VencChnPara[0].Venc_Chn);
+    for (int i = 0;i < m_VencChnPara.count();i++) {
+        deleteChnFromRecord(m_VencChnPara[i].ViChn);
     }
-    m_file_mutex.unlock();
+
     return;
 
 }

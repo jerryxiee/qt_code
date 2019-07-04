@@ -71,5 +71,6 @@
         <file>qml/State/ChnState/ChnState.qml</file>
         <file>qml/State/AlarmState/AlarmState.qml</file>
         <file>qml/State/PlatformState/PlatformState.qml</file>
+        <file>qml/AlarmTest.qml</file>
     </qresource>
 </RCC>

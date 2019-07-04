@@ -30,11 +30,13 @@ Widget::Widget(QWidget *parent) :
         context->setContextProperty("VencControl",Settings::getVencIni());
         context->setContextProperty("DispSet",Settings::getDispSetIni());
         context->setContextProperty("SystemConfig",Settings::getSystemSetIni());
+        context->setContextProperty("VideoAlarmTest",&Alarmtest);
     }
 
 
 #ifndef LUNUX_WIN
     mvideoControl.videoStart();
+    connect(&Alarmtest,SIGNAL(videoAlarmEventChangedSignal(VI_CHN,VIDEO_TYPE,bool)),&mvideoControl,SLOT(onTestVideoAlarmSlot(VI_CHN,VIDEO_TYPE,bool)));
 //    connect(this,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&mvideoControl,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
 #endif
 
