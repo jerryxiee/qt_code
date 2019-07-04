@@ -46,7 +46,7 @@ public:
 
 
 private:
-    const HI_S32 TIMEOUT = 1000*1;
+    const HI_S32 TIMEOUT = 500;
 
     QTimer *mTimer;
 

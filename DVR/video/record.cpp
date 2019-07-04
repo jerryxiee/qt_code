@@ -611,6 +611,9 @@ void Record::run()
         }
 
         for(i = 0; i < m_VencChnPara.count(); i++){
+            if(!m_VencChnPara[i].pFile){
+                continue;
+            }
             FD_SET(m_VencChnPara[i].VencFd, &read_fds);
         }
         TimeoutVal.tv_sec  = 0;
@@ -677,15 +680,9 @@ void Record::run()
                                    s32Ret);
                         break;
                     }
-//                    m_VencChnPara[i].framnum ++;
                     /*******************************************************
                      step 2.5 : save frame to file
                     *******************************************************/
-//                    framesize = 0;
-//                    for(j = 0;j < stStream.u32PackCount;j++){
-//                        framesize += stStream.pstPack[j].u32Len - stStream.pstPack[j].u32Offset;
-//                    }
-//                    fwrite((void *)&framesize,sizeof (framesize),1,m_VencChnPara[i].pFile);
 
                     s32Ret = Sample_Common_Venc::SAMPLE_COMM_VENC_SaveStream(m_enType, m_VencChnPara[i].pFile, &stStream);
                     if (HI_SUCCESS != s32Ret)
