@@ -347,8 +347,9 @@ HI_BOOL Record::deleteFromRecordList(VI_CHN Chn)
         qDebug()<<"Record list not video "<<Chn;
         return HI_FALSE;
     }
-
+    m_file_mutex.lock();
     m_VencChnPara.removeAt(index);
+    m_file_mutex.unlock();
     return HI_TRUE;
 
 }
