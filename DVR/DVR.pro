@@ -97,7 +97,8 @@ SOURCES +=common/sample_common_sys.cpp \
             video/vio.cpp \
             video/videoplay.cpp \
             video/regionctr.cpp \
-            video/record.cpp
+            video/record.cpp \
+            video/videodetect.cpp
 
 HEADERS +=common/loadbmp.h \
             common/sample_common_sys.h \
@@ -110,7 +111,8 @@ HEADERS +=common/loadbmp.h \
             video/vio.h \
             video/videoplay.h \
             video/regionctr.h \
-            video/record.h
+            video/record.h \
+            video/videodetect.h
 
 
 LIBS += -lpthread

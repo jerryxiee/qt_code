@@ -21,6 +21,7 @@ VideoControl::~VideoControl()
 {
 #ifndef LUNUX_WIN
     m_Record.RecordExit();
+    m_VideoDetect.VideoDetectExit();
 #endif
 
 }
@@ -50,9 +51,11 @@ HI_BOOL VideoControl::videoStart()
     }
 
     vio.Vi_Start(VIDEO_ENCODING_MODE_PAL,m_pVpss);
+
     m_Record.setRecordSrc(m_pVpss);
     for (int i = 0;i < vio.m_ViChnCnt;i++) {
         m_Record.startRecordChn(i,VIDEO_ENCODING_MODE_PAL);
+        m_VideoDetect.createMoveDetect(i,i*4,400,4);
     }
     mTimer->start(TIMEOUT);
     vio.Vo_Start();
@@ -60,6 +63,7 @@ HI_BOOL VideoControl::videoStart()
     connect(&vio,SIGNAL(VistatusChanged(VI_CHN,HI_BOOL)),&m_Record,SLOT(onViStatusChangedSlot(VI_CHN,HI_BOOL)));
     connect(this,SIGNAL(timePosChanged(int,QPoint)),&vio,SLOT(onMoveTimePosChanged(int,QPoint)));
     connect(this,SIGNAL(namePosChanged(int,QPoint)),&vio,SLOT(onMoveNamePosChanged(int,QPoint)));
+    connect(&vio,SIGNAL(VistatusChanged(VI_CHN,HI_BOOL)),&m_VideoDetect,SLOT(onViStatusChangedSlot(VI_CHN,HI_BOOL)));
 
 
 #endif

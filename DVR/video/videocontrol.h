@@ -13,6 +13,7 @@
 #include "video/vio.h"
 #include <video/videoplay.h>
 #include "record.h"
+#include "videodetect.h"
 #endif
 
 class VideoControl : public QObject
@@ -55,6 +56,7 @@ private:
     Vio vio;
     Sample_Common_Vpss *m_pVpss;
     Record m_Record;
+    VideoDetect m_VideoDetect;
 #endif
 
 };

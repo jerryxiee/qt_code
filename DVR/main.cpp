@@ -79,17 +79,6 @@ int main(int argc, char *argv[])
         Widget w;
         w.show();
 
-        //test
-//        QFile file("text");
-//        file.open(QIODevice::WriteOnly);
-//        file.write("1345566787651234567",30);
-//        file.close();
-//        file.open(QIODevice::WriteOnly|QIODevice::Append);
-//        file.seek(0);
-//        file.write("00",2);
-//        file.seek(file.size());
-//        file.write("aa",2);
-//        file.close();
 
         signal(SIGINT,sign);
 //        signal(SIGSEGV, sign);
