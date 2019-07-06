@@ -1,5 +1,6 @@
 #include "videodetect.h"
 #include <QDebug>
+#include <QDateTime>
 
 VideoDetect::VideoDetect(QObject *parent) : QThread(parent)
 {
@@ -336,6 +337,27 @@ HI_S32 VideoDetect::SAMPLE_COMM_VDA_MdPrtSad(FILE *fp, VDA_DATA_S *pstVdaData)
     return HI_SUCCESS;
 }
 
+bool VideoDetect::VideoMoveDetectProcess(VDA_DATA_S *pstVdaData)
+{
+
+    VDA_OBJ_S *pstVdaObj;
+    HI_S32 i;
+
+    if (HI_TRUE != pstVdaData->unData.stMdData.bObjValid)
+    {
+        return false;
+    }
+
+    if(pstVdaData->unData.stMdData.stObjData.u32ObjNum > 0
+            && pstVdaData->unData.stMdData.stObjData.u32SizeOfMaxObj > 5000)
+        return true;
+
+//    pstVdaObj = pstVdaData->unData.stMdData.stObjData.pstAddr + \
+//            pstVdaData->unData.stMdData.stObjData.u32IndexOfMaxObj;
+
+    return false;
+}
+
 void VideoDetect::run()
 {
     int i = 0;
@@ -343,8 +365,12 @@ void VideoDetect::run()
     fd_set read_fds;
     struct timeval TimeoutVal;
     VDA_DATA_S stVdaData;
+    bool ignore_flag[8] = {false};
+    bool premovestart[8] = {false};
+    bool movestart[8] = {false};
     FILE *fp = fopen("moveobj","wb");
     FILE *fp1 = fopen("movesad","wb");
+    HI_U32 movestarttime,moveendtime;
 
     qDebug()<<"maxfd:"<<maxfd;
     mdetect_run = true;
@@ -393,7 +419,12 @@ void VideoDetect::run()
                         break ;
                     }
 
-                    qDebug()<<"chn "<<mVdaChnList[i].VdaChn <<"move detect alarm cnt:"<<stVdaData.unData.stMdData.u32AlarmPixCnt;
+//                    qDebug()<<"chn "<<mVdaChnList[i].VdaChn <<"move detect alarm cnt:"<<stVdaData.unData.stMdData.u32AlarmPixCnt;
+//                    printf("ObjNum=%d, IndexOfMaxObj=%d, SizeOfMaxObj=%d, SizeOfTotalObj=%d\n", \
+//                                   stVdaData.unData.stMdData.stObjData.u32ObjNum, \
+//                             stVdaData.unData.stMdData.stObjData.u32IndexOfMaxObj, \
+//                             stVdaData.unData.stMdData.stObjData.u32SizeOfMaxObj,\
+//                             stVdaData.unData.stMdData.stObjData.u32SizeOfTotalObj);
                     /*******************************************************
                     *step 2.4 : save frame to file
                     *******************************************************/
@@ -401,6 +432,27 @@ void VideoDetect::run()
                     SAMPLE_COMM_VDA_MdPrtSad(fp1, &stVdaData);
                     SAMPLE_COMM_VDA_MdPrtObj(fp, &stVdaData);
 //                    SAMPLE_COMM_VDA_MdPrtAp(fp, &stVdaData);
+
+                    movestart[i] = VideoMoveDetectProcess(&stVdaData);
+                    if(!ignore_flag[i]){
+
+                        ignore_flag[i] = true;
+                        movestarttime = QDateTime::currentDateTime().toTime_t();
+                        if(movestart[i] && !premovestart[i]){
+                            emit videoMoveDetectChangeSignal(i,VIDEO_MOVEDETECT,true);
+                            qDebug()<<"move detect enable signal "<<i;
+                        }else if (premovestart[i] && !movestart[i]) {
+                            emit videoMoveDetectChangeSignal(i,VIDEO_MOVEDETECT,false);
+                            qDebug()<<"move detect disenable signal "<<i;
+                        }
+                        premovestart[i] = movestart[i];
+
+                    }else {
+                        moveendtime = QDateTime::currentDateTime().toTime_t();
+                        if(moveendtime - movestarttime >= mDetectDelay){
+                            ignore_flag[i] = false;
+                        }
+                    }
                     /*******************************************************
                     *step 2.5 : release stream
                     *******************************************************/

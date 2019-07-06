@@ -37,9 +37,11 @@ private:
     HI_S32 Vda_CreateChn(VDA_CHN VdaChn,HI_U32 u32SadTh,HI_U32 u32VdaIntvl);
     HI_S32 SAMPLE_COMM_VDA_MdPrtSad(FILE *fp, VDA_DATA_S *pstVdaData);
     HI_S32 SAMPLE_COMM_VDA_MdPrtObj(FILE *fp, VDA_DATA_S *pstVdaData);
+    bool VideoMoveDetectProcess(VDA_DATA_S *pstVdaData);
 
 
 signals:
+    void videoMoveDetectChangeSignal(VI_CHN Chn,VIDEO_TYPE type,bool change);
 
 public slots:
     void onViStatusChangedSlot(VI_CHN index ,HI_BOOL enable);
@@ -51,6 +53,7 @@ private:
 
     bool mdetect_run;
     HI_S32 maxfd = 0;
+    int mDetectDelay = 1;
 };
 
 #endif // VIDEODETECT_H

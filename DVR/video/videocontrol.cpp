@@ -3,6 +3,7 @@
 #include <QMetaType>
 #include <QFileInfo>
 #include <QSettings>
+#include <QMetaType>
 
 VideoControl::VideoControl(QObject *parent) : QObject(parent)
 {
@@ -13,6 +14,9 @@ VideoControl::VideoControl(QObject *parent) : QObject(parent)
     connect(mTimer,SIGNAL(timeout()),&vio,SLOT(onTimeHander()));
     connect(mTimer,SIGNAL(timeout()),&m_Record,SLOT(onTimeHander()));
 #endif
+
+    qRegisterMetaType<VI_CHN>("VI_CHN");
+    qRegisterMetaType<VIDEO_TYPE>("VIDEO_TYPE");
 
 
 }
@@ -64,6 +68,7 @@ HI_BOOL VideoControl::videoStart()
     connect(this,SIGNAL(timePosChanged(int,QPoint)),&vio,SLOT(onMoveTimePosChanged(int,QPoint)));
     connect(this,SIGNAL(namePosChanged(int,QPoint)),&vio,SLOT(onMoveNamePosChanged(int,QPoint)));
     connect(&vio,SIGNAL(VistatusChanged(VI_CHN,HI_BOOL)),&m_VideoDetect,SLOT(onViStatusChangedSlot(VI_CHN,HI_BOOL)));
+    connect(&m_VideoDetect,SIGNAL(videoMoveDetectChangeSignal(VI_CHN,VIDEO_TYPE,bool)),&m_Record,SLOT(onVideoAlarmEventChangedSlot(VI_CHN,VIDEO_TYPE,bool)));
 
 
 #endif
