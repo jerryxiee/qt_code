@@ -3,6 +3,7 @@
 VencSet *Settings::mVencIni = nullptr;
 DispSet *Settings::mDispSetIni = nullptr;
 SystemSet *Settings::mSystemSetIni = nullptr;
+AlarmSet *Settings::mAlarmSetIni = nullptr;
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
@@ -35,4 +36,13 @@ SystemSet *Settings::getSystemSetIni()
 
     return mSystemSetIni;
 
+}
+
+AlarmSet *Settings::getAlarmSetIni()
+{
+    if(mAlarmSetIni == nullptr){
+        mAlarmSetIni = new  AlarmSet();
+    }
+
+    return mAlarmSetIni;
 }

@@ -5,6 +5,7 @@
 #include "vencset.h"
 #include "dispset.h"
 #include "systemset.h"
+#include "alarmset.h"
 
 class Settings : public QObject
 {
@@ -15,6 +16,7 @@ public:
     static VencSet *getVencIni();
     static DispSet *getDispSetIni();
     static SystemSet *getSystemSetIni();
+    static AlarmSet *getAlarmSetIni();
 
 signals:
 
@@ -24,6 +26,7 @@ private:
     static VencSet *mVencIni;
     static DispSet *mDispSetIni;
     static SystemSet *mSystemSetIni;
+    static AlarmSet *mAlarmSetIni;
 
 };
 

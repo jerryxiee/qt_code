@@ -10,8 +10,10 @@ Item {
     Connections{
         target: ioalarmroot
         onPressed:{
-            if(setindex == index){
+            if(value == index){
                 console.log("input")
+                AlarmConfig.setIoAlarm(ioportbox.currentIndex,textfield_alarmname.text,electypebox.currentIndex,
+                                       recordchnbox.currentIndex,dealtype1.checked,dealtype2.checked,dealtype3.checked)
 
             }
         }
@@ -56,6 +58,7 @@ Item {
         anchors.leftMargin: 50
         anchors.top: alarmname.top
         height:alarmname.height
+        text: AlarmConfig.getAlarmName(ioportbox.currentIndex)
     }
 
     Text {
@@ -76,7 +79,8 @@ Item {
         anchors.left: electype.right
         anchors.leftMargin: 50
         anchors.verticalCenter: electype.verticalCenter
-        model: ["高电平","低电平"]
+        model: ["低电平","高电平"]
+        currentIndex: AlarmConfig.getTrigLevel(ioportbox.currentIndex)
     }
 
     Text {
@@ -99,6 +103,7 @@ Item {
         anchors.verticalCenter: recordchn.verticalCenter
         model: ["无","模拟通道0","模拟通道1","模拟通道2","模拟通道3",
             "模拟通道4","模拟通道5","模拟通道6","模拟通道7"]
+        currentIndex: AlarmConfig.getConnectVideoChn(ioportbox.currentIndex)
     }
 
     Text {
@@ -117,7 +122,7 @@ Item {
         anchors.left: dealtype.right
         anchors.leftMargin: 50
         anchors.verticalCenter: dealtype.verticalCenter
-        checked: true
+        checked: AlarmConfig.getIoDispEnable(ioportbox.currentIndex)
         pixSize:fontpixelSize
 
         str:qsTr("弹出报警画面")
@@ -128,7 +133,7 @@ Item {
         anchors.left: dealtype1.right
         anchors.leftMargin: 20
         anchors.verticalCenter: dealtype.verticalCenter
-        checked: true
+        checked: AlarmConfig.getIoSoundEnable(ioportbox.currentIndex)
         pixSize:fontpixelSize
         str:qsTr("声音报警")
     }
@@ -138,7 +143,7 @@ Item {
         anchors.left: dealtype2.right
         anchors.leftMargin: 20
         anchors.verticalCenter: dealtype.verticalCenter
-        checked: true
+        checked: AlarmConfig.getIoReportEnable(ioportbox.currentIndex)
         pixSize:fontpixelSize
         str:qsTr("报警输出")
     }

@@ -30,6 +30,7 @@ Widget::Widget(QWidget *parent) :
         context->setContextProperty("VencControl",Settings::getVencIni());
         context->setContextProperty("DispSet",Settings::getDispSetIni());
         context->setContextProperty("SystemConfig",Settings::getSystemSetIni());
+        context->setContextProperty("AlarmConfig",Settings::getAlarmSetIni());
         context->setContextProperty("VideoAlarmTest",&Alarmtest);
     }
 

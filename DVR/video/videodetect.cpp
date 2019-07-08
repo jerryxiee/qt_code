@@ -429,8 +429,8 @@ void VideoDetect::run()
                     *step 2.4 : save frame to file
                     *******************************************************/
 //                    printf("\033[0;0H");/*move cursor*/
-                    SAMPLE_COMM_VDA_MdPrtSad(fp1, &stVdaData);
-                    SAMPLE_COMM_VDA_MdPrtObj(fp, &stVdaData);
+//                    SAMPLE_COMM_VDA_MdPrtSad(fp1, &stVdaData);
+//                    SAMPLE_COMM_VDA_MdPrtObj(fp, &stVdaData);
 //                    SAMPLE_COMM_VDA_MdPrtAp(fp, &stVdaData);
 
                     movestart[i] = VideoMoveDetectProcess(&stVdaData);

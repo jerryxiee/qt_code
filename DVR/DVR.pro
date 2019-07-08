@@ -49,7 +49,8 @@ SOURCES += \
     settings/config.cpp \
     settings/systemset.cpp \
     settings/netconfig.cpp \
-    test/test.cpp
+    test/test.cpp \
+    settings/alarmset.cpp
 
 
 
@@ -70,7 +71,8 @@ HEADERS += \
     settings/config.h \
     settings/systemset.h \
     settings/netconfig.h \
-    test/test.h
+    test/test.h \
+    settings/alarmset.h
 
 
 
