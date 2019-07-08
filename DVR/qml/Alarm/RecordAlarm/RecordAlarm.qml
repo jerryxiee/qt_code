@@ -82,22 +82,23 @@ Item {
 
                 }
 
-//                MyCheckBox{
-//                    id:alarmout1
-//                    width: boxwidth-100
-//                    anchors.top: rectposition.bottom
-//                    anchors.topMargin: 20
-//                    anchors.left: rectposition.left
-//                    pixSize:fontpixelSize
-//                    str:qsTr("开启报警")
-//                }
-
                 MyCheckBox{
-                    id:alarmout2
+                    id:alarmout1
                     width: boxwidth-100
                     anchors.top: rectposition.bottom
                     anchors.topMargin: 20
                     anchors.left: rectposition.left
+                    pixSize:fontpixelSize
+                    str:qsTr("开启报警")
+                    checked: AlarmConfig.getOpenRecord(recordalarmBox.currentIndex)
+                }
+
+                MyCheckBox{
+                    id:alarmout2
+                    width: boxwidth-100
+                    anchors.left: alarmout1.right
+                    anchors.leftMargin: 150
+                    anchors.verticalCenter: alarmout1.verticalCenter
                     pixSize:fontpixelSize
                     str:qsTr("声音报警")
                     checked: AlarmConfig.getRecordSoundEnable(recordalarmBox.currentIndex)
@@ -106,9 +107,9 @@ Item {
                 MyCheckBox{
                     id:alarmout3
                     width: boxwidth-100
-                    anchors.left: alarmout2.right
-                    anchors.leftMargin: 150
-                    anchors.verticalCenter: alarmout2.verticalCenter
+                    anchors.top: alarmout1.bottom
+                    anchors.topMargin: 20
+                    anchors.left: alarmout1.left
                     pixSize:fontpixelSize
                     str:qsTr("显示报警画面")
                     checked: AlarmConfig.getRecordDispEnable(recordalarmBox.currentIndex)
@@ -117,9 +118,9 @@ Item {
                 MyCheckBox{
                     id:alarmout4
                     width: boxwidth-100
-                    anchors.top: alarmout2.bottom
-                    anchors.topMargin: 20
-                    anchors.left: alarmout2.left
+                    anchors.left: alarmout3.right
+                    anchors.leftMargin: 150
+                    anchors.verticalCenter: alarmout3.verticalCenter
                     pixSize:fontpixelSize
                     str:qsTr("上报报警信息")
                     checked: AlarmConfig.getRecordReportEnable(recordalarmBox.currentIndex)
@@ -130,7 +131,7 @@ Item {
                     onSuresignal:{
             //            pressed(tabView.currentIndex)
                         console.log("recordalarm set")
-                        AlarmConfig.setRecordAlarm(recordalarmBox.currentIndex,alarmout3.checked,
+                        AlarmConfig.setRecordAlarm(recordalarmBox.currentIndex,alarmout1.checked,alarmout3.checked,
                                                    alarmout2.checked,alarmout4.checked)
                     }
                     onCancelsignal:{

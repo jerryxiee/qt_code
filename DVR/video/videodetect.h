@@ -5,6 +5,7 @@
 #include <QList>
 #include <QMutex>
 #include "common/sample_comm.h"
+#include "settings/settings.h"
 
 class VideoDetect : public QThread
 {
@@ -45,12 +46,13 @@ signals:
 
 public slots:
     void onViStatusChangedSlot(VI_CHN index ,HI_BOOL enable);
+    void onRecordStatusChanged(int Chn);
 
 private:
 
     QList<VDACHNATTR> mVdaChnList;
     QMutex mVdaListMutex;
-
+    AlarmSet *mAlarmSet;
     bool mdetect_run;
     HI_S32 maxfd = 0;
     int mDetectDelay = 1;

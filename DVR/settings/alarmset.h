@@ -19,10 +19,11 @@ public:
     Q_INVOKABLE int  getConnectVideoChn(int io);
     Q_INVOKABLE QString  getAlarmName(int io);
 
-    Q_INVOKABLE void setRecordAlarm(int Chn,bool ShowWin,bool SoundAlarm,bool Report);
+    Q_INVOKABLE void setRecordAlarm(int Chn,bool open,bool ShowWin,bool SoundAlarm,bool Report);
     Q_INVOKABLE bool getRecordDispEnable(int Chn);
     Q_INVOKABLE bool getRecordSoundEnable(int Chn);
     Q_INVOKABLE bool getRecordReportEnable(int Chn);
+    Q_INVOKABLE bool getOpenRecord(int Chn);
 signals:
     void setRecordAlarmConfig(int Chn);
 
@@ -37,6 +38,7 @@ public:
     const QString EnableAlarmWin = "EnableAlarmWin";
     const QString EnableSoundAlarm = "EnableSoundAlarm";
     const QString EnableReport = "EnableReport";
+    const QString OpenRecordAlarm = "OpenRecordAlarm";
     const QString EnableRecordAlarmWin = "EnableRecordAlarmWin";
     const QString EnableRecordSoundAlarm = "EnableRecordSoundAlarm";
     const QString EnableRecordReport = "EnableRecordReport";

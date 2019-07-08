@@ -45,8 +45,9 @@ QString  AlarmSet::getAlarmName(int io)
     return getConfig(IoRootName+QString::number(io),AlarmName).toString();
 }
 
-void AlarmSet::setRecordAlarm(int Chn,bool ShowWin,bool SoundAlarm,bool Report)
+void AlarmSet::setRecordAlarm(int Chn,bool open,bool ShowWin,bool SoundAlarm,bool Report)
 {
+    setConfig(RecordRootName+QString::number(Chn),OpenRecordAlarm,open);
     setConfig(RecordRootName+QString::number(Chn),EnableAlarmWin,ShowWin);
     setConfig(RecordRootName+QString::number(Chn),EnableSoundAlarm,SoundAlarm);
     setConfig(RecordRootName+QString::number(Chn),EnableReport,Report);
@@ -66,4 +67,9 @@ bool AlarmSet::getRecordSoundEnable(int Chn)
 bool AlarmSet::getRecordReportEnable(int Chn)
 {
     return getConfig(RecordRootName+QString::number(Chn),EnableReport).toBool();
+}
+
+bool AlarmSet::getOpenRecord(int Chn)
+{
+    return getConfig(RecordRootName+QString::number(Chn),OpenRecordAlarm).toBool();
 }
