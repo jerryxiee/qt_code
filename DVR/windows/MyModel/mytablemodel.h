@@ -41,7 +41,7 @@ public:
 
 private:
     int search(QFileInfoList &list, int startindex, int endindex, uint time);
-    int normalSearch(QFileInfoList &list,uint time,int flag);
+    int normalSearch(QFileInfoList &list,uint sttime,uint endtime,int flag);
     HI_S32 getAlarmFileName(int Chn, VIDEO_TYPE type, char *filename, int len);
     int findAlarmFile(int Chn, VIDEO_TYPE type, QFileInfoList &list);
 

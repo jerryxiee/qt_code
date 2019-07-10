@@ -115,30 +115,37 @@ int MyTableModel::search(QFileInfoList &list,int startindex,int endindex, uint t
     }
 }
 
-int MyTableModel::normalSearch(QFileInfoList &list,uint time,int flag)
+int MyTableModel::normalSearch(QFileInfoList &list, uint sttime, uint endtime, int flag)
 {
-    if(flag == 0){
+
         QFileInfo tmpFileInfo = list.last();
-        if(tmpFileInfo.lastModified().toTime_t() < time){
+        qDebug()<<"lasttime:"<<tmpFileInfo.lastModified().toTime_t()<<"time:"<<sttime;
+        if(tmpFileInfo.lastModified().toTime_t() < sttime){
             return -1;
         }
         tmpFileInfo = list.first();
-        if(tmpFileInfo.lastModified().toTime_t() > time){
+        qDebug()<<"firsttime:"<<tmpFileInfo.lastModified().toTime_t()<<"time:"<<sttime;
+        if(tmpFileInfo.lastModified().toTime_t() > endtime){
             return -1;
         }
-    }else {
-        QFileInfo tmpFileInfo = list.first();
-        if(tmpFileInfo.lastModified().toTime_t() > time){
-            return -1;
-        }
+//    }else {
+//        QFileInfo tmpFileInfo = list.first();
+//        qDebug()<<"fasttime:"<<tmpFileInfo.lastModified().toTime_t()<<"time:"<<sttime;
+//        if(tmpFileInfo.lastModified().toTime_t() > endtime){
+//            return -1;
+//        }
 
-        tmpFileInfo = list.last();
-        if(tmpFileInfo.lastModified().toTime_t() < time){
-            return -1;
-        }
-    }
-
-    return search(list,0,list.count(), time);
+//        tmpFileInfo = list.last();
+//        qDebug()<<"lasttime:"<<tmpFileInfo.lastModified().toTime_t()<<"time:"<<sttime;
+//        if(tmpFileInfo.lastModified().toTime_t() < sttime){
+//            return -1;
+//        }
+//    }
+     if(flag == 0){
+        return search(list,0,list.count(), sttime);
+     }else{
+         return search(list,0,list.count(), endtime);
+     }
 }
 
 HI_S32 MyTableModel::getAlarmFileName(int Chn, VIDEO_TYPE type, char *filename, int len)
@@ -195,6 +202,7 @@ int MyTableModel::findAlarmFile(int Chn ,VIDEO_TYPE type,QFileInfoList &list)
     for (int i = 0;i < videohead.num;i++) {
         file.read((char *)&videoinfo,sizeof (VIDEO_FILE_INFO));
         QFileInfo fileinfo(videoinfo.filename);
+        qDebug()<<fileinfo.fileName()<<"time:"<<fileinfo.lastModified().toTime_t();
         list.append(fileinfo);
     }
 
@@ -235,15 +243,15 @@ void MyTableModel::searchFile(int type,int Chn,int filetype,QString starttime,QS
         {
             dir.setFilter(QDir::Files | QDir::NoSymLinks);
             list = dir.entryInfoList();
-            startindex = normalSearch(list,sttime,0);
-            endindex = normalSearch(list,entime,1);
+            startindex = normalSearch(list,sttime,entime,0);
+            endindex = normalSearch(list,sttime,entime,1);
             break;
         }
         case 1:
         {
             findAlarmFile(Chn ,VIDEO_MOVEDETECT,list);
-            startindex = normalSearch(list,sttime,0);
-            endindex = normalSearch(list,entime,1);
+            startindex = normalSearch(list,sttime,entime,0);
+            endindex = normalSearch(list,sttime,entime,1);
             break;
         }
 
