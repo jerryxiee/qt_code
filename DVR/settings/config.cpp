@@ -37,7 +37,7 @@ void Config::setConfig(const QString &rootName,const QString &name,const QVarian
 
 }
 
-QVariant Config::getConfig(const QString &rootName,const QString &name) const
+QVariant Config::getConfig(const QString &rootName, const QString &name, const QVariant &defaultValue) const
 {
-    return mpSetting->value(QString("/%1/%2").arg(rootName).arg(name));
+    return mpSetting->value(QString("/%1/%2").arg(rootName).arg(name),defaultValue);
 }

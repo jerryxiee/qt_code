@@ -99,9 +99,9 @@ bool AlarmSet::getRecordReportEnable(int Chn,int type)
 bool AlarmSet::getOpenRecord(int Chn,int type)
 {
     if(type == 0){
-        return getConfig(ODRootName+QString::number(Chn),OpenRecordAlarm).toBool();
+        return getConfig(ODRootName+QString::number(Chn),OpenRecordAlarm,true).toBool();
     }else if (type == 1) {
-        return getConfig(MDRootName+QString::number(Chn),OpenRecordAlarm).toBool();
+        return getConfig(MDRootName+QString::number(Chn),OpenRecordAlarm,true).toBool();
     }
 
     return true;

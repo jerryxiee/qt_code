@@ -13,7 +13,7 @@ public:
 
     void setFileName(const QString &filename);
     void setConfig(const QString &rootName,const QString &name,const QVariant &Value);
-    QVariant getConfig(const QString &rootName,const QString &name) const;
+    QVariant getConfig(const QString &rootName,const QString &name,const QVariant &defaultValue = QVariant()) const;
 
 
 
