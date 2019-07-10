@@ -90,7 +90,7 @@ Item {
                     anchors.left: rectposition.left
                     pixSize:fontpixelSize
                     str:qsTr("开启报警")
-                    checked: AlarmConfig.getOpenRecord(recordalarmBox.currentIndex)
+                    checked: AlarmConfig.getOpenRecord(recordalarmBox.currentIndex,alarmtypeBox.currentIndex)
                 }
 
                 MyCheckBox{
@@ -101,7 +101,7 @@ Item {
                     anchors.verticalCenter: alarmout1.verticalCenter
                     pixSize:fontpixelSize
                     str:qsTr("声音报警")
-                    checked: AlarmConfig.getRecordSoundEnable(recordalarmBox.currentIndex)
+                    checked: AlarmConfig.getRecordSoundEnable(recordalarmBox.currentIndex,alarmtypeBox.currentIndex)
                 }
 
                 MyCheckBox{
@@ -112,7 +112,7 @@ Item {
                     anchors.left: alarmout1.left
                     pixSize:fontpixelSize
                     str:qsTr("显示报警画面")
-                    checked: AlarmConfig.getRecordDispEnable(recordalarmBox.currentIndex)
+                    checked: AlarmConfig.getRecordDispEnable(recordalarmBox.currentIndex,alarmtypeBox.currentIndex)
                 }
 
                 MyCheckBox{
@@ -123,7 +123,7 @@ Item {
                     anchors.verticalCenter: alarmout3.verticalCenter
                     pixSize:fontpixelSize
                     str:qsTr("上报报警信息")
-                    checked: AlarmConfig.getRecordReportEnable(recordalarmBox.currentIndex)
+                    checked: AlarmConfig.getRecordReportEnable(recordalarmBox.currentIndex,alarmtypeBox.currentIndex)
                 }
 
                 Connections{
@@ -131,8 +131,8 @@ Item {
                     onSuresignal:{
             //            pressed(tabView.currentIndex)
                         console.log("recordalarm set")
-                        AlarmConfig.setRecordAlarm(recordalarmBox.currentIndex,alarmout1.checked,alarmout3.checked,
-                                                   alarmout2.checked,alarmout4.checked)
+                        AlarmConfig.setRecordAlarm(recordalarmBox.currentIndex,alarmtypeBox.currentIndex,alarmout1.checked,
+                                                   alarmout3.checked,alarmout2.checked,alarmout4.checked)
                     }
                     onCancelsignal:{
 

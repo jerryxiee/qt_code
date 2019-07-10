@@ -45,31 +45,64 @@ QString  AlarmSet::getAlarmName(int io)
     return getConfig(IoRootName+QString::number(io),AlarmName).toString();
 }
 
-void AlarmSet::setRecordAlarm(int Chn,bool open,bool ShowWin,bool SoundAlarm,bool Report)
+void AlarmSet::setRecordAlarm(int Chn,int type,bool open,bool ShowWin,bool SoundAlarm,bool Report)
 {
-    setConfig(RecordRootName+QString::number(Chn),OpenRecordAlarm,open);
-    setConfig(RecordRootName+QString::number(Chn),EnableAlarmWin,ShowWin);
-    setConfig(RecordRootName+QString::number(Chn),EnableSoundAlarm,SoundAlarm);
-    setConfig(RecordRootName+QString::number(Chn),EnableReport,Report);
-    setRecordAlarmConfig(Chn);
+    if(type == 0){
+
+        setConfig(ODRootName+QString::number(Chn),OpenRecordAlarm,open);
+        setConfig(ODRootName+QString::number(Chn),EnableAlarmWin,ShowWin);
+        setConfig(ODRootName+QString::number(Chn),EnableSoundAlarm,SoundAlarm);
+        setConfig(ODRootName+QString::number(Chn),EnableReport,Report);
+    }else if(type == 1){
+        setConfig(MDRootName+QString::number(Chn),OpenRecordAlarm,open);
+        setConfig(MDRootName+QString::number(Chn),EnableAlarmWin,ShowWin);
+        setConfig(MDRootName+QString::number(Chn),EnableSoundAlarm,SoundAlarm);
+        setConfig(MDRootName+QString::number(Chn),EnableReport,Report);
+        emit setRecordAlarmConfig(Chn);
+    }
+
 }
 
-bool AlarmSet::getRecordDispEnable(int Chn)
+bool AlarmSet::getRecordDispEnable(int Chn,int type)
 {
-    return getConfig(RecordRootName+QString::number(Chn),EnableAlarmWin).toBool();
+    if(type == 0){
+        return getConfig(ODRootName+QString::number(Chn),EnableAlarmWin).toBool();
+    }else if(type == 1){
+        return getConfig(MDRootName+QString::number(Chn),EnableAlarmWin).toBool();
+    }
+
+    return true;
 }
 
-bool AlarmSet::getRecordSoundEnable(int Chn)
+bool AlarmSet::getRecordSoundEnable(int Chn,int type)
 {
-    return getConfig(RecordRootName+QString::number(Chn),EnableSoundAlarm).toBool();
+    if(type == 0){
+        return getConfig(ODRootName+QString::number(Chn),EnableSoundAlarm).toBool();
+    }else if(type == 1){
+        return getConfig(MDRootName+QString::number(Chn),EnableSoundAlarm).toBool();
+    }
+
+    return true;
 }
 
-bool AlarmSet::getRecordReportEnable(int Chn)
+bool AlarmSet::getRecordReportEnable(int Chn,int type)
 {
-    return getConfig(RecordRootName+QString::number(Chn),EnableReport).toBool();
+    if(type == 0){
+        return getConfig(ODRootName+QString::number(Chn),EnableReport).toBool();
+    }else if (type == 1) {
+        return getConfig(MDRootName+QString::number(Chn),EnableReport).toBool();
+    }
+
+    return true;
 }
 
-bool AlarmSet::getOpenRecord(int Chn)
+bool AlarmSet::getOpenRecord(int Chn,int type)
 {
-    return getConfig(RecordRootName+QString::number(Chn),OpenRecordAlarm).toBool();
+    if(type == 0){
+        return getConfig(ODRootName+QString::number(Chn),OpenRecordAlarm).toBool();
+    }else if (type == 1) {
+        return getConfig(MDRootName+QString::number(Chn),OpenRecordAlarm).toBool();
+    }
+
+    return true;
 }

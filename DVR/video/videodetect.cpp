@@ -6,6 +6,8 @@ VideoDetect::VideoDetect(QObject *parent) : QThread(parent)
 {
     mAlarmSet = Settings::getAlarmSetIni();
 
+    connect(mAlarmSet,SIGNAL(setRecordAlarmConfig(int)),this,SLOT(onRecordStatusChanged(int)));
+
 }
 
 void VideoDetect::VideoDetectExit()
@@ -198,14 +200,19 @@ HI_S32 VideoDetect::VdaStart(VDA_CHN VdaChn)
         return HI_FAILURE;
     }
 
+    if(!mAlarmSet->getOpenRecord(mVdaChnList[index].VdaChn,1)){
+        qDebug()<<"can not open";
+        return HI_FAILURE;
+    }
+
     s32Ret = HI_MPI_VDA_StartRecvPic(mVdaChnList[index].VdaChn);
     if(s32Ret != HI_SUCCESS)
     {
         SAMPLE_PRT("HI_MPI_VDA_StartRecvPic failed with %#X!\n",s32Ret);
         return s32Ret;
     }
-    if(mAlarmSet->getOpenRecord(mVdaChnList[index].VdaChn))
-        mVdaChnList[index].enable = HI_TRUE;
+
+    mVdaChnList[index].enable = HI_TRUE;
     start();
 
     return s32Ret;
@@ -237,9 +244,13 @@ void VideoDetect::onViStatusChangedSlot(VI_CHN index ,HI_BOOL enable)
     }
 }
 
-void onRecordStatusChanged(int Chn)
+void VideoDetect::onRecordStatusChanged(int Chn)
 {
-
+    if(mAlarmSet->getOpenRecord(mVdaChnList[Chn].VdaChn,1)){
+        VdaStart(mVdaChnList[Chn].VdaChn);
+    }else {
+        VdaStop(mVdaChnList[Chn].VdaChn);
+    }
 }
 
 HI_S32 VideoDetect::distroyVdaChn(VDA_CHN VdaChn)

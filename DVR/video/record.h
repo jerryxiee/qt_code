@@ -73,6 +73,7 @@ private:
         VENC_CHN Venc_Chn;
         HI_S32 VencFd;
         FILE *pFile;
+        HI_U32 frame;
     } Venc_Data;
 
     VencSet *m_VencSet;

@@ -142,6 +142,7 @@ Rectangle {
                     x:fileType.width + 20; y:fileType.y
                     model: ListModel{
                         ListElement{text:qsTr("全部文件")}
+                        ListElement{text:qsTr("移动侦测")}
                     }
                 }
 
@@ -345,6 +346,9 @@ Rectangle {
                     anchors.leftMargin: 30
 //                    x:video.width + 20; y:video.y
 
+                    onClicked: dataModel.searchFile(findtypeBox.currentIndex,chnSelectBox.currentIndex,fileTypeBox.currentIndex,
+                                                    startd.text+" "+startt.text,endd.text+" "+endt.text)
+
                 }
 
                 Button{
@@ -354,6 +358,7 @@ Rectangle {
                     anchors.topMargin: 20
                     anchors.left: play.left
 //                    anchors.leftMargin: 20
+                    onClicked: dataModel.preViewFile()
 
                 }
 

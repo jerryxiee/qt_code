@@ -321,6 +321,7 @@ HI_BOOL Record::addRecordList(VI_CHN Chn)
     VencD.pFile   = nullptr;
     VencD.Venc_Chn = m_pVenc[Chn]->m_Venc_Chn;
     VencD.VencFd   = HI_MPI_VENC_GetFd(VencD.Venc_Chn);
+    VencD.frame = 0;
     if (VencD.VencFd < 0)
     {
         SAMPLE_PRT("HI_MPI_VENC_GetFd failed with %#x!\n",VencD.VencFd);
@@ -469,6 +470,7 @@ HI_BOOL Record::createNewFile(VI_CHN Chn)
         fclose(m_VencChnPara.at(index).pFile);
     }
     m_VencChnPara[index].pFile = VencFile;
+    m_VencChnPara[index].frame = 0;
 
     m_file_mutex.unlock();
 
@@ -505,8 +507,10 @@ HI_S32 Record::saveAlarmFile(VI_CHN Chn)
 {
     HI_S32 s32Ret = HI_SUCCESS;
     HI_CHAR alarm_path[VIDEO_FILENAME_SIZE];
+    int index = -1;
 
-    if(checkRecordChn(Chn) < 0){
+    index = checkRecordChn(Chn);
+    if(index < 0){
         qDebug("video %d not active",Chn);
         return HI_FAILURE;
     }
@@ -530,6 +534,7 @@ HI_S32 Record::saveAlarmFile(VI_CHN Chn)
 
             fseek(alarmFile,0,SEEK_END);
             m_VideoEventFileInfoList[Chn][i].mtime = videoFileHead.mtime;
+            m_VideoEventFileInfoList[Chn][i].frame = m_VencChnPara[index].frame;
             fwrite((char *)(&m_VideoEventFileInfoList[Chn].at(i)),sizeof (VIDEO_FILE_INFO),1,alarmFile);
             fclose(alarmFile);
 
@@ -557,6 +562,7 @@ HI_BOOL Record::onSaveFileStopSlot(VI_CHN Chn)
         if(m_VencChnPara[index].pFile)
             fclose(m_VencChnPara[index].pFile);
         m_VencChnPara[index].pFile = nullptr;
+        m_VencChnPara[index].frame = 0;
         qDebug("stop channel(%d) save file ",Chn);
         return HI_TRUE;
     }
@@ -685,6 +691,7 @@ void Record::run()
                      step 2.5 : save frame to file
                     *******************************************************/
 
+                    m_VencChnPara[i].frame++;
                     s32Ret = Sample_Common_Venc::SAMPLE_COMM_VENC_SaveStream(m_enType, m_VencChnPara[i].pFile, &stStream);
                     if (HI_SUCCESS != s32Ret)
                     {

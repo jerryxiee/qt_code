@@ -19,11 +19,11 @@ public:
     Q_INVOKABLE int  getConnectVideoChn(int io);
     Q_INVOKABLE QString  getAlarmName(int io);
 
-    Q_INVOKABLE void setRecordAlarm(int Chn,bool open,bool ShowWin,bool SoundAlarm,bool Report);
-    Q_INVOKABLE bool getRecordDispEnable(int Chn);
-    Q_INVOKABLE bool getRecordSoundEnable(int Chn);
-    Q_INVOKABLE bool getRecordReportEnable(int Chn);
-    Q_INVOKABLE bool getOpenRecord(int Chn);
+    Q_INVOKABLE void setRecordAlarm(int Chn,int type,bool open,bool ShowWin,bool SoundAlarm,bool Report);
+    Q_INVOKABLE bool getRecordDispEnable(int Chn,int type);
+    Q_INVOKABLE bool getRecordSoundEnable(int Chn,int type);
+    Q_INVOKABLE bool getRecordReportEnable(int Chn,int type);
+    Q_INVOKABLE bool getOpenRecord(int Chn,int type);
 signals:
     void setRecordAlarmConfig(int Chn);
 
@@ -31,7 +31,8 @@ public slots:
 
 public:
     const QString IoRootName = "IO";
-    const QString RecordRootName = "Record";
+    const QString MDRootName = "MoveDetect";
+    const QString ODRootName = "OcclusionDetect";
     const QString AlarmName = "AlarmName";
     const QString TrigLevel = "TrigLevel";
     const QString ConnectVideo = "ConnectVideo";
