@@ -4,6 +4,9 @@
 #include <QtQml>
 #include <QtMath>
 #include "settings/settings.h"
+#include "windows/MyModel/mytablemodel.h"
+
+VideoDisplay  *Widget::mVideoDisplay = nullptr;
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -23,6 +26,7 @@ Widget::Widget(QWidget *parent) :
     if(pRoot){
         connect(pRoot,SIGNAL(hidqmlsignal()),this,SLOT(onHidQmlSlot()));
         connect(pRoot,SIGNAL(videoDispSignal(QString)),this,SLOT(onVideoDispSlot(QString)));
+        connect(pRoot,SIGNAL(videoDispList()),this,SLOT(onVideoWinShowSlot()));
         connect(pRoot,SIGNAL(regionSetSignal(int,QString)),this,SLOT(onRegionSetSlot(int,QString)));
     }
     QQmlContext *context = mQuickWidget->rootContext();
@@ -61,9 +65,10 @@ void Widget::InitWindows()
     connect(mMainWidow, SIGNAL(enterMainMenuSignal()), this, SLOT(onMainMenuSlot()));
     mWindows->addWidget(mMainWidow);
 
-    mVideoDisplay = new VideoDisplay;
+    if(!mVideoDisplay){
+        mVideoDisplay = new VideoDisplay;
+    }
     connect(mVideoDisplay, SIGNAL(exitClicked()), this, SLOT(onShowQml()));
-
     mWindows->addWidget(mVideoDisplay);
 
     mRegionManage = new RegionManage;
@@ -89,6 +94,14 @@ void Widget::InitWindows()
     mWindows->resize(this->width(),this->height());
 }
 
+VideoDisplay  *Widget::getVideoDisplayWin()
+{
+    if(!mVideoDisplay){
+        mVideoDisplay = new VideoDisplay();
+    }
+
+    return mVideoDisplay;
+}
 
 void Widget::paintEvent(QPaintEvent *event)
 {
@@ -130,12 +143,16 @@ void Widget::onShowQml()
 
 }
 
-void Widget::onVideoDispSlot(QString filepath)
+void Widget::onVideoWinShowSlot()
 {
-
     mWindows->setCurrentWidget(mVideoDisplay);
     mWindows->show();
     mQuickWidget->setHidden(true);
+}
+
+void Widget::onVideoDispSlot(QString filepath)
+{
+    onVideoWinShowSlot();
     emit VideoDispSignal(filepath);
 
 }

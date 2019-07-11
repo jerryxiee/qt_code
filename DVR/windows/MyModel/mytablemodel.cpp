@@ -1,6 +1,7 @@
 #include "mytablemodel.h"
 #include <QDebug>
 #include <QDateTimeEdit>
+#include "widget.h"
 //#include <QThread>
 
 MyTableModel::MyTableModel(QObject *parent):
@@ -20,10 +21,13 @@ MyTableModel::MyTableModel(QObject *parent):
     string<<"*";
     QFileInfoList list = rootDir.entryInfoList(string,QDir::Files | QDir::AllEntries | QDir::NoDotAndDotDot);
     showFileInfoList(list);
+
+    connect(this,SIGNAL(filelistChangeSignal(QFileInfoList &)),Widget::getVideoDisplayWin(),SLOT(onVideoDispListSlot(QFileInfoList &)));
 }
 
 MyTableModel::~MyTableModel()
 {
+    disconnect(this,SIGNAL(filelistChangeSignal(QFileInfoList &)),Widget::getVideoDisplayWin(),SLOT(onVideoDispListSlot(QFileInfoList &)));
     qDebug()<<"~MyTableModel exit";
 }
 
@@ -221,6 +225,67 @@ void MyTableModel::preViewFile()
     onShowSlot(dir);
 }
 
+int MyTableModel::playVideoList(int type,int Chn,int filetype,QString starttime,QString endtime)
+{
+    int startindex = 0;
+    int endindex = 0;
+    QFileInfoList list;
+
+    QDir dir(RootPath+"channel"+QString::number(Chn));
+    uint sttime = QDateTime::fromString(starttime, "yyyy/MM/dd hh:mm:ss").toTime_t();
+    uint entime = QDateTime::fromString(endtime, "yyyy/MM/dd hh:mm:ss").toTime_t();
+
+    if(sttime > entime){
+        qDebug()<<"search file error ,time not correct";
+        return -1;
+    }
+
+    qDebug()<<"Chn:"<<Chn<<" filetype:"<<filetype<<" start:"<<starttime<<" end:"<<endtime;
+
+    switch (filetype) {
+        case 0:
+        {
+            dir.setFilter(QDir::Files | QDir::NoSymLinks);
+            list = dir.entryInfoList();
+            startindex = normalSearch(list,sttime,entime,0);
+            endindex = normalSearch(list,sttime,entime,1);
+            break;
+        }
+        case 1:
+        {
+            findAlarmFile(Chn ,VIDEO_MOVEDETECT,list);
+            startindex = normalSearch(list,sttime,entime,0);
+            endindex = normalSearch(list,sttime,entime,1);
+            break;
+        }
+
+        default:
+            qDebug()<<"file type error "<<filetype;
+            return -1;
+    }
+//    m_data.clear();
+    if(startindex == -1 && endindex == -1){
+        qDebug()<<"can not found";
+        return -1;
+    }
+
+    if(startindex == -1){
+        startindex = 0;
+    }
+    if(endindex == -1){
+        endindex = list.count() - 1;
+    }
+
+    mFileInfoList = list.mid(startindex,endindex -startindex+1);
+
+    emit filelistChangeSignal(mFileInfoList);
+    qDebug()<<"emit filelistChangeSignal file num:"<<mFileInfoList.count();
+
+    return mFileInfoList.count();
+//    mCurrentPath = RootPath+"channel"+QString::number(Chn);
+//    emit pathChanged();
+}
+
 void MyTableModel::searchFile(int type,int Chn,int filetype,QString starttime,QString endtime)
 {
     int startindex = 0;
@@ -321,7 +386,10 @@ QString MyTableModel::pathname() const
 {
     return mCurrentPath;
 }
-
+//QQmlListProperty<QFileInfo> MyTableModel::getFileInfoList() const
+//{
+////    return mFileInfoList;
+//}
 void MyTableModel::refrushModel()
 {
      beginResetModel();

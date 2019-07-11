@@ -31,6 +31,8 @@ public:
 
     void paintEvent(QPaintEvent *event);
 
+    static VideoDisplay  *getVideoDisplayWin();
+
 
 signals:
     void Set_VoMode(SAMPLE_VO_MODE_E &enVoMode);
@@ -42,9 +44,11 @@ signals:
 
 private:
     void InitWindows();
+//    void VideoWinShow();
 
 public slots:
     void onVideoDispSlot(QString filepath);
+    void onVideoWinShowSlot();
 
 private slots:
     void onHidQmlSlot();
@@ -60,7 +64,7 @@ private:
     VideoControl mvideoControl;
     QStackedWidget *mWindows;
     MainWindow *mMainWidow;
-    VideoDisplay  *mVideoDisplay;
+    static VideoDisplay  *mVideoDisplay;
     RegionManage *mRegionManage;
 
     Test Alarmtest;

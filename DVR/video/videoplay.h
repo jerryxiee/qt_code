@@ -5,6 +5,7 @@
 #include <QThread>
 #include "common/sample_common_vo.h"
 #include "common/sample_common_vdec.h"
+#include <QFileInfoList>
 
 class VideoPlay : public QThread
 {
@@ -16,6 +17,8 @@ public:
     void Set_VdecAttr(VdecThreadParam &VdecAttr);
     HI_BOOL Start_Vdec(char *filename,VPSS_GRP VpssGrp,VPSS_CHN VpssChn);
     void Stop_Vdec();
+
+    void setFileList(QFileInfoList &fileList);
 
 private:
     char* Get_FileType(char *filename);
@@ -41,6 +44,7 @@ private:
     int m_frameRate;
     PAYLOAD_TYPE_E m_enType;
     SIZE_S  m_PicSize;
+    QFileInfoList mVideoFileList;
 };
 
 #endif // VDECPLAY_H

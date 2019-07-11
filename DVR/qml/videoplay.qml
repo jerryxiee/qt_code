@@ -3,8 +3,10 @@ import QtQuick.Controls 1.2
 import MyTableViewModel 1.0
 import QtQuick.Dialogs 1.2
 import "Controls"
+//import FileInfo 1.0
 
 Rectangle {
+    id:rootVideo
 
 
 
@@ -17,6 +19,8 @@ Rectangle {
     property var week
 //    property var ndate
 
+    property int mwidth: 256
+    property int mhight: 680
     function getCurDate()
     {
          var d = new Date();
@@ -58,6 +62,7 @@ Rectangle {
     MyTableViewModel {
         id:dataModel
         roles: ["name","gender","na"]
+        objectName:"MyFileTable"
         onFileNameChanged:{
             videoDispSignal(name)
             console.log("display"+name)
@@ -74,8 +79,8 @@ Rectangle {
     Row{
         Rectangle{
             id:buttonEare
-            width:256
-            height: 680
+            width:mwidth
+            height: mhight
 //            color: "blue"
 
 //            Column{
@@ -334,7 +339,15 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.leftMargin: 20
                     anchors.topMargin: 60
-                    onClicked: warning.open()
+                    onClicked: {
+                        if(dataModel.playVideoList(findtypeBox.currentIndex,chnSelectBox.currentIndex,fileTypeBox.currentIndex,
+                                                    startd.text+" "+startt.text,endd.text+" "+endt.text) > 0){
+                            console.log("videodisplist")
+                            videoDispList();
+                        }
+//                        console.log(dataModel.mFileInfoList)
+
+                    }
 
                 }
 
@@ -346,8 +359,10 @@ Rectangle {
                     anchors.leftMargin: 30
 //                    x:video.width + 20; y:video.y
 
-                    onClicked: dataModel.searchFile(findtypeBox.currentIndex,chnSelectBox.currentIndex,fileTypeBox.currentIndex,
+                    onClicked: {
+                        dataModel.searchFile(findtypeBox.currentIndex,chnSelectBox.currentIndex,fileTypeBox.currentIndex,
                                                     startd.text+" "+startt.text,endd.text+" "+endt.text)
+                    }
 
                 }
 
@@ -377,7 +392,7 @@ Rectangle {
         Column{
             Rectangle{
                 height: 40
-                width: 1024
+                width: rootVideo.width - mwidth
                 NaviButton {
                     id: filebackButton
 
@@ -405,8 +420,8 @@ Rectangle {
     //            anchors.fill: parent
                 model: dataModel
                 sortIndicatorVisible:true
-                width: 1024
-                height: 660
+                width: rootVideo.width - mwidth
+                height: mhight
 
                 TableViewColumn { role: "name"; title: "名称"; width: 500;delegate:itemDelegateText}
                 TableViewColumn { role: "gender"; title: "修改时间";width: 400;delegate:itemDelegateText}

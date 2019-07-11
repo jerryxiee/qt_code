@@ -11,6 +11,13 @@ VideoDisplay::VideoDisplay(QWidget *parent) : QWidget(parent)
     connect(mVideoExit,SIGNAL(clicked()),this,SLOT(onVideoExitClickSlot()));
 
 }
+VideoDisplay::~VideoDisplay()
+{
+#ifndef LUNUX_WIN
+    mVdec.Stop_Vdec();
+    mVdec.wait();
+#endif
+}
 
 void VideoDisplay::paintEvent(QPaintEvent *event)
 {
@@ -41,7 +48,20 @@ void VideoDisplay::onVideoDispSignalSlot(QString path)
     QByteArray filename = path.toLatin1();
     qDebug()<<"onVideoDispSlot filename: "<<path;
 #ifndef LUNUX_WIN
+    QFileInfo fileinfo(path);
+    QFileInfoList filelist;
+    filelist.append(fileinfo);
+    mVdec.setFileList(filelist);
     mVdec.Start_Vdec(filename.data(),-1,-1);
 #endif
 
+}
+
+void VideoDisplay::onVideoDispListSlot(QFileInfoList & filelist)
+{
+#ifndef LUNUX_WIN
+    mVdec.setFileList(filelist);
+    mVdec.Start_Vdec("a.h264",-1,-1);
+#endif
+    qDebug()<<"onVideoDispListSlot num:"<<filelist.count();
 }

@@ -6,6 +6,7 @@
 #include <QFileInfoList>
 #include <QDir>
 #include <QStack>
+#include <QQmlListProperty>
 #include "common/sample_comm.h"
 
 class MyTableModel : public QAbstractTableModel
@@ -14,6 +15,7 @@ class MyTableModel : public QAbstractTableModel
     Q_PROPERTY(QStringList roles READ roles WRITE setRoles)
     Q_PROPERTY(QString name READ name NOTIFY fileNameChanged)
     Q_PROPERTY(QString mCurrentPath READ pathname NOTIFY pathChanged)
+//    Q_PROPERTY(QQmlListProperty<QFileInfo> mFileInfoList READ getFileInfoList)
 public:
     explicit MyTableModel(QObject *parent = nullptr);
     ~MyTableModel();
@@ -26,6 +28,7 @@ public:
     Q_INVOKABLE void onBackButtonClickedSlot();
     Q_INVOKABLE void searchFile(int type,int Chn,int filetype,QString starttime,QString endtime);
     Q_INVOKABLE void preViewFile();
+    Q_INVOKABLE int playVideoList(int type,int Chn,int filetype,QString starttime,QString endtime);
 
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -38,6 +41,7 @@ public:
     void refrushModel();
     QString name() const;
     QString pathname() const;
+//    QQmlListProperty<QFileInfo> getFileInfoList() const;
 
 private:
     int search(QFileInfoList &list, int startindex, int endindex, uint time);
@@ -45,7 +49,10 @@ private:
     HI_S32 getAlarmFileName(int Chn, VIDEO_TYPE type, char *filename, int len);
     int findAlarmFile(int Chn, VIDEO_TYPE type, QFileInfoList &list);
 
+//    static void appendGuest(QQmlListProperty<QFileInfo> *, QFileInfo *fileinfo);
+
 signals:
+    void filelistChangeSignal(QFileInfoList &);
     void dataChanged();
     void fileNameChanged();
     void pathChanged();
@@ -68,6 +75,7 @@ private:
     QString mFileName;
     QString mCurrentPath;
     QStack <QString> mPath;
+    QFileInfoList mFileInfoList;
 
 };
 

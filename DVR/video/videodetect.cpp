@@ -389,6 +389,7 @@ void VideoDetect::run()
     FILE *fp = fopen("moveobj","wb");
     FILE *fp1 = fopen("movesad","wb");
     HI_U32 movestarttime,moveendtime;
+    int enablenum = 0;
 
     qDebug()<<"maxfd:"<<maxfd;
     mdetect_run = true;
@@ -399,13 +400,20 @@ void VideoDetect::run()
         mVdaListMutex.lock();
         if(mVdaChnList.count() == 0){
             mVdaListMutex.unlock();
-            usleep(10000);
+            usleep(100000);
             continue;
         }
-
+        enablenum = 0;
         for(i = 0; i < mVdaChnList.count(); i++){
-            if(mVdaChnList[i].enable)
+            if(mVdaChnList[i].enable){
                 FD_SET(mVdaChnList[i].VdaFd, &read_fds);
+                enablenum++;
+            }
+        }
+        if(enablenum == 0){
+            mVdaListMutex.unlock();
+            usleep(100000);
+            continue;
         }
         TimeoutVal.tv_sec  = 1;
         TimeoutVal.tv_usec = 0;
