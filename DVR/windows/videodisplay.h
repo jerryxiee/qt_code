@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QFileInfoList>
+#include <QSlider>
+#include <QLabel>
 #ifndef LUNUX_WIN
 #include <video/videoplay.h>
 #endif
@@ -24,12 +26,18 @@ public slots:
     void onVideoExitClickSlot();
     void onVideoDispSignalSlot(QString path);
     void onVideoDispListSlot(QFileInfoList & filelist);
+    void onPositionChanged(uint value);
+
+private slots:
+    void seek(int value);
 
 private:
     QPushButton *mVideoExit;
 #ifndef LUNUX_WIN
     VideoPlay mVdec;
 #endif
+    QSlider *slider;
+    QLabel *labelDuration;
 };
 
 #endif // VIDEODISPLAY_H

@@ -229,6 +229,7 @@ HI_S32 VideoDetect::VdaStop(VDA_CHN VdaChn)
         return HI_FAILURE;
     }
 
+    emit videoMoveDetectChangeSignal(index,VIDEO_MOVEDETECT,false);
     mVdaChnList[index].enable = HI_FALSE;
     return HI_MPI_VDA_StopRecvPic(mVdaChnList[index].VdaChn);
 

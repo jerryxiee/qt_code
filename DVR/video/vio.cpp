@@ -282,7 +282,7 @@ HI_S32 Vio::OverlayInit()
     VI_CHN i;
     RGN_ATTR_S stRgnAttrSet;
     RGN_CHN_ATTR_S stChnAttr;
-    SDL_Color textColor = {0x80,0x0,0xff,0xff};
+    SDL_Color textColor = {0xff,0xff,0xff,0xff};
     QDateTime current_date_time;
     QString current_date;
     QByteArray time;

@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QDateTimeEdit>
 #include "widget.h"
+#include <sys/time.h>
 //#include <QThread>
 
 MyTableModel::MyTableModel(QObject *parent):
@@ -47,6 +48,10 @@ void MyTableModel::showFileInfoList(QFileInfoList &list,int fromindex,int toinde
         return;
     }
     m_data.clear();
+    struct timeval stv;
+    struct timeval etv;
+    struct timezone tz;
+    gettimeofday(&stv, &tz);
     for(int i = fromindex; i <= toindex ;i++){
         QFileInfo tmpFileInfo = list.at(i);
         QString fileName = tmpFileInfo.fileName();
@@ -61,6 +66,11 @@ void MyTableModel::showFileInfoList(QFileInfoList &list,int fromindex,int toinde
 
         m_data.push_back(list1);
     }
+
+    gettimeofday(&etv, &tz);
+
+    qDebug()<<"list sec:"<<etv.tv_sec - stv.tv_sec<<" usec:"<<etv.tv_usec-stv.tv_usec;
+
     refrushModel();
 }
 
@@ -102,7 +112,7 @@ int MyTableModel::search(QFileInfoList &list,int startindex,int endindex, uint t
 
     QFileInfo tmpFileInfo = list.at(index);
 
-    qDebug()<<"filetime:"<<tmpFileInfo.lastModified().toTime_t()<<"sttime:"<<time;
+//    qDebug()<<"filetime:"<<tmpFileInfo.lastModified().toTime_t()<<"sttime:"<<time;
 
     if(index == startindex){
         qDebug()<<"search end,index:"<<index;
@@ -202,13 +212,22 @@ int MyTableModel::findAlarmFile(int Chn ,VIDEO_TYPE type,QFileInfoList &list)
     file.read((char *)&videohead,sizeof (VIDEO_HEAD));
     qDebug("num:%x ctime:%x mtime:%x",videohead.num,videohead.cTime,videohead.mtime);
 
-
+    struct timeval stv;
+    struct timeval etv;
+    struct timezone tz;
+    gettimeofday(&stv, &tz);
     for (int i = 0;i < videohead.num;i++) {
         file.read((char *)&videoinfo,sizeof (VIDEO_FILE_INFO));
         QFileInfo fileinfo(videoinfo.filename);
-        qDebug()<<fileinfo.fileName()<<"time:"<<fileinfo.lastModified().toTime_t();
+//        qDebug()<<fileinfo.fileName()<<"time:"<<fileinfo.lastModified().toTime_t();
         list.append(fileinfo);
     }
+
+    file.close();
+
+    gettimeofday(&etv, &tz);
+
+    qDebug()<<"sec:"<<etv.tv_sec - stv.tv_sec<<" usec:"<<etv.tv_usec-stv.tv_usec;
 
     qDebug()<<"file num:"<<list.count();
     return list.count();

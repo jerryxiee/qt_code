@@ -319,6 +319,7 @@ HI_BOOL Record::addRecordList(VI_CHN Chn)
 
     VencD.ViChn   = Chn;
     VencD.pFile   = nullptr;
+    VencD.pFile_index = nullptr;
     VencD.Venc_Chn = m_pVenc[Chn]->m_Venc_Chn;
     VencD.VencFd   = HI_MPI_VENC_GetFd(VencD.Venc_Chn);
     VencD.frame = 0;
@@ -421,11 +422,13 @@ HI_BOOL Record::createNewFile(VI_CHN Chn)
 {
 //    Venc_Data VencD;
     FILE *VencFile;
+    FILE *VencFileIndex;
     HI_S32 index = HI_FAILURE;
     HI_S32 s32Ret;
     HI_CHAR szFilePostfix[10];
     HI_CHAR venc_path_name[VIDEO_FILENAME_SIZE];
     HI_CHAR venc_file_name[VIDEO_FILENAME_SIZE];
+    HI_CHAR venc_fileindex_name[VIDEO_FILENAME_SIZE];
     HI_CHAR alarm_path[VIDEO_FILENAME_SIZE];
 
 
@@ -465,11 +468,33 @@ HI_BOOL Record::createNewFile(VI_CHN Chn)
     }
     SAMPLE_PRT("open file[%s] sucess!\n",venc_file_name);
 
+    sprintf(venc_fileindex_name,"%s.%s",venc_path_name,file_name.data());
+    VencFileIndex = fopen(venc_fileindex_name, "wb");
+    if (!VencFileIndex)
+    {
+        fclose(VencFile);
+        fclose(VencFileIndex);
+        SAMPLE_PRT("open file[%s] failed!\n",venc_fileindex_name);
+        return HI_FALSE;
+    }
+    SAMPLE_PRT("open file[%s] sucess!\n",venc_fileindex_name);
+
     m_file_mutex.lock();
     if(m_VencChnPara[index].pFile){
         fclose(m_VencChnPara.at(index).pFile);
     }
+    FRAME_INDEX_HEAD framhead = {0,0};
+
+    if(m_VencChnPara[index].pFile_index){
+        framhead.framenum = m_VencChnPara[index].frame;
+        fseek(m_VencChnPara[index].pFile_index,0,SEEK_SET);
+        fwrite((char *)&framhead,sizeof (FRAME_INDEX_HEAD),1,m_VencChnPara[index].pFile_index);
+        fclose(m_VencChnPara.at(index).pFile_index);
+    }
+    framhead.framenum = 0;
+    fwrite((char *)&framhead,sizeof (FRAME_INDEX_HEAD),1,VencFileIndex);
     m_VencChnPara[index].pFile = VencFile;
+    m_VencChnPara[index].pFile_index = VencFileIndex;
     m_VencChnPara[index].frame = 0;
 
     m_file_mutex.unlock();
@@ -561,7 +586,15 @@ HI_BOOL Record::onSaveFileStopSlot(VI_CHN Chn)
     if(index >= 0){
         if(m_VencChnPara[index].pFile)
             fclose(m_VencChnPara[index].pFile);
+        if(m_VencChnPara[index].pFile_index){
+            FRAME_INDEX_HEAD framhead;
+            framhead.framenum = m_VencChnPara[index].frame;
+            fseek(m_VencChnPara[index].pFile_index,0,SEEK_SET);
+            fwrite((char *)&framhead,sizeof (FRAME_INDEX_HEAD),1,m_VencChnPara[index].pFile_index);
+            fclose(m_VencChnPara.at(index).pFile_index);
+        }
         m_VencChnPara[index].pFile = nullptr;
+        m_VencChnPara[index].pFile_index = nullptr;
         m_VencChnPara[index].frame = 0;
         qDebug("stop channel(%d) save file ",Chn);
         return HI_TRUE;
@@ -600,8 +633,10 @@ void Record::run()
     VENC_CHN_STAT_S stStat;
     VENC_STREAM_S stStream;
     HI_S32 s32Ret;
+    FRAME_INDEX framindex;
+    HI_U32 framesize = 0;
 
-
+//    FILE *frameinfo = fopen("saveinfo","wb");
     printf("start venc count:%d\n",m_VencChnPara.count());
 
     m_Venc_Run = HI_TRUE;
@@ -690,6 +725,16 @@ void Record::run()
                     /*******************************************************
                      step 2.5 : save frame to file
                     *******************************************************/
+                    framesize = 0;
+                    for(uint n = 0; n < stStream.u32PackCount ;n++){
+                        framesize += stStream.pstPack[n].u32Len - stStream.pstPack[n].u32Offset;
+                    }
+                    framindex.size = framesize;
+                    framindex.frame = m_VencChnPara[i].frame;
+                    framindex.offset = ftell(m_VencChnPara[i].pFile);
+                    fwrite((void *)&framindex,sizeof (FRAME_INDEX),1,m_VencChnPara[i].pFile_index);
+                    fflush(m_VencChnPara[i].pFile_index);
+//                    fprintf(frameinfo,"frame:%#x offset:%#x len:%#x\n",m_VencChnPara[i].frame,framindex.offset,framindex.size);
 
                     m_VencChnPara[i].frame++;
                     s32Ret = Sample_Common_Venc::SAMPLE_COMM_VENC_SaveStream(m_enType, m_VencChnPara[i].pFile, &stStream);
@@ -730,6 +775,7 @@ void Record::run()
         deleteChnFromRecord(m_VencChnPara[i].ViChn);
     }
 
+//    fclose(frameinfo);
     return;
 
 }

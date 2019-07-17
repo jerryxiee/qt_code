@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui quickwidgets multimedia network
+QT       += core gui quickwidgets multimedia network multimediawidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -50,7 +50,8 @@ SOURCES += \
     settings/systemset.cpp \
     settings/netconfig.cpp \
     test/test.cpp \
-    settings/alarmset.cpp
+    settings/alarmset.cpp \
+    windows/playcontrols.cpp
 
 
 
@@ -72,7 +73,8 @@ HEADERS += \
     settings/systemset.h \
     settings/netconfig.h \
     test/test.h \
-    settings/alarmset.h
+    settings/alarmset.h \
+    windows/playcontrols.h
 
 
 

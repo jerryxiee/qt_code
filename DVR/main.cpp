@@ -94,6 +94,15 @@ int main(int argc, char *argv[])
 //    QObject::connect(&w,SIGNAL(StopVoSignal()),&vio,SLOT(onStopVoSlot()));
 #endif
 
+//        QFile file("/home/abhw/nfsroot/1970-01-01-21-26-36.h264");
+//        file.open(QIODevice::ReadOnly);
+
+//        QFile file1("/home/abhw/nfsroot/1970-01-01-21-26-36.h264");
+//        file1.open(QIODevice::ReadOnly);
+
+//        file.close();
+//        file1.close();
+
         ret = a.exec();
     } catch(exception &e) {
         qDebug()<<"QApplication::quit";

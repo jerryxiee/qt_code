@@ -3,7 +3,10 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include <QDebug>
+#include <float.h>
 #include "common/sample_common_sys.h"
+
+#define USE_TAB
 
 VideoPlay::VideoPlay(QObject *parent) : QThread(parent)
 {
@@ -16,6 +19,7 @@ VideoPlay::VideoPlay(QObject *parent) : QThread(parent)
     memset(&m_Thread_Attr,0x0,sizeof (VdecThreadParam));
     memset(&m_stVdecChnAttr,0x0,sizeof(VDEC_CHN_ATTR_S));
 
+    pFramTab = nullptr;
     mVideoFileList.clear();
 
 }
@@ -30,13 +34,174 @@ VideoPlay::~VideoPlay()
     if(m_pVpss){
         delete m_pVpss;
     }
+    if(pFramTab){
+        HI_MPI_SYS_MmzFree(u32PhyAddr, pFramTab);
+    }
+    if(mFileCache){
+        free(mFileCache);
+    }
 
+}
+
+int VideoPlay::serach(HI_U32 *value,int start,int end,int num)
+{
+    int index = start + (end - start)/2;
+
+    if(start == index){
+        if(value[index] < num && index < mVideoFileList.count() - 1){
+            return index+1;
+        }else{
+            return index;
+        }
+    }
+
+    if(value[index] >= num){
+        serach(value, start,index,num);
+    }else {
+        serach(value, index,end,num);
+    }
+
+}
+
+int VideoPlay::getFileIndex(int framenum)
+{
+    return serach(pFramTab,0,mVideoFileList.count()-1,framenum);
+}
+
+off_t VideoPlay::getFrameOffset(int fileindex,int frame)
+{
+    if(frame <= 0){
+        return 0;
+    }
+    QString filename = mVideoFileList.at(fileindex).path()+"/."+mVideoFileList.at(fileindex).baseName();
+    int offset = sizeof(FRAME_INDEX_HEAD) + (frame - 1) *sizeof(FRAME_INDEX);
+    FRAME_INDEX frameindex;
+
+    QFile tabfile(filename);
+    if(tabfile.exists()){
+        tabfile.open(QIODevice::ReadOnly);
+        tabfile.seek(offset);
+        tabfile.read((char *)&frameindex,sizeof (FRAME_INDEX));
+        tabfile.close();
+    }else {
+        return -1;
+    }
+
+    return frameindex.offset;
+}
+
+void VideoPlay::caclFramNum()
+{
+    int i;
+    QFile file;
+    QString filepath = mVideoFileList.at(0).path();
+    FRAME_INDEX_HEAD framhead = {0,0};
+    HI_U32 *pTab = pFramTab;
+
+    for(i = 0; i < mVideoFileList.count();i++){
+        file.setFileName(mVideoFileList.at(i).path()+"/."+mVideoFileList.at(i).baseName());
+        if(!file.open(QIODevice::ReadOnly)){
+            file.close();
+            qDebug()<<"open file failed "<<file.fileName();
+            return;
+        }
+        file.read((char *)&framhead,sizeof (FRAME_INDEX_HEAD));
+        if(i != 0){
+            pTab[i] = pTab[i-1] + framhead.framenum;
+
+        }else {
+            pTab[i] = framhead.framenum;
+        }
+        file.close();
+    }
+    qDebug()<<"i:"<<i<<"mTotalFramNum:"<<pTab[i - 1];
+
+    mTotalFramNum = pTab[i - 1];
 
 }
 
 void VideoPlay::setFileList(QFileInfoList &fileList)
 {
+    HI_S32 s32Ret = -1;
+
     mVideoFileList = fileList;
+    mTotalFramNum =   0xffffffff;
+    mCurrentPrecent = 0;
+    mCurrentFileIndex = 0;
+    mCurFrameIndex = 0;
+
+    s32Ret = HI_MPI_SYS_MmzAlloc(&u32PhyAddr, (void **)(&pFramTab),
+                                 "frametab", nullptr, fileList.count() * sizeof(HI_U32));
+    if (HI_SUCCESS != s32Ret)
+    {
+        qDebug("HI_MPI_SYS_MmzAlloc failed with %#x",s32Ret);
+        HI_MPI_SYS_MmzFree(u32PhyAddr, pFramTab);
+        pFramTab = nullptr;
+        return;
+//        return NULL;
+    }
+    qDebug("HI_MPI_SYS_MmzAlloc successed!size:%d",fileList.count() * sizeof(HI_U32));
+    caclFramNum();
+}
+
+void VideoPlay::setCurrentposition(int percent)
+{
+    int framenum = percent * mTotalFramNum /100;
+    int fileindex = getFileIndex(framenum);
+    off_t frameoff = 0;
+    int frameindex = 0;
+
+    endofStream();
+    pause();
+    if(fileindex == 0){
+        frameindex = framenum - FRAMENUM > 0 ? framenum - FRAMENUM:0;
+    }else{
+        frameindex = framenum - pFramTab[fileindex -1] - FRAMENUM > 0?framenum - pFramTab[fileindex -1] - FRAMENUM:0;
+    }
+    frameoff = getFrameOffset(fileindex,frameindex);
+    qDebug()<<"frameoff:"<<frameoff;
+
+    mFileMutex.lock();
+    if(mCurFile.isOpen()){
+        if(mCurrentFileIndex != fileindex){
+            mCurFile.close();
+            QString filename = mVideoFileList.at(fileindex).absoluteFilePath();
+
+            mCurFile.setFileName(filename);
+            mCurFile.open(QIODevice::ReadOnly);
+
+#ifdef USE_TAB
+            mCurFileNode.close();
+            filename = mVideoFileList.at(fileindex).path()+"/."+mVideoFileList.at(fileindex).baseName();
+            mCurFileNode.setFileName(filename);
+            mCurFileNode.open(QIODevice::ReadOnly);
+
+#endif
+            mCurrentFileIndex = fileindex;
+        }
+        mCurFile.seek(frameoff);
+#ifdef USE_TAB
+        if(frameindex == 0){
+            mCurFileNode.seek(sizeof (FRAME_INDEX_HEAD));
+        }else {
+            mCurFileNode.seek(sizeof (FRAME_INDEX_HEAD) + (frameindex-1)*sizeof(FRAME_INDEX));
+        }
+#endif
+    }
+    mCurFrameIndex = framenum - FRAMENUM > 0 ? framenum - FRAMENUM : 0;
+
+    setPosition(mCurFrameIndex * 100 / mTotalFramNum);
+    mFileMutex.unlock();
+    play();
+    qDebug()<<"framenum:"<<framenum<<" fileindex"<<fileindex<<" mCurFrameIndex:"<<mCurFrameIndex;
+}
+
+void VideoPlay::setPosition(uint value)
+{
+    mCurrentPrecent = value;
+
+    emit currentPrecentChanged(value);
+
 }
 
 void VideoPlay::Set_VdecAttr(VdecThreadParam &VdecAttr)
@@ -159,8 +324,8 @@ HI_BOOL VideoPlay::Start_Vdec(char *filename, VPSS_GRP VpssGrp, VPSS_CHN VpssChn
     stVdecParam.s32MilliSec     = -1;
 //        stVdecParam.s32ChnId        = i;
     stVdecParam.s32IntervalTime = 1;
-    stVdecParam.u64PtsInit      = 40000;
-    stVdecParam.u64PtsIncrease  = 40000;
+    stVdecParam.u64PtsInit      = 0;
+    stVdecParam.u64PtsIncrease  = NORMALPTS;
     stVdecParam.eCtrlSinal      = VDEC_CTRL_START;
     stVdecParam.bLoopSend       = HI_FALSE;
     stVdecParam.bManuSend       = HI_FALSE;
@@ -177,7 +342,14 @@ HI_BOOL VideoPlay::Start_Vdec(char *filename, VPSS_GRP VpssGrp, VPSS_CHN VpssChn
 
     Set_VdecAttr(stVdecParam);
 
-
+    mFileCache = (char *)malloc(stVdecParam.s32MinBufSize);
+    if(mFileCache == nullptr)
+    {
+        printf("SAMPLE_TEST:can't alloc %d in send stream thread:%d\n", m_Thread_Attr.s32MinBufSize, m_Thread_Attr.s32ChnId);
+//        fclose(fpStrm);
+        goto END4;
+    }
+    play();
     start();
     return HI_TRUE;
 END4:
@@ -197,6 +369,7 @@ END1:
 
 void VideoPlay::Stop_Vdec()
 {
+    qDebug()<<"stop vdec";
     m_Vdec_Run = false;
     if(m_pVdec){
         m_pVdec->SAMPLE_COMM_VDEC_UnBindVpss(m_pVdec->m_Vdec_Tab[0],m_pVpss->m_Grp_Tab[0],0);
@@ -206,10 +379,114 @@ void VideoPlay::Stop_Vdec()
         m_pVpss->SAMPLE_COMM_VPSS_Stop();
         mVideoFileList.clear();
     }
+    if(pFramTab){
+        HI_MPI_SYS_MmzFree(u32PhyAddr, pFramTab);
+        qDebug()<<"HI_MPI_SYS_MmzFree";
+    }
+    if(mFileCache){
+        free(mFileCache);
+    }
+
+    mFileCache = nullptr;
+    pFramTab = nullptr;
     m_pVdec = nullptr;
 
 
 }
+
+bool VideoPlay::getOneFrame(VDEC_STREAM_S *pstStream)
+{
+    if(mCurFile.isOpen()){
+        if(mCurFileNode.isOpen()){
+
+        }else {
+
+        }
+    }else {
+        return false;
+    }
+
+    return true;
+}
+
+void VideoPlay::endofStream()
+{
+    VDEC_STREAM_S stStream;
+
+    memset(&stStream, 0, sizeof(VDEC_STREAM_S) );
+    stStream.bEndOfStream = HI_TRUE;
+    HI_MPI_VDEC_SendStream(m_Thread_Attr.s32ChnId, &stStream, -1);
+
+}
+
+void VideoPlay::pause(){
+    qDebug()<<"video pause";
+    m_Thread_Attr.eCtrlSinal = VDEC_CTRL_PAUSE;
+    emit stateChanged(QMediaPlayer::PausedState);
+}
+
+void VideoPlay::play()
+{
+    qDebug()<<"video play";
+    m_Thread_Attr.eCtrlSinal = VDEC_CTRL_START;
+    emit stateChanged(QMediaPlayer::PlayingState);
+}
+
+void VideoPlay::stop()
+{
+    qDebug()<<"video stop";
+    m_Thread_Attr.eCtrlSinal = VDEC_CTRL_STOP;
+    if(mCurFile.isOpen()){
+        endofStream();
+        setPosition(0);
+        mCurrentFileIndex = 0;
+        mCurFrameIndex = 0;
+        mFileMutex.lock();
+        mCurFile.close();
+        QString filename = mVideoFileList.first().absoluteFilePath();
+
+        mCurFile.setFileName(filename);
+        mCurFile.open(QIODevice::ReadOnly);
+
+#ifdef USE_TAB
+        mCurFileNode.close();
+        filename = mVideoFileList.first().path()+"/."+mVideoFileList.first().baseName();
+        mCurFileNode.setFileName(filename);
+        mCurFileNode.open(QIODevice::ReadOnly);
+        mCurFileNode.seek(sizeof (FRAME_INDEX_HEAD));
+#endif
+        mFileMutex.unlock();
+        if(!mCurFile.isOpen()){
+            qDebug()<<"can not open file:"<<mVideoFileList.at(mCurrentFileIndex).fileName();
+            return ;
+        }
+    }
+
+    emit stateChanged(QMediaPlayer::StoppedState);
+}
+
+void VideoPlay::videoStart()
+{
+    m_Thread_Attr.eCtrlSinal = VDEC_CTRL_START;
+    emit stateChanged(QMediaPlayer::PlayingState);
+}
+
+void VideoPlay::setRate(qreal rate)
+{
+    if(rate < FLT_EPSILON){
+        return;
+    }
+    m_Thread_Attr.u64PtsIncrease  = (HI_U64)(NORMALPTS /rate);
+    qDebug()<<"u64PtsIncrease:"<<m_Thread_Attr.u64PtsIncrease;
+}
+
+void VideoPlay::onRateChanged(qreal rate)
+{
+    qDebug()<<"rate change";
+    setRate(rate);
+}
+
+#if 0
 void VideoPlay::run()
 {
 //    VdecThreadParam *pstVdecThreadParam =(VdecThreadParam *)pArgs;
@@ -223,28 +500,17 @@ void VideoPlay::run()
     HI_S32 len;
     HI_BOOL sHasReadStream = HI_FALSE;
     int index = 0;
+    HI_U32 framenum = 0;
     VDEC_CHN_STAT_S stStat;
 
-//    prctl(PR_SET_NAME, "hi_SendStream", 0, 0, 0);
-
-//    if(m_Thread_Attr.cFileName != 0)
-//    {
-//        fpStrm = fopen(m_Thread_Attr.cFileName, "rb");
-//        if(fpStrm == nullptr)
-//        {
-//            printf("SAMPLE_TEST:can't open file %s in send stream thread:%d\n",m_Thread_Attr.cFileName, m_Thread_Attr.s32ChnId);
-//            return ;
-//        }
-//    }
     QByteArray filename = mVideoFileList.first().absoluteFilePath().toLocal8Bit();
 
+    FILE *frameinfo = fopen("frameinfo1","wb");
     fpStrm = fopen(filename.data(), "rb");
     if(fpStrm == nullptr){
         qDebug()<<"can not open file:"<<mVideoFileList.first().fileName();
         return ;
     }
-    //printf("SAMPLE_TEST:chn %d, stream file:%s, bufsize: %d\n",
-    //m_Thread_Attr.s32ChnId, m_Thread_Attr.cFileName, m_Thread_Attr.s32MinBufSize);
 
     pu8Buf = (HI_U8 *)malloc(m_Thread_Attr.s32MinBufSize);
     if(pu8Buf == nullptr)
@@ -254,14 +520,6 @@ void VideoPlay::run()
         return;
     }
     fflush(stdout);
-
-//    printf("start vdec filename=%s\n",m_Thread_Attr.cFileName);
-//    s32ReadLen = fread(pu8Buf, 1, m_Thread_Attr.s32MinBufSize, fpStrm);
-//    printf("read data(%d) = %d\n",m_Thread_Attr.s32MinBufSize,s32ReadLen);
-//    fseek(fpStrm, 0, SEEK_END);
-//    printf("file size=%d\n",ftell(fpStrm));
-
-//    fseek(fpStrm, 0, SEEK_SET);
 
     u64pts = m_Thread_Attr.u64PtsInit;
      m_Vdec_Run = true;
@@ -416,227 +674,13 @@ void VideoPlay::run()
             }
             else if (bFindEnd == HI_FALSE)
             {
+                qDebug()<<"can not found end s32ReadLen:"<<s32ReadLen;
                 s32ReadLen = i+8;
             }
 
         }
 
 
-        else if (m_Thread_Attr.s32StreamMode==VIDEO_MODE_FRAME && m_Thread_Attr.enType == PT_H265)
-        {
-            HI_BOOL  bNewPic = HI_FALSE;
-            bFindStart = HI_FALSE;
-            bFindEnd   = HI_FALSE;
-//            fseek(fpStrm, s32UsedBytes, SEEK_SET);
-            s32ReadLen = fread(pu8Buf, 1, m_Thread_Attr.s32MinBufSize, fpStrm);
-
-            if (s32ReadLen == 0)
-            {
-                if (m_Thread_Attr.bLoopSend == HI_TRUE)
-                {
-                    s32UsedBytes = 0;
-                    fseek(fpStrm, 0, SEEK_SET);
-                    s32ReadLen = fread(pu8Buf, 1, m_Thread_Attr.s32MinBufSize, fpStrm);
-                }
-                else
-                {
-                    continue;
-                }
-            }
-
-            for (i=0; i<s32ReadLen-6; i++)
-            {
-                bNewPic = (HI_BOOL)(pu8Buf[i+0] == 0 && pu8Buf[i+1] == 0 && pu8Buf[i+2] == 1
-                    &&(((pu8Buf[i+3]&0x7D) >= 0x0 && (pu8Buf[i+3]&0x7D) <= 0x2A) || (pu8Buf[i+3]&0x1F) == 0x1)
-                    &&((pu8Buf[i+5]&0x80) == 0x80));//first slice segment
-
-                if (bNewPic)
-                {
-                    bFindStart = HI_TRUE;
-                    i += 4;
-                    break;
-                }
-            }
-
-            for (; i<s32ReadLen-6; i++)
-            {
-                bNewPic = (HI_BOOL)(pu8Buf[i+0] == 0 && pu8Buf[i+1] == 0 && pu8Buf[i+2] == 1
-                    &&(((pu8Buf[i+3]&0x7D) >= 0x0 && (pu8Buf[i+3]&0x7D) <= 0x2A) || (pu8Buf[i+3]&0x1F) == 0x1)
-                    &&((pu8Buf[i+5]&0x80) == 0x80));//first slice segment
-
-                if (  pu8Buf[i  ] == 0 && pu8Buf[i+1] == 0 && pu8Buf[i+2] == 1
-                    &&(((pu8Buf[i+3]&0x7D) == 0x40) || ((pu8Buf[i+3]&0x7D) == 0x42) || ((pu8Buf[i+3]&0x7D) == 0x44)|| bNewPic)
-                   )
-                {
-                    bFindEnd = HI_TRUE;
-                    break;
-                }
-            }
-
-            s32ReadLen = i;
-
-            if (bFindStart == HI_FALSE)
-            {
-                printf("hevc can not find start code! %d s32ReadLen 0x%x +++++++++++++\n", m_Thread_Attr.s32ChnId,s32ReadLen);
-            }
-            else if (bFindEnd == HI_FALSE)
-            {
-                s32ReadLen = i+6;
-            }
-
-        }
-        else if (m_Thread_Attr.enType == PT_MJPEG)
-        {
-            bFindStart = HI_FALSE;
-            bFindEnd   = HI_FALSE;
-//            fseek(fpStrm, s32UsedBytes, SEEK_SET);
-            s32ReadLen = fread(pu8Buf, 1, m_Thread_Attr.s32MinBufSize, fpStrm);
-            if (s32ReadLen == 0)
-            {
-                if (m_Thread_Attr.bLoopSend)
-                {
-                    s32UsedBytes = 0;
-                    fseek(fpStrm, 0, SEEK_SET);
-                    s32ReadLen = fread(pu8Buf, 1, m_Thread_Attr.s32MinBufSize, fpStrm);
-                }
-                else
-                {
-                    continue;
-                }
-            }
-
-
-            for (i=0; i<s32ReadLen-2; i++)
-            {
-                if (pu8Buf[i] == 0xFF && pu8Buf[i+1] == 0xD8)
-                {
-                    start = i;
-                    bFindStart = HI_TRUE;
-                    i = i + 2;
-                    break;
-                }
-            }
-
-            for (; i<s32ReadLen-4; i++)
-            {
-                if ( (pu8Buf[i] == 0xFF) && (pu8Buf[i+1]& 0xF0) == 0xE0 )
-                {
-                     len = (pu8Buf[i+2]<<8) + pu8Buf[i+3];
-                     i += 1 + len;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            for (; i<s32ReadLen-2; i++)
-            {
-                if (pu8Buf[i] == 0xFF && pu8Buf[i+1] == 0xD8)
-                {
-                    bFindEnd = HI_TRUE;
-                    break;
-                }
-            }
-            s32ReadLen = i;
-            if (bFindStart == HI_FALSE)
-            {
-                printf("SAMPLE_TEST: chn %d can not find start code! s32ReadLen %d, s32UsedBytes %d. \n",
-                                            m_Thread_Attr.s32ChnId, s32ReadLen, s32UsedBytes);
-            }
-            else if (bFindEnd == HI_FALSE)
-            {
-                s32ReadLen = i+2;
-            }
-        }
-         else if ((m_Thread_Attr.enType == PT_JPEG) )
-        {
-            if (HI_TRUE != sHasReadStream)
-            {
-
-                bFindStart = HI_FALSE;
-                bFindEnd   = HI_FALSE;
-
-                fseek(fpStrm, s32UsedBytes, SEEK_SET);
-                s32ReadLen = fread(pu8Buf, 1, m_Thread_Attr.s32MinBufSize, fpStrm);
-                if (s32ReadLen == 0)
-                {
-                    if (m_Thread_Attr.bLoopSend)
-                    {
-                        s32UsedBytes = 0;
-                        fseek(fpStrm, 0, SEEK_SET);
-                        s32ReadLen = fread(pu8Buf, 1, m_Thread_Attr.s32MinBufSize, fpStrm);
-                    }
-                    else
-                    {
-                        continue;
-                    }
-                }
-
-
-                for (i=0; i<s32ReadLen-2; i++)
-                {
-                    if (pu8Buf[i] == 0xFF && pu8Buf[i+1] == 0xD8)
-                    {
-                        start = i;
-                        bFindStart = HI_TRUE;
-                        i = i + 2;
-                        break;
-                    }
-                }
-
-                for (; i<s32ReadLen-4; i++)
-                {
-                    if ( (pu8Buf[i] == 0xFF) && (pu8Buf[i+1]& 0xF0) == 0xE0 )
-                    {
-                         len = (pu8Buf[i+2]<<8) + pu8Buf[i+3];
-                         i += 1 + len;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                for (; i<s32ReadLen-2; i++)
-                {
-                    if (pu8Buf[i] == 0xFF && pu8Buf[i+1] == 0xD8)
-                    {
-                        bFindEnd = HI_TRUE;
-                        break;
-                    }
-                }
-                s32ReadLen = i;
-                if (bFindStart == HI_FALSE)
-                {
-                    printf("SAMPLE_TEST: chn %d can not find start code! s32ReadLen %d, s32UsedBytes %d. \n",
-                                                m_Thread_Attr.s32ChnId, s32ReadLen, s32UsedBytes);
-                }
-                else if (bFindEnd == HI_FALSE)
-                {
-                    s32ReadLen = i+2;
-                }
-                 sHasReadStream = HI_TRUE;
-            }
-        }
-        else
-        {
-//            fseek(fpStrm, s32UsedBytes, SEEK_SET);
-            s32ReadLen = fread(pu8Buf, 1, m_Thread_Attr.s32MinBufSize, fpStrm);
-            if (s32ReadLen == 0)
-            {
-                if (m_Thread_Attr.bLoopSend)
-                {
-                    s32UsedBytes = 0;
-                    fseek(fpStrm, 0, SEEK_SET);
-                    s32ReadLen = fread(pu8Buf, 1, m_Thread_Attr.s32MinBufSize, fpStrm);
-                }
-                else
-                {
-                    continue;
-                }
-            }
-        }
 
         stStream.u64PTS  = u64pts;
         stStream.pu8Addr = pu8Buf + start;
@@ -650,6 +694,8 @@ void VideoPlay::run()
         }
         stStream.bEndOfFrame  = (m_Thread_Attr.s32StreamMode==VIDEO_MODE_FRAME)? HI_TRUE: HI_FALSE;
         stStream.bEndOfStream = HI_FALSE;
+
+        fprintf(frameinfo,"frame:%#x offset:%#x len:%#x\n",framenum,s32UsedBytes,stStream.u32Len);
 
 
         //printf("Send One Frame");
@@ -672,6 +718,13 @@ void VideoPlay::run()
                 s32UsedBytes = s32UsedBytes +s32ReadLen + start;
             }
             u64pts += m_Thread_Attr.u64PtsIncrease;
+            framenum++;
+            if(mTotalFramNum != 0){
+                if((framenum * 100 /mTotalFramNum) != mCurrentPrecent){
+                    setPosition(framenum * 100 /mTotalFramNum);
+                }
+            }
+
         }
         fseek(fpStrm, s32UsedBytes, SEEK_SET);
        usleep(1000);
@@ -689,6 +742,275 @@ void VideoPlay::run()
         free(pu8Buf);
     }
     fclose(fpStrm);
+    fclose(frameinfo);
     mVideoFileList.clear();
     qDebug()<<"exit paly thread";
 }
+
+#else
+
+void VideoPlay::run()
+{
+//    VdecThreadParam *pstVdecThreadParam =(VdecThreadParam *)pArgs;
+    FILE *fpStrm=fopen("frameinfo","wb");
+//    HI_U8 *pu8Buf = nullptr;
+    VDEC_STREAM_S stStream;
+    HI_BOOL bFindStart, bFindEnd;
+    HI_S32 s32Ret,  i,  start = 0;
+    qint64 s32UsedBytes = 0, s32ReadLen = 0;
+    HI_U64 u64pts = 0;
+    FRAME_INDEX fram;
+//    HI_S32 len;
+//    HI_BOOL sHasReadStream = HI_FALSE;
+//    int index = 0;
+//    HI_U32 framenum = 0;
+    VDEC_CHN_STAT_S stStat;
+
+    QString filename = mVideoFileList.first().absoluteFilePath();
+
+    mCurFile.setFileName(filename);
+    mCurFile.open(QIODevice::ReadOnly);
+    if(!mCurFile.isOpen()){
+        qDebug()<<"can not open file:"<<mVideoFileList.at(mCurrentFileIndex).fileName();
+        return ;
+    }
+#ifdef USE_TAB
+    filename = mVideoFileList.first().path()+"/."+mVideoFileList.first().baseName();
+    mCurFileNode.setFileName(filename);
+    mCurFileNode.open(QIODevice::ReadOnly);
+    mCurFileNode.seek(sizeof (FRAME_INDEX_HEAD));
+#endif
+    fflush(stdout);
+
+    u64pts = m_Thread_Attr.u64PtsInit;
+     m_Vdec_Run = true;
+    while (m_Vdec_Run)
+    {
+//        usleep(20000);
+        if (m_Thread_Attr.eCtrlSinal == VDEC_CTRL_STOP || m_Thread_Attr.eCtrlSinal == VDEC_CTRL_PAUSE)
+        {
+            usleep(200000);
+            continue;
+        }
+//        else if (m_Thread_Attr.eCtrlSinal == VDEC_CTRL_PAUSE)
+//        {
+//            usleep(200000);
+//            continue;
+//        }
+
+        if(mCurFrameIndex >= mTotalFramNum){
+            usleep(100000);
+            endofStream();
+            pause();
+            qDebug()<<"pause";
+            continue;
+        }
+        if(mCurFile.atEnd()){
+//            memset(&stStream, 0, sizeof(VDEC_STREAM_S) );
+//            stStream.bEndOfStream = HI_TRUE;
+//            HI_MPI_VDEC_SendStream(m_Thread_Attr.s32ChnId, &stStream, -1);
+            endofStream();
+
+            mCurrentFileIndex ++;
+            if(mCurrentFileIndex < mVideoFileList.count()){
+//                fclose(fpStrm);
+                mFileMutex.lock();
+                mCurFile.close();
+                s32UsedBytes = 0;
+                filename = mVideoFileList.at(mCurrentFileIndex).absoluteFilePath();
+                mCurFile.setFileName(filename);
+//                fpStrm = fopen(filename.data(), "rb");
+                mCurFile.open(QIODevice::ReadOnly);
+#ifdef USE_TAB
+                mCurFileNode.close();
+                filename = mVideoFileList.at(mCurrentFileIndex).path()+"/."+mVideoFileList.at(mCurrentFileIndex).baseName();
+                mCurFileNode.setFileName(filename);
+                mCurFileNode.open(QIODevice::ReadOnly);
+                mCurFileNode.seek(sizeof (FRAME_INDEX_HEAD));
+#endif
+
+                mFileMutex.unlock();
+                if(!mCurFile.isOpen()){
+                    qDebug()<<"can not open file:"<<mVideoFileList.at(mCurrentFileIndex).fileName();
+                    break ;
+                }
+                qDebug()<<"file end open next success";
+            }else {
+                qDebug()<<"file list play over";
+                usleep(100000);
+                continue;
+            }
+
+        }
+
+        mFileMutex.lock();
+        if ( (m_Thread_Attr.s32StreamMode==VIDEO_MODE_FRAME) && (m_Thread_Attr.enType == PT_H264) )
+        {
+#ifdef USE_TAB
+            HI_MPI_VDEC_Query(m_Thread_Attr.s32ChnId,&stStat);
+            if(stStat.u32LeftStreamFrames > 0){
+                mFileMutex.unlock();
+                continue;
+            }
+//            s32UsedBytes = mCurFile.pos();
+            mCurFileNode.read((char *)&fram,sizeof (FRAME_INDEX));
+            s32ReadLen = mCurFile.read(mFileCache,fram.size);
+
+#else
+
+            bFindStart = HI_FALSE;
+            bFindEnd   = HI_FALSE;
+//            fseek(fpStrm, s32UsedBytes, SEEK_SET);
+            s32UsedBytes = mCurFile.pos();
+//            qDebug()<<"offset:"<<s32UsedBytes;
+            HI_MPI_VDEC_Query(m_Thread_Attr.s32ChnId,&stStat);
+            if(stStat.u32LeftStreamFrames > 0){
+                mFileMutex.unlock();
+                continue;
+            }
+//            s32ReadLen = fread(pu8Buf, 1, m_Thread_Attr.s32MinBufSize, fpStrm);
+
+            s32ReadLen = mCurFile.read(mFileCache,(qint64)m_Thread_Attr.s32MinBufSize);
+            if (s32ReadLen == 0)
+            {
+                if (m_Thread_Attr.bLoopSend)
+                {
+                    s32UsedBytes = 0;
+//                    fseek(fpStrm, 0, SEEK_SET);
+                    mCurFile.seek(0);
+//                    s32ReadLen = fread(pu8Buf, 1, m_Thread_Attr.s32MinBufSize, fpStrm);
+                    s32ReadLen = mCurFile.read(mFileCache,(qint64)m_Thread_Attr.s32MinBufSize);
+                }
+                else
+                {
+                    mFileMutex.unlock();
+                    continue;
+                }
+            }
+            fprintf(fpStrm,"mCurFrameIndex:%#x",mCurFrameIndex);
+            fprintf(fpStrm," offset:%#x",s32UsedBytes);
+
+            for (i=0; i<s32ReadLen-8; i++)
+            {
+                int tmp = mFileCache[i+3] & 0x1F;
+                if (  mFileCache[i] == 0 && mFileCache[i+1] == 0 && mFileCache[i+2] == 1 &&
+                       (
+                           ((tmp == 5 || tmp == 1) && ((mFileCache[i+4]&0x80) == 0x80)) ||
+                           (tmp == 20 && (mFileCache[i+7]&0x80) == 0x80)
+                        )
+                   )
+                {
+                    bFindStart = HI_TRUE;
+                    i += 8;
+                    break;
+                }
+            }
+
+            for (; i<s32ReadLen-8; i++)
+            {
+                int tmp = mFileCache[i+3] & 0x1F;
+                if (  mFileCache[i  ] == 0 && mFileCache[i+1] == 0 && mFileCache[i+2] == 1 &&
+                            (
+                                  tmp == 15 || tmp == 7 || tmp == 8 || tmp == 6 ||
+                                  ((tmp == 5 || tmp == 1) && ((mFileCache[i+4]&0x80) == 0x80)) ||
+                                  (tmp == 20 && (mFileCache[i+7]&0x80) == 0x80)
+                              )
+                   )
+                {
+                    bFindEnd = HI_TRUE;
+                    break;
+                }
+#endif
+            }
+#ifndef USE_TAB
+            if(i > 0) s32ReadLen = i;
+            if (bFindStart == HI_FALSE)
+            {
+                printf("SAMPLE_TEST: chn %d can not find start code!s32ReadLen %d, s32UsedBytes %d. \n",
+                                            m_Thread_Attr.s32ChnId, s32ReadLen, s32UsedBytes);
+            }
+            else if (bFindEnd == HI_FALSE)
+            {
+                qDebug()<<"can not found end s32ReadLen:"<<s32ReadLen;
+                s32ReadLen = i+8;
+            }
+
+        }
+#endif
+
+        stStream.u64PTS  = u64pts;
+        stStream.pu8Addr = (HI_U8 *)mFileCache + start;
+        if(m_Thread_Attr.enType == PT_MJPEG)
+        {
+             stStream.u32Len  = s32ReadLen - start;
+        }
+        else
+        {
+//            qDebug()<<"len:"<<s32ReadLen;
+//            fprintf(fpStrm,"len:%#x\n",s32ReadLen);
+            stStream.u32Len  = s32ReadLen;
+        }
+        stStream.bEndOfFrame  = (m_Thread_Attr.s32StreamMode==VIDEO_MODE_FRAME)? HI_TRUE: HI_FALSE;
+        stStream.bEndOfStream = HI_FALSE;
+//        fprintf(fpStrm,"frame:%#x offset:%#x len:%#x\n",mCurFrameIndex,s32UsedBytes,s32ReadLen);
+
+//        printf("Send One Frame");
+//        fflush(stdout);
+
+        s32Ret=HI_MPI_VDEC_SendStream(m_Thread_Attr.s32ChnId, &stStream, m_Thread_Attr.s32MilliSec);
+        m_Thread_Attr.cUserCmd = 0;
+        if (HI_SUCCESS != s32Ret)
+        {
+            usleep(100);
+        }
+        else
+        {
+            if(m_Thread_Attr.enType == PT_MJPEG)
+            {
+                s32UsedBytes = s32UsedBytes +s32ReadLen;
+            }
+            else
+            {
+                s32UsedBytes = s32UsedBytes +s32ReadLen + start;
+            }
+            u64pts += m_Thread_Attr.u64PtsIncrease;
+
+            mCurFrameIndex++;
+            if(mTotalFramNum != 0){
+                if((mCurFrameIndex * 100 /mTotalFramNum) != mCurrentPrecent){
+                    setPosition(mCurFrameIndex * 100 /mTotalFramNum);
+                }
+            }
+
+        }
+//        fseek(fpStrm, s32UsedBytes, SEEK_SET);
+#ifndef USE_TAB
+        mCurFile.seek(s32UsedBytes);
+#endif
+        mFileMutex.unlock();
+       usleep(10000);
+    }
+
+    /* send the flag of stream end */
+//    memset(&stStream, 0, sizeof(VDEC_STREAM_S) );
+//    stStream.bEndOfStream = HI_TRUE;
+//    HI_MPI_VDEC_SendStream(m_Thread_Attr.s32ChnId, &stStream, -1);
+    endofStream();
+
+    //printf("SAMPLE_TEST:send steam thread %d return ...\n", m_Thread_Attr.s32ChnId);
+    fflush(stdout);
+//    if (pu8Buf != nullptr)
+//    {
+//        free(pu8Buf);
+//    }
+    fclose(fpStrm);
+    mCurFile.close();
+    mVideoFileList.clear();
+    qDebug()<<"exit paly thread";
+}
+
+
+
+
+
+#endif

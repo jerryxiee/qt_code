@@ -6,6 +6,8 @@
 #include "common/sample_common_vo.h"
 #include "common/sample_common_vdec.h"
 #include <QFileInfoList>
+#include <QMediaPlayer>
+#include <QMutex>
 
 class VideoPlay : public QThread
 {
@@ -19,22 +21,42 @@ public:
     void Stop_Vdec();
 
     void setFileList(QFileInfoList &fileList);
+    void setCurrentposition(int percent);
+    void videoStart();
+    void setRate(qreal rate);
 
 private:
     char* Get_FileType(char *filename);
     bool dealFileHead(char *filename);
+    void setPosition(uint value);
+    void caclFramNum();
+    int serach(HI_U32 *value, int start, int end, int num);
+    int getFileIndex(int framenum);
+    off_t getFrameOffset(int fileindex,int frame);
+    bool getOneFrame(VDEC_STREAM_S *pstStream);
+    void endofStream();
 protected:
     virtual void run();
 
 signals:
+    void currentPrecentChanged(uint);
+    void stateChanged(QMediaPlayer::State);
 
 public slots:
+    void onRateChanged(qreal rate);
+    void pause();
+    void play();
+    void stop();
+
+
 
 public:
     VDEC_CHN_ATTR_S m_stVdecChnAttr;
 
 private:
     const VO_CHN VDEC_VO = 0;
+    const int FRAMENUM = 10;
+    const HI_U64 NORMALPTS = 40000;
 
     Sample_Common_Vo m_Vdec_Vio;
     Sample_Common_Vpss *m_pVpss = nullptr;
@@ -45,6 +67,18 @@ private:
     PAYLOAD_TYPE_E m_enType;
     SIZE_S  m_PicSize;
     QFileInfoList mVideoFileList;
+    HI_U32 mTotalFramNum;
+    HI_U32 *pFramTab;
+    HI_U32 u32PhyAddr;
+    HI_U32 mCurrentPrecent ;
+    HI_U32 mCurrentFileIndex;
+//    FILE *mCurFileNode;
+    QFile mCurFile;
+    QFile mCurFileNode;
+    char *mFileCache;
+    HI_U32 mCurFrameIndex;
+    QMutex mFileMutex;
+
 };
 
 #endif // VDECPLAY_H
