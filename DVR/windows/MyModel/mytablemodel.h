@@ -26,7 +26,7 @@ public:
     void onDirShowSlot(QString &filename);
     Q_INVOKABLE void oncellDoubleClickedSlot(int row,int column);
     Q_INVOKABLE void onBackButtonClickedSlot();
-    Q_INVOKABLE void searchFile(int type,int Chn,int filetype,QString starttime,QString endtime);
+    Q_INVOKABLE bool searchFile(int type,int Chn,int filetype,QString starttime,QString endtime);
     Q_INVOKABLE void preViewFile();
     Q_INVOKABLE int playVideoList(int type,int Chn,int filetype,QString starttime,QString endtime);
 

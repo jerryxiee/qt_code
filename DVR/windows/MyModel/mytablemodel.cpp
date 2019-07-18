@@ -254,7 +254,7 @@ int MyTableModel::playVideoList(int type,int Chn,int filetype,QString starttime,
     uint sttime = QDateTime::fromString(starttime, "yyyy/MM/dd hh:mm:ss").toTime_t();
     uint entime = QDateTime::fromString(endtime, "yyyy/MM/dd hh:mm:ss").toTime_t();
 
-    if(sttime > entime){
+    if(!dir.exists() || sttime > entime){
         qDebug()<<"search file error ,time not correct";
         return -1;
     }
@@ -305,7 +305,7 @@ int MyTableModel::playVideoList(int type,int Chn,int filetype,QString starttime,
 //    emit pathChanged();
 }
 
-void MyTableModel::searchFile(int type,int Chn,int filetype,QString starttime,QString endtime)
+bool MyTableModel::searchFile(int type,int Chn,int filetype,QString starttime,QString endtime)
 {
     int startindex = 0;
     int endindex = 0;
@@ -315,9 +315,9 @@ void MyTableModel::searchFile(int type,int Chn,int filetype,QString starttime,QS
     uint sttime = QDateTime::fromString(starttime, "yyyy/MM/dd hh:mm:ss").toTime_t();
     uint entime = QDateTime::fromString(endtime, "yyyy/MM/dd hh:mm:ss").toTime_t();
 
-    if(sttime > entime){
-        qDebug()<<"search file error ,time not correct";
-        return;
+    if(!dir.exists() || sttime > entime){
+        qDebug()<<"search file error ,time not correct or dir not exists";
+        return false;
     }
 
     qDebug()<<"Chn:"<<Chn<<" filetype:"<<filetype<<" start:"<<starttime<<" end:"<<endtime;
@@ -341,12 +341,12 @@ void MyTableModel::searchFile(int type,int Chn,int filetype,QString starttime,QS
 
         default:
             qDebug()<<"file type error "<<filetype;
-            return;
+            return false;
     }
 //    m_data.clear();
     if(startindex == -1 && endindex == -1){
         qDebug()<<"can not found";
-        return;
+        return false;
     }
 
     if(startindex == -1){
@@ -376,7 +376,7 @@ void MyTableModel::searchFile(int type,int Chn,int filetype,QString starttime,QS
 //    }
 //    refrushModel();
 
-
+    return true;
     qDebug()<<"startindex:"<<startindex<<"endindex"<<endindex;
 
 }

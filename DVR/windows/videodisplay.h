@@ -6,6 +6,7 @@
 #include <QFileInfoList>
 #include <QSlider>
 #include <QLabel>
+#include "playcontrols.h"
 #ifndef LUNUX_WIN
 #include <video/videoplay.h>
 #endif
@@ -38,6 +39,7 @@ private:
 #endif
     QSlider *slider;
     QLabel *labelDuration;
+    PlayControls *controls;
 };
 
 #endif // VIDEODISPLAY_H

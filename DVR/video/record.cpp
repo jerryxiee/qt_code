@@ -483,11 +483,14 @@ HI_BOOL Record::createNewFile(VI_CHN Chn)
     if(m_VencChnPara[index].pFile){
         fclose(m_VencChnPara.at(index).pFile);
     }
-    FRAME_INDEX_HEAD framhead = {0,0};
+    FRAME_INDEX_HEAD framhead = {0};
 
     if(m_VencChnPara[index].pFile_index){
-        framhead.framenum = m_VencChnPara[index].frame;
         fseek(m_VencChnPara[index].pFile_index,0,SEEK_SET);
+//        fread((char *)&framhead,sizeof (FRAME_INDEX_HEAD),1,m_VencChnPara[index].pFile_index);
+        framhead.mtime = current_date_time.toTime_t();
+        framhead.ctime = m_VencChnPara[index].ctime;
+        framhead.framenum = m_VencChnPara[index].frame;
         fwrite((char *)&framhead,sizeof (FRAME_INDEX_HEAD),1,m_VencChnPara[index].pFile_index);
         fclose(m_VencChnPara.at(index).pFile_index);
     }
@@ -496,6 +499,8 @@ HI_BOOL Record::createNewFile(VI_CHN Chn)
     m_VencChnPara[index].pFile = VencFile;
     m_VencChnPara[index].pFile_index = VencFileIndex;
     m_VencChnPara[index].frame = 0;
+    m_VencChnPara[index].ctime = current_date_time.toTime_t();
+    fflush(VencFileIndex);
 
     m_file_mutex.unlock();
 
@@ -588,8 +593,12 @@ HI_BOOL Record::onSaveFileStopSlot(VI_CHN Chn)
             fclose(m_VencChnPara[index].pFile);
         if(m_VencChnPara[index].pFile_index){
             FRAME_INDEX_HEAD framhead;
-            framhead.framenum = m_VencChnPara[index].frame;
+//            framhead.framenum = m_VencChnPara[index].frame;
             fseek(m_VencChnPara[index].pFile_index,0,SEEK_SET);
+//            fread((char *)&framhead,sizeof (FRAME_INDEX_HEAD),1,m_VencChnPara[index].pFile_index);
+            framhead.mtime = QDateTime::currentDateTime().toTime_t();
+            framhead.ctime = m_VencChnPara[index].ctime;
+            framhead.framenum = m_VencChnPara[index].frame;
             fwrite((char *)&framhead,sizeof (FRAME_INDEX_HEAD),1,m_VencChnPara[index].pFile_index);
             fclose(m_VencChnPara.at(index).pFile_index);
         }

@@ -1,7 +1,6 @@
 #include "videodisplay.h"
 #include <QPainter>
 #include <QDebug>
-#include "playcontrols.h"
 #include <QHBoxLayout>
 
 VideoDisplay::VideoDisplay(QWidget *parent) : QWidget(parent)
@@ -13,7 +12,7 @@ VideoDisplay::VideoDisplay(QWidget *parent) : QWidget(parent)
     connect(mVideoExit,SIGNAL(clicked()),this,SLOT(onVideoExitClickSlot()));
 
 
-    PlayControls *controls = new PlayControls(this);
+    controls = new PlayControls(this);
 
 
     slider = new QSlider(Qt::Horizontal, this);
@@ -81,6 +80,7 @@ void VideoDisplay::onVideoExitClickSlot()
 {
 
     emit exitClicked();
+    controls->setPlaybackRate(1);
 #ifndef LUNUX_WIN
     mVdec.Stop_Vdec();
     mVdec.wait();

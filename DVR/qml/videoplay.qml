@@ -421,7 +421,7 @@ Rectangle {
                 model: dataModel
                 sortIndicatorVisible:true
                 width: rootVideo.width - mwidth
-                height: mhight
+                height: mhight - 40
 
                 TableViewColumn { role: "name"; title: "名称"; width: 500;delegate:itemDelegateText}
                 TableViewColumn { role: "gender"; title: "修改时间";width: 400;delegate:itemDelegateText}
