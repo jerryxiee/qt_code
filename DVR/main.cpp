@@ -63,11 +63,11 @@ int main(int argc, char *argv[])
     }
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf-8"));
 
-    QDateTime current_date_time =QDateTime::currentDateTime();
-    QString current_date =QDateTime::currentDateTime().toString("ddd yyyy年MM月dd日 hh时mm分ss秒 AP");
-    qDebug()<<current_date;
-    QByteArray time = current_date.toLocal8Bit();
-    qDebug("%s",time.data());
+//    QDateTime current_date_time =QDateTime::currentDateTime();
+//    QString current_date =QDateTime::currentDateTime().toString("ddd yyyy年MM月dd日 hh时mm分ss秒 AP");
+//    qDebug()<<current_date;
+//    QByteArray time = current_date.toLocal8Bit();
+//    qDebug("%s",time.data());
 //    qDebug()<<current_date_time.toTime_t();
 //    qDebug()<<QDateTime::fromString(current_date,"yyyy-MM-dd-hh-mm-ss").toTime_t();
 

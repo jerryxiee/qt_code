@@ -3,6 +3,15 @@
 #include <QDir>
 #include <QDebug>
 
+SystemLog *Syslog = SystemLog::getSystemLog();
+
+#define LOGW1(str) do{ Syslog->logwrite(1,QString(str));   \
+    }while(0);
+
+#define LOGWE(fmt,...) do{ Syslog->logwrite(1,fmt,__VA_ARGS__);   \
+    }while(0);
+
+
 Record::Record(QObject *parent) : QThread(parent)
 {
     Init();
@@ -466,7 +475,8 @@ HI_BOOL Record::createNewFile(VI_CHN Chn)
         SAMPLE_PRT("open file[%s] failed!\n",venc_file_name);
         return HI_FALSE;
     }
-    SAMPLE_PRT("open file[%s] sucess!\n",venc_file_name);
+
+    LOGWE("open file[%s] sucess!\n",venc_file_name);
 
     sprintf(venc_fileindex_name,"%s.%s",venc_path_name,file_name.data());
     VencFileIndex = fopen(venc_fileindex_name, "wb");
@@ -477,7 +487,7 @@ HI_BOOL Record::createNewFile(VI_CHN Chn)
         SAMPLE_PRT("open file[%s] failed!\n",venc_fileindex_name);
         return HI_FALSE;
     }
-    SAMPLE_PRT("open file[%s] sucess!\n",venc_fileindex_name);
+    LOGWE("open file[%s] sucess!\n",venc_fileindex_name);
 
     m_file_mutex.lock();
     if(m_VencChnPara[index].pFile){

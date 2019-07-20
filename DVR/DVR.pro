@@ -51,7 +51,8 @@ SOURCES += \
     settings/netconfig.cpp \
     test/test.cpp \
     settings/alarmset.cpp \
-    windows/playcontrols.cpp
+    windows/playcontrols.cpp \
+    common/systemlog.cpp
 
 
 
@@ -74,7 +75,8 @@ HEADERS += \
     settings/netconfig.h \
     test/test.h \
     settings/alarmset.h \
-    windows/playcontrols.h
+    windows/playcontrols.h \
+    common/systemlog.h
 
 
 

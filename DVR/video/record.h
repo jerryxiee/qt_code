@@ -7,6 +7,7 @@
 #include <QMutex>
 #include "common/sample_common_sys.h"
 #include "settings/settings.h"
+#include "common/systemlog.h"
 
 class Record : public QThread
 {
