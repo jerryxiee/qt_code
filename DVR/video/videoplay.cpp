@@ -128,7 +128,9 @@ void VideoPlay::caclFramNum()
         if(!file.open(QIODevice::ReadOnly)){
             file.close();
             qDebug()<<"open file failed "<<file.fileName();
-            return;
+            mVideoFileList.removeAt(i);
+            i--;
+            continue;
         }
         file.read((char *)&framhead,sizeof (FRAME_INDEX_HEAD));
         if(i != 0){
