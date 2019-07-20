@@ -72,4 +72,14 @@ Rectangle {
         onClicked: VideoAlarmTest.setIOAlarm(chnindex.currentIndex,iotypeindex.currentIndex,false)
     }
 
+    Button{
+        id:test
+        anchors.top: io2.bottom
+        anchors.topMargin: 100
+        anchors.left: parent.left
+        anchors.leftMargin: 100
+
+        onClicked: console.log("x:"+x+" y:"+y)
+    }
+
 }

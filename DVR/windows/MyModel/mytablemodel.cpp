@@ -259,6 +259,11 @@ int MyTableModel::playVideoList(int type,int Chn,int filetype,QString starttime,
         return -1;
     }
 
+    struct timeval stv;
+    struct timeval etv;
+    struct timezone tz;
+    gettimeofday(&stv, &tz);
+
     qDebug()<<"Chn:"<<Chn<<" filetype:"<<filetype<<" start:"<<starttime<<" end:"<<endtime;
 
     switch (filetype) {
@@ -296,6 +301,10 @@ int MyTableModel::playVideoList(int type,int Chn,int filetype,QString starttime,
     }
 
     mFileInfoList = list.mid(startindex,endindex -startindex+1);
+
+    gettimeofday(&etv, &tz);
+
+    qDebug()<<"search time(us):"<<etv.tv_sec*1000000 + etv.tv_usec - (stv.tv_sec * 1000000 + stv.tv_usec);
 
     emit filelistChangeSignal(mFileInfoList);
     qDebug()<<"emit filelistChangeSignal file num:"<<mFileInfoList.count();

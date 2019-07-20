@@ -7,6 +7,7 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include "common/sample_common_sys.h"
+#include <QtConcurrent>
 
 #define USE_TAB
 
@@ -21,7 +22,9 @@ VideoPlay::VideoPlay(QObject *parent) : QThread(parent)
     memset(&m_Thread_Attr,0x0,sizeof (VdecThreadParam));
     memset(&m_stVdecChnAttr,0x0,sizeof(VDEC_CHN_ATTR_S));
 
+    mFileCache = nullptr;
     pFramTab = nullptr;
+    m_pVdec = nullptr;
     mVideoFileList.clear();
 
 }
@@ -40,7 +43,8 @@ VideoPlay::~VideoPlay()
         HI_MPI_SYS_MmzFree(u32PhyAddr, pFramTab);
     }
     if(mFileCache){
-        free(mFileCache);
+        HI_MPI_SYS_MmzFree(mFileCachePhyAddr, mFileCache);
+        qDebug()<<"HI_MPI_SYS_MmzFree mFileCache";
     }
 
 }
@@ -51,7 +55,12 @@ int VideoPlay::serach(HI_U32 *value,int start,int end,int num)
 
     if(start == index){
         if(value[index] < num && index < mVideoFileList.count() - 1){
-            return index+1;
+            if(num <= value[index + 1]){
+                return index+1;
+            }else {
+                qDebug()<<"beyond current frame tab";
+                return -1;
+            }
         }else{
             return index;
         }
@@ -65,9 +74,13 @@ int VideoPlay::serach(HI_U32 *value,int start,int end,int num)
 
 }
 
-int VideoPlay::getFileIndex(int framenum)
+int VideoPlay::getFileIndex(HI_U32 framenum)
 {
-    return serach(pFramTab,0,mVideoFileList.count()-1,framenum);
+    if(mTotalFileNum == 0){
+        return -1;
+    }
+
+    return serach(pFramTab,0,mTotalFileNum-1,framenum);
 }
 
 off_t VideoPlay::getFrameOffset(int fileindex,int frame)
@@ -104,6 +117,12 @@ void VideoPlay::caclFramNum()
     FRAME_INDEX_HEAD framhead = {0,0};
     HI_U32 *pTab = pFramTab;
 
+    struct timeval stv;
+    struct timeval etv;
+    struct timezone tz;
+    gettimeofday(&stv, &tz);
+    qDebug()<<"start calc frame num";
+
     for(i = 0; i < mVideoFileList.count();i++){
         file.setFileName(mVideoFileList.at(i).path()+"/."+mVideoFileList.at(i).baseName());
         if(!file.open(QIODevice::ReadOnly)){
@@ -119,7 +138,14 @@ void VideoPlay::caclFramNum()
             pTab[i] = framhead.framenum;
         }
         file.close();
+        mTotalFileNum++;
+        if(!mCalcFram){
+            break;
+        }
     }
+    gettimeofday(&etv, &tz);
+
+    qDebug()<<"search time(us):"<<etv.tv_sec*1000000 + etv.tv_usec - (stv.tv_sec * 1000000 + stv.tv_usec);
     qDebug()<<"i:"<<i<<"mTotalFramNum:"<<pTab[i - 1];
 
     mTotalFramNum = pTab[i - 1];
@@ -130,11 +156,17 @@ void VideoPlay::setFileList(QFileInfoList &fileList)
 {
     HI_S32 s32Ret = -1;
 
+    if(mProcess.isStarted()){
+        mCalcFram = false;
+        mProcess.waitForFinished();
+    }
+
     mVideoFileList = fileList;
     mTotalFramNum =   0xffffffff;
     mCurrentPrecent = 0;
     mCurrentFileIndex = 0;
     mCurFrameIndex = 0;
+    mTotalFileNum = 0;
 
     s32Ret = HI_MPI_SYS_MmzAlloc(&u32PhyAddr, (void **)(&pFramTab),
                                  "frametab", nullptr, fileList.count() * sizeof(HI_U32));
@@ -147,16 +179,30 @@ void VideoPlay::setFileList(QFileInfoList &fileList)
 //        return NULL;
     }
     qDebug("HI_MPI_SYS_MmzAlloc successed!size:%d",fileList.count() * sizeof(HI_U32));
-    caclFramNum();
+
+    mCalcFram = true;
+//    caclFramNum();
+
+    mProcess = QtConcurrent::run(this,&VideoPlay::caclFramNum);
+    qDebug()<<"run caclframe process";
+
 }
 
 void VideoPlay::setCurrentposition(int percent)
 {
-    int framenum = percent * mTotalFramNum /100;
-    int fileindex = getFileIndex(framenum);
+    HI_U32 framenum = percent * mTotalFramNum /100;
+    int fileindex;
     off_t frameoff = 0;
     int frameindex = 0;
 
+    fileindex = getFileIndex(framenum);
+    if(fileindex < 0){
+        fileindex = mTotalFileNum > 0 ? mTotalFileNum -1 : 0;
+        frameindex = 0;
+        frameoff = 0;
+        mCurFrameIndex = mTotalFileNum > 0 ? pFramTab[mTotalFileNum -1]:0;
+        goto END;
+    }
     endofStream();
     pause();
     if(fileindex == 0){
@@ -169,6 +215,10 @@ void VideoPlay::setCurrentposition(int percent)
         qDebug()<<"get frame offset failed";
         return;
     }
+
+    mCurFrameIndex = framenum > FRAMENUM ? framenum - FRAMENUM : 0;
+
+END:
     qDebug()<<"frameoff:"<<frameoff;
 
     mFileMutex.lock();
@@ -198,7 +248,6 @@ void VideoPlay::setCurrentposition(int percent)
         }
 #endif
     }
-    mCurFrameIndex = framenum - FRAMENUM > 0 ? framenum - FRAMENUM : 0;
 
     setPosition(mCurFrameIndex * 100 / mTotalFramNum);
     mFileMutex.unlock();
@@ -352,11 +401,14 @@ HI_BOOL VideoPlay::Start_Vdec(char *filename, VPSS_GRP VpssGrp, VPSS_CHN VpssChn
 
     Set_VdecAttr(stVdecParam);
 
-    mFileCache = (char *)malloc(stVdecParam.s32MinBufSize);
-    if(mFileCache == nullptr)
+    s32Ret = HI_MPI_SYS_MmzAlloc(&mFileCachePhyAddr, (void **)(&mFileCache),
+                                 "FileCache", nullptr, stVdecParam.s32MinBufSize);
+
+    if(s32Ret != HI_SUCCESS)
     {
         printf("SAMPLE_TEST:can't alloc %d in send stream thread:%d\n", m_Thread_Attr.s32MinBufSize, m_Thread_Attr.s32ChnId);
-//        fclose(fpStrm);
+        HI_MPI_SYS_MmzFree(mFileCachePhyAddr, mFileCache);
+        mFileCache = nullptr;
         goto END4;
     }
     play();
@@ -388,19 +440,30 @@ void VideoPlay::Stop_Vdec()
         m_pVdec->SAMPLE_COMM_VDEC_Stop(1);
         m_pVpss->SAMPLE_COMM_VPSS_Stop();
         mVideoFileList.clear();
+
+        delete m_pVdec;
     }
+
+    if(mProcess.isRunning()){
+        qDebug()<<"process kill";
+        mCalcFram = false;
+        mProcess.waitForFinished();
+        qDebug()<<"process finished";
+    }
+
     if(pFramTab){
         HI_MPI_SYS_MmzFree(u32PhyAddr, pFramTab);
         qDebug()<<"HI_MPI_SYS_MmzFree";
     }
     if(mFileCache){
-        free(mFileCache);
+        HI_MPI_SYS_MmzFree(mFileCachePhyAddr, mFileCache);
+        qDebug()<<"HI_MPI_SYS_MmzFree mFileCache";
     }
 
     mFileCache = nullptr;
     pFramTab = nullptr;
     m_pVdec = nullptr;
-
+    qDebug()<<"stop vdec end";
 
 }
 
@@ -500,7 +563,7 @@ void VideoPlay::onRateChanged(qreal rate)
 void VideoPlay::run()
 {
 //    VdecThreadParam *pstVdecThreadParam =(VdecThreadParam *)pArgs;
-    FILE *fpStrm=fopen("frameinfo","wb");
+//    FILE *fpStrm=fopen("frameinfo","wb");
 //    HI_U8 *pu8Buf = nullptr;
     VDEC_STREAM_S stStream;
     HI_BOOL bFindStart, bFindEnd;
@@ -517,29 +580,33 @@ void VideoPlay::run()
     HI_U32 preFileTime,lastFileTime;
 
     QString filename = mVideoFileList.first().absoluteFilePath();
-
+    qDebug()<<"set curfile name";
     mCurFile.setFileName(filename);
     mCurFile.open(QIODevice::ReadOnly);
     if(!mCurFile.isOpen()){
         qDebug()<<"can not open file:"<<mVideoFileList.at(mCurrentFileIndex).fileName();
         return ;
     }
+    qDebug()<<"curfile open success";
 
 //    QFileInfo fileinfo(filename);
 //    preFileTime = fileinfo.lastModified().toTime_t();
 //    qDebug()<<"create time:"<<fileinfo.created().toString("yyyy-MM-dd-hh-mm-ss")<<"lastmod time:"<<fileinfo.lastModified().toString("yyyy-MM-dd-hh-mm-ss");
 
 #ifdef USE_TAB
+    qDebug()<<"curfilenode set name";
     filename = mVideoFileList.first().path()+"/."+mVideoFileList.first().baseName();
     mCurFileNode.setFileName(filename);
     mCurFileNode.open(QIODevice::ReadOnly);
     mCurFileNode.read((char *)&framehead,sizeof (FRAME_INDEX_HEAD));
     preFileTime = framehead.mtime;
+    qDebug()<<"curfilenode open success";
 #endif
     fflush(stdout);
 
     u64pts = m_Thread_Attr.u64PtsInit;
      m_Vdec_Run = true;
+     qDebug()<<"vdec run";
     while (m_Vdec_Run)
     {
 //        usleep(20000);
@@ -601,6 +668,8 @@ void VideoPlay::run()
                 qDebug()<<"file end open next success";
             }else {
                 qDebug()<<"file list play over";
+                endofStream();
+                pause();
                 usleep(100000);
                 continue;
             }
@@ -755,21 +824,10 @@ void VideoPlay::run()
        usleep(10000);
     }
 
-    /* send the flag of stream end */
-//    memset(&stStream, 0, sizeof(VDEC_STREAM_S) );
-//    stStream.bEndOfStream = HI_TRUE;
-//    HI_MPI_VDEC_SendStream(m_Thread_Attr.s32ChnId, &stStream, -1);
     endofStream();
-
-    //printf("SAMPLE_TEST:send steam thread %d return ...\n", m_Thread_Attr.s32ChnId);
     fflush(stdout);
-//    if (pu8Buf != nullptr)
-//    {
-//        free(pu8Buf);
-//    }
-    fclose(fpStrm);
+
     mCurFile.close();
     mCurFileNode.close();
-    mVideoFileList.clear();
     qDebug()<<"exit paly thread";
 }

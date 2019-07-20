@@ -8,6 +8,7 @@
 #include <QFileInfoList>
 #include <QMediaPlayer>
 #include <QMutex>
+#include <QtConcurrent/QtConcurrentRun>
 
 class VideoPlay : public QThread
 {
@@ -31,7 +32,7 @@ private:
     void setPosition(uint value);
     void caclFramNum();
     int serach(HI_U32 *value, int start, int end, int num);
-    int getFileIndex(int framenum);
+    int getFileIndex(HI_U32 framenum);
     off_t getFrameOffset(int fileindex,int frame);
     bool getOneFrame(VDEC_STREAM_S *pstStream);
     void endofStream();
@@ -67,6 +68,7 @@ private:
     PAYLOAD_TYPE_E m_enType;
     SIZE_S  m_PicSize;
     QFileInfoList mVideoFileList;
+    HI_U32 mTotalFileNum;
     HI_U32 mTotalFramNum;
     HI_U32 *pFramTab;
     HI_U32 u32PhyAddr;
@@ -76,8 +78,11 @@ private:
     QFile mCurFile;
     QFile mCurFileNode;
     char *mFileCache;
+    HI_U32 mFileCachePhyAddr;
     HI_U32 mCurFrameIndex;
     QMutex mFileMutex;
+    QFuture<void> mProcess;
+    bool mCalcFram;
 
 };
 

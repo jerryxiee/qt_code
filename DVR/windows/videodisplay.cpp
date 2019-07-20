@@ -85,7 +85,7 @@ void VideoDisplay::onVideoExitClickSlot()
     mVdec.Stop_Vdec();
     mVdec.wait();
 #endif
-
+    qDebug()<<"video clicked exit end";
 }
 
 void VideoDisplay::onVideoDispSignalSlot(QString path)

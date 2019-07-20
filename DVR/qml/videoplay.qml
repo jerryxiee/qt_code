@@ -2,6 +2,8 @@ import QtQuick 2.0
 import QtQuick.Controls 1.2
 import MyTableViewModel 1.0
 import QtQuick.Dialogs 1.2
+import QtQuick.VirtualKeyboard 2.2
+import QtQuick.Layouts 1.1
 import "Controls"
 //import FileInfo 1.0
 
@@ -205,7 +207,7 @@ Rectangle {
 //                        height: starttime.height + 5
                         text: (new Date()).toLocaleString(Qt.locale(), "yyyy/MM/dd")
 
-                //        onPressed: vkb.visible = true;
+//                        onPressed: keyboardvir.visible = true;
 
                         onValueChanged: console.log("test value:"+value)
                     }
@@ -218,9 +220,9 @@ Rectangle {
                         type: "time"
                         width: 150
 //                        height: starttime.height + 5
-                        text: (new Date()).toLocaleString(Qt.locale(), "hh/mm/ss")
+                        text: qsTr("00:00:00")
 
-                //        onPressed: vkb.visible = true;
+//                        onPressed: keyboardvir.visible = true;
 
                         onValueChanged: console.log("test value:"+value)
                     }
@@ -267,7 +269,7 @@ Rectangle {
 //                        height: endtime.height + 5
                         text: (new Date()).toLocaleString(Qt.locale(), "yyyy/MM/dd")
 
-                //        onPressed: vkb.visible = true;
+//                        onPressed: keyboardvir.visible = true;
 
                         onValueChanged: console.log("test value:"+value)
                     }
@@ -280,9 +282,9 @@ Rectangle {
                         type: "time"
                         width: 150
 //                        height: endtime.height + 5
-                        text: (new Date()).toLocaleString(Qt.locale(), "hh/mm/ss")
+                        text: qsTr("23:59:59")
 
-                //        onPressed: vkb.visible = true;
+//                        onPressed: keyboardvir.visible = true;
 
                         onValueChanged: console.log("test value:"+value)
                     }
@@ -340,12 +342,16 @@ Rectangle {
                     anchors.leftMargin: 20
                     anchors.topMargin: 60
                     onClicked: {
+//                        keyboardvir.visible = false;
                         if(dataModel.playVideoList(findtypeBox.currentIndex,chnSelectBox.currentIndex,fileTypeBox.currentIndex,
                                                     startd.text+" "+startt.text,endd.text+" "+endt.text) > 0){
                             console.log("videodisplist")
                             videoDispList();
                         }
 //                        console.log(dataModel.mFileInfoList)
+
+//                        console.log("startdx:"+startd.x+" startdy:"+startd.y)
+//                        console.log("endtx:"+endt.x+" endty:"+endt.y)
 
                     }
 
@@ -360,6 +366,7 @@ Rectangle {
 //                    x:video.width + 20; y:video.y
 
                     onClicked: {
+//                        keyboardvir.visible = false;
                         dataModel.searchFile(findtypeBox.currentIndex,chnSelectBox.currentIndex,fileTypeBox.currentIndex,
                                                     startd.text+" "+startt.text,endd.text+" "+endt.text)
                     }
@@ -373,7 +380,10 @@ Rectangle {
                     anchors.topMargin: 20
                     anchors.left: play.left
 //                    anchors.leftMargin: 20
-                    onClicked: dataModel.preViewFile()
+                    onClicked: {
+//                        keyboardvir.visible = false;
+                        dataModel.preViewFile()
+                    }
 
                 }
 
@@ -384,6 +394,9 @@ Rectangle {
                     anchors.left: preview.right
                     anchors.leftMargin: 30
 //                    x:video.width + 20; y:video.y
+                    onClicked: {
+//                        keyboardvir.visible = false;
+                    }
 
                 }
 
@@ -443,6 +456,28 @@ Rectangle {
 
 
             }
+        }
+    }
+
+    ProgressBar {
+        value: 0.5
+//        indeterminate: true
+        Layout.fillWidth: true
+    }
+
+    InputPanel {
+        id: keyboardvir
+        visible: false
+//            anchors.right: parent.right
+//            anchors.left: parent.left
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        width: parent.width /2
+        height: parent.height/4
+        //这种集成方式下点击隐藏键盘的按钮是没有效果的，
+        //只会改变active，因此我们自己处理一下
+        onActiveChanged: {
+            if(!active) { visible = false; }
         }
     }
 

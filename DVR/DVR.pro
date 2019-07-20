@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui quickwidgets multimedia network multimediawidgets
+QT       += core gui quickwidgets multimedia network multimediawidgets concurrent
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 

@@ -90,6 +90,7 @@ Item {
                     focus:true
                     onPressed: {
                         console.log("curpos "+cursorPosition)
+                        console.log("textfield_textip.x:"+textfield_textip.x+" textfield_textip.y"+textfield_textip.y)
                     }
 
 
@@ -122,6 +123,8 @@ Item {
                     focus:true
                     onPressed: {
                         console.log("curpos "+cursorPosition)
+                        console.log("textfield_textmask.x:"+textfield_textmask.x+" textfield_textmask.y"+textfield_textmask.y)
+
                     }
 
                     validator: RegExpValidator{regExp:/^(254|252|248|240|224|192|128|0)\.0\.0\.0$|^(255\.(254|252|248|240|224|192|128|0)\.0\.0)$|^(255\.255\.(254|252|248|240|224|192|128|0)\.0)$|^(255\.255\.255\.(254|252|248|240|224|192|128|0))$/}
