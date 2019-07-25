@@ -52,7 +52,9 @@ SOURCES += \
     test/test.cpp \
     settings/alarmset.cpp \
     windows/playcontrols.cpp \
-    common/systemlog.cpp
+    common/systemlog.cpp \
+    video/videofile.cpp \
+    video/videosearch.cpp
 
 
 
@@ -76,7 +78,9 @@ HEADERS += \
     test/test.h \
     settings/alarmset.h \
     windows/playcontrols.h \
-    common/systemlog.h
+    common/systemlog.h \
+    video/videofile.h \
+    video/videosearch.h
 
 
 

@@ -9,6 +9,7 @@
 #include <QMediaPlayer>
 #include <QMutex>
 #include <QtConcurrent/QtConcurrentRun>
+#include "videofile.h"
 
 class VideoPlay : public QThread
 {
@@ -21,7 +22,7 @@ public:
     HI_BOOL Start_Vdec(char *filename,VPSS_GRP VpssGrp,VPSS_CHN VpssChn);
     void Stop_Vdec();
 
-    void setFileList(QFileInfoList &fileList);
+    void setFileList(VideoFileList &fileList);
     void setCurrentposition(int percent);
     void videoStart();
     void setRate(qreal rate);
@@ -36,6 +37,7 @@ private:
     off_t getFrameOffset(int fileindex,int frame);
     bool getOneFrame(VDEC_STREAM_S *pstStream);
     void endofStream();
+    bool changeFile(int index);
 protected:
     virtual void run();
 
@@ -67,7 +69,7 @@ private:
     int m_frameRate;
     PAYLOAD_TYPE_E m_enType;
     SIZE_S  m_PicSize;
-    QFileInfoList mVideoFileList;
+    VideoFileList mVideoFileList;
     HI_U32 mTotalFileNum;
     HI_U32 mTotalFramNum;
     HI_U32 *pFramTab;
@@ -83,6 +85,8 @@ private:
     QMutex mFileMutex;
     QFuture<void> mProcess;
     bool mCalcFram;
+    int mPlayPts;
+    qreal mRate;
 
 };
 

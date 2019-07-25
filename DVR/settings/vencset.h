@@ -11,6 +11,7 @@ Q_DECLARE_METATYPE(STREAMTYPE)
 Q_DECLARE_METATYPE(PIC_SIZE_E)
 Q_DECLARE_METATYPE(SAMPLE_RC_E)
 Q_DECLARE_METATYPE(HI_BOOL)
+Q_DECLARE_METATYPE(long)
 
 class VencSet : public QObject
 {
@@ -24,6 +25,8 @@ public:
 
     Q_INVOKABLE void setVencConfig(int Chn,uint stream,QString str,QString value);
     void setVencConfig(int Chn,uint stream,VDEC_PARAM &str);
+    void setFileInfo(int Chn, int index, HI_U32 offset);
+    void getFileInfo(int Chn,int *index,HI_U32 *offset);
 
     Q_INVOKABLE void setVencAttr(QString Chn,QString mainStream,QString streamType,QString vencSize,QString enRcMode,
                                  QString profile,QString dstFrmRate,QString bitRate);

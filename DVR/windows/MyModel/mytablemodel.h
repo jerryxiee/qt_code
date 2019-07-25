@@ -8,6 +8,7 @@
 #include <QStack>
 #include <QQmlListProperty>
 #include "common/sample_comm.h"
+#include "video/videosearch.h"
 
 class MyTableModel : public QAbstractTableModel
 {
@@ -20,14 +21,19 @@ public:
     explicit MyTableModel(QObject *parent = nullptr);
     ~MyTableModel();
 
+    void showVideoFileList(VideoFileList &list);
+    void showVideoFileList(VideoFileList &list,int fromindex,int toindex);
+
     void showFileInfoList(QFileInfoList &list);
     void showFileInfoList(QFileInfoList &list,int fromindex,int toindex);
+    void showNormalFileInfoList(QFileInfoList &list,int fromindex,int toindex);
+    void showNormalFileInfoList(QFileInfoList &list);
     void onShowSlot(QDir dir);
     void onDirShowSlot(QString &filename);
     Q_INVOKABLE void oncellDoubleClickedSlot(int row,int column);
     Q_INVOKABLE void onBackButtonClickedSlot();
     Q_INVOKABLE bool searchFile(int type,int Chn,int filetype,QString starttime,QString endtime);
-    Q_INVOKABLE void preViewFile();
+    Q_INVOKABLE void preViewFile(int Chn ,int filetype);
     Q_INVOKABLE int playVideoList(int type,int Chn,int filetype,QString starttime,QString endtime);
 
 
@@ -44,15 +50,17 @@ public:
 //    QQmlListProperty<QFileInfo> getFileInfoList() const;
 
 private:
+    VideoFileList searchFile(VideoFileList &list,uint sttime,uint endtime);
     int search(QFileInfoList &list, int startindex, int endindex, uint time);
     int normalSearch(QFileInfoList &list,uint sttime,uint endtime,int flag);
+    int getFrameIndex(QFileInfo &fileinfo,uint time);
     HI_S32 getAlarmFileName(int Chn, VIDEO_TYPE type, char *filename, int len);
     int findAlarmFile(int Chn, VIDEO_TYPE type, QFileInfoList &list);
 
 //    static void appendGuest(QQmlListProperty<QFileInfo> *, QFileInfo *fileinfo);
 
 signals:
-    void filelistChangeSignal(QFileInfoList &);
+    void filelistChangeSignal(VideoFileList &);
     void dataChanged();
     void fileNameChanged();
     void pathChanged();
@@ -63,7 +71,7 @@ private:
     const QString RootPath = "/home/abhw/venc/";
 #endif
 #ifndef LUNUX_WIN
-    const char *ALARM_FILE_PATH = "/opt/alarm";
+    const char *ALARM_FILE_PATH = "/mnt/sda1/alarm";
 #else
     const char *ALARM_FILE_PATH = "/home/abhw/nfsroot";
 #endif
@@ -76,6 +84,8 @@ private:
     QString mCurrentPath;
     QStack <QString> mPath;
     QFileInfoList mFileInfoList;
+    VideoSearch mVideoSearch;
+    VideoFileList mVideoFileList;
 
 };
 

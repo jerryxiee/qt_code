@@ -83,27 +83,27 @@ void VideoDisplay::onVideoExitClickSlot()
     controls->setPlaybackRate(1);
 #ifndef LUNUX_WIN
     mVdec.Stop_Vdec();
-    mVdec.wait();
+//    mVdec.wait();
 #endif
     qDebug()<<"video clicked exit end";
 }
 
 void VideoDisplay::onVideoDispSignalSlot(QString path)
 {
-    QByteArray filename = path.toLatin1();
-    qDebug()<<"onVideoDispSlot filename: "<<path;
-#ifndef LUNUX_WIN
-    QFileInfo fileinfo(path);
-    QFileInfoList filelist;
-    filelist.append(fileinfo);
-    mVdec.setFileList(filelist);
-    mVdec.Start_Vdec(filename.data(),-1,-1);
-#endif
-    onPositionChanged(0);
+//    QByteArray filename = path.toLatin1();
+//    qDebug()<<"onVideoDispSlot filename: "<<path;
+//#ifndef LUNUX_WIN
+//    QFileInfo fileinfo(path);
+//    QFileInfoList filelist;
+//    filelist.append(fileinfo);
+//    mVdec.setFileList(filelist);
+//    mVdec.Start_Vdec("a.h264",-1,-1);
+//#endif
+//    onPositionChanged(0);
 
 }
 
-void VideoDisplay::onVideoDispListSlot(QFileInfoList & filelist)
+void VideoDisplay::onVideoDispListSlot(VideoFileList &filelist)
 {
 #ifndef LUNUX_WIN
     mVdec.setFileList(filelist);

@@ -42,11 +42,6 @@ public:
 //    HI_U32 m_Venc_Tab[VENC_MAX_CHN_NUM];
 //    HI_U32 m_Venc_ChnNum;
     VENC_CHN m_Venc_Chn;
-
-private:
-    const HI_U8 g_SOI[2] = {0xFF, 0xD8};
-    const HI_U8 g_EOI[2] = {0xFF, 0xD9};
-
     PAYLOAD_TYPE_E m_enType;
     VIDEO_NORM_E m_enNorm;
     PIC_SIZE_E m_enSize;
@@ -54,6 +49,12 @@ private:
     HI_U32  m_u32Profile;
     HI_U32 m_u32BitRate;
     HI_FR32 m_DstFrmRate;
+
+private:
+    const HI_U8 g_SOI[2] = {0xFF, 0xD8};
+    const HI_U8 g_EOI[2] = {0xFF, 0xD9};
+
+
 
     static HI_U32 m_Venc_MaxTab[VENC_MAX_CHN_NUM];
 };

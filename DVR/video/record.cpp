@@ -39,6 +39,7 @@ void Record::Init()
 
     for (int i = 0;i < m_VencSet->m_Vdec_Param[0].count();i++) {
         m_VencStatus.insert("channel"+QString::number(i),m_VencSet->m_Vdec_Param[0][i].mopen);
+        m_VencSet->getFileInfo(i,&mfileindex[i],&mfileoffset[i]);
     }
 
     connect(m_VencSet,SIGNAL(vencAttrChanged(VI_CHN,HI_U32)),this,SLOT(onVencAttrChangedSlot(VI_CHN,HI_U32)));
@@ -279,7 +280,7 @@ bool Record::removeVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type)
 
 bool Record::addVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type)
 {
-    VIDEO_FILE_INFO fileinfo;
+    ALARM_FILE_INFO fileinfo;
     int index;
 
     index = checkVideoAlarmList(Chn,type);
@@ -288,6 +289,7 @@ bool Record::addVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type)
         m_EventFileMutex.lock();
         m_VideoEventFileInfoList[Chn].append(fileinfo);
         m_EventFileMutex.unlock();
+        qDebug()<<"add alarm to list";
 
         return true;
     }
@@ -297,6 +299,7 @@ bool Record::addVideoAlarmEventFromlist(VI_CHN Chn,VIDEO_TYPE type)
 
 void Record::onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool change)
 {
+    qDebug()<<"onVideoAlarmEventChangedSlot";
     if(m_VideoEventFileInfoList[Chn].count()){
         saveAlarmFile(Chn);
     }
@@ -304,6 +307,7 @@ void Record::onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool change
         if(!addVideoAlarmEventFromlist(Chn,type)){
             return;
         }
+        createAlarmFile(Chn);
     }else {
 
         if(!removeVideoAlarmEventFromlist(Chn,type)){
@@ -311,7 +315,7 @@ void Record::onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool change
         }
     }
 
-    addChnToRecord(Chn);
+//    addChnToRecord(Chn);
 
 }
 
@@ -388,7 +392,7 @@ HI_BOOL Record::deleteChnFromRecord(VI_CHN Chn)
 {
     HI_BOOL result = HI_TRUE;
 
-    saveAlarmFile(Chn);
+//    saveAlarmFile(Chn);
     m_file_mutex.lock();
     result = onSaveFileStopSlot(Chn);
     m_file_mutex.unlock();
@@ -431,20 +435,20 @@ HI_BOOL Record::createNewFile(VI_CHN Chn)
 {
 //    Venc_Data VencD;
     FILE *VencFile;
-    FILE *VencFileIndex;
     HI_S32 index = HI_FAILURE;
     HI_S32 s32Ret;
     HI_CHAR szFilePostfix[10];
     HI_CHAR venc_path_name[VIDEO_FILENAME_SIZE];
     HI_CHAR venc_file_name[VIDEO_FILENAME_SIZE];
-    HI_CHAR venc_fileindex_name[VIDEO_FILENAME_SIZE];
-    HI_CHAR alarm_path[VIDEO_FILENAME_SIZE];
-
 
     index = checkRecordChn(Chn);
     if(index < 0){
         qDebug()<<"recordlist not video "<<Chn;
         return HI_FALSE;
+    }
+
+    if(mfileoffset[Chn] > MAXSIZE){
+       mfileindex[Chn]++;
     }
 
     s32Ret = Sample_Common_Venc::SAMPLE_COMM_VENC_GetFilePostfix(m_enType, szFilePostfix);
@@ -454,8 +458,7 @@ HI_BOOL Record::createNewFile(VI_CHN Chn)
         return HI_FALSE;
     }
 
-    QDateTime current_date_time =QDateTime::currentDateTime();
-    QString current_date =current_date_time.toString("yyyy-MM-dd-hh-mm-ss");
+
 
     sprintf(venc_path_name,"%s/channel%d/",VENC_PATH,Chn);
     QDir dir(venc_path_name);
@@ -466,9 +469,8 @@ HI_BOOL Record::createNewFile(VI_CHN Chn)
         }
     }
 
-    QByteArray file_name = current_date.toLatin1();
-    sprintf(venc_file_name,"%s%s%s",venc_path_name,file_name.data(),szFilePostfix);
-    VencFile = fopen(venc_file_name, "wb");
+    sprintf(venc_file_name,"%s%d%s",venc_path_name,mfileindex[Chn],szFilePostfix);
+    VencFile = fopen(venc_file_name, "ab");
     if (!VencFile)
     {
         fclose(VencFile);
@@ -478,69 +480,157 @@ HI_BOOL Record::createNewFile(VI_CHN Chn)
 
     LOGWE("open file[%s] sucess!\n",venc_file_name);
 
-    sprintf(venc_fileindex_name,"%s.%s",venc_path_name,file_name.data());
-    VencFileIndex = fopen(venc_fileindex_name, "wb");
+    m_file_mutex.lock();
+    saveFileNode(index);
+
+    if(m_VencChnPara[index].pFile){
+        mfileoffset[Chn] = ftell(m_VencChnPara[index].pFile);
+        fclose(m_VencChnPara[index].pFile);
+        m_VencSet->setFileInfo(Chn,mfileindex[Chn],mfileoffset[Chn]);
+    }
+
+    m_VencChnPara[index].pFile = VencFile;
+    m_VencChnPara[index].frame = 0;
+
+    createFileNode(index);
+    m_file_mutex.unlock();
+
+    qDebug()<<"creat new file end";
+
+    return HI_TRUE;
+}
+
+HI_BOOL Record::createFileNode(int index)
+{
+    HI_CHAR venc_fileindex_name[VIDEO_FILENAME_SIZE];
+    FILE *VencFileIndex;
+    MYVIDEO_HEAD videohead;
+    SIZE_S size;
+
+    if(!m_VencChnPara[index].pFile){
+        qDebug()<<"can not record";
+    }
+    QDateTime current_date_time =QDateTime::currentDateTime();
+    QString current_date =current_date_time.toString("yyyy-MM-dd-hh-mm-ss");
+    QByteArray file_name = current_date.toLatin1();
+
+    sprintf(venc_fileindex_name,"%s/channel%d/%s.index",VENC_PATH,m_VencChnPara[index].ViChn,file_name.data());
+    VencFileIndex = fopen(venc_fileindex_name, "wb+");
     if (!VencFileIndex)
     {
-        fclose(VencFile);
         fclose(VencFileIndex);
         SAMPLE_PRT("open file[%s] failed!\n",venc_fileindex_name);
         return HI_FALSE;
     }
     LOGWE("open file[%s] sucess!\n",venc_fileindex_name);
 
-    m_file_mutex.lock();
-    if(m_VencChnPara[index].pFile){
-        fclose(m_VencChnPara.at(index).pFile);
-    }
-    FRAME_INDEX_HEAD framhead = {0};
+    Sample_Common_Sys::SAMPLE_COMM_SYS_GetPicSize(m_pVenc[m_VencChnPara[index].ViChn]->m_enNorm,m_enSize,&size);
 
-    if(m_VencChnPara[index].pFile_index){
-        fseek(m_VencChnPara[index].pFile_index,0,SEEK_SET);
-//        fread((char *)&framhead,sizeof (FRAME_INDEX_HEAD),1,m_VencChnPara[index].pFile_index);
-        framhead.mtime = current_date_time.toTime_t();
-        framhead.ctime = m_VencChnPara[index].ctime;
-        framhead.framenum = m_VencChnPara[index].frame;
-        fwrite((char *)&framhead,sizeof (FRAME_INDEX_HEAD),1,m_VencChnPara[index].pFile_index);
-        fclose(m_VencChnPara.at(index).pFile_index);
-    }
-    framhead.framenum = 0;
-    fwrite((char *)&framhead,sizeof (FRAME_INDEX_HEAD),1,VencFileIndex);
-    m_VencChnPara[index].pFile = VencFile;
+    videohead.fileindex = mfileindex[m_VencChnPara[index].ViChn];
+    videohead.ctime = current_date_time.toTime_t();
+    videohead.enType = m_enType;
+//    videohead.framerate = (m_pVenc[m_VencChnPara[index].ViChn]->m_enNorm == VIDEO_ENCODING_MODE_PAL)?25:30;
+    videohead.framerate = m_pVenc[m_VencChnPara[index].ViChn]->m_DstFrmRate;
+    videohead.mtime = 0;
+    videohead.width = size.u32Width;
+    videohead.height = size.u32Height;
+    videohead.stoffset = ftell(m_VencChnPara[index].pFile);
     m_VencChnPara[index].pFile_index = VencFileIndex;
-    m_VencChnPara[index].frame = 0;
-    m_VencChnPara[index].ctime = current_date_time.toTime_t();
+
+    fwrite((char *)&videohead,sizeof (MYVIDEO_HEAD),1,VencFileIndex);
     fflush(VencFileIndex);
 
-    m_file_mutex.unlock();
+    strcpy(curFileIndexName,venc_fileindex_name);
 
-    m_EventFileMutex.lock();
-    for (int i = 0;i < m_VideoEventFileInfoList[Chn].count();i++) {
-        s32Ret = getAlarmFileName(Chn,m_VideoEventFileInfoList[Chn].at(i).type, alarm_path,VIDEO_FILENAME_SIZE);
-        if(s32Ret != HI_SUCCESS){
-            qDebug()<<"getAlarmFileName failed";
-            m_VideoEventFileInfoList[Chn].removeAt(i);
-            continue;
-        }
-        strcpy(m_VideoEventFileInfoList[Chn][i].filename,venc_file_name);
-        m_VideoEventFileInfoList[Chn][i].ctime = current_date_time.toTime_t();
-        qDebug("create alarm file[%s]",alarm_path);
+    createAlarmFile(m_VencChnPara[index].ViChn);
 
-        QFileInfo alarmFile(alarm_path);
-        if(!alarmFile.exists()){
-            VIDEO_HEAD videoFileHead;
-            videoFileHead.type = m_VideoEventFileInfoList[Chn].at(i).type;
-            videoFileHead.cTime = current_date_time.toTime_t();
-            FILE *file = fopen(alarm_path,"wb");
-            fwrite((char *)&videoFileHead,sizeof (VIDEO_HEAD),1,file);
-            fclose(file);
-
-        }
-    }
-    m_EventFileMutex.unlock();
+    VencFileIndex=nullptr;
 
 
     return HI_TRUE;
+
+
+}
+
+HI_BOOL Record::saveFileHead(int index)
+{
+    if(m_VencChnPara[index].pFile_index){
+        MYVIDEO_HEAD videohead;
+//            framhead.framenum = m_VencChnPara[index].frame;
+        fseek(m_VencChnPara[index].pFile_index,0,SEEK_SET);
+        fread((char *)&videohead,sizeof (MYVIDEO_HEAD),1,m_VencChnPara[index].pFile_index);
+
+        videohead.mtime = QDateTime::currentDateTime().toTime_t();
+        videohead.num = m_VencChnPara[index].frame;
+        videohead.endoffset = ftell(m_VencChnPara[index].pFile);
+        fseek(m_VencChnPara[index].pFile_index,0,SEEK_SET);
+        fwrite((char *)&videohead,sizeof (MYVIDEO_HEAD),1,m_VencChnPara[index].pFile_index);
+
+        fseek(m_VencChnPara[index].pFile_index,0,SEEK_END);
+
+        return HI_TRUE;
+    }
+
+    return HI_FALSE;
+}
+
+HI_BOOL Record::saveFileNode(int index)
+{
+    if(saveFileHead(index) == HI_TRUE){
+        fclose(m_VencChnPara.at(index).pFile_index);
+        saveAlarmFile(m_VencChnPara[index].ViChn);
+    }
+
+    m_VencChnPara[index].pFile_index = nullptr;
+    m_VencChnPara[index].frame = 0;
+
+}
+
+HI_S32 Record::createAlarmFile(VI_CHN Chn)
+{
+    HI_S32 s32Ret = HI_SUCCESS;
+
+    HI_CHAR alarm_path[VIDEO_FILENAME_SIZE];
+
+    HI_S32 index = HI_FAILURE;
+
+    index = checkRecordChn(Chn);
+
+    if(!m_VencChnPara[index].pFile_index){
+        qDebug()<<"not record can not create alarm file";
+        return HI_FAILURE;
+    }
+    m_EventFileMutex.lock();
+    if(index >= 0){
+        for (int i = 0;i < m_VideoEventFileInfoList[Chn].count();i++) {
+            s32Ret = getAlarmFileName(Chn,m_VideoEventFileInfoList[Chn].at(i).type, alarm_path,VIDEO_FILENAME_SIZE);
+            if(s32Ret != HI_SUCCESS){
+                qDebug()<<"getAlarmFileName failed";
+                m_VideoEventFileInfoList[Chn].removeAt(i);
+                continue;
+            }
+            strcpy(m_VideoEventFileInfoList[Chn][i].filename,curFileIndexName);
+            m_VideoEventFileInfoList[Chn][i].ctime = QDateTime::currentDateTime().toTime_t();
+            m_VideoEventFileInfoList[Chn][i].stframe = m_VencChnPara[index].frame > 25?m_VencChnPara[index].frame-25:0;
+            qDebug("create alarm file[%s]",alarm_path);
+
+            QFileInfo alarmFile(alarm_path);
+            if(!alarmFile.exists()){
+                ALARM_VIDEO_HEAD videoFileHead;
+                videoFileHead.type = m_VideoEventFileInfoList[Chn].at(i).type;
+                videoFileHead.cTime = QDateTime::currentDateTime().toTime_t();
+                FILE *file = fopen(alarm_path,"wb");
+                fwrite((char *)&videoFileHead,sizeof (ALARM_VIDEO_HEAD),1,file);
+                fclose(file);
+
+            }
+        }
+    }
+
+    m_EventFileMutex.unlock();
+
+
+    return s32Ret;
 }
 
 HI_S32 Record::saveAlarmFile(VI_CHN Chn)
@@ -565,17 +655,18 @@ HI_S32 Record::saveAlarmFile(VI_CHN Chn)
         qDebug("write file[%s]",alarm_path);
         FILE *alarmFile = fopen(alarm_path,"rb+");
         if(alarmFile){
-            VIDEO_HEAD videoFileHead;
-            fread((char *)&videoFileHead,sizeof (VIDEO_HEAD),1,alarmFile);
+            ALARM_VIDEO_HEAD videoFileHead;
+            fread((char *)&videoFileHead,sizeof (ALARM_VIDEO_HEAD),1,alarmFile);
             videoFileHead.mtime = QDateTime::currentDateTime().toTime_t();
             videoFileHead.num++;
             fseek(alarmFile,0,SEEK_SET);
-            fwrite((char *)&videoFileHead,sizeof (VIDEO_HEAD),1,alarmFile);
+            fwrite((char *)&videoFileHead,sizeof (ALARM_VIDEO_HEAD),1,alarmFile);
 
             fseek(alarmFile,0,SEEK_END);
             m_VideoEventFileInfoList[Chn][i].mtime = videoFileHead.mtime;
-            m_VideoEventFileInfoList[Chn][i].frame = m_VencChnPara[index].frame;
-            fwrite((char *)(&m_VideoEventFileInfoList[Chn].at(i)),sizeof (VIDEO_FILE_INFO),1,alarmFile);
+            m_VideoEventFileInfoList[Chn][i].frame = m_VencChnPara[index].frame - m_VideoEventFileInfoList[Chn][i].stframe;
+            m_VideoEventFileInfoList[Chn][i].endframe = m_VencChnPara[index].frame > 0?m_VencChnPara[index].frame-1:0;
+            fwrite((char *)(&m_VideoEventFileInfoList[Chn].at(i)),sizeof (ALARM_FILE_INFO),1,alarmFile);
             fclose(alarmFile);
 
             qDebug("write file[%s] sucess",alarm_path);
@@ -599,22 +690,14 @@ HI_BOOL Record::onSaveFileStopSlot(VI_CHN Chn)
 
     index = checkRecordChn(Chn);
     if(index >= 0){
-        if(m_VencChnPara[index].pFile)
+        if(m_VencChnPara[index].pFile){
+            saveFileNode(index);
+            mfileoffset[Chn] = ftell(m_VencChnPara[index].pFile);
             fclose(m_VencChnPara[index].pFile);
-        if(m_VencChnPara[index].pFile_index){
-            FRAME_INDEX_HEAD framhead;
-//            framhead.framenum = m_VencChnPara[index].frame;
-            fseek(m_VencChnPara[index].pFile_index,0,SEEK_SET);
-//            fread((char *)&framhead,sizeof (FRAME_INDEX_HEAD),1,m_VencChnPara[index].pFile_index);
-            framhead.mtime = QDateTime::currentDateTime().toTime_t();
-            framhead.ctime = m_VencChnPara[index].ctime;
-            framhead.framenum = m_VencChnPara[index].frame;
-            fwrite((char *)&framhead,sizeof (FRAME_INDEX_HEAD),1,m_VencChnPara[index].pFile_index);
-            fclose(m_VencChnPara.at(index).pFile_index);
+            m_VencSet->setFileInfo(Chn,mfileindex[Chn],mfileoffset[Chn]);
         }
+
         m_VencChnPara[index].pFile = nullptr;
-        m_VencChnPara[index].pFile_index = nullptr;
-        m_VencChnPara[index].frame = 0;
         qDebug("stop channel(%d) save file ",Chn);
         return HI_TRUE;
     }
@@ -639,6 +722,9 @@ void Record::checkFileSize()
             qDebug()<<"channel"<<m_VencChnPara[i].Venc_Chn<<"make new file";
             emit createNewFileSignal(m_VencChnPara[i].ViChn);
         }
+        m_file_mutex.lock();
+        saveFileHead(i);
+        m_file_mutex.unlock();
     }
 
 }

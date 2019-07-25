@@ -54,11 +54,11 @@ HI_BOOL VideoControl::videoStart()
         goto END_VPSS_START;
     }
 
-    vio.Vi_Start(VIDEO_ENCODING_MODE_PAL,m_pVpss);
+    vio.Vi_Start(VIDEO_ENCODING_MODE_NTSC,m_pVpss);
 
     m_Record.setRecordSrc(m_pVpss);
     for (int i = 0;i < vio.m_ViChnCnt;i++) {
-        m_Record.startRecordChn(i,VIDEO_ENCODING_MODE_PAL);
+        m_Record.startRecordChn(i,VIDEO_ENCODING_MODE_NTSC);
         m_VideoDetect.createMoveDetect(i,i*4,400,4);
     }
     mTimer->start(TIMEOUT);

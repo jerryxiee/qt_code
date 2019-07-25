@@ -7,6 +7,7 @@
 #include <QSlider>
 #include <QLabel>
 #include "playcontrols.h"
+#include "video/videofile.h"
 #ifndef LUNUX_WIN
 #include <video/videoplay.h>
 #endif
@@ -26,7 +27,7 @@ signals:
 public slots:
     void onVideoExitClickSlot();
     void onVideoDispSignalSlot(QString path);
-    void onVideoDispListSlot(QFileInfoList & filelist);
+    void onVideoDispListSlot(VideoFileList & filelist);
     void onPositionChanged(uint value);
 
 private slots:

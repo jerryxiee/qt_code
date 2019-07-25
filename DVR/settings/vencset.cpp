@@ -253,6 +253,22 @@ void VencSet::setVencConfig(int Chn,uint stream,QString str,QString value)
 
 }
 
+void VencSet::setFileInfo(int Chn, int index, HI_U32 offset)
+{
+    QSettings vioConfig(VIO_CONFIG_PATH, QSettings::IniFormat);
+
+    vioConfig.setValue("Channel"+QString::number(Chn)+"/fileindex",index);
+    vioConfig.setValue("Channel"+QString::number(Chn)+"/fileoff",offset);
+}
+
+void VencSet::getFileInfo(int Chn,int *index,HI_U32 *offset)
+{
+    QSettings vioConfig(VIO_CONFIG_PATH, QSettings::IniFormat);
+
+    *index = vioConfig.value("Channel"+QString::number(Chn)+"/fileindex",0).toInt();
+    *offset = vioConfig.value("Channel"+QString::number(Chn)+"/fileoff",0).toUInt();
+}
+
 /*******************
 输入
     chn:通道

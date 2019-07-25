@@ -39,8 +39,12 @@ private:
     HI_S32 setRecordAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32BitRate,HI_FR32 frmRate,HI_U32 u32Profile);
     HI_S32 startRecordChn(VI_CHN ViChnCnt, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_FR32 frmRate, HI_U32 u32Profile);
     HI_S32 getAlarmFileName(VI_CHN Chn,VIDEO_TYPE type,char *filename,int len);
+    HI_S32 createAlarmFile(VI_CHN Chn);
     HI_S32 saveAlarmFile(VI_CHN Chn);
     HI_BOOL createNewFile(VI_CHN Chn);
+    HI_BOOL createFileNode(int index);
+    HI_BOOL saveFileNode(int index);
+    HI_BOOL saveFileHead(int index);
     HI_S32 checkRecordChn(VI_CHN Chn);
     int checkVideoAlarmList(VI_CHN Chn,VIDEO_TYPE type);
     bool removeVideoAlarmEventFromlist(VI_CHN Chn);
@@ -62,11 +66,11 @@ public slots:
 
 
 private:
-    const HI_CHAR *ALARM_FILE_PATH = "/opt/alarm";
+    const HI_CHAR *ALARM_FILE_PATH = "/mnt/sda1/alarm";
     const HI_CHAR *IO_FILE = ".io_alarm";
     const HI_CHAR *MOVED_FILE = ".move_alarm";
     const HI_CHAR *VENC_PATH = "/mnt/sda1/venc";
-    const HI_U32 MAXSIZE = 1024*1024*2;
+    const HI_U32 MAXSIZE = 1024*1024*20;
     const VPSS_CHN m_VencBindVpss = VPSS_CHN0;   //主码流绑定到通道0
 
     typedef struct{
@@ -90,8 +94,11 @@ private:
     Sample_Common_Vpss m_Vpss;
     Sample_Common_Venc *m_pVenc[VIDEO_MAX_NUM];
     QMap<QString,bool> m_VencStatus;
-    QList<VIDEO_FILE_INFO> m_VideoEventFileInfoList[VIDEO_MAX_NUM];
+    QList<ALARM_FILE_INFO> m_VideoEventFileInfoList[VIDEO_MAX_NUM];
     QMutex m_EventFileMutex;
+    int mfileindex[VIDEO_MAX_NUM];
+    HI_U32 mfileoffset[VIDEO_MAX_NUM];
+    HI_CHAR curFileIndexName[VIDEO_FILENAME_SIZE];
 };
 
 #endif // RECORD_H

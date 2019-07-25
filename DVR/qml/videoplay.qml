@@ -66,13 +66,13 @@ Rectangle {
         roles: ["name","gender","na"]
         objectName:"MyFileTable"
         onFileNameChanged:{
-            videoDispSignal(name)
+//            videoDispSignal(name)
             console.log("display"+name)
         }
 
         onPathChanged: {
 
-            filepath.text = mCurrentPath
+//            filepath.text = mCurrentPath
 
         }
 
@@ -382,7 +382,7 @@ Rectangle {
 //                    anchors.leftMargin: 20
                     onClicked: {
 //                        keyboardvir.visible = false;
-                        dataModel.preViewFile()
+                        dataModel.preViewFile(chnSelectBox.currentIndex,fileTypeBox.currentIndex)
                     }
 
                 }
@@ -402,32 +402,32 @@ Rectangle {
 
 
         }
-        Column{
-            Rectangle{
-                height: 40
-                width: rootVideo.width - mwidth
-                NaviButton {
-                    id: filebackButton
+//        Column{
+//            Rectangle{
+//                height: 40
+//                width: rootVideo.width - mwidth
+//                NaviButton {
+//                    id: filebackButton
 
-            //        edge: Qt.TopEdge
-                    enabled: true
-                    imageSource: "qrc:/images/left1.png"
-                    anchors.left: parent.left
-                    imageheight: 40
-                    imagewidth: 40
-                    imageRotation:180
-                    onClicked: {
-                        dataModel.onBackButtonClickedSlot()
-                    }
-                }
-                Label{
-                    id:filepath
-                    text: dataModel.mCurrentPath
-                    anchors.left:filebackButton.right
-                    anchors.verticalCenter: filebackButton.verticalCenter
-                    font.pixelSize: 24
-                }
-            }
+//            //        edge: Qt.TopEdge
+//                    enabled: true
+//                    imageSource: "qrc:/images/left1.png"
+//                    anchors.left: parent.left
+//                    imageheight: 40
+//                    imagewidth: 40
+//                    imageRotation:180
+//                    onClicked: {
+//                        dataModel.onBackButtonClickedSlot()
+//                    }
+//                }
+//                Label{
+//                    id:filepath
+//                    text: dataModel.mCurrentPath
+//                    anchors.left:filebackButton.right
+//                    anchors.verticalCenter: filebackButton.verticalCenter
+//                    font.pixelSize: 24
+//                }
+//            }
             TableView {
     //            anchors.right: parent.right
     //            anchors.fill: parent
@@ -436,12 +436,13 @@ Rectangle {
                 width: rootVideo.width - mwidth
                 height: mhight - 40
 
-                TableViewColumn { role: "name"; title: "名称"; width: 500;delegate:itemDelegateText}
+                TableViewColumn { role: "name"; title: "创建时间"; width: 400;delegate:itemDelegateText}
                 TableViewColumn { role: "gender"; title: "修改时间";width: 400;delegate:itemDelegateText}
                 TableViewColumn { role: "na"; title: "文件大小";width: 100;delegate:itemDelegateText}
 
                 onDoubleClicked: {
                     dataModel.oncellDoubleClickedSlot(row,0)
+                    videoDispList();
                 }
 
                 Component{
@@ -456,7 +457,7 @@ Rectangle {
 
 
             }
-        }
+//        }
     }
 
     ProgressBar {
