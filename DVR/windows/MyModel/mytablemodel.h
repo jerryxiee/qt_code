@@ -9,6 +9,7 @@
 #include <QQmlListProperty>
 #include "common/sample_comm.h"
 #include "video/videosearch.h"
+#include <QtConcurrent/QtConcurrentRun>
 
 class MyTableModel : public QAbstractTableModel
 {
@@ -32,9 +33,10 @@ public:
     void onDirShowSlot(QString &filename);
     Q_INVOKABLE void oncellDoubleClickedSlot(int row,int column);
     Q_INVOKABLE void onBackButtonClickedSlot();
-    Q_INVOKABLE bool searchFile(int type,int Chn,int filetype,QString starttime,QString endtime);
+    Q_INVOKABLE void searchFile(int type,int Chn,int filetype,QString starttime,QString endtime);
     Q_INVOKABLE void preViewFile(int Chn ,int filetype);
     Q_INVOKABLE int playVideoList(int type,int Chn,int filetype,QString starttime,QString endtime);
+    Q_INVOKABLE void cancelProcess();
 
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -44,12 +46,15 @@ public:
 
     QStringList roles() const;
     void setRoles(const QStringList roles);
-    void refrushModel();
     QString name() const;
     QString pathname() const;
 //    QQmlListProperty<QFileInfo> getFileInfoList() const;
 
+private slots:
+    void refrushModel();
 private:
+    void priSearchFile(int type,int Chn,int filetype,QString starttime,QString endtime);
+    void priPreViewFile(int Chn ,int filetype);
     VideoFileList searchFile(VideoFileList &list,uint sttime,uint endtime);
     int search(QFileInfoList &list, int startindex, int endindex, uint time);
     int normalSearch(QFileInfoList &list,uint sttime,uint endtime,int flag);
@@ -64,6 +69,7 @@ signals:
     void dataChanged();
     void fileNameChanged();
     void pathChanged();
+    void refrushModelSignal();
 private:
 #ifndef LUNUX_WIN
     const QString RootPath = "/mnt/sda1/venc/";
@@ -86,6 +92,8 @@ private:
     QFileInfoList mFileInfoList;
     VideoSearch mVideoSearch;
     VideoFileList mVideoFileList;
+    QFuture<void> mProcess;
+    bool mProcess_Run;
 
 };
 

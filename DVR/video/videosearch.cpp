@@ -76,7 +76,7 @@ VideoFileList VideoSearch::readAlarmFileList(int Chn, VIDEO_TYPE type)
 
     file.open(QIODevice::ReadOnly);
     file.read((char *)&videohead,sizeof (ALARM_VIDEO_HEAD));
-    qDebug("num:%x ctime:%d mtime:%d",videohead.num,videohead.cTime,videohead.mtime);
+    qDebug("num:%d ctime:%d mtime:%d",videohead.num,videohead.cTime,videohead.mtime);
 
     struct timeval stv;
     struct timeval etv;
@@ -111,7 +111,7 @@ VideoFileList VideoSearch::readAlarmFileList(int Chn, VIDEO_TYPE type)
 
     gettimeofday(&etv, &tz);
 
-    qDebug()<<"sec:"<<etv.tv_sec - stv.tv_sec<<" usec:"<<etv.tv_usec-stv.tv_usec;
+    qDebug()<<"readAlarmFileList usec:"<<etv.tv_sec*1000000 + etv.tv_usec - (stv.tv_sec * 1000000 + stv.tv_usec);
 
     return videofilelist;
 

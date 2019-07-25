@@ -871,7 +871,6 @@ void Record::run()
         m_file_mutex.unlock();
         usleep(20000);
     }
-    qDebug()<<"exit venc thread";
     /*******************************************************
      step 3 : close save-file
     *******************************************************/
@@ -880,6 +879,7 @@ void Record::run()
         deleteChnFromRecord(m_VencChnPara[i].ViChn);
     }
 
+    qDebug()<<"exit venc thread";
 //    fclose(frameinfo);
     return;
 

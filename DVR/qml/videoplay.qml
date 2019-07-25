@@ -69,6 +69,10 @@ Rectangle {
 //            videoDispSignal(name)
             console.log("display"+name)
         }
+        onRefrushModelSignal:{
+            processBar.visible = false
+            console.log("refrushModel")
+        }
 
         onPathChanged: {
 
@@ -83,6 +87,7 @@ Rectangle {
             id:buttonEare
             width:mwidth
             height: mhight
+            enabled: !processBar.visible
 //            color: "blue"
 
 //            Column{
@@ -366,6 +371,7 @@ Rectangle {
 //                    x:video.width + 20; y:video.y
 
                     onClicked: {
+                        processBar.visible = true;
 //                        keyboardvir.visible = false;
                         dataModel.searchFile(findtypeBox.currentIndex,chnSelectBox.currentIndex,fileTypeBox.currentIndex,
                                                     startd.text+" "+startt.text,endd.text+" "+endt.text)
@@ -381,6 +387,7 @@ Rectangle {
                     anchors.left: play.left
 //                    anchors.leftMargin: 20
                     onClicked: {
+                        processBar.visible = true;
 //                        keyboardvir.visible = false;
                         dataModel.preViewFile(chnSelectBox.currentIndex,fileTypeBox.currentIndex)
                     }
@@ -435,6 +442,7 @@ Rectangle {
                 sortIndicatorVisible:true
                 width: rootVideo.width - mwidth
                 height: mhight - 40
+                enabled: !processBar.visible
 
                 TableViewColumn { role: "name"; title: "创建时间"; width: 400;delegate:itemDelegateText}
                 TableViewColumn { role: "gender"; title: "修改时间";width: 400;delegate:itemDelegateText}
@@ -455,16 +463,49 @@ Rectangle {
 
                 }
 
-
+            Component.onCompleted: console.log("TableView Completed")
             }
 //        }
     }
 
-    ProgressBar {
-        value: 0.5
-//        indeterminate: true
-        Layout.fillWidth: true
+    Rectangle{
+        id:processBar
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+        color: "lightblue"
+        width: 240
+        height: 120
+        visible: false
+
+        ProgressBar {
+            id:process
+            width: parent.width - 20
+            anchors.top: parent.top
+            anchors.topMargin: 20
+            anchors.horizontalCenter: parent.horizontalCenter
+            indeterminate: true; Layout.fillWidth: true
+        }
+        Label{
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top:process.bottom
+            anchors.topMargin: 10
+            text: qsTr("搜索中...")
+        }
+
+        Button{
+            id:processbut
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 10
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: qsTr("取消")
+            onClicked: {
+                dataModel.cancelProcess()
+            }
+        }
+
+        Component.onCompleted: console.log("processBar Completed")
     }
+
 
     InputPanel {
         id: keyboardvir
@@ -475,8 +516,6 @@ Rectangle {
         anchors.bottom: parent.bottom
         width: parent.width /2
         height: parent.height/4
-        //这种集成方式下点击隐藏键盘的按钮是没有效果的，
-        //只会改变active，因此我们自己处理一下
         onActiveChanged: {
             if(!active) { visible = false; }
         }
