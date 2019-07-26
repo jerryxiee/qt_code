@@ -57,7 +57,7 @@ void Record::onTimeHander()
 HI_S32 Record::checkRecordChn(VI_CHN Chn)
 {
     for(HI_S32 i = 0 ;i < m_VencChnPara.count();i++){
-        if(m_VencChnPara[i].ViChn == Chn ){
+        if(m_VencChnPara[i].ViChn == Chn && m_VencStatus["channel"+QString::number(Chn)]){
             qDebug("Video(%d) active ",Chn);
             return i;
         }
@@ -473,7 +473,7 @@ HI_BOOL Record::createNewFile(VI_CHN Chn)
     VencFile = fopen(venc_file_name, "ab");
     if (!VencFile)
     {
-        fclose(VencFile);
+//        fclose(VencFile);
         SAMPLE_PRT("open file[%s] failed!\n",venc_file_name);
         return HI_FALSE;
     }
@@ -518,7 +518,7 @@ HI_BOOL Record::createFileNode(int index)
     VencFileIndex = fopen(venc_fileindex_name, "wb+");
     if (!VencFileIndex)
     {
-        fclose(VencFileIndex);
+//        fclose(VencFileIndex);
         SAMPLE_PRT("open file[%s] failed!\n",venc_fileindex_name);
         return HI_FALSE;
     }
@@ -535,6 +535,7 @@ HI_BOOL Record::createFileNode(int index)
     videohead.width = size.u32Width;
     videohead.height = size.u32Height;
     videohead.stoffset = ftell(m_VencChnPara[index].pFile);
+    videohead.endoffset = 0;
     m_VencChnPara[index].pFile_index = VencFileIndex;
 
     fwrite((char *)&videohead,sizeof (MYVIDEO_HEAD),1,VencFileIndex);
@@ -611,7 +612,9 @@ HI_S32 Record::createAlarmFile(VI_CHN Chn)
             }
             strcpy(m_VideoEventFileInfoList[Chn][i].filename,curFileIndexName);
             m_VideoEventFileInfoList[Chn][i].ctime = QDateTime::currentDateTime().toTime_t();
+            m_VideoEventFileInfoList[Chn][i].mtime = 0;
             m_VideoEventFileInfoList[Chn][i].stframe = m_VencChnPara[index].frame > 25?m_VencChnPara[index].frame-25:0;
+            m_VideoEventFileInfoList[Chn][i].endframe = 0;
             qDebug("create alarm file[%s]",alarm_path);
 
             QFileInfo alarmFile(alarm_path);
@@ -679,7 +682,7 @@ HI_S32 Record::saveAlarmFile(VI_CHN Chn)
 
 HI_BOOL Record::onCreatNewFileSlot(VI_CHN Chn)
 {
-    saveAlarmFile(Chn);
+//    saveAlarmFile(Chn);
     return createNewFile(Chn);
 }
 
@@ -758,13 +761,13 @@ void Record::run()
         }
 
         for(i = 0; i < m_VencChnPara.count(); i++){
-            if(!m_VencChnPara[i].pFile){
+            if(!m_VencChnPara[i].pFile|| !m_VencStatus["channel"+QString::number(m_VencChnPara[i].ViChn)]){
                 continue;
             }
             FD_SET(m_VencChnPara[i].VencFd, &read_fds);
         }
-        TimeoutVal.tv_sec  = 0;
-        TimeoutVal.tv_usec = 200000;
+        TimeoutVal.tv_sec  = 1;
+        TimeoutVal.tv_usec = 0;
         s32Ret = select(m_maxfd + 1, &read_fds, nullptr, nullptr, &TimeoutVal);
         if (s32Ret < 0)
         {
@@ -774,7 +777,7 @@ void Record::run()
         }
         else if (s32Ret == 0)
         {
-            SAMPLE_PRT("get venc stream time out, exit thread\n");
+            SAMPLE_PRT("get venc stream time out, exit thread %d\n",m_VencChnPara.count());
 //            continue;
         }
         else
@@ -837,11 +840,8 @@ void Record::run()
                     framindex.size = framesize;
                     framindex.frame = m_VencChnPara[i].frame;
                     framindex.offset = ftell(m_VencChnPara[i].pFile);
-                    fwrite((void *)&framindex,sizeof (FRAME_INDEX),1,m_VencChnPara[i].pFile_index);
-                    fflush(m_VencChnPara[i].pFile_index);
 //                    fprintf(frameinfo,"frame:%#x offset:%#x len:%#x\n",m_VencChnPara[i].frame,framindex.offset,framindex.size);
 
-                    m_VencChnPara[i].frame++;
                     s32Ret = Sample_Common_Venc::SAMPLE_COMM_VENC_SaveStream(m_enType, m_VencChnPara[i].pFile, &stStream);
                     if (HI_SUCCESS != s32Ret)
                     {
@@ -850,6 +850,12 @@ void Record::run()
                         SAMPLE_PRT("save stream failed!\n");
                         break;
                     }
+
+                    fwrite((void *)&framindex,sizeof (FRAME_INDEX),1,m_VencChnPara[i].pFile_index);
+                    fflush(m_VencChnPara[i].pFile_index);
+
+                    m_VencChnPara[i].frame++;
+
                     /*******************************************************
                      step 2.6 : release stream
                      *******************************************************/

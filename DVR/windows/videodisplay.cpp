@@ -59,8 +59,8 @@ VideoDisplay::~VideoDisplay()
 {
 #ifndef LUNUX_WIN
     mVdec.Stop_Vdec();
-    mVdec.wait();
 #endif
+    qDebug()<<"exit videoplay";
 }
 
 void VideoDisplay::paintEvent(QPaintEvent *event)

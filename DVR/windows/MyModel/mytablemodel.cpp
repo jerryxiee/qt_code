@@ -426,6 +426,9 @@ int MyTableModel::playVideoList(int type,int Chn,int filetype,QString starttime,
     }
 
     mVideoFileList = mVideoSearch.searchFile(filelist,sttime,entime);
+    if(mVideoFileList.count() == 0){
+        return 0;
+    }
 
     emit filelistChangeSignal(mVideoFileList);
 

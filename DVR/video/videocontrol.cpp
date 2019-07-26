@@ -26,6 +26,9 @@ VideoControl::~VideoControl()
 #ifndef LUNUX_WIN
     m_Record.RecordExit();
     m_VideoDetect.VideoDetectExit();
+    m_pVpss->SAMPLE_COMM_VPSS_Stop();
+//    delete m_pVpss;
+    qDebug()<<"exit videocontrol";
 #endif
 
 }

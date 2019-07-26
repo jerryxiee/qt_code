@@ -22,6 +22,11 @@ VideoFileList VideoSearch::videofilelist(QFileInfoList &infolist)
             continue;
         }
         file.read((char *)&videohead,sizeof (MYVIDEO_HEAD));
+        if(videohead.endoffset < videohead.stoffset){
+            qDebug()<<"file error "<<file.fileName();
+            file.close();
+            continue;
+        }
         VideoFile   videofile;
         videofile.setFileName(infolist.at(i).absoluteFilePath());
         videofile.setModTime(videohead.mtime);
@@ -58,6 +63,7 @@ VideoFileList VideoSearch::readAlarmFileList(int Chn, VIDEO_TYPE type)
     VideoFileList videofilelist;
     MYVIDEO_HEAD framhead;
     FRAME_INDEX framindex1,framindex2;
+    qint64 readn;
 
     char alarmfilename[VIDEO_FILENAME_SIZE];
     ALARM_VIDEO_HEAD videohead;
@@ -83,18 +89,43 @@ VideoFileList VideoSearch::readAlarmFileList(int Chn, VIDEO_TYPE type)
     struct timezone tz;
     gettimeofday(&stv, &tz);
     for (int i = 0;i < videohead.num;i++) {
-        file.read((char *)&videoinfo,sizeof (ALARM_FILE_INFO));
+        readn = file.read((char *)&videoinfo,sizeof (ALARM_FILE_INFO));
+        if(readn < sizeof (ALARM_FILE_INFO)){
+            qDebug()<<"read file error "<<file.fileName();
+            break;
+        }
+        if(videoinfo.ctime > videoinfo.mtime || videoinfo.stframe > videoinfo.endframe){
+            qDebug()<<"alarm file error ";
+            continue;
+        }
+
         VideoFile videofile;
         QFile alarmfile(videoinfo.filename);
         if(!alarmfile.open(QIODevice::ReadOnly)){
             qDebug()<<"can not open alalrm file "<<videoinfo.filename;
             continue;
         }
-        alarmfile.read((char *)&framhead,sizeof (MYVIDEO_HEAD));
+
+        readn = alarmfile.read((char *)&framhead,sizeof (MYVIDEO_HEAD));
+        if(readn < sizeof (MYVIDEO_HEAD)){
+            qDebug()<<"read head error "<<alarmfile.fileName();
+            alarmfile.close();
+            continue;
+        }
         alarmfile.seek(sizeof (MYVIDEO_HEAD)+sizeof (FRAME_INDEX)*videoinfo.stframe);
-        alarmfile.read((char *)&framindex1,sizeof (FRAME_INDEX));
+        readn = alarmfile.read((char *)&framindex1,sizeof (FRAME_INDEX));
+        if(readn < sizeof (FRAME_INDEX)){
+            qDebug()<<"read frame info error "<<alarmfile.fileName();
+            alarmfile.close();
+            continue;
+        }
         alarmfile.seek(sizeof (MYVIDEO_HEAD)+sizeof (FRAME_INDEX)*videoinfo.endframe);
-        alarmfile.read((char *)&framindex2,sizeof (FRAME_INDEX));
+        readn = alarmfile.read((char *)&framindex2,sizeof (FRAME_INDEX));
+        if(readn < sizeof (FRAME_INDEX)){
+            qDebug()<<"read frame2 info error "<<alarmfile.fileName();
+            alarmfile.close();
+            continue;
+        }
 
         videofile.setSize(framindex2.offset - framindex1.offset);
         videofile.setModTime(videoinfo.mtime);

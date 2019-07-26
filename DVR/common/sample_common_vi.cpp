@@ -1007,7 +1007,7 @@ HI_S32 Sample_Common_Vi::SAMPLE_COMM_VI_BindVpss(SAMPLE_VI_MODE_E enViMode, VPSS
     nVpssGrp = MIN2(Vpss_nGrp,stViParam.s32ViChnCnt);
     for (j=0; j<nVpssGrp; j++)
     {
-        ViChn = j * stViParam.s32ViChnInterval;
+        ViChn = 0;//j * stViParam.s32ViChnInterval;
 
         stSrcChn.enModId = HI_ID_VIU;
         stSrcChn.s32DevId = 0;
