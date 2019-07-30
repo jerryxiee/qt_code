@@ -4,6 +4,7 @@
 #include <QString>
 #include <QList>
 #include <QFileInfo>
+#include "common/sample_common_sys.h"
 
 class VideoFile
 {
@@ -14,6 +15,10 @@ public:
 
     void setStartIndex(uint value){mstart = value;}
     uint getStartIndex() const{return  mstart;}
+    void setStartOffset(uint value){mstoffset = value;}
+    uint getStartOffset() const{return  mstoffset;}
+    void setEndOffset(uint value){mendoffset = value;}
+    uint getEndOffset() const{return  mendoffset;}
     void setEndIndex(uint value){mend = value;}
     uint getEndIndex() const{return  mend;}
     void setCreatTime(uint time){mctime = time;}
@@ -24,6 +29,12 @@ public:
     uint getSize() const{return msize;}
     void setFrameRate(uint rate) {mframerate = rate;}
     uint getFrameRate() const {return mframerate;}
+    void setWidth(uint value) {mwidth = value;}
+    uint getWidth() const {return mwidth;}
+    void setHight(uint value) {mhight = value;}
+    uint getHight() const {return mhight;}
+    void setEnType(PAYLOAD_TYPE_E type) {enType = type;}
+    PAYLOAD_TYPE_E getEnType() const {return enType;}
 
     void setFileName(QString name){mfilename = name;}
     QString getFileName() const{return mfilename;}
@@ -34,6 +45,8 @@ public:
 
 
 public:
+    uint mwidth;
+    uint mhight;
     uint mstart;
     uint mend;
     QString mfilename;
@@ -41,6 +54,9 @@ public:
     uint mmtime;
     uint msize;
     uint mframerate;
+    uint mstoffset;
+    uint mendoffset;
+    PAYLOAD_TYPE_E enType;
 };
 
 typedef QList<VideoFile>  VideoFileList;

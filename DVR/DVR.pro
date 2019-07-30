@@ -60,6 +60,7 @@ SOURCES += \
 
 
 
+
 HEADERS += \
         widget.h \
     windows/CustomControls/animationbutton.h \
@@ -81,6 +82,7 @@ HEADERS += \
     common/systemlog.h \
     video/videofile.h \
     video/videosearch.h
+
 
 
 
@@ -108,7 +110,8 @@ SOURCES +=common/sample_common_sys.cpp \
             video/videoplay.cpp \
             video/regionctr.cpp \
             video/record.cpp \
-            video/videodetect.cpp
+            video/videodetect.cpp \
+            video/videoplaylist.cpp
 
 HEADERS +=common/loadbmp.h \
             common/sample_common_sys.h \
@@ -122,7 +125,8 @@ HEADERS +=common/loadbmp.h \
             video/videoplay.h \
             video/regionctr.h \
             video/record.h \
-            video/videodetect.h
+            video/videodetect.h \
+            video/videoplaylist.h
 
 
 LIBS += -lpthread

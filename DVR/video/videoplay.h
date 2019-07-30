@@ -10,6 +10,7 @@
 #include <QMutex>
 #include <QtConcurrent/QtConcurrentRun>
 #include "videofile.h"
+#include "videoplaylist.h"
 
 class VideoPlay : public QThread
 {
@@ -87,6 +88,7 @@ private:
     bool mCalcFram;
     int mPlayPts;
     qreal mRate;
+    VideoPlayList mVideoPlayList;
 
 };
 

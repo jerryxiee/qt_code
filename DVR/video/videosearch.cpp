@@ -28,6 +28,7 @@ VideoFileList VideoSearch::videofilelist(QFileInfoList &infolist)
             continue;
         }
         VideoFile   videofile;
+        videofile.setEnType(videohead.enType);
         videofile.setFileName(infolist.at(i).absoluteFilePath());
         videofile.setModTime(videohead.mtime);
         videofile.setCreatTime(videohead.ctime);
@@ -35,6 +36,8 @@ VideoFileList VideoSearch::videofilelist(QFileInfoList &infolist)
         videofile.setEndIndex(videohead.num-1);
         videofile.setSize(videohead.endoffset - videohead.stoffset);
         videofile.setFrameRate(videohead.framerate);
+        videofile.setStartOffset(videohead.stoffset);
+        videofile.setEndOffset(videohead.endoffset);
 
         videofilelist.append(videofile);
         file.close();
@@ -127,6 +130,7 @@ VideoFileList VideoSearch::readAlarmFileList(int Chn, VIDEO_TYPE type)
             continue;
         }
 
+        videofile.setEnType(framhead.enType);
         videofile.setSize(framindex2.offset - framindex1.offset);
         videofile.setModTime(videoinfo.mtime);
         videofile.setEndIndex(videoinfo.endframe);
@@ -134,6 +138,8 @@ VideoFileList VideoSearch::readAlarmFileList(int Chn, VIDEO_TYPE type)
         videofile.setCreatTime(videoinfo.ctime);
         videofile.setStartIndex(videoinfo.stframe);
         videofile.setFrameRate(framhead.framerate);
+        videofile.setStartOffset(framindex1.offset);
+        videofile.setEndOffset(framindex2.offset);
 
         videofilelist.append(videofile);
         alarmfile.close();
