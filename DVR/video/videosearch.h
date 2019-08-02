@@ -14,6 +14,7 @@ public:
     VideoFileList videofilelist(QFileInfoList &infolist);
     VideoFileList readFileList(int Chn, VIDEO_TYPE type);
     int getFrameIndex(VideoFile &videofile, uint time);
+    uint getOffset(VideoFile &videofile,quint32 time);
     int search(VideoFileList &list, int startindex, int endindex, uint time);
     int normalSearch(VideoFileList &list, uint sttime, uint endtime, int flag);
     VideoFileList searchFile(VideoFileList &list,uint sttime,uint endtime);

@@ -532,16 +532,18 @@ HI_BOOL Record::createFileNode(int index)
 //    videohead.framerate = (m_pVenc[m_VencChnPara[index].ViChn]->m_enNorm == VIDEO_ENCODING_MODE_PAL)?25:30;
     videohead.framerate = m_pVenc[m_VencChnPara[index].ViChn]->m_DstFrmRate;
     videohead.mtime = 0;
+    videohead.num = 0;
     videohead.width = size.u32Width;
     videohead.height = size.u32Height;
     videohead.stoffset = ftell(m_VencChnPara[index].pFile);
     videohead.endoffset = 0;
+    videohead.IIntervalTime = 0;
     m_VencChnPara[index].pFile_index = VencFileIndex;
 
     fwrite((char *)&videohead,sizeof (MYVIDEO_HEAD),1,VencFileIndex);
     fflush(VencFileIndex);
 
-    strcpy(curFileIndexName,venc_fileindex_name);
+    strcpy(curFileIndexName[m_VencChnPara[index].ViChn],venc_fileindex_name);
 
     createAlarmFile(m_VencChnPara[index].ViChn);
 
@@ -564,6 +566,7 @@ HI_BOOL Record::saveFileHead(int index)
         videohead.mtime = QDateTime::currentDateTime().toTime_t();
         videohead.num = m_VencChnPara[index].frame;
         videohead.endoffset = ftell(m_VencChnPara[index].pFile);
+        videohead.IIntervalTime = m_VencChnPara[index].IInterval;
         fseek(m_VencChnPara[index].pFile_index,0,SEEK_SET);
         fwrite((char *)&videohead,sizeof (MYVIDEO_HEAD),1,m_VencChnPara[index].pFile_index);
 
@@ -610,10 +613,10 @@ HI_S32 Record::createAlarmFile(VI_CHN Chn)
                 m_VideoEventFileInfoList[Chn].removeAt(i);
                 continue;
             }
-            strcpy(m_VideoEventFileInfoList[Chn][i].filename,curFileIndexName);
+            strcpy(m_VideoEventFileInfoList[Chn][i].filename,curFileIndexName[Chn]);
             m_VideoEventFileInfoList[Chn][i].ctime = QDateTime::currentDateTime().toTime_t();
             m_VideoEventFileInfoList[Chn][i].mtime = 0;
-            m_VideoEventFileInfoList[Chn][i].stframe = m_VencChnPara[index].frame > 25?m_VencChnPara[index].frame-25:0;
+            m_VideoEventFileInfoList[Chn][i].stframe = m_VencChnPara[index].frame > 2?m_VencChnPara[index].frame-2:0;
             m_VideoEventFileInfoList[Chn][i].endframe = 0;
             qDebug("create alarm file[%s]",alarm_path);
 
@@ -662,14 +665,16 @@ HI_S32 Record::saveAlarmFile(VI_CHN Chn)
             fread((char *)&videoFileHead,sizeof (ALARM_VIDEO_HEAD),1,alarmFile);
             videoFileHead.mtime = QDateTime::currentDateTime().toTime_t();
             videoFileHead.num++;
-            fseek(alarmFile,0,SEEK_SET);
-            fwrite((char *)&videoFileHead,sizeof (ALARM_VIDEO_HEAD),1,alarmFile);
 
             fseek(alarmFile,0,SEEK_END);
             m_VideoEventFileInfoList[Chn][i].mtime = videoFileHead.mtime;
             m_VideoEventFileInfoList[Chn][i].frame = m_VencChnPara[index].frame - m_VideoEventFileInfoList[Chn][i].stframe;
             m_VideoEventFileInfoList[Chn][i].endframe = m_VencChnPara[index].frame > 0?m_VencChnPara[index].frame-1:0;
             fwrite((char *)(&m_VideoEventFileInfoList[Chn].at(i)),sizeof (ALARM_FILE_INFO),1,alarmFile);
+
+            fseek(alarmFile,0,SEEK_SET);
+            fwrite((char *)&videoFileHead,sizeof (ALARM_VIDEO_HEAD),1,alarmFile);
+
             fclose(alarmFile);
 
             qDebug("write file[%s] sucess",alarm_path);
@@ -729,6 +734,7 @@ void Record::checkFileSize()
         saveFileHead(i);
         m_file_mutex.unlock();
     }
+    LOGW1("check file size!");
 
 }
 
@@ -737,6 +743,7 @@ void Record::run()
     HI_S32 i = 0;
     struct timeval TimeoutVal;
     fd_set read_fds;
+    HI_U32 interval[VIDEO_MAX_NUM]={0};
 
     VENC_CHN_STAT_S stStat;
     VENC_STREAM_S stStream;
@@ -833,14 +840,10 @@ void Record::run()
                     /*******************************************************
                      step 2.5 : save frame to file
                     *******************************************************/
-                    framesize = 0;
-                    for(uint n = 0; n < stStream.u32PackCount ;n++){
-                        framesize += stStream.pstPack[n].u32Len - stStream.pstPack[n].u32Offset;
-                    }
-                    framindex.size = framesize;
-                    framindex.frame = m_VencChnPara[i].frame;
+
                     framindex.offset = ftell(m_VencChnPara[i].pFile);
 //                    fprintf(frameinfo,"frame:%#x offset:%#x len:%#x\n",m_VencChnPara[i].frame,framindex.offset,framindex.size);
+
 
                     s32Ret = Sample_Common_Venc::SAMPLE_COMM_VENC_SaveStream(m_enType, m_VencChnPara[i].pFile, &stStream);
                     if (HI_SUCCESS != s32Ret)
@@ -850,11 +853,22 @@ void Record::run()
                         SAMPLE_PRT("save stream failed!\n");
                         break;
                     }
+                    if(stStream.stH264Info.enRefType == BASE_IDRSLICE){
+                        framesize = 0;
+                        for(uint n = 0; n < stStream.u32PackCount ;n++){
+                            framesize += stStream.pstPack[n].u32Len - stStream.pstPack[n].u32Offset;
+                        }
+                        m_VencChnPara[i].IInterval = stStream.pstPack->u64PTS/1000 - interval[m_VencChnPara[i].ViChn];
+                        interval[m_VencChnPara[i].ViChn] = m_VencChnPara[i].IInterval;
+                        framindex.size = framesize;
+                        framindex.frame = m_VencChnPara[i].frame;
+//                        qDebug()<<"IFrame PTS(us):"<<stStream.pstPack->u64PTS;
+                        fwrite((void *)&framindex,sizeof (FRAME_INDEX),1,m_VencChnPara[i].pFile_index);
+                        fflush(m_VencChnPara[i].pFile_index);
+                        m_VencChnPara[i].frame++;
+                    }
 
-                    fwrite((void *)&framindex,sizeof (FRAME_INDEX),1,m_VencChnPara[i].pFile_index);
-                    fflush(m_VencChnPara[i].pFile_index);
 
-                    m_VencChnPara[i].frame++;
 
                     /*******************************************************
                      step 2.6 : release stream

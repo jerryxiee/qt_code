@@ -80,6 +80,7 @@ private:
         FILE *pFile;
         FILE *pFile_index;
         HI_U32 frame;
+        HI_U32 IInterval;
         HI_U32 ctime;
     } Venc_Data;
 
@@ -98,7 +99,7 @@ private:
     QMutex m_EventFileMutex;
     int mfileindex[VIDEO_MAX_NUM];
     HI_U32 mfileoffset[VIDEO_MAX_NUM];
-    HI_CHAR curFileIndexName[VIDEO_FILENAME_SIZE];
+    HI_CHAR curFileIndexName[VIDEO_MAX_NUM][VIDEO_FILENAME_SIZE];
 };
 
 #endif // RECORD_H

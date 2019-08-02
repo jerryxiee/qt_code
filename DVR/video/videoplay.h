@@ -21,6 +21,8 @@ public:
 
     void Set_VdecAttr(VdecThreadParam &VdecAttr);
     HI_BOOL Start_Vdec(char *filename,VPSS_GRP VpssGrp,VPSS_CHN VpssChn);
+    HI_S32 VideoBindVo(VO_DEV VoDev,VO_CHN Chn);
+    HI_S32 VideoUnBindVo(VO_DEV VoDev,VO_CHN Chn);
     void Stop_Vdec();
 
     void setFileList(VideoFileList &fileList);
@@ -48,6 +50,9 @@ signals:
 
 public slots:
     void onRateChanged(qreal rate);
+    void onSetDuration(quint32 duration);
+    void onPositionChanged(quint32 pos);
+    void onFileFinished();
     void pause();
     void play();
     void stop();
@@ -59,7 +64,6 @@ public:
 
 private:
     const VO_CHN VDEC_VO = 0;
-    const int FRAMENUM = 10;
     const HI_U64 NORMALPTS = 40000;
 
     Sample_Common_Vo m_Vdec_Vio;
@@ -67,28 +71,14 @@ private:
     Sample_Common_Vdec *m_pVdec = nullptr;
     VdecThreadParam m_Thread_Attr;
     bool m_Vdec_Run;
-    int m_frameRate;
     PAYLOAD_TYPE_E m_enType;
     SIZE_S  m_PicSize;
-    VideoFileList mVideoFileList;
-    HI_U32 mTotalFileNum;
-    HI_U32 mTotalFramNum;
-    HI_U32 *pFramTab;
-    HI_U32 u32PhyAddr;
-    HI_U32 mCurrentPrecent ;
-    HI_U32 mCurrentFileIndex;
-//    FILE *mCurFileNode;
-    QFile mCurFile;
-    QFile mCurFileNode;
-    char *mFileCache;
-    HI_U32 mFileCachePhyAddr;
-    HI_U32 mCurFrameIndex;
     QMutex mFileMutex;
-    QFuture<void> mProcess;
-    bool mCalcFram;
     int mPlayPts;
     qreal mRate;
     VideoPlayList mVideoPlayList;
+//    QList<VideoPlayList> mVideoList;
+    quint32 mDuration;
 
 };
 

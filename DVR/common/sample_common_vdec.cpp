@@ -89,29 +89,29 @@ HI_VOID	Sample_Common_Vdec::SAMPLE_COMM_VDEC_ChnAttr(HI_S32 s32ChnNum,
 {
     HI_S32 i;
 
-    for(i=0; i<m_Vdec_ChnNum; i++)
+//    for(i=0; i<m_Vdec_ChnNum; i++)
     {
-        pstVdecChnAttr[i].enType       = enType;
-        pstVdecChnAttr[i].u32BufSize   = 3 * pstSize->u32Width * pstSize->u32Height;
-        pstVdecChnAttr[i].u32Priority  = 5;
-        pstVdecChnAttr[i].u32PicWidth  = pstSize->u32Width;
-        pstVdecChnAttr[i].u32PicHeight = pstSize->u32Height;
+        pstVdecChnAttr->enType       = enType;
+        pstVdecChnAttr->u32BufSize   = 3 * pstSize->u32Width * pstSize->u32Height;
+        pstVdecChnAttr->u32Priority  = 5;
+        pstVdecChnAttr->u32PicWidth  = pstSize->u32Width;
+        pstVdecChnAttr->u32PicHeight = pstSize->u32Height;
         if (PT_H264 == enType || PT_MP4VIDEO == enType)
         {
-            pstVdecChnAttr[i].stVdecVideoAttr.enMode=VIDEO_MODE_FRAME;
-            pstVdecChnAttr[i].stVdecVideoAttr.u32RefFrameNum = 2;
-            pstVdecChnAttr[i].stVdecVideoAttr.bTemporalMvpEnable = HI_FALSE;
+            pstVdecChnAttr->stVdecVideoAttr.enMode=VIDEO_MODE_FRAME;
+            pstVdecChnAttr->stVdecVideoAttr.u32RefFrameNum = 2;
+            pstVdecChnAttr->stVdecVideoAttr.bTemporalMvpEnable = HI_FALSE;
         }
         else if (PT_JPEG == enType || PT_MJPEG == enType)
         {
-            pstVdecChnAttr[i].stVdecJpegAttr.enMode = VIDEO_MODE_FRAME;
-            pstVdecChnAttr[i].stVdecJpegAttr.enJpegFormat = JPG_COLOR_FMT_YCBCR420;
+            pstVdecChnAttr->stVdecJpegAttr.enMode = VIDEO_MODE_FRAME;
+            pstVdecChnAttr->stVdecJpegAttr.enJpegFormat = JPG_COLOR_FMT_YCBCR420;
         }
         else if(PT_H265 == enType)
         {
-            pstVdecChnAttr[i].stVdecVideoAttr.enMode=VIDEO_MODE_STREAM;
-            pstVdecChnAttr[i].stVdecVideoAttr.u32RefFrameNum = 2;
-            pstVdecChnAttr[i].stVdecVideoAttr.bTemporalMvpEnable = HI_TRUE;
+            pstVdecChnAttr->stVdecVideoAttr.enMode=VIDEO_MODE_STREAM;
+            pstVdecChnAttr->stVdecVideoAttr.u32RefFrameNum = 2;
+            pstVdecChnAttr->stVdecVideoAttr.bTemporalMvpEnable = HI_TRUE;
         }
     }
 

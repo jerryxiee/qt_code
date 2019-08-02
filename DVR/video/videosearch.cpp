@@ -22,9 +22,12 @@ VideoFileList VideoSearch::videofilelist(QFileInfoList &infolist)
             continue;
         }
         file.read((char *)&videohead,sizeof (MYVIDEO_HEAD));
-        if(videohead.endoffset < videohead.stoffset){
+        if((videohead.endoffset < videohead.stoffset) || (videohead.num == 0)){
             qDebug()<<"file error "<<file.fileName();
             file.close();
+            if(file.remove()){
+                qDebug()<<"remove file sucess";
+            }
             continue;
         }
         VideoFile   videofile;
@@ -185,15 +188,47 @@ int VideoSearch::getFrameIndex(VideoFile &videofile, uint time)
 
 //    file.read((char *)&videohead,sizeof (MYVIDEO_HEAD));
     if(videofile.getCreatTime() > time){
+        qDebug()<<"getFrameIndex1";
         return videofile.getStartIndex();
     }else if(videofile.getModTime() < time){
+        qDebug()<<"getFrameIndex2";
         return videofile.getEndIndex();
     }else {
-        return videofile.getStartIndex() + (time - videofile.getCreatTime())*videofile.getFrameRate();
+        qDebug()<<"getFrameIndex3 time:"<<time<<" StartIndex:"<<videofile.getStartIndex()<<" endindex:"<<videofile.getEndIndex();
+        return videofile.getStartIndex() + (time - videofile.getCreatTime());
     }
 
-
 }
+
+uint VideoSearch::getOffset(VideoFile &videofile,quint32 time)
+{
+
+    QString filename = videofile.getFileName();
+    int offset = sizeof(MYVIDEO_HEAD) + time *sizeof(FRAME_INDEX);
+    FRAME_INDEX frameindex;
+    qint64 readlen;
+
+    QFile tabfile(filename);
+    if(tabfile.exists()){
+        tabfile.open(QIODevice::ReadOnly);
+        if(!tabfile.isOpen()){
+            qDebug()<<"can not open file "<<tabfile.fileName();
+            return -1;
+        }
+        tabfile.seek(offset);
+        readlen = tabfile.read((char *)&frameindex,sizeof (FRAME_INDEX));
+        if(readlen <= 0){
+            tabfile.close();
+            return -1;
+        }
+        tabfile.close();
+    }else {
+        return -1;
+    }
+
+    return frameindex.offset;
+}
+
 
 int VideoSearch::search(VideoFileList &list, int startindex, int endindex, uint time)
 {
@@ -208,6 +243,11 @@ int VideoSearch::search(VideoFileList &list, int startindex, int endindex, uint 
         return index;
     }
     if(index == startindex){
+//        videofile = list.at(endindex);
+//        if(videofile.mctime > time){
+//            qDebug()<<"index:"<<index;
+//            return index;
+//        }
         qDebug()<<"endindex:"<<endindex;
         return endindex;
     }
@@ -278,7 +318,8 @@ VideoFileList VideoSearch::searchFile(VideoFileList &list,uint sttime,uint endti
     startindex = normalSearch(list,sttime,endtime,0);
     endindex = normalSearch(list,sttime,endtime,1);
 
-    if(startindex == -1 && endindex == -1){
+    if((startindex == -1 && endindex == -1)
+            ||((startindex == endindex)&&(list.at(startindex).mctime > endtime||list.at(startindex).mmtime < sttime))){
         qDebug()<<"can not found";
         return returnlist;
     }
@@ -288,14 +329,32 @@ VideoFileList VideoSearch::searchFile(VideoFileList &list,uint sttime,uint endti
     if(endindex == -1){
         endindex = list.count() - 1;
     }
+    if(list.at(startindex).mmtime < sttime){
+        startindex++;
+    }
+    if(list.at(endindex).mctime > endtime){
+        endindex--;
+    }
 
     returnlist = list.mid(startindex,endindex -startindex+1);
 
     frameindex = getFrameIndex(returnlist.first(),sttime);
+    qDebug()<<"startindex:"<<frameindex <<" endindex:"<<returnlist[0].getEndIndex();
     returnlist[0].setStartIndex(frameindex);
-    frameindex = getFrameIndex(returnlist.last(),endtime);
-    returnlist.last().setEndIndex(frameindex);
+    uint offset = getOffset(returnlist[0],frameindex);
+    if(offset > 0){
+        returnlist[0].setStartOffset(offset);
+    }
 
+    frameindex = getFrameIndex(returnlist.last(),endtime);
+    qDebug()<<"startindex:"<<returnlist.last().getStartIndex() <<" endindex:"<<frameindex;
+    returnlist.last().setEndIndex(frameindex);
+    offset = getOffset(returnlist.last(),frameindex);
+    if(offset > 0){
+        returnlist.last().setEndOffset(offset);
+    }
+
+    qDebug()<<"searchFile end";
     return returnlist;
 
 }

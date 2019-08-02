@@ -75,6 +75,32 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
 
 }
 
+void VideoDisplay::onShowControl(bool show)
+{
+    if(show){
+        if(slider){
+            slider->show();
+        }
+        if(labelDuration){
+            labelDuration->show();
+        }
+        if(controls){
+            controls->show();
+        }
+    }else {
+        if(slider){
+            slider->hide();
+        }
+        if(labelDuration){
+            labelDuration->hide();
+        }
+        if(controls){
+            controls->hide();
+        }
+    }
+
+}
+
 
 void VideoDisplay::onVideoExitClickSlot()
 {

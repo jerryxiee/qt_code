@@ -14,8 +14,33 @@
 //#endif
 #include <iostream>
 #include <exception>
+#include <execinfo.h>
 using namespace std;
 
+void dump(int signo)
+{
+    void *buffer[30] = {0};
+    size_t size = 0;
+    size_t i = 0;
+    char ** strings = NULL;
+
+    size = backtrace(buffer,30);
+
+    strings = backtrace_symbols(buffer,size);
+    if(strings == NULL)
+    {
+        return;
+    }
+
+    for (i = 0 ; i< size; i++)
+    {
+        printf("[%02d] %s\n", i, strings[i]);
+    }
+
+    fflush(stdout);
+    free(strings);
+    exit(0);
+}
 
 void sign(int signal)
 {
@@ -62,6 +87,8 @@ int main(int argc, char *argv[])
         }
     }
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf-8"));
+    signal(SIGINT,sign);
+    signal(SIGSEGV, dump);
 
 //    QDateTime current_date_time =QDateTime::currentDateTime();
 //    QString current_date =QDateTime::currentDateTime().toString("ddd yyyy年MM月dd日 hh时mm分ss秒 AP");
@@ -80,9 +107,6 @@ int main(int argc, char *argv[])
         Widget w;
         w.show();
 
-
-        signal(SIGINT,sign);
-//        signal(SIGSEGV, sign);
 #ifndef LUNUX_WIN
 //    vio.Vi_Start(VIDEO_ENCODING_MODE_PAL);
 //    vio.Vo_Start();

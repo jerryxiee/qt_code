@@ -59,13 +59,13 @@ private slots:
 
 private:
     Ui::Widget *ui;
-    QQuickWidget* mQuickWidget = nullptr;
 
     VideoControl mvideoControl;
-    QStackedWidget *mWindows;
     MainWindow *mMainWidow;
     static VideoDisplay  *mVideoDisplay;
     RegionManage *mRegionManage;
+    QStackedWidget *mWindows;
+    QQuickWidget* mQuickWidget = nullptr;
 
     Test Alarmtest;
 

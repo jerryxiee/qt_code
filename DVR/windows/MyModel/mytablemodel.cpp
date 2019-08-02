@@ -432,6 +432,7 @@ int MyTableModel::playVideoList(int type,int Chn,int filetype,QString starttime,
 
     emit filelistChangeSignal(mVideoFileList);
 
+    qDebug()<<"playVideoList end";
     return mVideoFileList.count();
 
 }

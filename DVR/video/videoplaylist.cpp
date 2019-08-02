@@ -1,4 +1,5 @@
 #include "videoplaylist.h"
+#include <QThread>
 
 VideoPlayList::VideoPlayList(QObject *parent) : QObject(parent)
 {
@@ -9,7 +10,9 @@ VideoPlayList::~VideoPlayList()
 {
     if(mProcess.isRunning()){
         mCalcFram = false;
+        qDebug()<<"kill process";
         mProcess.waitForFinished();
+        qDebug()<<"process finished";
     }
 
     if(pFileTimeTab){
@@ -20,6 +23,8 @@ VideoPlayList::~VideoPlayList()
         qDebug()<<"HI_MPI_SYS_MmzFree mFileCache";
     }
 
+    pFileTimeTab = nullptr;
+    mFileCache = nullptr;
     qDebug()<<"exit ~VideoPlayList";
 }
 
@@ -36,8 +41,65 @@ quint32 VideoPlayList::position() const
 
 void VideoPlayList::setPosition(quint32 position)
 {
+    uint offset;
+    qint64 fileoff;
+    int fileindex = getFileIndex(position);
+    if(fileindex < 0){
+        qDebug()<<"setPosition error";
+        return;
+    }
+    qDebug()<<"get fileindex:"<<fileindex;
+    if(fileindex != 0){
+        offset = position > pFileTimeTab[fileindex -1]?position - pFileTimeTab[fileindex -1]:0;
+
+    }else {
+        offset = position < pFileTimeTab[0]?position:pFileTimeTab[0]-1;
+        position = offset;
+    }
+
+//    mCurSouFile.seek(mVideoFileList.at(fileindex).getStartOffset());
+    fileoff = getOffset(fileindex,offset);
+    if(fileoff < 0){
+        qDebug()<<"getoffset error";
+        return;
+    }
+    qDebug()<<"fileindex:"<<fileindex<<" pos:"<<offset<<" mCurFileOffset:"<<mCurFileOffset;
+
+
+    mFileMutex.lock();
+
+    if(mCurFileIndex.isOpen()){
+        mCurFileIndex.close();
+    }
+    if(mCurSouFile.isOpen()){
+        mCurSouFile.close();
+    }
+
+    mCurFileIndex.setFileName(mVideoFileList.at(fileindex).getFileName());
+    if(!mCurFileIndex.open(QIODevice::ReadOnly)){
+        qDebug()<<"open file error "<<mVideoFileList.at(fileindex).getFileName();
+        mFileMutex.unlock();
+        return;
+    }
+
+    MYVIDEO_HEAD videohead;
+    mCurFileIndex.read((char *)&videohead,sizeof (MYVIDEO_HEAD));
+    mCurFileIndex.close();
+    QString filename = mVideoFileList.at(fileindex).path()+"/"+QString::number(videohead.fileindex)+".h264";
+
+    mCurSouFile.setFileName(filename);
+    if(!mCurSouFile.open(QIODevice::ReadOnly)){
+        qDebug()<<"can not open "+filename;
+        mFileMutex.unlock();
+        return;
+    }
+
+    mCurrentFileListIndex = fileindex;
+    mCurFileOffset = fileoff;
+
     mPosition = position;
     emit positionChanged(position);
+    mFileMutex.unlock();
 }
 
 int VideoPlayList::serach(quint32 *value, quint32 start, quint32 end, quint32 time)
@@ -63,12 +125,47 @@ int VideoPlayList::serach(quint32 *value, quint32 start, quint32 end, quint32 ti
         serach(value, index,end,time);
     }
 
-    return -1;
+//    return -1;
+}
+
+int VideoPlayList::getOffset(int index,quint32 time)
+{
+
+    if(index >= mLoadFileNum){
+        qDebug()<<"index out of range:"<<index;
+        return -1;
+    }
+
+    QString filename = mVideoFileList.at(index).getFileName();
+    int offset = sizeof(MYVIDEO_HEAD) + (mVideoFileList.at(index).getStartIndex()+time) *sizeof(FRAME_INDEX);
+    FRAME_INDEX frameindex;
+    qint64 readlen;
+
+    QFile tabfile(filename);
+    if(tabfile.exists()){
+        tabfile.open(QIODevice::ReadOnly);
+        if(!tabfile.isOpen()){
+            qDebug()<<"can not open file "<<tabfile.fileName();
+            return -1;
+        }
+        tabfile.seek(offset);
+        readlen = tabfile.read((char *)&frameindex,sizeof (FRAME_INDEX));
+        if(readlen <= 0){
+            tabfile.close();
+            return -1;
+        }
+        tabfile.close();
+    }else {
+        return -1;
+    }
+
+    return frameindex.offset;
 }
 
 int VideoPlayList::getFileIndex(quint32 time)
 {
     if(mLoadFileNum == 0){
+        qDebug()<<"loadfile null";
         return -1;
     }
 
@@ -77,13 +174,14 @@ int VideoPlayList::getFileIndex(quint32 time)
 
 bool VideoPlayList::changeCurFile()
 {
-    if(mCurSouFile.pos() >= mVideoFileList.at(mCurrentFileListIndex).getEndOffset()){
+    if(mCurSouFile.pos() > mVideoFileList.at(mCurrentFileListIndex).getEndOffset()||mCurSouFile.atEnd()){
         mCurrentFileListIndex++;
         if(mCurrentFileListIndex >= mVideoFileList.count()){
             qDebug()<<"end of file";
             mCurrentFileListIndex = mVideoFileList.count();
             mCurSouFile.close();
-            mCurFileIndex.close();
+//            mCurFileIndex.close();
+            emit filefinished();
             return false;
         }
         MYVIDEO_HEAD videohead;
@@ -97,6 +195,7 @@ bool VideoPlayList::changeCurFile()
         }
 
         mCurFileIndex.read((char *)&videohead,sizeof (MYVIDEO_HEAD));
+        mCurFileIndex.close();
         QString filename = mVideoFileList.at(mCurrentFileListIndex).path()+"/"+QString::number(videohead.fileindex)+".h264";
 
         if(mCurSouFile.fileName()!=filename){
@@ -108,8 +207,15 @@ bool VideoPlayList::changeCurFile()
             }
         }
         qDebug()<<"change file end";
-        mCurSouFile.seek(mVideoFileList.at(mCurrentFileListIndex).getStartOffset());
-        mCurFileOffset = mVideoFileList.at(mCurrentFileListIndex).getStartOffset();
+//        qint64 fileoff = getOffset(mCurrentFileListIndex,0);
+//        if(fileoff < 0){
+            mCurFileOffset = mVideoFileList.at(mCurrentFileListIndex).getStartOffset();
+//        }else {
+//            mCurFileOffset = fileoff;
+//        }
+
+        mCurSouFile.seek(mCurFileOffset);
+//        mCurFileOffset = mVideoFileList.at(mCurrentFileListIndex).getStartOffset();
     }
 
     return true;
@@ -119,7 +225,7 @@ bool VideoPlayList::changeCurFile()
 void VideoPlayList::calcDuration()
 {
     int i;
-    HI_U32 *pTab = pFileTimeTab;
+//    HI_U32 *pTab = pFileTimeTab;
 
     struct timeval stv;
     struct timeval etv;
@@ -127,13 +233,15 @@ void VideoPlayList::calcDuration()
     gettimeofday(&stv, &tz);
     qDebug()<<"start calc frame num";
 
+//    QThread::sleep(1);
     for(i = 0; i < mVideoFileList.count();i++){
         if(i != 0){
-            pTab[i] = pTab[i-1] + mVideoFileList.at(i).getModTime() - mVideoFileList.at(i).getCreatTime();
+            pFileTimeTab[i] = pFileTimeTab[i-1] + mVideoFileList.at(i).getEndIndex() - mVideoFileList.at(i).getStartIndex() + 1;
 
         }else {
-            pTab[i] = mVideoFileList.at(i).getModTime() - mVideoFileList.at(i).getCreatTime();
+            pFileTimeTab[i] = mVideoFileList.at(i).getEndIndex() - mVideoFileList.at(i).getStartIndex() + 1;
         }
+        mDuration = pFileTimeTab[i];
         mLoadFileNum++;
         if(!mCalcFram){
             break;
@@ -142,10 +250,11 @@ void VideoPlayList::calcDuration()
     gettimeofday(&etv, &tz);
 
     qDebug()<<"search time(us):"<<etv.tv_sec*1000000 + etv.tv_usec - (stv.tv_sec * 1000000 + stv.tv_usec);
-    qDebug()<<"i:"<<i<<"mTotalTime:"<<pTab[i - 1];
+    qDebug()<<"i:"<<i<<"mTotalTime:"<<pFileTimeTab[i - 1];
 
-    mDuration = pTab[i - 1];
-    emit durationChanged(mDuration);
+//    mDuration = pFileTimeTab[i - 1];
+    if(mDuration != 0)
+        emit durationChanged(mDuration);
 
 
 }
@@ -168,6 +277,7 @@ void VideoPlayList::setPlaylist(VideoFileList &playlist)
     mCurrentFileListIndex = 0;
     mPosition = 0;
     mDuration = 0;
+    mLoadFileNum = 0;
 
     if(pFileTimeTab){
         HI_MPI_SYS_MmzFree(u32PhyAddr, pFileTimeTab);
@@ -189,6 +299,7 @@ void VideoPlayList::setPlaylist(VideoFileList &playlist)
         pFileTimeTab = nullptr;
         return;
     }
+    memset(pFileTimeTab,0x0,playlist.count() * sizeof(HI_U32));
     qDebug("HI_MPI_SYS_MmzAlloc successed!size:%d",playlist.count() * sizeof(HI_U32));
 
     s32Ret = HI_MPI_SYS_MmzAlloc(&mFileCachePhyAddr, (void **)(&mFileCache),
@@ -203,19 +314,27 @@ void VideoPlayList::setPlaylist(VideoFileList &playlist)
     }
 
     mCalcFram = true;
+    calcDuration();
 
-    mProcess = QtConcurrent::run(this,&VideoPlayList::calcDuration);
-    qDebug()<<"run caclframe process";
+//    mProcess = QtConcurrent::run(this,&VideoPlayList::calcDuration);
+//    qDebug()<<"run caclframe process";
 
     MYVIDEO_HEAD videohead;
 
+    if(mCurFileIndex.isOpen()){
+        mCurFileIndex.close();
+    }
     mCurFileIndex.setFileName(mVideoFileList.first().getFileName());
     if(!mCurFileIndex.open(QIODevice::ReadOnly)){
         qDebug()<<"open file error "<<mVideoFileList.first().getFileName();
     }
 
     mCurFileIndex.read((char *)&videohead,sizeof (MYVIDEO_HEAD));
+    mCurFileIndex.close();
 
+    if(mCurSouFile.isOpen()){
+        mCurSouFile.close();
+    }
     QString filename = mVideoFileList.first().path()+"/"+QString::number(videohead.fileindex)+".h264";
     mCurSouFile.setFileName(filename);
     mCurSouFile.open(QIODevice::ReadOnly);
@@ -224,18 +343,29 @@ void VideoPlayList::setPlaylist(VideoFileList &playlist)
     }
 //    mCurSouFile.seek(mVideoFileList.first().getStartOffset());
     mCurFileOffset = mVideoFileList.first().getStartOffset();
+//    qint64 fileoff = getOffset(0,0);
+//    if(fileoff < 0){
+//        mCurFileOffset = mVideoFileList.at(0).getStartOffset();
+//    }else {
+//        mCurFileOffset = fileoff;
+//    }
     qDebug()<<"file size:"<<mCurSouFile.size();
 
 }
 
 int VideoPlayList::getFrame(char **buff, VIDEO_MODE_E mode)
 {
+//    struct timeval stv;
+//    struct timeval etv;
+//    struct timezone tz;
+
     bool bFindStart;
     bool bFindEnd;
     int i;
 //    if(len < )
     int readlen;
-    if(!mCurSouFile.isOpen()){
+    if(!mCurSouFile.isOpen()||mCurrentFileListIndex>mVideoFileList.count()){
+        emit filefinished();
         return 0;
     }
     mFileMutex.lock();
@@ -247,18 +377,22 @@ int VideoPlayList::getFrame(char **buff, VIDEO_MODE_E mode)
 
     if(mVideoFileList.at(mCurrentFileListIndex).getEnType() == PT_H264 && mode == VIDEO_MODE_FRAME){
 //        readlen = mCurSouFile.read(buff,len);
-
+//gettimeofday(&stv, &tz);
         bFindStart = false;
         bFindEnd   = false;
         mCurSouFile.seek(mCurFileOffset);
         readlen = mCurSouFile.read(mFileCache,MINBUFSIZE);
         if (readlen == 0)
         {
+            mFileMutex.unlock();
             qDebug()<<"file read len:"<<readlen;
-            mCurSouFile.close();
+//            mCurSouFile.close();
             return 0;
 
         }
+//        gettimeofday(&etv, &tz);
+
+//        qDebug()<<"read fram usec:"<<etv.tv_sec*1000000 + etv.tv_usec - (stv.tv_sec * 1000000 + stv.tv_usec);
 
         for (i=0; i<readlen-8; i++)
         {
@@ -271,6 +405,11 @@ int VideoPlayList::getFrame(char **buff, VIDEO_MODE_E mode)
                )
             {
                 bFindStart = HI_TRUE;
+                if(tmp == 5){
+                    mPosition++;
+                    emit positionChanged(mPosition);
+                }
+//                qDebug()<<"start:"<<start;
                 i += 8;
                 break;
             }
@@ -303,6 +442,9 @@ int VideoPlayList::getFrame(char **buff, VIDEO_MODE_E mode)
             readlen = i+8;
         }
 
+//        gettimeofday(&etv, &tz);
+
+//        qDebug()<<"deal fram usec:"<<etv.tv_sec*1000000 + etv.tv_usec - (stv.tv_sec * 1000000 + stv.tv_usec);
     }else {
         readlen = mCurSouFile.read(mFileCache,MINBUFSIZE);
     }

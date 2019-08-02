@@ -24,6 +24,7 @@ signals:
 
     void durationChanged(quint32 duration);
     void positionChanged(quint32 position);
+    void filefinished();
 //    void stateChanged(QMediaPlayer::State);
 
 public slots:
@@ -39,10 +40,11 @@ private:
     void calcDuration();
     int serach(quint32 *value, quint32 start, quint32 end, quint32 time);
     int getFileIndex(quint32 time);
+    int getOffset(int index,quint32 time);
     bool changeCurFile();
 
 private:
-    const qint64 MINBUFSIZE = 1382400;
+    const qint64 MINBUFSIZE = 102400;
 //    Sample_Common_Vdec *m_pVdec = nullptr;
 //    int mVedcVo;   //vdec输出到vo设备号
 //    int mVoChn;    //绑定到vo通道号

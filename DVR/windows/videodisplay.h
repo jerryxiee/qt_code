@@ -29,6 +29,7 @@ public slots:
     void onVideoDispSignalSlot(QString path);
     void onVideoDispListSlot(VideoFileList & filelist);
     void onPositionChanged(uint value);
+    void onShowControl(bool show);
 
 private slots:
     void seek(int value);
@@ -41,6 +42,7 @@ private:
     QSlider *slider;
     QLabel *labelDuration;
     PlayControls *controls;
+    QWidget mControlWidget;
 };
 
 #endif // VIDEODISPLAY_H

@@ -26,7 +26,7 @@ public:
     void setModTime(uint time){mmtime = time;}
     uint getModTime() const{return mmtime;}
     void setSize(uint size){msize = size;}
-    uint getSize() const{return msize;}
+    uint getSize() const{return mendoffset - mstoffset;}
     void setFrameRate(uint rate) {mframerate = rate;}
     uint getFrameRate() const {return mframerate;}
     void setWidth(uint value) {mwidth = value;}
