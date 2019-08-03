@@ -14,16 +14,25 @@ class VideoPlayList : public QObject
     Q_OBJECT
 public:
     explicit VideoPlayList(QObject *parent = nullptr);
+    VideoPlayList(const VideoPlayList& list);
     ~VideoPlayList();
+
+    VideoPlayList& operator=(const VideoPlayList& list);
+
+    int init();
+
 
     quint32 duration() const;   //返回播放持续时间
     quint32 position() const;   //返回当前位置
     int getFrame(char **buff, VIDEO_MODE_E mode);    //获取一帧视频数据
+    quint32 getCurrentFileIndex() const;
+    int getFileListNum() const;
 
 signals:
 
     void durationChanged(quint32 duration);
     void positionChanged(quint32 position);
+    void frameRateChanged(uint framerate);
     void filefinished();
 //    void stateChanged(QMediaPlayer::State);
 
@@ -43,6 +52,9 @@ private:
     int getOffset(int index,quint32 time);
     bool changeCurFile();
 
+public:
+    VideoFileList mVideoFileList;   //播放文件列表
+
 private:
     const qint64 MINBUFSIZE = 102400;
 //    Sample_Common_Vdec *m_pVdec = nullptr;
@@ -54,7 +66,6 @@ private:
     quint32 mCurrentFileListIndex;   //当前播放文件在列表中的索引
     QFile mCurSouFile;              //视频文件节点
     QFile mCurFileIndex;           //索引文件节点
-    VideoFileList mVideoFileList;   //播放文件列表
     QFuture<void> mProcess;         //线程处理
     QMutex mFileMutex;             //文件操作锁
 //    qreal mRate;                   //视频播放帧率

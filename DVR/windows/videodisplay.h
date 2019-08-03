@@ -10,6 +10,7 @@
 #include "video/videofile.h"
 #ifndef LUNUX_WIN
 #include <video/videoplay.h>
+#include "common/sample_common_sys.h"
 #endif
 
 class VideoDisplay : public QWidget
@@ -19,12 +20,16 @@ public:
     explicit VideoDisplay(QWidget *parent = nullptr);
     ~VideoDisplay();
 
+//    int BindVideoPlay(VO_CHN VoChn,VPSS_GRP VpssGrp,VPSS_CHN VpssChn);
+//    int UnBindVideoPlay(VO_CHN VoChn,VPSS_GRP VpssGrp,VPSS_CHN VpssChn);
+
     void paintEvent(QPaintEvent *event);
 
 signals:
     void exitClicked();
 
 public slots:
+//    void onSetWinNum(int num);
     void onVideoExitClickSlot();
     void onVideoDispSignalSlot(QString path);
     void onVideoDispListSlot(VideoFileList & filelist);
@@ -37,8 +42,10 @@ private slots:
 private:
     QPushButton *mVideoExit;
 #ifndef LUNUX_WIN
+    Sample_Common_Vo mVideoVo;
     VideoPlay mVdec;
 #endif
+    int mWinNum;
     QSlider *slider;
     QLabel *labelDuration;
     PlayControls *controls;

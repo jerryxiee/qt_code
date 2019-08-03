@@ -49,6 +49,7 @@ private:
 public slots:
     void onVideoDispSlot(QString filepath);
     void onVideoWinShowSlot();
+    void onVideoTestWinShowSlot();
 
 private slots:
     void onHidQmlSlot();
@@ -64,10 +65,11 @@ private:
     MainWindow *mMainWidow;
     static VideoDisplay  *mVideoDisplay;
     RegionManage *mRegionManage;
+    videoplaytest *mVideoPlayTestWin;
     QStackedWidget *mWindows;
     QQuickWidget* mQuickWidget = nullptr;
 
-    Test Alarmtest;
+    Test mTest;
 
 };
 

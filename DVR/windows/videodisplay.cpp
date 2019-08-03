@@ -43,7 +43,12 @@ VideoDisplay::VideoDisplay(QWidget *parent) : QWidget(parent)
     layout->setStretch(2,1);
 
     setLayout(layout);
+
 #ifndef LUNUX_WIN
+    VO_DEV VoDev;
+    VO_LAYER VoLayer;
+    Sample_Common_Sys::Get_Sys_VoDev(VoDev,VoLayer);
+    mVideoVo.SAMPLE_COMM_VO_SetDev(VoDev,VoLayer);
     connect(&mVdec,SIGNAL(currentPrecentChanged(uint)),this,SLOT(onPositionChanged(uint)));
     connect(controls,SIGNAL(changeRate(qreal)),&mVdec,SLOT(onRateChanged(qreal)));
     connect(&mVdec,SIGNAL(stateChanged(QMediaPlayer::State)),controls,SLOT(setState(QMediaPlayer::State)));
@@ -58,7 +63,9 @@ VideoDisplay::VideoDisplay(QWidget *parent) : QWidget(parent)
 VideoDisplay::~VideoDisplay()
 {
 #ifndef LUNUX_WIN
+    mVideoVo.SAMPLE_COMM_VO_UnBindVpss(0,mVdec.getVpssGrp(),mVdec.getVpssChn());
     mVdec.Stop_Vdec();
+    mVideoVo.SAMPLE_COMM_VO_StopChn();
 #endif
     qDebug()<<"exit videoplay";
 }
@@ -74,6 +81,16 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
 #endif
 
 }
+
+//int VideoDisplay::BindVideoPlay(VO_CHN VoChn,VPSS_GRP VpssGrp,VPSS_CHN VpssChn)
+//{
+//    return mVideoVo.SAMPLE_COMM_VO_BindVpss(VoChn,VpssGrp,VpssChn);
+//}
+
+//int VideoDisplay::UnBindVideoPlay(VO_CHN VoChn,VPSS_GRP VpssGrp,VPSS_CHN VpssChn)
+//{
+//    return mVideoVo.SAMPLE_COMM_VO_UnBindVpss(VoChn,VpssGrp,VpssChn);
+//}
 
 void VideoDisplay::onShowControl(bool show)
 {
@@ -101,6 +118,17 @@ void VideoDisplay::onShowControl(bool show)
 
 }
 
+//void VideoDisplay::onSetWinNum(int num)
+//{
+//    qDebug()<<"start vo chn:"<<num;
+//    if(num > 4){
+//        mVideoVo.SAMPLE_COMM_VO_StartChn(VO_MODE_9MUX);
+//    }else if(num > 1){
+//        mVideoVo.SAMPLE_COMM_VO_StartChn(VO_MODE_4MUX);
+//    }else {
+//        mVideoVo.SAMPLE_COMM_VO_StartChn(VO_MODE_1MUX);
+//    }
+//}
 
 void VideoDisplay::onVideoExitClickSlot()
 {
@@ -108,8 +136,10 @@ void VideoDisplay::onVideoExitClickSlot()
     emit exitClicked();
     controls->setPlaybackRate(1);
 #ifndef LUNUX_WIN
+
+    mVideoVo.SAMPLE_COMM_VO_UnBindVpss(0,mVdec.getVpssGrp(),mVdec.getVpssChn());
     mVdec.Stop_Vdec();
-//    mVdec.wait();
+    mVideoVo.SAMPLE_COMM_VO_StopChn();
 #endif
     qDebug()<<"video clicked exit end";
 }
@@ -132,8 +162,12 @@ void VideoDisplay::onVideoDispSignalSlot(QString path)
 void VideoDisplay::onVideoDispListSlot(VideoFileList &filelist)
 {
 #ifndef LUNUX_WIN
+
     mVdec.setFileList(filelist);
-    mVdec.Start_Vdec("a.h264",-1,-1);
+    mVdec.Start_Vdec();
+    mVideoVo.SAMPLE_COMM_VO_StartChn(VO_MODE_1MUX);
+    mVideoVo.SAMPLE_COMM_VO_BindVpss(0,mVdec.getVpssGrp(),mVdec.getVpssChn());
+
 #endif
     onPositionChanged(0);
     qDebug()<<"onVideoDispListSlot num:"<<filelist.count();

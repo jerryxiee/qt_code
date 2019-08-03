@@ -54,7 +54,8 @@ SOURCES += \
     windows/playcontrols.cpp \
     common/systemlog.cpp \
     video/videofile.cpp \
-    video/videosearch.cpp
+    video/videosearch.cpp \
+    windows/videoplaytest.cpp
 
 
 
@@ -81,7 +82,8 @@ HEADERS += \
     windows/playcontrols.h \
     common/systemlog.h \
     video/videofile.h \
-    video/videosearch.h
+    video/videosearch.h \
+    windows/videoplaytest.h
 
 
 

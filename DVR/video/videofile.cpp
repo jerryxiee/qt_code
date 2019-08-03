@@ -1,6 +1,6 @@
 #include "videofile.h"
 
-VideoFile::VideoFile()
+VideoFile::VideoFile():enType(PT_BUTT)
 {
 
 }

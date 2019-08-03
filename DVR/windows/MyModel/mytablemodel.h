@@ -66,6 +66,7 @@ private:
 
 signals:
     void filelistChangeSignal(VideoFileList &);
+//    void setWinNumSignal(int);
     void dataChanged();
     void fileNameChanged();
     void pathChanged();

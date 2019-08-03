@@ -362,7 +362,7 @@ HI_VOID	Sample_Common_Vdec::SAMPLE_COMM_VDEC_ModCommPoolConf(VB_CONF_S *pstModVb
     VB_PIC_BLK_SIZE(pstSize->u32Width, pstSize->u32Height, enType, PicSize);
     /***********vdec compressed vb needs header****************/
     pstModVbConf->astCommPool[0].u32BlkSize = PicSize;
-    pstModVbConf->astCommPool[0].u32BlkCnt  = 5*s32ChnNum;
+    pstModVbConf->astCommPool[0].u32BlkCnt  = 45;
 
     /* NOTICE:
     1. if the VDEC channel is H264 channel and support to decode B frame, then you should allocate PmvBuffer

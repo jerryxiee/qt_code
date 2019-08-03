@@ -27,6 +27,7 @@ Widget::Widget(QWidget *parent) :
         connect(pRoot,SIGNAL(hidqmlsignal()),this,SLOT(onHidQmlSlot()));
         connect(pRoot,SIGNAL(videoDispSignal(QString)),this,SLOT(onVideoDispSlot(QString)));
         connect(pRoot,SIGNAL(videoDispList()),this,SLOT(onVideoWinShowSlot()));
+        connect(pRoot,SIGNAL(videoTestSignal()),this,SLOT(onVideoTestWinShowSlot()));
         connect(pRoot,SIGNAL(regionSetSignal(int,QString)),this,SLOT(onRegionSetSlot(int,QString)));
     }
     QQmlContext *context = mQuickWidget->rootContext();
@@ -35,13 +36,13 @@ Widget::Widget(QWidget *parent) :
         context->setContextProperty("DispSet",Settings::getDispSetIni());
         context->setContextProperty("SystemConfig",Settings::getSystemSetIni());
         context->setContextProperty("AlarmConfig",Settings::getAlarmSetIni());
-        context->setContextProperty("VideoAlarmTest",&Alarmtest);
+        context->setContextProperty("VideoTest",&mTest);
     }
 
 
 #ifndef LUNUX_WIN
     mvideoControl.videoStart();
-    connect(&Alarmtest,SIGNAL(videoAlarmEventChangedSignal(VI_CHN,VIDEO_TYPE,bool)),&mvideoControl,SLOT(onTestVideoAlarmSlot(VI_CHN,VIDEO_TYPE,bool)));
+    connect(&mTest,SIGNAL(videoAlarmEventChangedSignal(VI_CHN,VIDEO_TYPE,bool)),&mvideoControl,SLOT(onTestVideoAlarmSlot(VI_CHN,VIDEO_TYPE,bool)));
 //    connect(this,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&mvideoControl,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
 #endif
 
@@ -74,9 +75,13 @@ void Widget::InitWindows()
     mRegionManage = new RegionManage;
     connect(this, SIGNAL(regionSetSignal(int,QString)), mRegionManage, SLOT(onRegionSetSlot(int,QString)));
     connect(mRegionManage, SIGNAL(exitSignal()), this, SLOT(onShowQml()));
-
     mWindows->addWidget(mRegionManage);
 
+    mVideoPlayTestWin = new videoplaytest();
+    connect(mVideoPlayTestWin, SIGNAL(exitClicked()), this, SLOT(onShowQml()));
+    connect(&mTest,SIGNAL(setWinNumSignal(int)),mVideoPlayTestWin,SLOT(onSetWinNum(int)));
+    connect(&mTest,SIGNAL(videoPlayListSignal(VideoFileList &)),mVideoPlayTestWin,SLOT(onVideoDispListSlot(VideoFileList &)));
+    mWindows->addWidget(mVideoPlayTestWin);
 
 
 #ifndef LUNUX_WIN
@@ -146,6 +151,13 @@ void Widget::onShowQml()
 void Widget::onVideoWinShowSlot()
 {
     mWindows->setCurrentWidget(mVideoDisplay);
+    mWindows->show();
+    mQuickWidget->setHidden(true);
+}
+
+void Widget::onVideoTestWinShowSlot()
+{
+    mWindows->setCurrentWidget(mVideoPlayTestWin);
     mWindows->show();
     mQuickWidget->setHidden(true);
 }

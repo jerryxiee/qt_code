@@ -25,6 +25,7 @@ MyTableModel::MyTableModel(QObject *parent):
 
     connect(this,SIGNAL(refrushModelSignal()),this,SLOT(refrushModel()));
     connect(this,SIGNAL(filelistChangeSignal(VideoFileList &)),Widget::getVideoDisplayWin(),SLOT(onVideoDispListSlot(VideoFileList &)));
+//    connect(this,SIGNAL(setWinNumSignal(int)),Widget::getVideoDisplayWin(),SLOT(onSetWinNum(int)));
 }
 
 MyTableModel::~MyTableModel()
@@ -410,6 +411,7 @@ int MyTableModel::playVideoList(int type,int Chn,int filetype,QString starttime,
     uint sttime = QDateTime::fromString(starttime, "yyyy/MM/dd hh:mm:ss").toTime_t();
     uint entime = QDateTime::fromString(endtime, "yyyy/MM/dd hh:mm:ss").toTime_t();
 
+//    emit setWinNumSignal(1);
     switch (filetype) {
         case 0:
         {
@@ -429,8 +431,11 @@ int MyTableModel::playVideoList(int type,int Chn,int filetype,QString starttime,
     if(mVideoFileList.count() == 0){
         return 0;
     }
+//    m_data.clear();
+//    emit refrushModelSignal();
 
     emit filelistChangeSignal(mVideoFileList);
+    showVideoFileList(mVideoFileList);
 
     qDebug()<<"playVideoList end";
     return mVideoFileList.count();
@@ -489,6 +494,7 @@ void MyTableModel::oncellDoubleClickedSlot(int row,int column)
     Q_UNUSED(column)
     VideoFileList videolist;
 
+//    emit setWinNumSignal(1);
     videolist.append(mVideoFileList.at(row));
     mFileName = mVideoFileList.at(row).getFileName();
     emit filelistChangeSignal(videolist);
