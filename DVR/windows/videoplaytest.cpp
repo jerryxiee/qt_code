@@ -21,7 +21,7 @@ videoplaytest::~videoplaytest()
 {
 #ifndef LUNUX_WIN
     for (int i = 0;i < mVideoPlayList.count();i++) {
-        mVideoVo.SAMPLE_COMM_VO_UnBindVpss(0,mVideoPlayList.at(i).getVpssGrp(),mVideoPlayList.at(i).getVpssChn());
+        mVideoVo.SAMPLE_COMM_VO_UnBindVpss(i,mVideoPlayList.at(i).getVpssGrp(),mVideoPlayList.at(i).getVpssChn());
         mVideoPlayList[i].Stop_Vdec();
     }
 
@@ -65,7 +65,7 @@ void videoplaytest::onVideoExitClickSlot()
     emit exitClicked();
 #ifndef LUNUX_WIN
     for (int i = 0;i < mVideoPlayList.count();i++) {
-        mVideoVo.SAMPLE_COMM_VO_UnBindVpss(0,mVideoPlayList.at(i).getVpssGrp(),mVideoPlayList.at(i).getVpssChn());
+        mVideoVo.SAMPLE_COMM_VO_UnBindVpss(i,mVideoPlayList.at(i).getVpssGrp(),mVideoPlayList.at(i).getVpssChn());
         mVideoPlayList[i].Stop_Vdec();
     }
     mVideoPlayList.clear();
