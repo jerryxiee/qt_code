@@ -17,6 +17,10 @@
 #include <execinfo.h>
 using namespace std;
 
+#ifndef LUNUX_WIN
+#include "video/realtimestream.h"
+#endif
+
 void dump(int signo)
 {
     void *buffer[30] = {0};
@@ -126,7 +130,10 @@ int main(int argc, char *argv[])
 
 //        file.close();
 //        file1.close();
-
+#ifndef LUNUX_WIN
+    RealTimeStream realtest;
+    realtest.start();
+#endif
         ret = a.exec();
     } catch(exception &e) {
         qDebug()<<"QApplication::quit";

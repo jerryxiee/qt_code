@@ -11,7 +11,7 @@
 
 #define USE_TAB
 
-VideoPlay::VideoPlay(QObject *parent) : QThread(parent),m_pVdec(nullptr)
+VideoPlay::VideoPlay(QObject *parent) : QThread(parent),m_pVdec(nullptr),mDelay(0)
 {
     connect(&mVideoPlayList,SIGNAL(positionChanged(quint32)),this,SLOT(onPositionChanged(quint32)));
     connect(&mVideoPlayList,SIGNAL(durationChanged(quint32)),this,SLOT(onSetDuration(quint32)));
@@ -63,6 +63,7 @@ void VideoPlay::setFileList(VideoFileList &fileList)
     m_enType = fileList.first().getEnType();
     setPosition(0);
     mVideoPlayList.setPlaylist(fileList);
+    qDebug()<<"mPlayPts:"<<mPlayPts;
 
 
 }
@@ -123,7 +124,23 @@ int VideoPlay::getVpssChn() const
 {
     return VPSS_CHN0;
 }
+int VideoPlay::setVpssToUser(SIZE_S  stSize)
+{
+    if(!m_pVpss){
+        qDebug()<<"vpss not init";
+        return -1;
+    }
 
+    VPSS_CHN_MODE_S stVpssMode;
+
+    stVpssMode.enChnMode = VPSS_CHN_MODE_USER;
+    stVpssMode.u32Width = stSize.u32Width;
+    stVpssMode.u32Height = stSize.u32Height;
+    stVpssMode.enPixelFormat = SAMPLE_PIXEL_FORMAT;
+
+    return  m_pVpss->SAMPLE_COMM_VPSS_SetChnMod(0,VPSS_CHN0,&stVpssMode,8);
+
+}
 
 HI_BOOL VideoPlay::Start_Vdec()
 {
@@ -132,6 +149,7 @@ HI_BOOL VideoPlay::Start_Vdec()
     VB_CONF_S       stModVbConf;
     SIZE_S stRotateSize;
     VDEC_CHN_ATTR_S stVdecChnAttr;
+//    VPSS_CHN_MODE_S stVpssMode;
 
     memset(&stVdecChnAttr,0x0,sizeof(VDEC_CHN_ATTR_S));
 
@@ -176,6 +194,16 @@ HI_BOOL VideoPlay::Start_Vdec()
         goto END1;
     }
 
+//    stVpssMode.enChnMode = VPSS_CHN_MODE_USER;
+//    stVpssMode.u32Width = stSize.u32Width;
+//    stVpssMode.u32Height = stSize.u32Height;
+//    stVpssMode.enPixelFormat = SAMPLE_PIXEL_FORMAT;
+
+//    s32Ret = m_pVpss->SAMPLE_COMM_VPSS_SetChnMod(0,VPSS_CHN0,&stVpssMode,8);
+//    if (HI_SUCCESS != s32Ret)
+//    {
+//        SAMPLE_PRT("SetChnMod failed!\n");
+//    }
 
     s32Ret = m_pVdec->SAMPLE_COMM_VDEC_Start(1);
     if(s32Ret != HI_SUCCESS)
@@ -260,6 +288,11 @@ void VideoPlay::videoStart()
     play();
 }
 
+void VideoPlay::setDelay(int delay)
+{
+    mDelay = delay;
+}
+
 void VideoPlay::setRate(qreal rate)
 {
     if(rate < FLT_EPSILON){
@@ -281,6 +314,7 @@ void VideoPlay::onFrameRateChanged(uint framrate)
     if(framrate != 0){
         mPlayPts = 1000000/framrate;
     }
+    qDebug()<<"mPlayPts:"<<mPlayPts;
 }
 
 void VideoPlay::onSetDuration(quint32 duration)
@@ -368,7 +402,7 @@ void VideoPlay::run()
 //        qDebug()<<"send frame usec:"<<etv.tv_sec*1000000 + etv.tv_usec - (stv.tv_sec * 1000000 + stv.tv_usec);
 
         mFileMutex.unlock();
-       usleep(10000);
+       usleep(10000+mDelay);
     }
     fflush(stdout);
     qDebug()<<"exit paly thread";

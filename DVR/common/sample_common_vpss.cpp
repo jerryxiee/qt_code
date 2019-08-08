@@ -338,6 +338,7 @@ HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_SetChnMod(VPSS_GRP VpssGrpIndex, VPS
     s32Ret = HI_MPI_VPSS_GetChnMode(m_Grp_Tab[VpssGrpIndex],VpssChn,&stVpssMode);
     if(s32Ret != HI_SUCCESS)
     {
+        SAMPLE_PRT("GetChnMode failed with %#x!\n",s32Ret);
         return s32Ret;
     }
 
@@ -349,6 +350,7 @@ HI_S32 Sample_Common_Vpss::SAMPLE_COMM_VPSS_SetChnMod(VPSS_GRP VpssGrpIndex, VPS
     s32Ret = HI_MPI_VPSS_SetChnMode(m_Grp_Tab[VpssGrpIndex],VpssChn,&stVpssMode);
     if(s32Ret != HI_SUCCESS)
     {
+        SAMPLE_PRT("SetChnMode failed with %#x!\n",s32Ret);
         return s32Ret;
     }
     s32Ret = HI_MPI_VPSS_SetDepth(m_Grp_Tab[VpssGrpIndex],VpssChn,u32Depth);

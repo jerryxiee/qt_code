@@ -23,10 +23,12 @@ public:
 
     void Set_VdecAttr(VdecThreadParam &VdecAttr);
     HI_BOOL Start_Vdec();
+    int setVpssToUser(SIZE_S  stSize);
     bool Start_Vdec(int ChnNum);
     void Stop_Vdec();
     int getVpssGrp() const;
     int getVpssChn() const;
+    void setDelay(int delay);
 
     void setFileList(VideoFileList &fileList);
     void setCurrentposition(int percent);
@@ -69,6 +71,7 @@ private:
     PAYLOAD_TYPE_E m_enType;
     QMutex mFileMutex;
     int mPlayPts;
+    int mDelay;
     qreal mRate;
     VideoPlayList mVideoPlayList;
     quint32 mDuration;

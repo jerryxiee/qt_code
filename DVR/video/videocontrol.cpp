@@ -5,6 +5,8 @@
 #include <QSettings>
 #include <QMetaType>
 
+Sample_Common_Vpss *VideoControl::m_pVpss = nullptr;
+
 VideoControl::VideoControl(QObject *parent) : QObject(parent)
 {
     qDebug()<<"start videocontrol";
@@ -33,6 +35,30 @@ VideoControl::~VideoControl()
 
 }
 
+Sample_Common_Vpss *VideoControl::getVpss()
+{
+#ifndef LUNUX_WIN
+    return m_pVpss;
+#else
+    return nullptr;
+#endif
+}
+
+VPSS_GRP VideoControl::getVpssGrp(VI_CHN Chn)
+{
+#ifndef LUNUX_WIN
+    if(Chn >= m_pVpss->m_Grp_Num){
+        qDebug()<<"can not get vpss for Chn:"<<Chn;
+        return -1;
+    }
+
+    return m_pVpss->m_Grp_Tab[Chn];
+#else
+    return -1;
+#endif
+
+}
+
 HI_BOOL VideoControl::videoStart()
 {
 
@@ -40,6 +66,8 @@ HI_BOOL VideoControl::videoStart()
 #ifndef LUNUX_WIN
     SIZE_S stSize = {1280,720};
     VPSS_GRP_ATTR_S stGrpAttr;
+    VPSS_CHN_MODE_S stVpssMode;
+    HI_S32 s32Ret;
 
 
     memset(&stGrpAttr,0,sizeof(VPSS_GRP_ATTR_S));
@@ -63,6 +91,17 @@ HI_BOOL VideoControl::videoStart()
     for (int i = 0;i < vio.m_ViChnCnt;i++) {
         m_Record.startRecordChn(i,VIDEO_ENCODING_MODE_PAL);
         m_VideoDetect.createMoveDetect(i,i*4,400,4);
+
+        stVpssMode.enChnMode = VPSS_CHN_MODE_USER;
+        stVpssMode.u32Width = stSize.u32Width;
+        stVpssMode.u32Height = stSize.u32Height;
+        stVpssMode.enPixelFormat = SAMPLE_PIXEL_FORMAT;
+        s32Ret = m_pVpss->SAMPLE_COMM_VPSS_SetChnMod(i,VPSS_CHN1,&stVpssMode,6);
+        if (HI_SUCCESS != s32Ret)
+        {
+            SAMPLE_PRT("SetChnMod failed!\n");
+        }
+
     }
     mTimer->start(TIMEOUT);
     vio.Vo_Start();

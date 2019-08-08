@@ -198,7 +198,7 @@ HI_BOOL Vio::Vo_Stop(VO_CHN Vo_Chn)
 
     if(Vo_Chn >= 0){
         m_Vo.SAMPLE_COMM_VO_UnBindVpss(Vo_Chn,m_Vpss.m_Grp_Tab[Vo_Chn],m_VoBindVpss);
-        return m_Vo.SAMPLE_COMM_VO_StopChn(Vo_Chn) > 0 ? HI_TRUE:HI_TRUE;
+        return m_Vo.SAMPLE_COMM_VO_StopChn(Vo_Chn) < 0 ? HI_FALSE:HI_TRUE;
     }
     for(i = 0; i < m_ViChnCnt; i++){
         m_Vo.SAMPLE_COMM_VO_UnBindVpss(i,m_Vpss.m_Grp_Tab[i],m_VoBindVpss);

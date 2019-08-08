@@ -18,7 +18,7 @@
 #include <QDir>
 
 VO_DEV Sample_Common_Sys::m_FbVoDev = SAMPLE_VO_DEV_DHD0;
-VO_DEV Sample_Common_Sys::m_FbVoLayer = 0;
+VO_LAYER Sample_Common_Sys::m_FbVoLayer = 0;
 VO_PUB_ATTR_S Sample_Common_Sys::m_stPubAttr = {0};
 
 
@@ -527,11 +527,11 @@ HI_S32 Sample_Common_Sys::SAMPLE_COMM_SYS_Init(VB_CONF_S *pstVbConf)
     stVbConf.u32MaxPoolCnt = 128;
     stVbConf.astCommPool[0].u32BlkSize = CEILING_2_POWER(u32PicWidth,SAMPLE_SYS_ALIGN_WIDTH)\
                                                 * CEILING_2_POWER(u32PicHeight,SAMPLE_SYS_ALIGN_WIDTH) *2;;
-    stVbConf.astCommPool[0].u32BlkCnt =  16;
+    stVbConf.astCommPool[0].u32BlkCnt =  32;
 
     stVbConf.astCommPool[1].u32BlkSize = SAMPLE_COMM_SYS_CalcPicVbBlkSize(VIDEO_ENCODING_MODE_NTSC,\
                                                                           PIC_HD1080, SAMPLE_PIXEL_FORMAT, SAMPLE_SYS_ALIGN_WIDTH,COMPRESS_MODE_SEG);
-    stVbConf.astCommPool[1].u32BlkCnt = 64;
+    stVbConf.astCommPool[1].u32BlkCnt = 128;
 
 
     HI_MPI_SYS_Exit();

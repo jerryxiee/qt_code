@@ -27,6 +27,9 @@ public:
     HI_BOOL videoStart();
 
 
+    static Sample_Common_Vpss *getVpss();
+    static VPSS_GRP getVpssGrp(VI_CHN Chn);    //获取vi通道对应的vpss组
+
 
 signals:
     void vencAttrChanged(VI_CHN Chn,HI_U32 stream);
@@ -54,7 +57,7 @@ private:
 #ifndef LUNUX_WIN
     VIDEO_NORM_E m_enNorm;
     Vio vio;
-    Sample_Common_Vpss *m_pVpss;
+    static Sample_Common_Vpss *m_pVpss;
     Record m_Record;
     VideoDetect m_VideoDetect;
 #endif

@@ -116,6 +116,12 @@ HI_S32 Record::startRecordChn(VI_CHN ViChnCnt, PIC_SIZE_E enSize, SAMPLE_RC_E en
 {
 
     HI_S32 s32Ret;
+
+    if(m_Vpss.m_Grp_Num == 0){
+        SAMPLE_PRT("vpss not init!\n");
+        return HI_FAILURE;
+    }
+
 //    qDebug()<<"start venc chn "<<ViChnCnt;
     m_pVenc[ViChnCnt] = new Sample_Common_Venc();
     m_pVenc[ViChnCnt]->SAMPLE_COMM_VENC_SetAttr(m_enType,m_enNorm, enSize, enRcMode,u32BitRate,frmRate,u32Profile);
@@ -123,11 +129,6 @@ HI_S32 Record::startRecordChn(VI_CHN ViChnCnt, PIC_SIZE_E enSize, SAMPLE_RC_E en
     if (HI_SUCCESS != s32Ret)
     {
         SAMPLE_PRT("Start Venc failed!\n");
-        goto END_1;
-    }
-
-    if(m_Vpss.m_Grp_Num == 0){
-        SAMPLE_PRT("vpss not init!\n");
         goto END_1;
     }
 
@@ -236,9 +237,12 @@ void Record::onViStatusChangedSlot(VI_CHN Chn,HI_BOOL status)
 void Record::onVencAttrChangedSlot(VI_CHN Chn,HI_U32 stream)
 {
     qDebug("%s:%d",__FUNCTION__,__LINE__);
-    setRecordAttr(Chn,m_VencSet->m_Vdec_Param[stream][Chn].mvencSize,m_VencSet->m_Vdec_Param[stream][Chn].menRcMode,
-                  m_VencSet->m_Vdec_Param[stream][Chn].mu32BitRate,m_VencSet->m_Vdec_Param[stream][Chn].mfr32DstFrmRate,
-                      m_VencSet->m_Vdec_Param[stream][Chn].mu32Profile);
+    if(stream == 0){
+        setRecordAttr(Chn,m_VencSet->m_Vdec_Param[stream][Chn].mvencSize,m_VencSet->m_Vdec_Param[stream][Chn].menRcMode,
+                      m_VencSet->m_Vdec_Param[stream][Chn].mu32BitRate,m_VencSet->m_Vdec_Param[stream][Chn].mfr32DstFrmRate,
+                          m_VencSet->m_Vdec_Param[stream][Chn].mu32Profile);
+    }
+
 }
 
 int Record::checkVideoAlarmList(VI_CHN Chn,VIDEO_TYPE type)

@@ -70,7 +70,7 @@ private:
     const HI_CHAR *IO_FILE = ".io_alarm";
     const HI_CHAR *MOVED_FILE = ".move_alarm";
     const HI_CHAR *VENC_PATH = "/mnt/sda1/venc";
-    const HI_U32 MAXSIZE = 1024*1024*20;
+    const HI_U32 MAXSIZE = 1024*1024*256;
     const VPSS_CHN m_VencBindVpss = VPSS_CHN0;   //主码流绑定到通道0
 
     typedef struct{
