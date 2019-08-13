@@ -6,6 +6,7 @@
 #include "GroupsockHelper.hh"
 #include "video/videostreampro.h"
 
+#define CACHELEN 102400
 
 class H264VideoSource:public FramedSource
 {
@@ -31,6 +32,9 @@ private:
     int mChn;
     VideoStreamPro mVideoStreamPro;
     uint mCurFrameSize;
+    char *mCache;
+    int mCacheLen;
+    int mPos;
 };
 
 #endif // H264VIDEOSOURCE_H
