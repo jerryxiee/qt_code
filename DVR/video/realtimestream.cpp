@@ -1,5 +1,6 @@
 #include "realtimestream.h"
 #include <QDebug>
+#include "../live555/mytest/h264mediasubsession.h"
 
 
 RealTimeStream::RealTimeStream(QObject *parent) : QThread(parent)
@@ -10,6 +11,7 @@ RealTimeStream::RealTimeStream(QObject *parent) : QThread(parent)
 RealTimeStream::~RealTimeStream()
 {
     mRun = false;
+    terminate();
     wait();
     qDebug()<<"exit RealTimeStream thread";
 }
@@ -17,6 +19,7 @@ RealTimeStream::~RealTimeStream()
 
 void RealTimeStream::run()
 {
+#if 0
     HI_S32 i = 0;
     int maxFd;
     struct timeval TimeoutVal;
@@ -160,4 +163,64 @@ void RealTimeStream::run()
     fclose(vencfile);
 
     mStreamPro.stopVenc(ViChn);
+
+#endif
+
+    UsageEnvironment* env;
+//    H264VideoStreamFramer* videoSource;
+//    RTPSink* videoSink;
+
+    TaskScheduler* scheduler = BasicTaskScheduler::createNew();
+    env = BasicUsageEnvironment::createNew(*scheduler);
+
+    UserAuthenticationDatabase* authDB = nullptr;
+  #ifdef ACCESS_CONTROL
+    // To implement client access control to the RTSP server, do the following:
+    authDB = new UserAuthenticationDatabase;
+    authDB->addUserRecord("username1", "password1"); // replace these with real strings
+    // Repeat the above with each <username>, <password> that you wish to allow
+    // access to the server.
+  #endif
+
+    // Create the RTSP server:
+    RTSPServer* rtspServer = RTSPServer::createNew(*env, 8554, authDB);
+    if (rtspServer == nullptr) {
+      *env << "Failed to create RTSP server: " << env->getResultMsg() << "\n";
+      exit(1);
+    }
+
+    char const* descriptionString
+      = "Session streamed by \"testOnDemandRTSPServer\"";
+
+    OutPacketBuffer::maxSize = 200000;
+    // A H.264 video elementary stream:
+    {
+      char const* streamName = "h264ESVideoTest";
+      char const* inputFileName = "test.264";
+      ServerMediaSession* sms
+        = ServerMediaSession::createNew(*env, streamName, streamName,
+                        descriptionString);
+      sms->addSubsession(H264MediaSubsession::createNew(*env,0,false));
+//      sms->addSubsession(H264VideoFileServerMediaSubsession
+//                 ::createNew(*env, inputFileName, false));
+      rtspServer->addServerMediaSession(sms);
+
+      char* url = rtspServer->rtspURL(sms);
+      UsageEnvironment& env = rtspServer->envir();
+      env << "\n\"" << streamName << "\" stream, from the file \""
+          << inputFileName << "\"\n";
+      env << "Play this stream using the URL \"" << url << "\"\n";
+      delete[] url;
+    }
+
+    if (rtspServer->setUpTunnelingOverHTTP(80) || rtspServer->setUpTunnelingOverHTTP(8000) || rtspServer->setUpTunnelingOverHTTP(8080)) {
+      *env << "\n(We use port " << rtspServer->httpServerPortNum() << " for optional RTSP-over-HTTP tunneling.)\n";
+    } else {
+      *env << "\n(RTSP-over-HTTP tunneling is not available.)\n";
+    }
+
+
+    env->taskScheduler().doEventLoop(); // does not return
+
+
 }

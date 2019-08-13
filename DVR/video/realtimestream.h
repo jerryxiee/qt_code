@@ -5,6 +5,9 @@
 #include <QMutex>
 #include <QList>
 #include "video/videostreampro.h"
+#include <liveMedia.hh>
+#include <BasicUsageEnvironment.hh>
+#include <GroupsockHelper.hh>
 
 class RealTimeStream : public QThread
 {

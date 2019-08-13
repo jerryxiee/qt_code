@@ -22,6 +22,7 @@ public:
     int getVencChn() const;
     bool startVenc(int Chn,SEND_STREAM_T type);
     bool stopVenc(int Chn);
+    bool isStop() const {return !mStart;}
 
 private:
     bool startLocalStream(VO_DEV VoDev,VO_LAYER VoLayer,int startChn);
@@ -49,6 +50,7 @@ private:
     QList<uint>mEndTime;
     VIDEO_TYPE mVideoType;
     VideoSearch mVideoSearch;
+    bool mStart;
 
 
 

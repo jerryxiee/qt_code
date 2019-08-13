@@ -4,7 +4,7 @@
 VencSet *VideoStreamPro::mVencSet = Settings::getVencIni();
 
 VideoStreamPro::VideoStreamPro(QObject *parent) : QObject(parent),mStreamType(TYPENUM),
-    mpVenc(nullptr),mVideoType(VIDEO_NORMAL)
+    mpVenc(nullptr),mVideoType(VIDEO_NORMAL),mStart(false)
 
 {
 
@@ -283,6 +283,7 @@ bool VideoStreamPro::startVenc(int Chn,SEND_STREAM_T type)
 
     }
 
+    mStart = true;
     return true;
 
 END_1:
@@ -294,6 +295,11 @@ END_1:
 bool VideoStreamPro::stopVenc(int Chn)
 {
     int i;
+
+    if(!mStart){
+        qDebug()<<"have been stop";
+        return true;
+    }
 
     mpVenc->SAMPLE_COMM_VENC_Stop();
 
@@ -346,5 +352,6 @@ bool VideoStreamPro::stopVenc(int Chn)
     if(mpVenc)
         delete mpVenc;
     mpVenc = nullptr;
+    mStart = false;
     return true;
 }
