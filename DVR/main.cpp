@@ -15,6 +15,10 @@
 #include <iostream>
 #include <exception>
 #include <execinfo.h>
+
+#ifndef LUNUX_WIN
+#include "test/venctomp4test.h"
+#endif
 using namespace std;
 
 #ifndef LUNUX_WIN
@@ -131,8 +135,10 @@ int main(int argc, char *argv[])
 //        file.close();
 //        file1.close();
 #ifndef LUNUX_WIN
-    RealTimeStream realtest;
-    realtest.start();
+//    RealTimeStream realtest;
+//    realtest.start();
+    VencToMp4Test mp4test;
+    mp4test.start();
 #endif
         ret = a.exec();
     } catch(exception &e) {

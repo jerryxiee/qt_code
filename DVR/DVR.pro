@@ -483,7 +483,8 @@ INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
                 /home/abhw/git/qt_code/DVR/live555/BasicUsageEnvironment/include \
                 /home/abhw/git/qt_code/DVR/live555/groupsock/include \
                 /home/abhw/git/qt_code/DVR/live555/liveMedia/include \
-                /home/abhw/git/qt_code/DVR/live555/UsageEnvironment/include
+                /home/abhw/git/qt_code/DVR/live555/UsageEnvironment/include \
+                /home/abhw/libdir/ffmpeg-hisi/include
 
 
 
@@ -506,7 +507,8 @@ SOURCES +=common/sample_common_sys.cpp \
             video/videoplaylist.cpp \
             video/videolink.cpp \
             video/realtimestream.cpp \
-            video/videostreampro.cpp
+            video/videostreampro.cpp \
+            test/venctomp4test.cpp
 
 HEADERS +=common/loadbmp.h \
             common/sample_common_sys.h \
@@ -524,7 +526,8 @@ HEADERS +=common/loadbmp.h \
             video/videoplaylist.h \
             video/videolink.h \
             video/realtimestream.h \
-            video/videostreampro.h
+            video/videostreampro.h \
+            test/venctomp4test.h
 
 
 LIBS += -lpthread
@@ -544,7 +547,14 @@ LIBS += /usr/lib/libmpi.so \
         /home/abhw/nfsroot/lib/install/lib/libfreetype.so \
         /home/abhw/nfsroot/lib/install/lib/libfreetype.so.6 \
         /home/abhw/nfsroot/lib/install/lib/libSDL2_ttf-2.0.so.0 \
-        /home/abhw/nfsroot/lib/install/lib/libSDL2-2.0.so.0
+        /home/abhw/nfsroot/lib/install/lib/libSDL2-2.0.so.0  \
+        /home/abhw/libdir/ffmpeg-hisi/lib/libavformat.so.58 \
+        /home/abhw/libdir/ffmpeg-hisi/lib/libavcodec.so \
+        /home/abhw/libdir/ffmpeg-hisi/lib/libavdevice.so \
+        /home/abhw/libdir/ffmpeg-hisi/lib/libavfilter.so \
+        /home/abhw/libdir/ffmpeg-hisi/lib/libavutil.so \
+        /home/abhw/libdir/ffmpeg-hisi/lib/libswscale.so \
+        /home/abhw/libdir/ffmpeg-hisi/lib/libswresample.so
 
     message("arm platform")
 
