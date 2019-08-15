@@ -503,6 +503,8 @@ SOURCES +=common/sample_common_sys.cpp \
             video/videoplay.cpp \
             video/regionctr.cpp \
             video/record.cpp \
+            video/mp4file.cpp \
+            video/recordtomp4.cpp \
             video/videodetect.cpp \
             video/videoplaylist.cpp \
             video/videolink.cpp \
@@ -522,6 +524,8 @@ HEADERS +=common/loadbmp.h \
             video/videoplay.h \
             video/regionctr.h \
             video/record.h \
+            video/mp4file.h \
+            video/recordtomp4.h \
             video/videodetect.h \
             video/videoplaylist.h \
             video/videolink.h \

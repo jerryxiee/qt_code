@@ -5,6 +5,7 @@
 #include <QMutex>
 #include <QList>
 #include "video/videostreampro.h"
+#include "../video/mp4file.h"
 
 extern "C"
 {
@@ -46,6 +47,7 @@ private:
     int mPtsInc;
     int mVi;
     unsigned char *mIDRFramBuf;
+    MP4File mMp4File;
 };
 
 #endif // VENCTOMP4TEST_H

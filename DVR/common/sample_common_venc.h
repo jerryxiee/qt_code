@@ -28,6 +28,7 @@ public:
     HI_S32 SAMPLE_COMM_VENC_Stop();
     HI_S32 SAMPLE_COMM_VENC_StopRecv();
     HI_S32 SAMPLE_COMM_VENC_StartRecv();
+    static bool isIDRFrame(VENC_STREAM_S *pstStream,PAYLOAD_TYPE_E enType);
 
     static HI_S32 SAMPLE_COMM_VENC_GetFilePostfix(PAYLOAD_TYPE_E enPayload, char* szFilePostfix);
     static HI_S32 SAMPLE_COMM_VENC_SaveStream(PAYLOAD_TYPE_E enType, FILE* pFd, VENC_STREAM_S* pstStream);

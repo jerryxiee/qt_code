@@ -1694,6 +1694,40 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_StopRecv()
     return s32Ret;
 
 }
+
+bool Sample_Common_Venc::isIDRFrame(VENC_STREAM_S *pstStream,PAYLOAD_TYPE_E enType)
+{
+    switch (enType) {
+        case PT_H264:{
+            switch(pstStream->pstPack[0].DataType.enH264EType)
+            {
+                case H264E_NALU_IDRSLICE:
+                case H264E_NALU_ISLICE:
+                case H264E_NALU_SPS:
+                case H264E_NALU_PPS:
+                    return true;
+                default:
+                    break;
+            }
+        }
+        case PT_H265:{
+            switch(pstStream->pstPack[0].DataType.enH265EType)
+            {
+                case H265E_NALU_IDRSLICE:
+                case H265E_NALU_ISLICE:
+                case H265E_NALU_SPS:
+                case H265E_NALU_PPS:
+                case H265E_NALU_VPS:
+                    return true;
+                default:
+                    break;
+            }
+        }
+    }
+
+    return false;
+}
+
 /******************************************************************************
 * funciton : Stop venc ( stream mode -- H264, MJPEG )
 ******************************************************************************/

@@ -109,7 +109,7 @@ void VencToMp4Test::HI_PDT_CloseMp4(void)
     mFirstIDRFind = false;
 }
 
-void VencToMp4Test::HI_PDT_WriteVideo(VENC_STREAM_S *pstStream,PAYLOAD_TYPE_E	enType)
+void VencToMp4Test::HI_PDT_WriteVideo(VENC_STREAM_S *pstStream,PAYLOAD_TYPE_E enType)
 {
     unsigned int i=0;
     unsigned char* pPackVirtAddr = nullptr;
@@ -354,6 +354,10 @@ void VencToMp4Test::run()
     int ViChn = 0;
     QList<uint>start;
     QList<uint>end;
+    unsigned char* pPackVirtAddr = nullptr;
+    unsigned int u32PackLen = 0;
+    unsigned int u32PackOffset = 0;
+    bool isIDR = false;
 
     mRun = true;
 
@@ -362,8 +366,9 @@ void VencToMp4Test::run()
 //        qDebug()<<"open file error";
 //        return;
 //    }
+    QSize size(1280,720);
 
-    if(HI_PDT_CreateMp4("record.mp4") < 0){
+    if(mMp4File.createMP4File("record.mp4",25,size) < 0){
         printf("create mp4 file error\n");
         return;
     }
@@ -467,7 +472,30 @@ void VencToMp4Test::run()
 //                        break;
 //                    }
 
-                    HI_PDT_WriteVideo(&stStream,PAYLOAD_TYPE);
+                    if(stStream.u32PackCount == 1){
+                        pPackVirtAddr = stStream.pstPack[0].pu8Addr + stStream.pstPack[0].u32Offset;
+                        u32PackLen = stStream.pstPack[0].u32Len - stStream.pstPack[0].u32Offset;
+//                        u32PackOffset = stStream.pstPack[0].u32Offset;
+                        isIDR = Sample_Common_Venc::isIDRFrame(&stStream,PAYLOAD_TYPE);
+
+                    }else {
+                        for (i = 0 ; i < stStream.u32PackCount; i++)
+                        {
+                            isIDR = Sample_Common_Venc::isIDRFrame(&stStream,PAYLOAD_TYPE);
+
+                            memcpy(&mIDRFramBuf[u32PackLen],stStream.pstPack[i].pu8Addr+stStream.pstPack[i].u32Offset,
+                                   stStream.pstPack[i].u32Len - stStream.pstPack[i].u32Offset);
+
+                            u32PackLen += stStream.pstPack[i].u32Len - stStream.pstPack[i].u32Offset;
+
+
+                        }
+                        pPackVirtAddr = mIDRFramBuf;
+
+                    }
+                    mMp4File.writeFrame(pPackVirtAddr,u32PackLen,isIDR);
+
+//                    HI_PDT_WriteVideo(&stStream,PAYLOAD_TYPE);
 
                     /*******************************************************
                      step 2.6 : release stream
@@ -491,7 +519,7 @@ void VencToMp4Test::run()
     }
 
 //    fclose(vencfile);
-    HI_PDT_CloseMp4();
+    mMp4File.closeMO4File();
 
     mStreamPro.stopVenc(ViChn);
 
