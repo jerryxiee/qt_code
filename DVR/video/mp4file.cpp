@@ -7,6 +7,13 @@ MP4File::MP4File():mAVFmtCtx(nullptr),mVideoIndex(-1),mAudioIndex(-1),
 
 }
 
+MP4File::~MP4File()
+{
+    if(mAVFmtCtx){
+        closeMO4File();
+    }
+
+}
 
 int MP4File::addStream(enum AVCodecID codec_id)
 {
@@ -75,6 +82,40 @@ int MP4File::addVideoStream(int framerate,QSize &size,int bitrate)
     }
 
     return 0;
+}
+
+void MP4File::printinfo()
+{
+    if(!mAVFmtCtx)
+        return;
+    AVStream *pAVStream = mAVFmtCtx->streams[mVideoIndex];
+    AVPacket pkt = mAVFmtCtx->streams[mVideoIndex]->attached_pic;
+
+    qDebug()<<"pkt.dts:"<<pkt.dts<<" pkt.pts:"<<pkt.pts<<endl
+           <<"pkt.size:"<<pkt.size<<" pkt.duration:"<<pkt.duration<<endl
+          <<"cur_dts:"<<pAVStream->cur_dts<<" avStream.duration:"<<pAVStream->duration<<endl
+            <<"nb_frames:"<<pAVStream->nb_frames<<" start_time"<<pAVStream->start_time<<endl
+              <<"r_frame_rate.num:"<<pAVStream->r_frame_rate.num<<" r_frame_rate.den:"<<pAVStream->r_frame_rate.den;;
+
+//    qDebug()<<"AVStream info"<<endl
+//           <<"index:"<<pAVStream->index<<" duration:"<<pAVStream->duration<<endl
+//          <<"nb_frames:"<<pAVStream->nb_frames<<" start_time"<<pAVStream->start_time<<endl
+//         <<"r_frame_rate.num:"<<pAVStream->r_frame_rate.num<<" r_frame_rate.den:"<<pAVStream->r_frame_rate.den;
+//    qDebug()<<"max_analyze_duration:"<<mAVFmtCtx->max_analyze_duration<<" probesize:"<<mAVFmtCtx->probesize<<endl
+//           <<"codec.base:"<<pAVStream->codec->time_base.num<<" "<<pAVStream->codec->time_base.den;
+
+
+}
+
+const char *MP4File::getMP4FileName()
+{
+    if(!mAVFmtCtx){
+        qDebug()<<"get file name error!";
+        return nullptr;
+    }
+
+    return mAVFmtCtx->filename;
+
 }
 
 bool MP4File::createMP4File(char *filename,int framerate,QSize &size,int bitrate,bool enAudio)
@@ -168,7 +209,35 @@ void MP4File::closeMO4File()
     mVideoIndex = -1;
     mAudioIndex = -1;
     mFirstIDRFrame = false;
+    mPtsInc = 0;
 
+}
+
+bool MP4File::isOpen()
+{
+    if(mAVFmtCtx)
+        return true;
+
+    return false;
+}
+
+//uint MP4File::getFileSize()
+//{
+//    if(mAVFmtCtx)
+//        return mAVFmtCtx->packet_size;
+
+//    return 0;
+//}
+
+int64_t MP4File::getDuration()
+{
+    if(mAVFmtCtx){
+        AVStream *pAVStream = mAVFmtCtx->streams[mVideoIndex];
+        if(pAVStream->codec->time_base.den > 0)
+            return pAVStream->nb_frames /pAVStream->codec->time_base.den ;
+    }
+
+    return 0;
 }
 
 void MP4File::writeFrame(unsigned char *buf,int len,bool isIDR)

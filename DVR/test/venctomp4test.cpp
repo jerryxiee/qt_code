@@ -373,6 +373,7 @@ void VencToMp4Test::run()
         return;
     }
 
+    qDebug("create file[%s] sucess\n",mMp4File.getMP4FileName());
     start.append(0);
     start.append(0);
     start.append(0);
@@ -494,6 +495,8 @@ void VencToMp4Test::run()
 
                     }
                     mMp4File.writeFrame(pPackVirtAddr,u32PackLen,isIDR);
+
+//                    mMp4File.printinfo();
 
 //                    HI_PDT_WriteVideo(&stStream,PAYLOAD_TYPE);
 

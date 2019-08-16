@@ -14,6 +14,7 @@
 #include <video/videoplay.h>
 #include "record.h"
 #include "videodetect.h"
+#include "recordtomp4.h"
 #endif
 
 class VideoControl : public QObject
@@ -58,7 +59,8 @@ private:
     VIDEO_NORM_E m_enNorm;
     Vio vio;
     static Sample_Common_Vpss *m_pVpss;
-    Record m_Record;
+//    Record m_Record;
+    RecordToMP4 *mRecordMp4;
     VideoDetect m_VideoDetect;
 #endif
 

@@ -237,7 +237,7 @@ HI_S32 VideoDetect::VdaStop(VDA_CHN VdaChn)
 
 void VideoDetect::onViStatusChangedSlot(VI_CHN index ,HI_BOOL enable)
 {
-    qDebug()<<"vda status change"<<index<<" "<<enable;
+    qDebug()<<"vda status change"<<index<<" "<<enable<<" mVdaChnList.count:"<<mVdaChnList.count();
     if(enable){
         VdaStart(mVdaChnList[index].VdaChn);
     }else {
@@ -387,8 +387,8 @@ void VideoDetect::run()
     bool ignore_flag[8] = {false};
     bool premovestart[8] = {false};
     bool movestart[8] = {false};
-    FILE *fp = fopen("moveobj","wb");
-    FILE *fp1 = fopen("movesad","wb");
+//    FILE *fp = fopen("moveobj","wb");
+//    FILE *fp1 = fopen("movesad","wb");
     HI_U32 movestarttime,moveendtime;
     int enablenum = 0;
 
@@ -498,8 +498,8 @@ void VideoDetect::run()
 
     }
 #endif
-    fclose(fp);
-    fclose(fp1);
+//    fclose(fp);
+//    fclose(fp1);
     for (i = 0;i < mVdaChnList.count();i++) {
         VdaStop(mVdaChnList[i].VdaChn);
     }

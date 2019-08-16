@@ -14,7 +14,7 @@ VideoControl::VideoControl(QObject *parent) : QObject(parent)
 
 #ifndef LUNUX_WIN
     connect(mTimer,SIGNAL(timeout()),&vio,SLOT(onTimeHander()));
-    connect(mTimer,SIGNAL(timeout()),&m_Record,SLOT(onTimeHander()));
+//    connect(mTimer,SIGNAL(timeout()),&m_Record,SLOT(onTimeHander()));   //定时任务
 #endif
 
     qRegisterMetaType<VI_CHN>("VI_CHN");
@@ -26,7 +26,8 @@ VideoControl::VideoControl(QObject *parent) : QObject(parent)
 VideoControl::~VideoControl()
 {
 #ifndef LUNUX_WIN
-    m_Record.RecordExit();
+//    m_Record.RecordExit();
+    mRecordMp4->RecordExit();
     m_VideoDetect.VideoDetectExit();
     m_pVpss->SAMPLE_COMM_VPSS_Stop();
 //    delete m_pVpss;
@@ -87,9 +88,11 @@ HI_BOOL VideoControl::videoStart()
 
     vio.Vi_Start(VIDEO_ENCODING_MODE_PAL,m_pVpss);
 
-    m_Record.setRecordSrc(m_pVpss);
+//    m_Record.setRecordSrc(m_pVpss);
+    mRecordMp4 = new RecordToMP4(*m_pVpss);
     for (int i = 0;i < vio.m_ViChnCnt;i++) {
-        m_Record.startRecordChn(i,VIDEO_ENCODING_MODE_PAL);
+//        m_Record.startRecordChn(i,VIDEO_ENCODING_MODE_PAL);
+        mRecordMp4->startRecordChn(i,VIDEO_ENCODING_MODE_PAL);
         m_VideoDetect.createMoveDetect(i,i*4,400,4);
 
         stVpssMode.enChnMode = VPSS_CHN_MODE_USER;
@@ -106,12 +109,15 @@ HI_BOOL VideoControl::videoStart()
     mTimer->start(TIMEOUT);
     vio.Vo_Start();
 
-    connect(&vio,SIGNAL(VistatusChanged(VI_CHN,HI_BOOL)),&m_Record,SLOT(onViStatusChangedSlot(VI_CHN,HI_BOOL)));
+//    connect(&vio,SIGNAL(VistatusChanged(VI_CHN,HI_BOOL)),&m_Record,SLOT(onViStatusChangedSlot(VI_CHN,HI_BOOL)));
+    connect(mTimer,SIGNAL(timeout()),mRecordMp4,SLOT(onTimeHander()));
+    connect(&vio,SIGNAL(VistatusChanged(VI_CHN,HI_BOOL)),mRecordMp4,SLOT(onViStatusChangedSlot(VI_CHN,HI_BOOL)));
     connect(this,SIGNAL(timePosChanged(int,QPoint)),&vio,SLOT(onMoveTimePosChanged(int,QPoint)));
     connect(this,SIGNAL(namePosChanged(int,QPoint)),&vio,SLOT(onMoveNamePosChanged(int,QPoint)));
     connect(&vio,SIGNAL(VistatusChanged(VI_CHN,HI_BOOL)),&m_VideoDetect,SLOT(onViStatusChangedSlot(VI_CHN,HI_BOOL)));
-    connect(&m_VideoDetect,SIGNAL(videoMoveDetectChangeSignal(VI_CHN,VIDEO_TYPE,bool)),&m_Record,SLOT(onVideoAlarmEventChangedSlot(VI_CHN,VIDEO_TYPE,bool)));
-
+    //移动检测录像
+//    connect(&m_VideoDetect,SIGNAL(videoMoveDetectChangeSignal(VI_CHN,VIDEO_TYPE,bool)),&m_Record,SLOT(onVideoAlarmEventChangedSlot(VI_CHN,VIDEO_TYPE,bool)));
+    connect(&m_VideoDetect,SIGNAL(videoMoveDetectChangeSignal(VI_CHN,VIDEO_TYPE,bool)),mRecordMp4,SLOT(onVideoAlarmEventChangedSlot(VI_CHN,VIDEO_TYPE,bool)));
 
 #endif
     return HI_TRUE;
@@ -169,6 +175,7 @@ void VideoControl::onRgnOverlayShowSlot(int Chn,bool enable)
 void VideoControl::onTestVideoAlarmSlot(VI_CHN Chn,VIDEO_TYPE type,bool change)
 {
 #ifndef LUNUX_WIN
-    m_Record.onVideoAlarmEventChangedSlot(Chn,type,change);
+    //报警测试
+//    m_Record.onVideoAlarmEventChangedSlot(Chn,type,change);
 #endif
 }
