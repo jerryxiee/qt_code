@@ -9,6 +9,9 @@
 #include "settings/settings.h"
 #include "common/systemlog.h"
 #include "mp4file.h"
+#include "common/systemlog.h"
+
+#define BUFLEN 1024*1024
 
 class RecordToMP4 : public QThread
 {

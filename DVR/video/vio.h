@@ -74,7 +74,7 @@ public:
     Sample_Common_Vpss m_Vpss;
 
 private:
-    const HI_U32 LUMCONST = 14745600-10;
+    const HI_U32 LUMCONST = 14745600;
     const RGN_HANDLE TIMEHAND = 0;
     const RGN_HANDLE NAMEHAND = 1;
 

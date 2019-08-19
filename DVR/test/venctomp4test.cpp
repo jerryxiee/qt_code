@@ -3,7 +3,7 @@
 VencToMp4Test::VencToMp4Test(QObject *parent) :
     QThread(parent),mOutFmt_Ctx(nullptr),mFirstIDRFind(false),mPtsInc(0),mVi(-1)
 {
-    mIDRFramBuf = (unsigned char *)malloc(100*1024);
+    mIDRFramBuf = (unsigned char *)malloc(1024*1024);
     if(!mIDRFramBuf){
         printf("malloc error\n");
     }
@@ -488,6 +488,10 @@ void VencToMp4Test::run()
                                    stStream.pstPack[i].u32Len - stStream.pstPack[i].u32Offset);
 
                             u32PackLen += stStream.pstPack[i].u32Len - stStream.pstPack[i].u32Offset;
+                            if(u32PackLen > 1024*1024){
+                                qDebug()<<"large than bufsize:"<<u32PackLen;
+                                break;
+                            }
 
 
                         }
