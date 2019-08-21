@@ -13,10 +13,23 @@ static SystemLog *Syslog = SystemLog::getSystemLog();
 RecordToMP4::RecordToMP4(Sample_Common_Vpss &Vpss, QObject *parent) : QThread(parent),mIDRFramBuf(nullptr),
     mVpss(Vpss),mMaxFd(0)
 {
+    char venc_path_name[VIDEO_FILENAME_SIZE];
+
     QDir dir(ALARM_FILE_PATH);
     if(!dir.exists()){
         if(!dir.mkpath(ALARM_FILE_PATH)){
             SAMPLE_PRT("mkpath %s failed\n",ALARM_FILE_PATH);
+        }
+    }
+
+    for (int i = 0;i < VIDEO_MAX_NUM;i++) {
+        sprintf(venc_path_name,"%s/channel%d/",VENC_PATH,i);
+        QDir recorddir(venc_path_name);
+        if(!recorddir.exists()){
+            if(!recorddir.mkpath(venc_path_name)){
+                SAMPLE_PRT("mkpath %s failed\n",venc_path_name);
+
+            }
         }
     }
 
@@ -43,9 +56,10 @@ void RecordToMP4::RecordExit()
     mRun = false;
     wait();
     for (int i = 0;i < mVencParam.count();i++) {
-        if(mVencParam[i].Mp4File.isOpen()){
-            mVencParam[i].Mp4File.closeMO4File();
-        }
+        deleteChnFromRecord(mVencParam[i].ViChn);
+//        if(mVencParam[i].Mp4File.isOpen()){
+//            mVencParam[i].Mp4File.closeMO4File();
+//        }
     }
 }
 
@@ -211,8 +225,17 @@ bool RecordToMP4::addVideoAlarmToFile(int Chn,VIDEO_TYPE type)
         qDebug()<<"can not add alarm file,record not on list";
         return false;
     }
+
+    mFileMutex.lock();
+    if(!mVencParam[index].Mp4File.isOpen()){
+        qDebug()<<"addVideoAlarmToFile error";
+        mFileMutex.unlock();
+        return false;
+    }
+
     int alarmindex = checkVideoAlarmList(Chn, type);
     if(alarmindex < 0){
+        mFileMutex.unlock();
         qDebug()<<"alarm not in list";
         return false;
     }
@@ -220,12 +243,13 @@ bool RecordToMP4::addVideoAlarmToFile(int Chn,VIDEO_TYPE type)
     getAlarmFileName(Chn,type,alarmfile,VIDEO_FILENAME_SIZE);
 
     if(!checkAlarmFile(alarmfile)){
+        mFileMutex.unlock();
         return false;
     }
 
     mVideoEventFileInfoList[Chn][alarmindex].eTime = QDateTime::currentDateTime().toTime_t();
     LOGWE("%s:%d",__FUNCTION__,__LINE__);
-    mFileMutex.lock();
+//    mFileMutex.lock();
     strcpy(mVideoEventFileInfoList[Chn][alarmindex].filename,mVencParam[index].Mp4File.getMP4FileName());
     mFileMutex.unlock();
     LOGWE("%s:%d",__FUNCTION__,__LINE__);
@@ -282,6 +306,12 @@ bool RecordToMP4::addVideoAlarmToFile(int Chn)
         qDebug()<<"can not add alarm file,record not on list";
         return false;
     }
+    mFileMutex.lock();
+    if(!mVencParam[index].Mp4File.isOpen()){
+        qDebug()<<"addVideoAlarmToFile error";
+        mFileMutex.unlock();
+        return false;
+    }
 
     for(int i = 0;i < mVideoEventFileInfoList[Chn].count();i++){
         getAlarmFileName(Chn,mVideoEventFileInfoList[Chn][i].type,alarmfile,VIDEO_FILENAME_SIZE);
@@ -289,11 +319,11 @@ bool RecordToMP4::addVideoAlarmToFile(int Chn)
             continue;
         }
         mVideoEventFileInfoList[Chn][i].eTime = QDateTime::currentDateTime().toTime_t();
-        LOGWE("%s:%d",__FUNCTION__,__LINE__);
-        mFileMutex.lock();
+//        LOGWE("%s:%d",__FUNCTION__,__LINE__);
+//        mFileMutex.lock();
         strcpy(mVideoEventFileInfoList[Chn][i].filename,mVencParam[index].Mp4File.getMP4FileName());
-        mFileMutex.unlock();
-        LOGWE("%s:%d",__FUNCTION__,__LINE__);
+//        mFileMutex.unlock();
+//        LOGWE("%s:%d",__FUNCTION__,__LINE__);
         pFile = fopen(alarmfile,"rb+");
         if(!pFile){
             qDebug("open file[%s] error\n",alarmfile);
@@ -314,6 +344,7 @@ bool RecordToMP4::addVideoAlarmToFile(int Chn)
 
         qDebug("write alarm file[%s] sucess!alarm file num:%d\n",alarmfile,videoFileHead.num);
     }
+    mFileMutex.unlock();
 
     return true;
 }
@@ -331,10 +362,6 @@ bool RecordToMP4::createNewMp4File(int Chn)
         return false;
     }
 
-    LOGWE("%s:%d",__FUNCTION__,__LINE__);
-    changeAlarmFile(Chn);
-    LOGWE("%s:%d",__FUNCTION__,__LINE__);
-
     if(Sample_Common_Sys::SAMPLE_COMM_SYS_GetPicSize(VIDEO_NORM, mVencSet->m_Vdec_Param[0][Chn].mvencSize, &picsize) == HI_SUCCESS){
         size.setWidth(picsize.u32Width);
         size.setHeight(picsize.u32Height);
@@ -348,10 +375,9 @@ bool RecordToMP4::createNewMp4File(int Chn)
             return HI_FALSE;
         }
     }
-
-    QDateTime current_date_time =QDateTime::currentDateTime();
-    QString current_date =current_date_time.toString("yyyy-MM-dd-hh-mm-ss");
-    QByteArray file_name = current_date.toLatin1();
+//    QDateTime current_date_time =QDateTime::currentDateTime();
+//    QString current_date =current_date_time.toString("yyyy-MM-dd-hh-mm-ss");
+//    QByteArray file_name = current_date.toLatin1();
 
     MP4File &file = mVencParam[index].Mp4File;
 
@@ -361,7 +387,11 @@ bool RecordToMP4::createNewMp4File(int Chn)
         file.closeMO4File();
     }
 
-    sprintf(fileindex_name,"%s%s.mp4",venc_path_name,file_name.data());
+    mVencParam[index].filenode.stTime = QDateTime::currentDateTime().toTime_t();
+
+    mPFileTabFind[Chn]->createNewDayTab();
+
+    sprintf(fileindex_name,"%sHI%d.mp4",venc_path_name,mVencParam[index].curFileIndex);
     if(!file.createMP4File(fileindex_name,25,size)){
         qDebug()<<"create new file error";
         return false;
@@ -388,6 +418,11 @@ bool RecordToMP4::saveMp4File(int Chn)
         qDebug()<<"mp4file not open";
         return false;
     }
+    mVencParam[index].filenode.fileindex = mVencParam[index].curFileIndex;
+    mVencParam[index].filenode.duration = QDateTime::currentDateTime().toTime_t();
+
+    mPFileTabFind[Chn]->addFileToTab(mVencParam[index].filenode);
+    mVencParam[index].curFileIndex++;
 
     mVencParam[index].Mp4File.closeMO4File();
 
@@ -406,11 +441,18 @@ bool RecordToMP4::addRecordList(int Chn)
        if(param.VencFd > mMaxFd){
            mMaxFd = param.VencFd;
        }
+       param.curFileIndex = mPFileTabFind[Chn]->getFileIndex();
+//       if(param.curFileIndex != 0){
+//           param.curFileIndex++;
+//       }
+       qDebug()<<"current file index:"<<param.curFileIndex;
+       param.filenode.stTime = QDateTime::currentDateTime().toTime_t();
 
        LOGWE("%s:%d",__FUNCTION__,__LINE__);
        qDebug()<<"add record Chn:"<<Chn;
        mFileMutex.lock();
        mVencParam.append(param);
+//       mFileTab.append(filenode);
        qDebug()<<"add record Chn:"<<Chn<<" record num:"<<mVencParam.count();
        mFileMutex.unlock();
        LOGWE("%s:%d",__FUNCTION__,__LINE__);
@@ -449,6 +491,7 @@ bool RecordToMP4::addChnToRecord(int Chn)
     }
     LOGWE("%s:%d",__FUNCTION__,__LINE__);
 
+//    mFileTab.append()
     if(createNewMp4File(Chn)){
         start();
     }
@@ -468,6 +511,10 @@ bool RecordToMP4::deleteChnFromRecord(int Chn)
 
 void RecordToMP4::onCreateNewFileSlot(int Chn)
 {
+    LOGWE("%s:%d",__FUNCTION__,__LINE__);
+    changeAlarmFile(Chn);
+    LOGWE("%s:%d",__FUNCTION__,__LINE__);
+    saveMp4File(Chn);
     createNewMp4File(Chn);
 
 }
@@ -475,12 +522,17 @@ void RecordToMP4::onCreateNewFileSlot(int Chn)
 void RecordToMP4::onTimeHander()
 {
     int i;
+    uint time = QDateTime::currentDateTime().toTime_t();
 
-    for (i = 0;i < mVencParam.count();i++) {
-        if(mVencParam[i].Mp4File.getDuration() >= FILEDURATION){
-            emit createNewFileSignal(mVencParam[i].ViChn);
+    if(time % (3600/SPLITNUM) == 0){
+        for (i = 0;i < mVencParam.count();i++) {
+//            if(mVencParam[i].Mp4File.getDuration() >= FILEDURATION){
+            qDebug()<<"create new file";
+                emit createNewFileSignal(mVencParam[i].ViChn);
+//            }
         }
     }
+
 
 }
 
@@ -554,6 +606,9 @@ bool RecordToMP4::startRecordChn(VI_CHN ViChnCnt, PIC_SIZE_E enSize, SAMPLE_RC_E
         goto END_2;
     }
 
+    mPFileTabFind[ViChnCnt] = FileTabFind::createNewTab(ViChnCnt);
+    mPFileTabFind[ViChnCnt]->createNewDayTab();
+
     return true;
 END_2:
     mPVenc[ViChnCnt]->SAMPLE_COMM_VENC_UnBindVpss(mVpss.m_Grp_Tab[ViChnCnt], m_VencBindVpss);
@@ -591,6 +646,9 @@ bool RecordToMP4::stopRecordChn(int Chn)
     {
         SAMPLE_PRT("SAMPLE_COMM_VENC_Stop failed with %#x!\n",s32Ret);
     }
+    mPFileTabFind[Chn]->close();
+
+    delete mPFileTabFind[Chn];
 
     delete mPVenc[Chn];
 

@@ -86,13 +86,13 @@ HI_BOOL VideoControl::videoStart()
         goto END_VPSS_START;
     }
 
-    vio.Vi_Start(VIDEO_ENCODING_MODE_PAL,m_pVpss);
+    vio.Vi_Start(VIDEO_NORM,m_pVpss);
 
 //    m_Record.setRecordSrc(m_pVpss);
     mRecordMp4 = new RecordToMP4(*m_pVpss);
     for (int i = 0;i < vio.m_ViChnCnt;i++) {
-//        m_Record.startRecordChn(i,VIDEO_ENCODING_MODE_PAL);
-        mRecordMp4->startRecordChn(i,VIDEO_ENCODING_MODE_PAL);
+//        m_Record.startRecordChn(i,VIDEO_NORM);
+        mRecordMp4->startRecordChn(i,VIDEO_NORM);
         m_VideoDetect.createMoveDetect(i,i*4,400,4);
 
         stVpssMode.enChnMode = VPSS_CHN_MODE_USER;

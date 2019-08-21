@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
     signal(SIGINT,sign);
     signal(SIGSEGV, dump);
 
-//    QDateTime current_date_time =QDateTime::currentDateTime();
+    QDateTime current_date_time =QDateTime::currentDateTime();
 //    QString current_date =QDateTime::currentDateTime().toString("ddd yyyy年MM月dd日 hh时mm分ss秒 AP");
 //    qDebug()<<current_date;
 //    QByteArray time = current_date.toLocal8Bit();
@@ -137,8 +137,8 @@ int main(int argc, char *argv[])
 #ifndef LUNUX_WIN
 //    RealTimeStream realtest;
 //    realtest.start();
-    VencToMp4Test mp4test;
-    mp4test.start();
+//    VencToMp4Test mp4test;
+//    mp4test.start();
 #endif
         ret = a.exec();
     } catch(exception &e) {

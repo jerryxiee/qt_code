@@ -10,6 +10,7 @@
 #include "common/systemlog.h"
 #include "mp4file.h"
 #include "common/systemlog.h"
+#include "filetabfind.h"
 
 #define BUFLEN 1024*1024
 
@@ -71,7 +72,9 @@ private:
         int ViChn;
 //        int VencChn;
         int VencFd;
+        uint curFileIndex;
         MP4File Mp4File;
+        FILENODE filenode;
     } VENCPARAM;
 
     unsigned char *mIDRFramBuf;
@@ -80,6 +83,9 @@ private:
     Sample_Common_Vpss &mVpss;
     QMutex mFileMutex;
     QList<VENCPARAM> mVencParam;
+//    QList<FILENODE> mFileTab;
+    FileTabFind *mPFileTabFind[VIDEO_MAX_NUM];
+
     bool mRun;
     int mMaxFd;
 

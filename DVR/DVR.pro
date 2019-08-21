@@ -510,7 +510,8 @@ SOURCES +=common/sample_common_sys.cpp \
             video/videolink.cpp \
             video/realtimestream.cpp \
             video/videostreampro.cpp \
-            test/venctomp4test.cpp
+            test/venctomp4test.cpp \
+            video/filetabfind.cpp
 
 HEADERS +=common/loadbmp.h \
             common/sample_common_sys.h \
@@ -531,7 +532,8 @@ HEADERS +=common/loadbmp.h \
             video/videolink.h \
             video/realtimestream.h \
             video/videostreampro.h \
-            test/venctomp4test.h
+            test/venctomp4test.h \
+            video/filetabfind.h
 
 
 LIBS += -lpthread
