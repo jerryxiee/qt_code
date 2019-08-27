@@ -5,7 +5,9 @@
 #include <QSettings>
 #include <QMetaType>
 
+#ifndef LUNUX_WIN
 Sample_Common_Vpss *VideoControl::m_pVpss = nullptr;
+#endif
 
 VideoControl::VideoControl(QObject *parent) : QObject(parent)
 {
@@ -36,13 +38,11 @@ VideoControl::~VideoControl()
 
 }
 
+#ifndef LUNUX_WIN
 Sample_Common_Vpss *VideoControl::getVpss()
 {
-#ifndef LUNUX_WIN
+
     return m_pVpss;
-#else
-    return nullptr;
-#endif
 }
 
 VPSS_GRP VideoControl::getVpssGrp(VI_CHN Chn)
@@ -59,6 +59,7 @@ VPSS_GRP VideoControl::getVpssGrp(VI_CHN Chn)
 #endif
 
 }
+#endif
 
 HI_BOOL VideoControl::videoStart()
 {

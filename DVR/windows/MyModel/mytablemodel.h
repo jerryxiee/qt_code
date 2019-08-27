@@ -10,6 +10,9 @@
 #include "common/sample_comm.h"
 #include "video/videosearch.h"
 #include <QtConcurrent/QtConcurrentRun>
+#ifndef LUNUX_WIN
+#include "video/mp4fileindex.h"
+#endif
 
 class MyTableModel : public QAbstractTableModel
 {
@@ -24,6 +27,9 @@ public:
 
     void showVideoFileList(VideoFileList &list);
     void showVideoFileList(VideoFileList &list,int fromindex,int toindex);
+
+    void showMp4FileList(QList<MP4FileInfo> &list);
+    void showMp4FileList(QList<MP4FileInfo> &list,int fromindex,int toindex);
 
     void showFileInfoList(QFileInfoList &list);
     void showFileInfoList(QFileInfoList &list,int fromindex,int toindex);
@@ -66,6 +72,7 @@ private:
 
 signals:
     void filelistChangeSignal(VideoFileList &);
+    void filelistChangeSignal(QList<MP4FileInfo> &);
 //    void setWinNumSignal(int);
     void dataChanged();
     void fileNameChanged();
@@ -95,6 +102,8 @@ private:
     VideoFileList mVideoFileList;
     QFuture<void> mProcess;
     bool mProcess_Run;
+    QList<MP4FileInfo> mMp4FileList;
+
 
 };
 

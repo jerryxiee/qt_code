@@ -27,9 +27,12 @@ public:
 
     HI_BOOL videoStart();
 
+#ifndef LUNUX_WIN
 
     static Sample_Common_Vpss *getVpss();
     static VPSS_GRP getVpssGrp(VI_CHN Chn);    //获取vi通道对应的vpss组
+
+#endif
 
 
 signals:

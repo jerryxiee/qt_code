@@ -10,10 +10,12 @@ videoplaytest::videoplaytest(QWidget *parent) : QWidget(parent)
     mVideoExit->move(this->width()-mVideoExit->width()*2,mVideoExit->height());
     connect(mVideoExit,SIGNAL(clicked()),this,SLOT(onVideoExitClickSlot()));
 
+#ifndef LUNUX_WIN
     VO_DEV VoDev;
     VO_LAYER VoLayer;
     Sample_Common_Sys::Get_Sys_VoDev(VoDev,VoLayer);
     mVideoVo.SAMPLE_COMM_VO_SetDev(VoDev,VoLayer);
+#endif
 
 }
 

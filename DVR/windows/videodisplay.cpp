@@ -173,6 +173,15 @@ void VideoDisplay::onVideoDispListSlot(VideoFileList &filelist)
     qDebug()<<"onVideoDispListSlot num:"<<filelist.count();
 }
 
+void VideoDisplay::onVideoDispListSlot(QList<MP4FileInfo> & filelist)
+{
+#ifndef LUNUX_WIN
+
+
+#endif
+
+}
+
 void VideoDisplay::seek(int value)
 {
 #ifndef LUNUX_WIN

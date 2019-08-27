@@ -11,6 +11,7 @@
 #include "mp4file.h"
 #include "common/systemlog.h"
 #include "filetabfind.h"
+#include "mp4fileindex.h"
 
 #define BUFLEN 1024*1024
 
@@ -66,7 +67,7 @@ private:
     const HI_CHAR *MOVED_FILE = ".move_alarm";
     const HI_CHAR *VENC_PATH = "/mnt/sda1/venc";
     const VPSS_CHN m_VencBindVpss = VPSS_CHN0;   //主码流绑定到通道0
-    const int64_t FILEDURATION = 60*30;
+    const int64_t FILEDURATION = 60*5;
 
     typedef struct{
         int ViChn;
@@ -74,7 +75,8 @@ private:
         int VencFd;
         uint curFileIndex;
         MP4File Mp4File;
-        FILENODE filenode;
+//        FILENODE filenode;
+        MP4FileInfo fileinfo;
     } VENCPARAM;
 
     unsigned char *mIDRFramBuf;
@@ -85,6 +87,7 @@ private:
     QList<VENCPARAM> mVencParam;
 //    QList<FILENODE> mFileTab;
     FileTabFind *mPFileTabFind[VIDEO_MAX_NUM];
+    MP4FileIndex *mPMP4FileIndex[VIDEO_MAX_NUM];
 
     bool mRun;
     int mMaxFd;

@@ -387,9 +387,11 @@ bool RecordToMP4::createNewMp4File(int Chn)
         file.closeMO4File();
     }
 
-    mVencParam[index].filenode.stTime = QDateTime::currentDateTime().toTime_t();
+    mVencParam[index].fileinfo.sttime = QDateTime::currentDateTime().toTime_t();
+    mVencParam[index].fileinfo.stPts = 0;
+//    mVencParam[index].filenode.stTime = QDateTime::currentDateTime().toTime_t();
 
-    mPFileTabFind[Chn]->createNewDayTab();
+//    mPFileTabFind[Chn]->createNewDayTab();
 
     sprintf(fileindex_name,"%sHI%d.mp4",venc_path_name,mVencParam[index].curFileIndex);
     if(!file.createMP4File(fileindex_name,25,size)){
@@ -418,10 +420,18 @@ bool RecordToMP4::saveMp4File(int Chn)
         qDebug()<<"mp4file not open";
         return false;
     }
-    mVencParam[index].filenode.fileindex = mVencParam[index].curFileIndex;
-    mVencParam[index].filenode.duration = QDateTime::currentDateTime().toTime_t();
 
-    mPFileTabFind[Chn]->addFileToTab(mVencParam[index].filenode);
+    strcpy(mVencParam[index].fileinfo.filename,mVencParam[index].Mp4File.getMP4FileName());
+//    mVencParam[index].fileinfo.index = mVencParam[index].curFileIndex;
+    mVencParam[index].fileinfo.endtime = QDateTime::currentDateTime().toTime_t();
+    mVencParam[index].fileinfo.endPts = mVencParam[index].Mp4File.getCurPts();
+    mVencParam[index].fileinfo.duration = mVencParam[index].fileinfo.endPts + mPMP4FileIndex[Chn]->getDuration();
+
+//    mVencParam[index].filenode.fileindex = mVencParam[index].curFileIndex;
+//    mVencParam[index].filenode.duration = QDateTime::currentDateTime().toTime_t();
+
+    mPMP4FileIndex[Chn]->addIndexToFile(mVencParam[index].fileinfo);
+//    mPFileTabFind[Chn]->addFileToTab(mVencParam[index].filenode);
     mVencParam[index].curFileIndex++;
 
     mVencParam[index].Mp4File.closeMO4File();
@@ -441,12 +451,14 @@ bool RecordToMP4::addRecordList(int Chn)
        if(param.VencFd > mMaxFd){
            mMaxFd = param.VencFd;
        }
-       param.curFileIndex = mPFileTabFind[Chn]->getFileIndex();
+       param.curFileIndex = mPMP4FileIndex[Chn]->getFileNum();
+//       param.curFileIndex = mPFileTabFind[Chn]->getFileIndex();
 //       if(param.curFileIndex != 0){
 //           param.curFileIndex++;
 //       }
        qDebug()<<"current file index:"<<param.curFileIndex;
-       param.filenode.stTime = QDateTime::currentDateTime().toTime_t();
+       param.fileinfo.sttime = QDateTime::currentDateTime().toTime_t();
+//       param.filenode.stTime = QDateTime::currentDateTime().toTime_t();
 
        LOGWE("%s:%d",__FUNCTION__,__LINE__);
        qDebug()<<"add record Chn:"<<Chn;
@@ -524,7 +536,7 @@ void RecordToMP4::onTimeHander()
     int i;
     uint time = QDateTime::currentDateTime().toTime_t();
 
-    if(time % (3600/SPLITNUM) == 0){
+    if(time % (3600/SPLITNUM/6) == 0){
         for (i = 0;i < mVencParam.count();i++) {
 //            if(mVencParam[i].Mp4File.getDuration() >= FILEDURATION){
             qDebug()<<"create new file";
@@ -606,8 +618,12 @@ bool RecordToMP4::startRecordChn(VI_CHN ViChnCnt, PIC_SIZE_E enSize, SAMPLE_RC_E
         goto END_2;
     }
 
-    mPFileTabFind[ViChnCnt] = FileTabFind::createNewTab(ViChnCnt);
-    mPFileTabFind[ViChnCnt]->createNewDayTab();
+    mPMP4FileIndex[ViChnCnt] = MP4FileIndex::createNewFileIndex(ViChnCnt);
+    if(!mPMP4FileIndex[ViChnCnt]){
+        qDebug()<<"createNewFileIndex error";
+    }
+//    mPFileTabFind[ViChnCnt] = FileTabFind::createNewTab(ViChnCnt);
+//    mPFileTabFind[ViChnCnt]->createNewDayTab();
 
     return true;
 END_2:
@@ -646,9 +662,14 @@ bool RecordToMP4::stopRecordChn(int Chn)
     {
         SAMPLE_PRT("SAMPLE_COMM_VENC_Stop failed with %#x!\n",s32Ret);
     }
-    mPFileTabFind[Chn]->close();
+    if(mPMP4FileIndex[Chn]){
+        mPMP4FileIndex[Chn]->close();
+        delete mPMP4FileIndex[Chn];
+        mPMP4FileIndex[Chn] = nullptr;
+    }
+//    mPFileTabFind[Chn]->close();
 
-    delete mPFileTabFind[Chn];
+//    delete mPFileTabFind[Chn];
 
     delete mPVenc[Chn];
 

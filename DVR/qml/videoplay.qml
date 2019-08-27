@@ -446,7 +446,7 @@ Rectangle {
 
                 TableViewColumn { role: "name"; title: "创建时间"; width: 400;delegate:itemDelegateText}
                 TableViewColumn { role: "gender"; title: "修改时间";width: 400;delegate:itemDelegateText}
-                TableViewColumn { role: "na"; title: "文件大小";width: 100;delegate:itemDelegateText}
+                TableViewColumn { role: "na"; title: "时长";width: 200;delegate:itemDelegateText}
 
                 onDoubleClicked: {
                     dataModel.oncellDoubleClickedSlot(row,0)

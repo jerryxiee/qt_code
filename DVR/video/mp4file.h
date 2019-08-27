@@ -17,7 +17,7 @@ public:
     void closeMO4File();
     bool isOpen();
 //    uint getFileSize();
-    int64_t getDuration();    //根据帧帧率及帧数计算结果,单位为s
+    int64_t getCurPts();    //根据帧帧率及帧数计算结果,单位为s
     void writeFrame(unsigned char *buf,int len,bool isIDR);
     const char *getMP4FileName();
     void printinfo();

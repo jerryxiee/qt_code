@@ -229,12 +229,12 @@ bool MP4File::isOpen()
 //    return 0;
 //}
 
-int64_t MP4File::getDuration()
+int64_t MP4File::getCurPts()
 {
     if(mAVFmtCtx){
         AVStream *pAVStream = mAVFmtCtx->streams[mVideoIndex];
-        if(pAVStream->codec->time_base.den > 0)
-            return pAVStream->nb_frames /pAVStream->codec->time_base.den ;
+        if(pAVStream->nb_frames > 0)
+            return av_rescale_q_rnd(pAVStream->nb_frames - 1, pAVStream->codec->time_base,pAVStream->time_base,(enum AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX)); ;
     }
 
     return 0;

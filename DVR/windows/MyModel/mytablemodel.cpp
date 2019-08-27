@@ -24,13 +24,15 @@ MyTableModel::MyTableModel(QObject *parent):
 //    showFileInfoList(list);
 
     connect(this,SIGNAL(refrushModelSignal()),this,SLOT(refrushModel()));
-    connect(this,SIGNAL(filelistChangeSignal(VideoFileList &)),Widget::getVideoDisplayWin(),SLOT(onVideoDispListSlot(VideoFileList &)));
+//    connect(this,SIGNAL(filelistChangeSignal(VideoFileList &)),Widget::getVideoDisplayWin(),SLOT(onVideoDispListSlot(VideoFileList &)));
+    connect(this,SIGNAL(filelistChangeSignal(QList<MP4FileInfo> &)),Widget::getVideoDisplayWin(),SLOT(onVideoDispListSlot(QList<MP4FileInfo> &)));
 //    connect(this,SIGNAL(setWinNumSignal(int)),Widget::getVideoDisplayWin(),SLOT(onSetWinNum(int)));
 }
 
 MyTableModel::~MyTableModel()
 {
-    disconnect(this,SIGNAL(filelistChangeSignal(VideoFileList &)),Widget::getVideoDisplayWin(),SLOT(onVideoDispListSlot(VideoFileList &)));
+//    disconnect(this,SIGNAL(filelistChangeSignal(VideoFileList &)),Widget::getVideoDisplayWin(),SLOT(onVideoDispListSlot(VideoFileList &)));
+    disconnect(this,SIGNAL(filelistChangeSignal(QList<MP4FileInfo> &)),Widget::getVideoDisplayWin(),SLOT(onVideoDispListSlot(QList<MP4FileInfo> &)));
     mProcess_Run = false;
     mProcess.waitForFinished();
     qDebug()<<"~MyTableModel exit";
@@ -39,7 +41,11 @@ MyTableModel::~MyTableModel()
 void MyTableModel::onShowSlot(QDir dir)
 {
     QStringList string;
-    string<<"channel*"<<"*.index";
+#ifndef LUNUX_WIN
+    string<<"*.mp4";
+#else
+    string<<"*";
+#endif
     QFileInfoList list = dir.entryInfoList(string, QDir::Files | QDir::AllEntries | QDir::NoDotAndDotDot , QDir::DirsFirst);
     showFileInfoList(list);
 }
@@ -83,6 +89,61 @@ void MyTableModel::showVideoFileList(VideoFileList &list, int fromindex, int toi
 void MyTableModel::showVideoFileList(VideoFileList &list)
 {
     showVideoFileList(list, 0, list.count()-1);
+}
+
+void MyTableModel::showMp4FileList(QList<MP4FileInfo> &list,int fromindex,int toindex)
+{
+    qDebug()<<"list.count ="<<list.count();
+    if(toindex >= list.count()){
+        qDebug()<<"beyond the list count";
+        return;
+    }
+
+    QDateTime datetime;
+    QDateTime datetime1;
+    m_data.clear();
+    struct timeval stv;
+    struct timeval etv;
+    struct timezone tz;
+    gettimeofday(&stv, &tz);
+    for(int i = fromindex; i <= toindex ;i++){
+
+        QVariantList list1;
+        datetime = QDateTime::fromTime_t(list.at(i).sttime);
+        list1.push_back(datetime.toString("yyyy-MM-dd-hh-mm-ss"));
+
+        datetime1 = QDateTime::fromTime_t(list.at(i).endtime);
+        list1.push_back(datetime1.toString("yyyy-MM-dd-hh-mm-ss"));
+
+//        QString
+//        list1.push_back(tr("%1 KB").arg(int((list.at(i).msize + 1023) / 1024)));
+        uint duration = datetime1.toTime_t() - datetime.toTime_t();
+        uint hour = duration/3600;
+        uint min = (duration%3600)/60;
+        uint sec = duration%60;
+        QString strduration;
+        if(hour)
+            strduration=QString::number(hour)+"h";
+        if(min)
+            strduration+=QString::number(min)+"min";
+        strduration+=QString::number(sec)+"s";
+        list1.push_back(strduration);
+        m_data.push_back(list1);
+        if(!mProcess_Run)
+            break;
+    }
+
+    gettimeofday(&etv, &tz);
+
+    qDebug()<<"list sec:"<<etv.tv_sec - stv.tv_sec<<" usec:"<<etv.tv_usec-stv.tv_usec;
+
+    emit refrushModelSignal();
+
+}
+
+void MyTableModel::showMp4FileList(QList<MP4FileInfo> &list)
+{
+    showMp4FileList(list, 0, list.count()-1);
 }
 
 void MyTableModel::showNormalFileInfoList(QFileInfoList &list,int fromindex,int toindex)
@@ -130,7 +191,7 @@ void MyTableModel::showNormalFileInfoList(QFileInfoList &list,int fromindex,int 
 
     qDebug()<<"list sec:"<<etv.tv_sec - stv.tv_sec<<" usec:"<<etv.tv_usec-stv.tv_usec;
 
-    refrushModel();
+    emit refrushModelSignal();
 
 }
 
@@ -153,15 +214,27 @@ void MyTableModel::showFileInfoList(QFileInfoList &list,int fromindex,int toinde
     gettimeofday(&stv, &tz);
     for(int i = fromindex; i <= toindex ;i++){
         QFileInfo tmpFileInfo = list.at(i);
-        QString fileName = tmpFileInfo.fileName();
+//        QString fileName = tmpFileInfo.fileName();
         QVariantList list1;
-        list1.push_back(fileName);
+        QDateTime time = tmpFileInfo.created();
+        list1.push_back(time.toString("yyyy-MM-dd-hh-mm-ss"));
+//        list1.push_back(fileName);
 
-        QDateTime time = tmpFileInfo.lastModified();
+        time = tmpFileInfo.lastModified();
         list1.push_back(time.toString("yyyy-MM-dd-hh-mm-ss"));
 
-        const qint64 size = tmpFileInfo.size();
-        list1.push_back(tr("%1 KB").arg(int((size + 1023) / 1024)));
+//        const qint64 size = tmpFileInfo.size();
+        uint duration = tmpFileInfo.lastModified().toTime_t() - tmpFileInfo.created().toTime_t();
+        uint hour = duration/3600;
+        uint min = (duration%3600)/60;
+        uint sec = duration%60;
+        QString strduration;
+        if(hour)
+            strduration=QString::number(hour)+"h";
+        if(min)
+            strduration+=QString::number(min)+"m";
+        strduration+=QString::number(sec)+"s";
+        list1.push_back(strduration);
 
         m_data.push_back(list1);
         if(!mProcess_Run)
@@ -172,7 +245,7 @@ void MyTableModel::showFileInfoList(QFileInfoList &list,int fromindex,int toinde
 
     qDebug()<<"list sec:"<<etv.tv_sec - stv.tv_sec<<" usec:"<<etv.tv_usec-stv.tv_usec;
 
-    refrushModel();
+    emit refrushModelSignal();
 }
 
 void MyTableModel::showFileInfoList(QFileInfoList &list)
@@ -388,20 +461,35 @@ void MyTableModel::preViewFile(int Chn ,int filetype)
 
 void MyTableModel::priPreViewFile(int Chn ,int filetype)
 {
+    mMp4FileList.clear();
+
+    struct timeval stv;
+    struct timeval etv;
+    struct timezone tz;
+    gettimeofday(&stv, &tz);
+
     switch (filetype) {
         case 0:
         {
-            mVideoFileList = mVideoSearch.readFileList(Chn,VIDEO_NORMAL);
+    #ifndef LUNUX_WIN
+            MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(Chn);
+            mp4fileindex->getFileList(mMp4FileList);
+    #endif
             break;
 
         }
         case 1:
         {
-            mVideoFileList = mVideoSearch.readFileList(Chn,VIDEO_MOVEDETECT);
+//            mVideoFileList = mVideoSearch.readFileList(Chn,VIDEO_MOVEDETECT);
             break;
         }
     }
-    showVideoFileList(mVideoFileList);
+    gettimeofday(&etv, &tz);
+
+    qDebug()<<"getfile sec:"<<etv.tv_sec - stv.tv_sec<<" usec:"<<etv.tv_usec-stv.tv_usec;
+
+    showMp4FileList(mMp4FileList);
+//    showVideoFileList(mVideoFileList);
 
 }
 
@@ -468,23 +556,36 @@ void MyTableModel::priSearchFile(int type,int Chn,int filetype,QString starttime
     uint sttime = QDateTime::fromString(starttime, "yyyy/MM/dd hh:mm:ss").toTime_t();
     uint entime = QDateTime::fromString(endtime, "yyyy/MM/dd hh:mm:ss").toTime_t();
 
+    struct timeval stv;
+    struct timeval etv;
+    struct timezone tz;
+    gettimeofday(&stv, &tz);
+    mMp4FileList.clear();
     switch (filetype) {
         case 0:
         {
-            filelist = mVideoSearch.readFileList(Chn,VIDEO_NORMAL);
+    #ifndef LUNUX_WIN
+            MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(Chn);
+            mp4fileindex->getFileList(mMp4FileList,sttime,entime);
+    #endif
 //            showVideoFileList(mVideoFileList);
             break;
         }
         case 1:
         {
-            filelist = mVideoSearch.readFileList(Chn,VIDEO_MOVEDETECT);
+//            filelist = mVideoSearch.readFileList(Chn,VIDEO_MOVEDETECT);
 //            showVideoFileList(mVideoFileList);
             break;
         }
     }
+    gettimeofday(&etv, &tz);
 
-    mVideoFileList = mVideoSearch.searchFile(filelist,sttime,entime);
-    showVideoFileList(mVideoFileList);
+    qDebug()<<"search sec:"<<etv.tv_sec - stv.tv_sec<<" usec:"<<etv.tv_usec-stv.tv_usec;
+
+
+//    mVideoFileList = mVideoSearch.searchFile(filelist,sttime,entime);
+//    showVideoFileList(mVideoFileList);
+    showMp4FileList(mMp4FileList);
 
     return ;
 
@@ -492,14 +593,18 @@ void MyTableModel::priSearchFile(int type,int Chn,int filetype,QString starttime
 void MyTableModel::oncellDoubleClickedSlot(int row,int column)
 {
     Q_UNUSED(column)
-    VideoFileList videolist;
+//    VideoFileList videolist;
 
-//    emit setWinNumSignal(1);
-    videolist.append(mVideoFileList.at(row));
-    mFileName = mVideoFileList.at(row).getFileName();
-    emit filelistChangeSignal(videolist);
+////    emit setWinNumSignal(1);
+//    videolist.append(mVideoFileList.at(row));
+//    mFileName = mVideoFileList.at(row).getFileName();
+//    emit filelistChangeSignal(videolist);
 
-    qDebug()<<"testSlot"<<mFileName;
+    QList<MP4FileInfo> fileinfolist;
+    fileinfolist.append(mMp4FileList.at(row));
+    filelistChangeSignal(fileinfolist);
+
+    qDebug()<<"testSlot"<<mMp4FileList.at(row).filename;
 }
 
 QString MyTableModel::name() const

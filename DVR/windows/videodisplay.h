@@ -11,6 +11,7 @@
 #ifndef LUNUX_WIN
 #include <video/videoplay.h>
 #include "common/sample_common_sys.h"
+//#include "video/mp4fileindex.h"
 #endif
 
 class VideoDisplay : public QWidget
@@ -33,6 +34,7 @@ public slots:
     void onVideoExitClickSlot();
     void onVideoDispSignalSlot(QString path);
     void onVideoDispListSlot(VideoFileList & filelist);
+    void onVideoDispListSlot(QList<MP4FileInfo> & filelist);
     void onPositionChanged(uint value);
     void onShowControl(bool show);
 
