@@ -64,7 +64,7 @@ void MP4VideoPlay::setPosition(qint64 position)
         av_seek_frame(mAVfmtCtx,mVideoIndex,mPlayList.at(mCurFileIndex).stPts+pos - mCurPosition,AVSEEK_FLAG_BACKWARD);
 
     }
-    qDebug()<<"setpos:"<<position<<"fileindex:"<<index<<" mCurFileIndex:"<<mCurFileIndex;
+//    qDebug()<<"setpos:"<<position<<"fileindex:"<<index<<" mCurFileIndex:"<<mCurFileIndex;
     emit positionChanged(position);
     play();
     mFileMutex.unlock();

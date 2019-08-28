@@ -210,6 +210,14 @@ int MP4FileIndex::getFileList(QList<MP4FileInfo> &filelist,uint sttime,uint endt
         return 0;
     }
 
+    if(endindex == startindex){
+        if(list.at(startindex).sttime > endtime || list.at(startindex).endtime < sttime){
+            return 0;
+        }
+    }
+
+    qDebug()<<"startindex:"<<startindex<<" endindex:"<<endindex;
+
     filelist = list.mid(startindex,endindex + 1 - startindex);
     if(filelist.first().sttime < sttime && filelist.first().endtime > sttime){
         filelist.first().stPts += (sttime - filelist.first().sttime)*(filelist.first().endPts - filelist.first().stPts)/(filelist.first().endtime - filelist.first().sttime);
@@ -230,16 +238,16 @@ int MP4FileIndex::findLeftIndex(QList<MP4FileInfo> &filelist,int stindex,int end
 
     MP4FileInfo fileinfo = filelist.at(index);
     if(fileinfo.sttime <= time && fileinfo.endtime > time ){
-//        qDebug()<<"find index:"<<stindex;
+        qDebug()<<"find left index:"<<stindex;
 //        qDebug()<<"filest:"<<fileinfo.sttime<<" fileet:"<<fileinfo.endtime<<" find t:"<<time;
         return index;
     }
     if(index == stindex){
         if(fileinfo.endtime < time){
-//            qDebug()<<"find (end):"<<endindex;
+            qDebug()<<"find left:"<<endindex;
             return endindex;
         }
-//        qDebug()<<"find:"<<endindex;
+        qDebug()<<"find left1:"<<index;
         return index;
 
     }
@@ -257,19 +265,21 @@ int MP4FileIndex::findRightIndex(QList<MP4FileInfo> &filelist,int stindex,int en
 
     MP4FileInfo fileinfo = filelist.at(index);
     if(fileinfo.sttime <= time && fileinfo.endtime > time ){
-//        qDebug()<<"find index:"<<stindex;
+        qDebug()<<"find right index:"<<stindex;
 //        qDebug()<<"filest:"<<fileinfo.sttime<<" fileet:"<<fileinfo.endtime<<" find t:"<<time;
-        return stindex;
+        return index;
     }
     if(index == stindex){
-//        qDebug()<<"find :"<<stindex;
+        if(fileinfo.sttime < time)
+            return endindex;
+        qDebug()<<"find right:"<<stindex;
         return index;
     }
 
     if(fileinfo.endtime < time){
-        return findLeftIndex(filelist,index,endindex,time);
+        return findRightIndex(filelist,index,endindex,time);
     }else {
-        return findLeftIndex(filelist,stindex,index-1,time);
+        return findRightIndex(filelist,stindex,index-1,time);
     }
 
 }
