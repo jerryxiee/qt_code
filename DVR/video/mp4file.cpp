@@ -234,7 +234,7 @@ int64_t MP4File::getCurPts()
     if(mAVFmtCtx){
         AVStream *pAVStream = mAVFmtCtx->streams[mVideoIndex];
         if(pAVStream->nb_frames > 0)
-            return av_rescale_q_rnd(pAVStream->nb_frames - 1, pAVStream->codec->time_base,pAVStream->time_base,(enum AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX)); ;
+            return av_rescale_q_rnd(pAVStream->nb_frames, pAVStream->codec->time_base,pAVStream->time_base,(enum AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX)); ;
     }
 
     return 0;

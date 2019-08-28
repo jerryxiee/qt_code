@@ -57,6 +57,7 @@ MP4FileIndex::MP4FileIndex(QString filename)
 
 MP4FileIndex::~MP4FileIndex()
 {
+    qDebug()<<"exit MP4FileIndex";
     close();
 }
 

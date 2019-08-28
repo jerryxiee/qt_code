@@ -495,7 +495,7 @@ void MyTableModel::priPreViewFile(int Chn ,int filetype)
 
 int MyTableModel::playVideoList(int type,int Chn,int filetype,QString starttime,QString endtime)
 {
-    VideoFileList filelist;
+    QList<MP4FileInfo> filelist;
     uint sttime = QDateTime::fromString(starttime, "yyyy/MM/dd hh:mm:ss").toTime_t();
     uint entime = QDateTime::fromString(endtime, "yyyy/MM/dd hh:mm:ss").toTime_t();
 
@@ -503,30 +503,30 @@ int MyTableModel::playVideoList(int type,int Chn,int filetype,QString starttime,
     switch (filetype) {
         case 0:
         {
-            filelist = mVideoSearch.readFileList(Chn,VIDEO_NORMAL);
+    #ifndef LUNUX_WIN
+            MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(Chn);
+            mp4fileindex->getFileList(filelist,sttime,entime);
+            delete  mp4fileindex;
+    #endif
+
 
             break;
         }
         case 1:
         {
-            filelist = mVideoSearch.readFileList(Chn,VIDEO_MOVEDETECT);
 
             break;
         }
     }
 
-    mVideoFileList = mVideoSearch.searchFile(filelist,sttime,entime);
-    if(mVideoFileList.count() == 0){
-        return 0;
-    }
-//    m_data.clear();
-//    emit refrushModelSignal();
+    if(filelist.count() == 0){
+         return 0;
+     }
 
-    emit filelistChangeSignal(mVideoFileList);
-    showVideoFileList(mVideoFileList);
+    emit filelistChangeSignal(filelist);
 
     qDebug()<<"playVideoList end";
-    return mVideoFileList.count();
+    return filelist.count();
 
 }
 
@@ -567,6 +567,7 @@ void MyTableModel::priSearchFile(int type,int Chn,int filetype,QString starttime
     #ifndef LUNUX_WIN
             MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(Chn);
             mp4fileindex->getFileList(mMp4FileList,sttime,entime);
+            delete  mp4fileindex;
     #endif
 //            showVideoFileList(mVideoFileList);
             break;

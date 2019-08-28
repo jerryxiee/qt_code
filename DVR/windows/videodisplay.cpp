@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QDateTime>
 
 VideoDisplay::VideoDisplay(QWidget *parent) : QWidget(parent)
 {
@@ -49,12 +50,13 @@ VideoDisplay::VideoDisplay(QWidget *parent) : QWidget(parent)
     VO_LAYER VoLayer;
     Sample_Common_Sys::Get_Sys_VoDev(VoDev,VoLayer);
     mVideoVo.SAMPLE_COMM_VO_SetDev(VoDev,VoLayer);
-    connect(&mVdec,SIGNAL(currentPrecentChanged(uint)),this,SLOT(onPositionChanged(uint)));
-    connect(controls,SIGNAL(changeRate(qreal)),&mVdec,SLOT(onRateChanged(qreal)));
-    connect(&mVdec,SIGNAL(stateChanged(QMediaPlayer::State)),controls,SLOT(setState(QMediaPlayer::State)));
-    connect(controls,SIGNAL(play()),&mVdec,SLOT(play()));
-    connect(controls,SIGNAL(pause()),&mVdec,SLOT(pause()));
-    connect(controls,SIGNAL(stop()),&mVdec,SLOT(stop()));
+    connect(&mMp4VideoPlay,SIGNAL(positionChanged(qint64)),this,SLOT(onPositionChanged(qint64)));
+    connect(&mMp4VideoPlay,SIGNAL(durationChanged(qint64)),this,SLOT(onDurationChanged(qint64)));
+    connect(controls,SIGNAL(changeRate(qreal)),&mMp4VideoPlay,SLOT(setPlaybackRate(qreal)));
+    connect(&mMp4VideoPlay,SIGNAL(stateChanged(QMediaPlayer::State)),controls,SLOT(setState(QMediaPlayer::State)));
+    connect(controls,SIGNAL(play()),&mMp4VideoPlay,SLOT(play()));
+    connect(controls,SIGNAL(pause()),&mMp4VideoPlay,SLOT(pause()));
+    connect(controls,SIGNAL(stop()),&mMp4VideoPlay,SLOT(stop()));
 #endif
 
 
@@ -62,10 +64,11 @@ VideoDisplay::VideoDisplay(QWidget *parent) : QWidget(parent)
 }
 VideoDisplay::~VideoDisplay()
 {
+    qDebug()<<"enter ~VideoDisplay";
 #ifndef LUNUX_WIN
-    mVideoVo.SAMPLE_COMM_VO_UnBindVpss(0,mVdec.getVpssGrp(),mVdec.getVpssChn());
-    mVdec.Stop_Vdec();
-    mVideoVo.SAMPLE_COMM_VO_StopChn();
+//    mVideoVo.SAMPLE_COMM_VO_UnBindVpss(0,mMp4VideoPlay.getVpssGrp(),mMp4VideoPlay.getVpssChn());
+//    mMp4VideoPlay.stopPlay();
+//    mVideoVo.SAMPLE_COMM_VO_StopChn();
 #endif
     qDebug()<<"exit videoplay";
 }
@@ -137,8 +140,8 @@ void VideoDisplay::onVideoExitClickSlot()
     controls->setPlaybackRate(1);
 #ifndef LUNUX_WIN
 
-    mVideoVo.SAMPLE_COMM_VO_UnBindVpss(0,mVdec.getVpssGrp(),mVdec.getVpssChn());
-    mVdec.Stop_Vdec();
+    mVideoVo.SAMPLE_COMM_VO_UnBindVpss(0,mMp4VideoPlay.getVpssGrp(),mMp4VideoPlay.getVpssChn());
+    mMp4VideoPlay.stopPlay();
     mVideoVo.SAMPLE_COMM_VO_StopChn();
 #endif
     qDebug()<<"video clicked exit end";
@@ -176,7 +179,10 @@ void VideoDisplay::onVideoDispListSlot(VideoFileList &filelist)
 void VideoDisplay::onVideoDispListSlot(QList<MP4FileInfo> & filelist)
 {
 #ifndef LUNUX_WIN
-
+    mMp4VideoPlay.setPlaylist(filelist);
+    mMp4VideoPlay.startPlay();
+    mVideoVo.SAMPLE_COMM_VO_StartChn(VO_MODE_1MUX);
+    mVideoVo.SAMPLE_COMM_VO_BindVpss(0,mMp4VideoPlay.getVpssGrp(),mMp4VideoPlay.getVpssChn());
 
 #endif
 
@@ -185,16 +191,37 @@ void VideoDisplay::onVideoDispListSlot(QList<MP4FileInfo> & filelist)
 void VideoDisplay::seek(int value)
 {
 #ifndef LUNUX_WIN
-    mVdec.setCurrentposition(value);
+    mMp4VideoPlay.setPosition(value);
 #endif
 }
 
-void VideoDisplay::onPositionChanged(uint value)
+void VideoDisplay::updateDurationInfo(qint64 currentInfo)
+{
+    QString tStr;
+    if (currentInfo || duration) {
+        QTime currentTime((currentInfo/3600)%60, (currentInfo/60)%60, currentInfo%60, (currentInfo*1000)%1000);
+        QTime totalTime((duration/3600)%60, (duration/60)%60, duration%60, (duration*1000)%1000);
+        QString format = "mm:ss";
+        if (duration > 3600)
+            format = "hh:mm:ss";
+        tStr = currentTime.toString(format) + " / " + totalTime.toString(format);
+    }
+    labelDuration->setText(tStr);
+}
+
+
+void VideoDisplay::onPositionChanged(qint64 value)
 {
     if (!slider->isSliderDown()) {
         slider->setValue(value);
     }
 
-    QString tStr = QString::number(value)+"%";
-    labelDuration->setText(tStr);
+    updateDurationInfo(value);
 }
+
+void VideoDisplay::onDurationChanged(qint64 value)
+{
+    this->duration = value/1000;
+    slider->setMaximum(this->duration);
+}
+

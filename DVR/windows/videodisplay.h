@@ -11,6 +11,7 @@
 #ifndef LUNUX_WIN
 #include <video/videoplay.h>
 #include "common/sample_common_sys.h"
+#include "video/mp4play.h"
 //#include "video/mp4fileindex.h"
 #endif
 
@@ -26,6 +27,9 @@ public:
 
     void paintEvent(QPaintEvent *event);
 
+private:
+    void updateDurationInfo(qint64 currentInfo);
+
 signals:
     void exitClicked();
 
@@ -35,7 +39,8 @@ public slots:
     void onVideoDispSignalSlot(QString path);
     void onVideoDispListSlot(VideoFileList & filelist);
     void onVideoDispListSlot(QList<MP4FileInfo> & filelist);
-    void onPositionChanged(uint value);
+    void onPositionChanged(qint64 value);
+    void onDurationChanged(qint64 value);
     void onShowControl(bool show);
 
 private slots:
@@ -46,7 +51,9 @@ private:
 #ifndef LUNUX_WIN
     Sample_Common_Vo mVideoVo;
     VideoPlay mVdec;
+    MP4VideoPlay mMp4VideoPlay;
 #endif
+    qint64 duration;
     int mWinNum;
     QSlider *slider;
     QLabel *labelDuration;
