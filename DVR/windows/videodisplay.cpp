@@ -166,10 +166,6 @@ void VideoDisplay::onVideoDispListSlot(VideoFileList &filelist)
 {
 #ifndef LUNUX_WIN
 
-    mVdec.setFileList(filelist);
-    mVdec.Start_Vdec();
-    mVideoVo.SAMPLE_COMM_VO_StartChn(VO_MODE_1MUX);
-    mVideoVo.SAMPLE_COMM_VO_BindVpss(0,mVdec.getVpssGrp(),mVdec.getVpssChn());
 
 #endif
     onPositionChanged(0);

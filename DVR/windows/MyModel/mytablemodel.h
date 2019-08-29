@@ -98,8 +98,6 @@ private:
     QString mCurrentPath;
     QStack <QString> mPath;
     QFileInfoList mFileInfoList;
-    VideoSearch mVideoSearch;
-    VideoFileList mVideoFileList;
     QFuture<void> mProcess;
     bool mProcess_Run;
     QList<MP4FileInfo> mMp4FileList;

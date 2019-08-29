@@ -50,7 +50,6 @@ private:
     QPushButton *mVideoExit;
 #ifndef LUNUX_WIN
     Sample_Common_Vo mVideoVo;
-    VideoPlay mVdec;
     MP4VideoPlay mMp4VideoPlay;
 #endif
     qint64 duration;

@@ -33,7 +33,7 @@ void H264VideoSource::doGetNextFrame()
         start.append(0);
         end.append(QDateTime::currentDateTime().toTime_t());
         mVideoStreamPro.setTime(start,end,VIDEO_NORMAL);
-        if(!mVideoStreamPro.startVenc(mChn,LOCALMODE1)){
+        if(!mVideoStreamPro.startVenc(mChn,REALTIME1)){
             qDebug()<<"start venc error";
             return;
         }

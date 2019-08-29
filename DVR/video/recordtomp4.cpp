@@ -279,7 +279,7 @@ bool RecordToMP4::changeAlarmFile(int Chn)
         mVideoEventFileInfoList[Chn][i].sttime = QDateTime::currentDateTime().toTime_t();
         mVideoEventFileInfoList[Chn][i].stPts = 0;
     }
-
+    LOGWE("%s:%d",__FUNCTION__,__LINE__);
     mEventFileMutex.unlock();
     return true;
 }
@@ -294,9 +294,12 @@ bool RecordToMP4::addVideoAlarmToFile(int Chn)
         qDebug()<<"can not add alarm file,record not on list";
         return false;
     }
+    LOGWE("%s:%d",__FUNCTION__,__LINE__);
     mFileMutex.lock();
+    LOGWE("%s:%d",__FUNCTION__,__LINE__);
     if(!mVencParam[index].Mp4File.isOpen()){
         qDebug()<<"addVideoAlarmToFile error";
+        LOGWE("%s:%d",__FUNCTION__,__LINE__);
         mFileMutex.unlock();
         return false;
     }
@@ -319,6 +322,7 @@ bool RecordToMP4::addVideoAlarmToFile(int Chn)
 
         qDebug("write alarm file sucess!\n");
     }
+    LOGWE("%s:%d",__FUNCTION__,__LINE__);
     mFileMutex.unlock();
 
     return true;
@@ -371,6 +375,7 @@ bool RecordToMP4::createNewMp4File(int Chn)
     sprintf(fileindex_name,"%sHI%d.mp4",venc_path_name,mVencParam[index].curFileIndex);
     if(!file.createMP4File(fileindex_name,25,size)){
         qDebug()<<"create new file error";
+        mFileMutex.unlock();
         return false;
     }
 
@@ -393,6 +398,7 @@ bool RecordToMP4::saveMp4File(int Chn)
     mFileMutex.lock();
     if(!mVencParam[index].Mp4File.isOpen()){
         qDebug()<<"mp4file not open";
+        mFileMutex.unlock();
         return false;
     }
 
@@ -489,10 +495,12 @@ bool RecordToMP4::addChnToRecord(int Chn)
 
 bool RecordToMP4::deleteChnFromRecord(int Chn)
 {
+    LOGWE("%s:%d",__FUNCTION__,__LINE__);
     mEventFileMutex.lock();
     addVideoAlarmToFile(Chn);
     removeVideoAlarmEventFromlist(Chn);
     mEventFileMutex.unlock();
+    LOGWE("%s:%d",__FUNCTION__,__LINE__);
     return saveMp4File(Chn);
 }
 
@@ -542,6 +550,7 @@ void RecordToMP4::onViStatusChangedSlot(VI_CHN Chn,HI_BOOL status)
 
 void RecordToMP4::onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool change)
 {
+    LOGWE("%s:%d",__FUNCTION__,__LINE__);
     mEventFileMutex.lock();
     if(!isRecordOpen(Chn)){
         qDebug()<<"record not open";
@@ -564,6 +573,7 @@ void RecordToMP4::onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool c
             return;
         }
     }
+    LOGWE("%s:%d",__FUNCTION__,__LINE__);
     mEventFileMutex.unlock();
 }
 

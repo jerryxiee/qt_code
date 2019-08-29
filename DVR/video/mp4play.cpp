@@ -208,11 +208,9 @@ int MP4VideoPlay::openFile(const char *name)
 void MP4VideoPlay::closeFile()
 {
     if(mAVfmtCtx){
-        printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
         avformat_close_input(&mAVfmtCtx);
         mAVfmtCtx = nullptr;
     }
-    printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
 
 }
 
@@ -457,6 +455,7 @@ void MP4VideoPlay::run()
 
             }
         }
+        av_packet_unref(&pkt);
 
 
 //        gettimeofday(&etv, &tz);

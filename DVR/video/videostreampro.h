@@ -51,7 +51,7 @@ private:
     QList<uint>mStartTime;
     QList<uint>mEndTime;
     VIDEO_TYPE mVideoType;
-    VideoSearch mVideoSearch;
+//    VideoSearch mVideoSearch;
     bool mStart;
 
 

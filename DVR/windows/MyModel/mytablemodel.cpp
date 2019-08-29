@@ -24,14 +24,11 @@ MyTableModel::MyTableModel(QObject *parent):
 //    showFileInfoList(list);
 
     connect(this,SIGNAL(refrushModelSignal()),this,SLOT(refrushModel()));
-//    connect(this,SIGNAL(filelistChangeSignal(VideoFileList &)),Widget::getVideoDisplayWin(),SLOT(onVideoDispListSlot(VideoFileList &)));
     connect(this,SIGNAL(filelistChangeSignal(QList<MP4FileInfo> &)),Widget::getVideoDisplayWin(),SLOT(onVideoDispListSlot(QList<MP4FileInfo> &)));
-//    connect(this,SIGNAL(setWinNumSignal(int)),Widget::getVideoDisplayWin(),SLOT(onSetWinNum(int)));
 }
 
 MyTableModel::~MyTableModel()
 {
-//    disconnect(this,SIGNAL(filelistChangeSignal(VideoFileList &)),Widget::getVideoDisplayWin(),SLOT(onVideoDispListSlot(VideoFileList &)));
     disconnect(this,SIGNAL(filelistChangeSignal(QList<MP4FileInfo> &)),Widget::getVideoDisplayWin(),SLOT(onVideoDispListSlot(QList<MP4FileInfo> &)));
     mProcess_Run = false;
     mProcess.waitForFinished();
@@ -485,7 +482,6 @@ void MyTableModel::priPreViewFile(int Chn ,int filetype)
             mp4fileindex->getFileList(mMp4FileList);
 
             delete mp4fileindex;
-//            mVideoFileList = mVideoSearch.readFileList(Chn,VIDEO_MOVEDETECT);
             break;
         }
     }
@@ -495,7 +491,6 @@ void MyTableModel::priPreViewFile(int Chn ,int filetype)
     qDebug()<<"getfile sec:"<<etv.tv_sec - stv.tv_sec<<" usec:"<<etv.tv_usec-stv.tv_usec;
 
     showMp4FileList(mMp4FileList);
-//    showVideoFileList(mVideoFileList);
 
 }
 
@@ -579,7 +574,6 @@ void MyTableModel::priSearchFile(int type,int Chn,int filetype,QString starttime
             mp4fileindex->getFileList(mMp4FileList,sttime,entime);
             delete  mp4fileindex;
     #endif
-//            showVideoFileList(mVideoFileList);
             break;
         }
         case 1:
@@ -594,9 +588,6 @@ void MyTableModel::priSearchFile(int type,int Chn,int filetype,QString starttime
 
     qDebug()<<"search sec:"<<etv.tv_sec - stv.tv_sec<<" usec:"<<etv.tv_usec-stv.tv_usec;
 
-
-//    mVideoFileList = mVideoSearch.searchFile(filelist,sttime,entime);
-//    showVideoFileList(mVideoFileList);
     showMp4FileList(mMp4FileList);
 
     return ;
@@ -605,12 +596,7 @@ void MyTableModel::priSearchFile(int type,int Chn,int filetype,QString starttime
 void MyTableModel::oncellDoubleClickedSlot(int row,int column)
 {
     Q_UNUSED(column)
-//    VideoFileList videolist;
 
-////    emit setWinNumSignal(1);
-//    videolist.append(mVideoFileList.at(row));
-//    mFileName = mVideoFileList.at(row).getFileName();
-//    emit filelistChangeSignal(videolist);
 
     QList<MP4FileInfo> fileinfolist;
     fileinfolist.append(mMp4FileList.at(row));
