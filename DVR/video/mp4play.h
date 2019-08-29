@@ -53,6 +53,7 @@ public slots:
     void pause();
     void play();
     void stop();
+    void onEndOfStream();
 
 
 private:

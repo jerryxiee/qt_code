@@ -92,7 +92,8 @@ private:
     bool mRun;
     int mMaxFd;
 
-    QList<ALARM_FILE> mVideoEventFileInfoList[VIDEO_MAX_NUM];
+//    QList<ALARM_FILE> mVideoEventFileInfoList[VIDEO_MAX_NUM];
+    QList<MP4FileInfo> mVideoEventFileInfoList[VIDEO_MAX_NUM];
     QMutex mEventFileMutex;
 
 

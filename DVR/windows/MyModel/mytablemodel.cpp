@@ -467,23 +467,29 @@ void MyTableModel::priPreViewFile(int Chn ,int filetype)
     struct timeval etv;
     struct timezone tz;
     gettimeofday(&stv, &tz);
-
+#ifndef LUNUX_WIN
     switch (filetype) {
         case 0:
         {
-    #ifndef LUNUX_WIN
+
             MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(Chn);
             mp4fileindex->getFileList(mMp4FileList);
-    #endif
+
+            delete mp4fileindex;
             break;
 
         }
         case 1:
         {
+            MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(Chn,VIDEO_MOVEDETECT);
+            mp4fileindex->getFileList(mMp4FileList);
+
+            delete mp4fileindex;
 //            mVideoFileList = mVideoSearch.readFileList(Chn,VIDEO_MOVEDETECT);
             break;
         }
     }
+#endif
     gettimeofday(&etv, &tz);
 
     qDebug()<<"getfile sec:"<<etv.tv_sec - stv.tv_sec<<" usec:"<<etv.tv_usec-stv.tv_usec;
@@ -500,25 +506,29 @@ int MyTableModel::playVideoList(int type,int Chn,int filetype,QString starttime,
     uint entime = QDateTime::fromString(endtime, "yyyy/MM/dd hh:mm:ss").toTime_t();
 
 //    emit setWinNumSignal(1);
+#ifndef LUNUX_WIN
     switch (filetype) {
         case 0:
         {
-    #ifndef LUNUX_WIN
+
             MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(Chn);
             mp4fileindex->getFileList(filelist,sttime,entime);
             delete  mp4fileindex;
-    #endif
+
 
 
             break;
         }
         case 1:
         {
+            MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(Chn,VIDEO_MOVEDETECT);
+            mp4fileindex->getFileList(filelist,sttime,entime);
+            delete  mp4fileindex;
 
             break;
         }
     }
-
+#endif
     if(filelist.count() == 0){
          return 0;
      }
@@ -574,8 +584,9 @@ void MyTableModel::priSearchFile(int type,int Chn,int filetype,QString starttime
         }
         case 1:
         {
-//            filelist = mVideoSearch.readFileList(Chn,VIDEO_MOVEDETECT);
-//            showVideoFileList(mVideoFileList);
+            MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(Chn,VIDEO_MOVEDETECT);
+            mp4fileindex->getFileList(mMp4FileList,sttime,entime);
+            delete  mp4fileindex;
             break;
         }
     }

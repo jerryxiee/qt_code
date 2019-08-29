@@ -111,7 +111,6 @@ int main(int argc, char *argv[])
 //    qmlRegisterType<QFileInfo>("FileInfo", 1, 0, "FileInfo");
 //    qmlRegisterType<SystemSet>("SystemConfig", 1, 0, "SystemConfig");
 
-    try {
         Widget w;
         w.show();
 
@@ -134,10 +133,6 @@ int main(int argc, char *argv[])
 //    mp4test.start();
 #endif
         ret = a.exec();
-    } catch(exception &e) {
-        qDebug()<<"QApplication::quit";
-        QApplication::quit();
-    }
 #ifndef LUNUX_WIN
 //    vio.Venc_exit();
 //    vio.wait();

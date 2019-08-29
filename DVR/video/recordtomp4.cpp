@@ -196,15 +196,24 @@ bool RecordToMP4::removeVideoAlarmEventFromlist(int Chn,VIDEO_TYPE type)
 
 bool RecordToMP4::addVideoAlarmEventFromlist(int Chn,VIDEO_TYPE type)
 {
-    ALARM_FILE alarmfile;
+    MP4FileInfo alarmfileinfo;
     int index;
 
     index = checkVideoAlarmList(Chn,type);
     if(index < 0){
-        alarmfile.type = type;
-        alarmfile.sTime = QDateTime::currentDateTime().toTime_t();
+        int videoindex = checkRecordChn(Chn);
+        mFileMutex.lock();
+        if(videoindex >= 0&&mVencParam[videoindex].Mp4File.isOpen()){
+            alarmfileinfo.stPts = mVencParam[videoindex].Mp4File.getCurPts();
+        }else {
+            alarmfileinfo.stPts = 0;
+        }
+        mFileMutex.unlock();
+        alarmfileinfo.type = type;
+        alarmfileinfo.sttime = QDateTime::currentDateTime().toTime_t();
+
 //        mEventFileMutex.lock();
-        mVideoEventFileInfoList[Chn].append(alarmfile);
+        mVideoEventFileInfoList[Chn].append(alarmfileinfo);
 //        mEventFileMutex.unlock();
         qDebug()<<"add alarm to list";
 
@@ -217,9 +226,6 @@ bool RecordToMP4::addVideoAlarmEventFromlist(int Chn,VIDEO_TYPE type)
 
 bool RecordToMP4::addVideoAlarmToFile(int Chn,VIDEO_TYPE type)
 {
-    char alarmfile[VIDEO_FILENAME_SIZE];
-    FILE *pFile;
-
     int index = checkRecordChn(Chn);
     if(index < 0){
         qDebug()<<"can not add alarm file,record not on list";
@@ -240,41 +246,22 @@ bool RecordToMP4::addVideoAlarmToFile(int Chn,VIDEO_TYPE type)
         return false;
     }
 
-    getAlarmFileName(Chn,type,alarmfile,VIDEO_FILENAME_SIZE);
+    MP4FileIndex *alarmFile = MP4FileIndex::openFileIndex(Chn,type);
 
-    if(!checkAlarmFile(alarmfile)){
-        mFileMutex.unlock();
-        return false;
-    }
-
-    mVideoEventFileInfoList[Chn][alarmindex].eTime = QDateTime::currentDateTime().toTime_t();
+//    mVideoEventFileInfoList[Chn][alarmindex].eTime = QDateTime::currentDateTime().toTime_t();
     LOGWE("%s:%d",__FUNCTION__,__LINE__);
 //    mFileMutex.lock();
+    mVideoEventFileInfoList[Chn][alarmindex].endtime = QDateTime::currentDateTime().toTime_t();
+    mVideoEventFileInfoList[Chn][alarmindex].endPts = mVencParam[index].Mp4File.getCurPts();
+    mVideoEventFileInfoList[Chn][alarmindex].duration =mVideoEventFileInfoList[Chn][alarmindex].endPts + alarmFile->getDuration();
     strcpy(mVideoEventFileInfoList[Chn][alarmindex].filename,mVencParam[index].Mp4File.getMP4FileName());
     mFileMutex.unlock();
-    LOGWE("%s:%d",__FUNCTION__,__LINE__);
-    pFile = fopen(alarmfile,"rb+");
-    if(!pFile){
-        qDebug("open file[%s] error\n",alarmfile);
-        return false;
-    }
-    ALARM_VIDEO_HEAD videoFileHead;
-    fread((char *)&videoFileHead,sizeof (ALARM_VIDEO_HEAD),1,pFile);
-    videoFileHead.type = mVideoEventFileInfoList[Chn][alarmindex].type;
-    videoFileHead.num ++;
-    videoFileHead.mtime = QDateTime::currentDateTime().toTime_t();
-    videoFileHead.cTime = videoFileHead.cTime < mVideoEventFileInfoList[Chn][alarmindex].sTime?videoFileHead.cTime:mVideoEventFileInfoList[Chn][alarmindex].sTime;
 
-    qDebug()<<"alarm file num:"<<videoFileHead.num;
-    fseek(pFile,0,SEEK_END);
-    fwrite((void *)&mVideoEventFileInfoList[Chn][alarmindex],sizeof (ALARM_FILE),1,pFile);
+    alarmFile->addIndexToFile(mVideoEventFileInfoList[Chn][alarmindex]);
+    alarmFile->close();
+    delete alarmFile;
 
-    fseek(pFile,0,SEEK_SET);
-    fwrite((void *)&videoFileHead,sizeof (ALARM_VIDEO_HEAD),1,pFile);
-    fclose(pFile);
-
-    qDebug("write alarm file[%s] sucess!\n",alarmfile);
-
+    qDebug("chn[%d] write alarm file sucess!\n",Chn);
     return true;
 
 
@@ -289,7 +276,8 @@ bool RecordToMP4::changeAlarmFile(int Chn)
     LOGWE("%s:%d",__FUNCTION__,__LINE__);
 
     for (int i = 0;i < mVideoEventFileInfoList[Chn].count();i++) {
-        mVideoEventFileInfoList[Chn][i].sTime = QDateTime::currentDateTime().toTime_t();
+        mVideoEventFileInfoList[Chn][i].sttime = QDateTime::currentDateTime().toTime_t();
+        mVideoEventFileInfoList[Chn][i].stPts = 0;
     }
 
     mEventFileMutex.unlock();
@@ -298,8 +286,8 @@ bool RecordToMP4::changeAlarmFile(int Chn)
 
 bool RecordToMP4::addVideoAlarmToFile(int Chn)
 {
-    char alarmfile[VIDEO_FILENAME_SIZE];
-    FILE *pFile;
+//    char alarmfile[VIDEO_FILENAME_SIZE];
+//    FILE *pFile;
 
     int index = checkRecordChn(Chn);
     if(index < 0){
@@ -314,35 +302,22 @@ bool RecordToMP4::addVideoAlarmToFile(int Chn)
     }
 
     for(int i = 0;i < mVideoEventFileInfoList[Chn].count();i++){
-        getAlarmFileName(Chn,mVideoEventFileInfoList[Chn][i].type,alarmfile,VIDEO_FILENAME_SIZE);
-        if(!checkAlarmFile(alarmfile)){
-            continue;
-        }
-        mVideoEventFileInfoList[Chn][i].eTime = QDateTime::currentDateTime().toTime_t();
-//        LOGWE("%s:%d",__FUNCTION__,__LINE__);
-//        mFileMutex.lock();
+
+        MP4FileIndex *alarmFile = MP4FileIndex::openFileIndex(Chn,mVideoEventFileInfoList[Chn][i].type);
+
+    //    mVideoEventFileInfoList[Chn][alarmindex].eTime = QDateTime::currentDateTime().toTime_t();
+        LOGWE("%s:%d",__FUNCTION__,__LINE__);
+    //    mFileMutex.lock();
+        mVideoEventFileInfoList[Chn][i].endtime = QDateTime::currentDateTime().toTime_t();
+        mVideoEventFileInfoList[Chn][i].endPts = mVencParam[index].Mp4File.getCurPts();
+        mVideoEventFileInfoList[Chn][i].duration =mVideoEventFileInfoList[Chn][i].endPts + alarmFile->getDuration();
         strcpy(mVideoEventFileInfoList[Chn][i].filename,mVencParam[index].Mp4File.getMP4FileName());
-//        mFileMutex.unlock();
-//        LOGWE("%s:%d",__FUNCTION__,__LINE__);
-        pFile = fopen(alarmfile,"rb+");
-        if(!pFile){
-            qDebug("open file[%s] error\n",alarmfile);
-            continue;
-        }
-        ALARM_VIDEO_HEAD videoFileHead;
-        fread((char *)&videoFileHead,sizeof (ALARM_VIDEO_HEAD),1,pFile);
-        videoFileHead.type = mVideoEventFileInfoList[Chn][i].type;
-        videoFileHead.num ++;
-        videoFileHead.mtime = QDateTime::currentDateTime().toTime_t();
 
-        fseek(pFile,0,SEEK_END);
-        fwrite((void *)&mVideoEventFileInfoList[Chn][i],sizeof (ALARM_FILE),1,pFile);
+        alarmFile->addIndexToFile(mVideoEventFileInfoList[Chn][i]);
+        alarmFile->close();
+        delete alarmFile;
 
-        fseek(pFile,0,SEEK_SET);
-        fwrite((void *)&videoFileHead,sizeof (ALARM_VIDEO_HEAD),1,pFile);
-        fclose(pFile);
-
-        qDebug("write alarm file[%s] sucess!alarm file num:%d\n",alarmfile,videoFileHead.num);
+        qDebug("write alarm file sucess!\n");
     }
     mFileMutex.unlock();
 

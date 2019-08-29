@@ -2,6 +2,7 @@
 
 MP4VideoPlay::MP4VideoPlay(QObject *parent) : QThread(parent)
 {
+    connect(this,SIGNAL(endOfStream()),this,SLOT(onEndOfStream()));
 
 }
 
@@ -115,6 +116,12 @@ void MP4VideoPlay::stop()
     setPosition(0);
     mMediaState = QMediaPlayer::StoppedState;
     emit stateChanged(QMediaPlayer::StoppedState);
+}
+
+void MP4VideoPlay::onEndOfStream()
+{
+    stop();
+    emit positionChanged(mDuration/1000);
 }
 
 int MP4VideoPlay::getVpssGrp() const

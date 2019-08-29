@@ -2,6 +2,11 @@
 #include <QDebug>
 #include <QDateTime>
 
+QString MP4FileIndex::ALARM_FILE_PATH = "/mnt/sda1/alarm/";
+QString MP4FileIndex::IO_FILE = ".io_alarm";
+QString MP4FileIndex::MOVED_FILE = ".move_alarm";
+QString MP4FileIndex::VENC_PATH = "/mnt/sda1/venc/";
+
 
 MP4FileIndex *MP4FileIndex::createNewFileIndex(int Chn)
 {
@@ -44,13 +49,41 @@ MP4FileIndex *MP4FileIndex::openFileIndex(int Chn)
 
     return  new MP4FileIndex(indexfile);
 }
+MP4FileIndex *MP4FileIndex::openFileIndex(int Chn,VIDEO_TYPE type)
+{
+    QString filename;
+    getFileName(Chn,type,filename);
+
+//    QFileInfo fileinfo(filename);
+//    if(!fileinfo.exists()){
+//        qDebug()<<"file not exist";
+//        return nullptr;
+//    }
+
+    return  new MP4FileIndex(filename);
+}
+
+MP4FileIndex::MP4FileIndex()
+{
+
+}
 
 MP4FileIndex::MP4FileIndex(QString filename)
 {
+    bool isNew = false;
+
+    QFileInfo fileinfo(filename);
+    if(!fileinfo.exists()){
+        qDebug()<<"file not exist";
+        isNew = true;
+    }
+
     mFile.setFileName(filename);
     if(!mFile.open(QIODevice::ReadWrite)){
         qDebug()<<"open tabfile error";
     }
+    if(isNew)
+        reset();
     mFile.seek(mFile.size());
 
 }
@@ -314,4 +347,88 @@ int MP4FileIndex::searchRight(QList<MP4FileInfo> &filelist, int stindex, int end
 
     return findRightIndex(filelist, stindex, endindex,time);
 
+}
+
+
+bool MP4FileIndex::getFileName(int Chn,VIDEO_TYPE type,QString &filename)
+{
+//    char file[VIDEO_FILENAME_SIZE];
+
+    switch (type) {
+        case VIDEO_NORMAL:
+        {
+            filename = VENC_PATH+"channel"+QString::number(Chn)+"/mp4.index";
+            break;
+        }
+        case VIDEO_MOVEDETECT:
+        {
+            filename = ALARM_FILE_PATH+MOVED_FILE+QString::number(Chn);
+//            sprintf(file,"%s/%s%d",ALARM_FILE_PATH,MOVED_FILE,Chn);
+            break;
+        }
+        case VIDEO_IO0:
+        case VIDEO_IO1:
+        case VIDEO_IO2:
+        case VIDEO_IO3:
+        {
+            filename = ALARM_FILE_PATH+IO_FILE+QString::number(type)+QString::number(Chn);
+//            sprintf(file,"%s/%s%d%d",ALARM_FILE_PATH,IO_FILE,type,Chn);
+            break;
+        }
+    default:{
+        return false;
+    }
+    }
+//    if(len < strlen(file)){
+//        return false;
+//    }
+//    strcpy(filename,file);
+
+    return true;
+}
+
+bool MP4FileIndex::readFileHead(MP4FileIndexHead &head,int Chn,VIDEO_TYPE type)
+{
+    QString filename;
+    getFileName(Chn,type,filename);
+
+}
+
+bool MP4FileIndex::writeFileHead(MP4FileIndexHead &head,int Chn,VIDEO_TYPE type)
+{
+
+}
+
+int MP4FileIndex::getFileNum(int Chn,VIDEO_TYPE type)
+{
+
+}
+
+int64_t MP4FileIndex::getDuration(int Chn,VIDEO_TYPE type)
+{
+    QString filename;
+    getFileName(Chn,type,filename);
+
+
+
+}
+
+bool MP4FileIndex::addIndexToFile(MP4FileInfo &info,int Chn,VIDEO_TYPE type)
+{
+
+
+    return true;
+}
+
+int MP4FileIndex::getFileList(QList<MP4FileInfo> &filelist,int Chn,VIDEO_TYPE type)
+{
+
+    return filelist.count();
+}
+
+int MP4FileIndex::getFileList(QList<MP4FileInfo> &filelist,uint sttime,uint endtime,int Chn,VIDEO_TYPE type)
+{
+
+
+    return filelist.count();
 }
