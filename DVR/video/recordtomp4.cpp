@@ -253,7 +253,7 @@ bool RecordToMP4::addVideoAlarmToFile(int Chn,VIDEO_TYPE type)
 //    mFileMutex.lock();
     mVideoEventFileInfoList[Chn][alarmindex].endtime = QDateTime::currentDateTime().toTime_t();
     mVideoEventFileInfoList[Chn][alarmindex].endPts = mVencParam[index].Mp4File.getCurPts();
-    mVideoEventFileInfoList[Chn][alarmindex].duration =mVideoEventFileInfoList[Chn][alarmindex].endPts + alarmFile->getDuration();
+    mVideoEventFileInfoList[Chn][alarmindex].duration =mVideoEventFileInfoList[Chn][alarmindex].endPts - mVideoEventFileInfoList[Chn][alarmindex].stPts + alarmFile->getDuration();
     strcpy(mVideoEventFileInfoList[Chn][alarmindex].filename,mVencParam[index].Mp4File.getMP4FileName());
     mFileMutex.unlock();
 
@@ -310,7 +310,7 @@ bool RecordToMP4::addVideoAlarmToFile(int Chn)
     //    mFileMutex.lock();
         mVideoEventFileInfoList[Chn][i].endtime = QDateTime::currentDateTime().toTime_t();
         mVideoEventFileInfoList[Chn][i].endPts = mVencParam[index].Mp4File.getCurPts();
-        mVideoEventFileInfoList[Chn][i].duration =mVideoEventFileInfoList[Chn][i].endPts + alarmFile->getDuration();
+        mVideoEventFileInfoList[Chn][i].duration =mVideoEventFileInfoList[Chn][i].endPts - mVideoEventFileInfoList[Chn][i].stPts + alarmFile->getDuration();
         strcpy(mVideoEventFileInfoList[Chn][i].filename,mVencParam[index].Mp4File.getMP4FileName());
 
         alarmFile->addIndexToFile(mVideoEventFileInfoList[Chn][i]);

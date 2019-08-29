@@ -5,6 +5,7 @@
 #include "common/sample_comm.h"
 #include "windows/videoplaytest.h"
 #include "video/videosearch.h"
+#include "video/mp4fileindex.h"
 
 class Test : public QObject
 {
@@ -18,14 +19,14 @@ public:
 
 signals:
     void videoAlarmEventChangedSignal(VI_CHN Chn,VIDEO_TYPE type,bool change);
-    void videoPlayListSignal(VideoFileList &);
+    void videoPlayListSignal(QList<MP4FileInfo> &);
     void setWinNumSignal(int);
 
 public slots:
 
 private:
-    VideoSearch mVideoSearch;
-    VideoFileList mVideoFileList;
+//    VideoSearch mVideoSearch;
+//    VideoFileList mVideoFileList;
 };
 
 #endif // TEST_H

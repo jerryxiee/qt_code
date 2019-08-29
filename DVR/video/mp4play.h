@@ -24,6 +24,7 @@ public:
 
     int getVpssGrp() const;
     int getVpssChn() const;
+    int setVpssToUser(SIZE_S  stSize);
     bool startPlay();
     void stopPlay();
 protected:

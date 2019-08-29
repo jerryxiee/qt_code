@@ -28,7 +28,12 @@ void H264VideoSource::doGetNextFrame()
     struct timeval TimeoutVal;
 
     if(!mHaveStartedReading){
-        if(!mVideoStreamPro.startVenc(mChn,REALTIME1)){
+        QList<uint>start;
+        QList<uint>end;
+        start.append(0);
+        end.append(QDateTime::currentDateTime().toTime_t());
+        mVideoStreamPro.setTime(start,end,VIDEO_NORMAL);
+        if(!mVideoStreamPro.startVenc(mChn,LOCALMODE1)){
             qDebug()<<"start venc error";
             return;
         }

@@ -80,7 +80,7 @@ void Widget::InitWindows()
     mVideoPlayTestWin = new videoplaytest();
     connect(mVideoPlayTestWin, SIGNAL(exitClicked()), this, SLOT(onShowQml()));
     connect(&mTest,SIGNAL(setWinNumSignal(int)),mVideoPlayTestWin,SLOT(onSetWinNum(int)));
-    connect(&mTest,SIGNAL(videoPlayListSignal(VideoFileList &)),mVideoPlayTestWin,SLOT(onVideoDispListSlot(VideoFileList &)));
+    connect(&mTest,SIGNAL(videoPlayListSignal(QList<MP4FileInfo> &)),mVideoPlayTestWin,SLOT(onVideoDispListSlot(QList<MP4FileInfo> &)));
     mWindows->addWidget(mVideoPlayTestWin);
 
 

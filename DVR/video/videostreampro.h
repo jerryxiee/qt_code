@@ -9,6 +9,8 @@
 #include "video/videolink.h"
 #include "video/videocontrol.h"
 #include "video/videosearch.h"
+#include "video/mp4fileindex.h"
+#include "video/mp4play.h"
 
 class VideoStreamPro : public QObject
 {
@@ -45,7 +47,7 @@ private:
     Sample_Common_Venc *mpVenc;
     Sample_Common_Vpss *mpVpss;
     VideoLink mVideoLink;
-    QList<VideoPlay>mVideoPlayList;
+    QList<MP4VideoPlay>mVideoPlayList;
     QList<uint>mStartTime;
     QList<uint>mEndTime;
     VIDEO_TYPE mVideoType;

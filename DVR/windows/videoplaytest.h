@@ -6,6 +6,7 @@
 #include "video/videofile.h"
 #ifndef LUNUX_WIN
 #include <video/videoplay.h>
+#include <video/mp4play.h>
 //#include "common/sample_common_sys.h"
 #endif
 
@@ -25,13 +26,14 @@ signals:
 public slots:
     void onSetWinNum(int num);
     void onVideoExitClickSlot();
-    void onVideoDispListSlot(VideoFileList & filelist);
+    void onVideoDispListSlot(QList<MP4FileInfo> & filelist);
+//    void onVideoDispListSlot(QList<MP4FileInfo> & filelist);
 
 private:
     QPushButton *mVideoExit;
 #ifndef LUNUX_WIN
     Sample_Common_Vo mVideoVo;
-    QList<VideoPlay>mVideoPlayList;
+    QList<MP4VideoPlay>mVideoPlayList;
 #endif
     int mWinNum;
 };

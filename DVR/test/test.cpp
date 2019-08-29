@@ -52,18 +52,19 @@ void Test::play(int Chn,QString starttime,QString endtime)
     qDebug()<<"chn:"<<Chn<<" stime:"<<starttime<<" endt:"<<endtime;
 
 //    return;
-    VideoFileList filelist;
+    QList<MP4FileInfo> filelist;
     uint sttime = QDateTime::fromString(starttime, "yyyy/MM/dd hh:mm:ss").toTime_t();
     uint entime = QDateTime::fromString(endtime, "yyyy/MM/dd hh:mm:ss").toTime_t();
 
 
-    filelist = mVideoSearch.readFileList(Chn,VIDEO_NORMAL);
+    MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(Chn);
+    mp4fileindex->getFileList(filelist,sttime,entime);
+    delete  mp4fileindex;
 
-    mVideoFileList = mVideoSearch.searchFile(filelist,sttime,entime);
-    if(mVideoFileList.count() == 0){
+    if(filelist.count() == 0){
         return;
     }
 
-    emit videoPlayListSignal(mVideoFileList);
+    emit videoPlayListSignal(filelist);
 
 }

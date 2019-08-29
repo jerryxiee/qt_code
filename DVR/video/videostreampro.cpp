@@ -61,7 +61,7 @@ bool VideoStreamPro::startLocalStream(VO_DEV VoDev,VO_LAYER VoLayer,int startChn
 {
     int ret;
     int i;
-    VideoFileList filelist;
+    QList<MP4FileInfo> filelist;
     SIZE_S stSize = {1280,720};
 
     ret = mVideoLink.Init(VoDev,VoLayer,VO_MODE_4MUX);
@@ -71,21 +71,23 @@ bool VideoStreamPro::startLocalStream(VO_DEV VoDev,VO_LAYER VoLayer,int startChn
     }
 
     for (i = 0;i < 4;i++) {
-        filelist = mVideoSearch.readFileList(startChn+i,mVideoType);
-        filelist = mVideoSearch.searchFile(filelist,mStartTime.at(i),mEndTime.at(i));
+        MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(startChn+i,mVideoType);
+        mp4fileindex->getFileList(filelist,mStartTime.at(i),mEndTime.at(i));
+        delete  mp4fileindex;
+
         if(filelist.count() == 0){
             qDebug()<<"not file";
             continue;
         }
 
-        mVideoPlayList.append(VideoPlay());
-        mVideoPlayList.last().setFileList(filelist);
-        if(!mVideoPlayList.last().Start_Vdec()){
-            mVideoPlayList.last().Stop_Vdec();
+        mVideoPlayList.append(MP4VideoPlay());
+        mVideoPlayList.last().setPlaylist(filelist);
+        if(!mVideoPlayList.last().startPlay()){
+            mVideoPlayList.last().stopPlay();
             continue;
         }
         mVideoPlayList.last().setVpssToUser(stSize);
-        mVideoPlayList.last().setDelay(15000);
+//        mVideoPlayList.last().setDelay(15000);
 //        if(mVideoLink.setChnFrameRate(i,20) < 0){
 //            qDebug()<<"set chn framerate error";
 //        }
@@ -107,7 +109,7 @@ bool VideoStreamPro::stopLocalStream(VO_DEV VoDev,VO_LAYER VoLayer)
     mVideoLink.DeInit(VoDev,VoLayer);
     for (i = 0;i < mVideoPlayList.count();i++) {
         mVideoLink.UnBindVpss(i,mVideoPlayList.at(i).getVpssGrp(),mVideoPlayList.at(i).getVpssChn());
-        mVideoPlayList[i].Stop_Vdec();
+        mVideoPlayList[i].stopPlay();
     }
     return true;
 }
@@ -118,7 +120,7 @@ bool VideoStreamPro::startVenc(int Chn,SEND_STREAM_T type)
     int i;
     int VpssGrp;
     int VpssChn;
-    VideoFileList filelist;
+    QList<MP4FileInfo> filelist;
 
     if(type == TYPENUM || Chn >= VIDEO_MAX_NUM){
         qDebug()<<"not set stream type";
@@ -208,16 +210,22 @@ bool VideoStreamPro::startVenc(int Chn,SEND_STREAM_T type)
         break;
     }
     case LOCALMODE1:{
-        filelist = mVideoSearch.readFileList(Chn,mVideoType);
-        filelist = mVideoSearch.searchFile(filelist,mStartTime.first(),mEndTime.first());
+        if(mStartTime.count()<1 || mEndTime.count()<1){
+            qDebug()<<"not set time";
+            goto END_1;
+        }
+        MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(Chn,mVideoType);
+        mp4fileindex->getFileList(filelist,mStartTime.first(),mEndTime.first());
+        delete  mp4fileindex;
+
         if(filelist.count() == 0){
             qDebug()<<"not file";
             goto END_1;
         }
-        mVideoPlayList.append(VideoPlay());
-        mVideoPlayList.first().setFileList(filelist);
-        if(!mVideoPlayList.first().Start_Vdec()){
-            mVideoPlayList.first().Stop_Vdec();
+        mVideoPlayList.append(MP4VideoPlay());
+        mVideoPlayList.first().setPlaylist(filelist);
+        if(!mVideoPlayList.first().startPlay()){
+            mVideoPlayList.first().stopPlay();
             goto END_1;
         }
 
@@ -226,7 +234,7 @@ bool VideoStreamPro::startVenc(int Chn,SEND_STREAM_T type)
         {
             SAMPLE_PRT("Start Venc failed!\n");
             mpVenc->SAMPLE_COMM_VENC_UnBindVpss(mVideoPlayList.first().getVpssGrp(), mVideoPlayList.first().getVpssChn());
-            mVideoPlayList.first().Stop_Vdec();
+            mVideoPlayList.first().stopPlay();
             goto END_1;
         }
 
@@ -288,6 +296,8 @@ bool VideoStreamPro::startVenc(int Chn,SEND_STREAM_T type)
 
 END_1:
     mpVenc->SAMPLE_COMM_VENC_Stop();
+    delete mpVenc;
+    mpVenc = nullptr;
     return false;
 
 }
@@ -330,7 +340,7 @@ bool VideoStreamPro::stopVenc(int Chn)
     }
     case LOCALMODE1:{
         mpVenc->SAMPLE_COMM_VENC_UnBindVpss(mVideoPlayList.first().getVpssGrp(), mVideoPlayList.first().getVpssChn());
-        mVideoPlayList.first().Stop_Vdec();
+        mVideoPlayList.first().stopPlay();
 
         break;
     }

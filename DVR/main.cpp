@@ -127,8 +127,8 @@ int main(int argc, char *argv[])
 
 
 #ifndef LUNUX_WIN
-//    RealTimeStream realtest;
-//    realtest.start();
+    RealTimeStream realtest;
+    realtest.start();
 //    VencToMp4Test mp4test;
 //    mp4test.start();
 #endif

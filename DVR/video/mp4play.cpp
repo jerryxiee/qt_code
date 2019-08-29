@@ -1,6 +1,6 @@
 #include "mp4play.h"
 
-MP4VideoPlay::MP4VideoPlay(QObject *parent) : QThread(parent)
+MP4VideoPlay::MP4VideoPlay(QObject *parent) : QThread(parent),mAVfmtCtx(nullptr)
 {
     connect(this,SIGNAL(endOfStream()),this,SLOT(onEndOfStream()));
 
@@ -18,7 +18,7 @@ MP4VideoPlay& MP4VideoPlay::operator=(const MP4VideoPlay& video)
 
 MP4VideoPlay::~MP4VideoPlay()
 {
-    stopPlay();
+//    stopPlay();
 
 }
 
@@ -28,6 +28,7 @@ void MP4VideoPlay::setPlaylist(QList<MP4FileInfo> &playlist)
     mCurFileIndex = 0;
     mCurPosition = 0;
     mRate = 1;
+    mAVfmtCtx = nullptr;
     if(mPlayList.count() == 1){
         mDuration = (playlist.first().endPts - playlist.first().stPts)*1000 / 90000;
     }else {
@@ -179,13 +180,13 @@ int MP4VideoPlay::openFile(const char *name)
     ret = avformat_open_input(&mAVfmtCtx, name, nullptr, nullptr);
     if(ret < 0){
         qDebug()<<"avformat_open_input failed";
-        return ret;
+        goto end;
     }
 
     ret = avformat_find_stream_info(mAVfmtCtx, nullptr);
     if(ret < 0){
         qDebug()<<"avformat_open_input failed";
-        return ret;
+        goto end;
     }
 
     for (uint i = 0;i <mAVfmtCtx->nb_streams ;i++) {
@@ -193,17 +194,25 @@ int MP4VideoPlay::openFile(const char *name)
             mVideoIndex = i;
         }
     }
+
     mPlayPts = 1000000/(mAVfmtCtx->streams[mVideoIndex]->r_frame_rate.num);
 
     return ret;
+
+    end:
+
+    avformat_close_input(&mAVfmtCtx);
+    return -1;
 }
 
 void MP4VideoPlay::closeFile()
 {
     if(mAVfmtCtx){
+        printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
         avformat_close_input(&mAVfmtCtx);
         mAVfmtCtx = nullptr;
     }
+    printf(">>>>>>>%s:%d\n",__FUNCTION__,__LINE__);
 
 }
 
@@ -263,6 +272,25 @@ int MP4VideoPlay::readFrame(AVPacket &pkt)
 
 }
 
+int MP4VideoPlay::setVpssToUser(SIZE_S  stSize)
+{
+    if(!mpVpss){
+        qDebug()<<"vpss not init";
+        return -1;
+    }
+
+    VPSS_CHN_MODE_S stVpssMode;
+
+    stVpssMode.enChnMode = VPSS_CHN_MODE_USER;
+    stVpssMode.u32Width = stSize.u32Width;
+    stVpssMode.u32Height = stSize.u32Height;
+    stVpssMode.enPixelFormat = SAMPLE_PIXEL_FORMAT;
+
+    return  mpVpss->SAMPLE_COMM_VPSS_SetChnMod(0,VPSS_CHN0,&stVpssMode,8);
+
+}
+
+
 bool MP4VideoPlay::startPlay()
 {
     HI_S32 s32Ret;
@@ -315,8 +343,6 @@ bool MP4VideoPlay::startPlay()
         goto END1;
     }
 
-
-
     s32Ret = mpVdec->SAMPLE_COMM_VDEC_Start(1);
     if(s32Ret != HI_SUCCESS)
     {
@@ -338,7 +364,7 @@ bool MP4VideoPlay::startPlay()
     if(mPlayList.first().stPts > 0){
         av_seek_frame(mAVfmtCtx,mVideoIndex,mPlayList.first().stPts,AVSEEK_FLAG_BACKWARD);
     }
-
+    qDebug()<<"start play";
     play();
     start();
     return true;
@@ -350,7 +376,7 @@ END2:
 
 END1:
     mpVpss->SAMPLE_COMM_VPSS_Stop();
-
+    mpVdec = nullptr;
     return false;
 
 }

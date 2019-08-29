@@ -24,7 +24,7 @@ videoplaytest::~videoplaytest()
 #ifndef LUNUX_WIN
     for (int i = 0;i < mVideoPlayList.count();i++) {
         mVideoVo.SAMPLE_COMM_VO_UnBindVpss(i,mVideoPlayList.at(i).getVpssGrp(),mVideoPlayList.at(i).getVpssChn());
-        mVideoPlayList[i].Stop_Vdec();
+        mVideoPlayList[i].stopPlay();
     }
 
     mVideoVo.SAMPLE_COMM_VO_StopChn();
@@ -68,7 +68,7 @@ void videoplaytest::onVideoExitClickSlot()
 #ifndef LUNUX_WIN
     for (int i = 0;i < mVideoPlayList.count();i++) {
         mVideoVo.SAMPLE_COMM_VO_UnBindVpss(i,mVideoPlayList.at(i).getVpssGrp(),mVideoPlayList.at(i).getVpssChn());
-        mVideoPlayList[i].Stop_Vdec();
+        mVideoPlayList[i].stopPlay();
     }
     mVideoPlayList.clear();
     mVideoVo.SAMPLE_COMM_VO_StopChn();
@@ -76,13 +76,13 @@ void videoplaytest::onVideoExitClickSlot()
     qDebug()<<"video clicked exit end";
 }
 
-void videoplaytest::onVideoDispListSlot(VideoFileList &filelist)
+void videoplaytest::onVideoDispListSlot(QList<MP4FileInfo> &filelist)
 {
 #ifndef LUNUX_WIN
-    mVideoPlayList.append(VideoPlay());
+    mVideoPlayList.append(MP4VideoPlay());
 
-    mVideoPlayList.last().setFileList(filelist);
-    mVideoPlayList.last().Start_Vdec();
+    mVideoPlayList.last().setPlaylist(filelist);
+    mVideoPlayList.last().startPlay();
 
     mVideoVo.SAMPLE_COMM_VO_BindVpss(mVideoPlayList.count()-1,mVideoPlayList.last().getVpssGrp(),mVideoPlayList.last().getVpssChn());
 
