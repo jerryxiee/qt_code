@@ -85,14 +85,12 @@ private:
     Sample_Common_Vpss &mVpss;
     QMutex mFileMutex;
     QList<VENCPARAM> mVencParam;
-//    QList<FILENODE> mFileTab;
     FileTabFind *mPFileTabFind[VIDEO_MAX_NUM];
     MP4FileIndex *mPMP4FileIndex[VIDEO_MAX_NUM];
 
     bool mRun;
     int mMaxFd;
 
-//    QList<ALARM_FILE> mVideoEventFileInfoList[VIDEO_MAX_NUM];
     QList<MP4FileInfo> mVideoEventFileInfoList[VIDEO_MAX_NUM];
     QMutex mEventFileMutex;
 

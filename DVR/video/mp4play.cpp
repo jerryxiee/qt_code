@@ -251,6 +251,9 @@ int MP4VideoPlay::readFrame(AVPacket &pkt)
     if(pkt.pts >= mPlayList.at(mCurFileIndex).endPts || ret < 0){
         mCurPosition += mPlayList.at(mCurFileIndex).endPts - mPlayList.at(mCurFileIndex).stPts;
         mCurFileIndex++;
+        if(ret > 0){
+            av_packet_unref(&pkt);
+        }
         ret = changeCurFile(mCurFileIndex);
         if(ret < 0){
             qDebug()<<"changeCurFile error";
@@ -258,6 +261,9 @@ int MP4VideoPlay::readFrame(AVPacket &pkt)
         }else {
             qDebug()<<"changeCurFile sucess";
         }
+
+        ret = av_read_frame(mAVfmtCtx, &pkt);
+
     }
 //    mCurPosition = pkt.pts;
 
