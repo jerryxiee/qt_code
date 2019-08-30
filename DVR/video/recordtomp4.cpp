@@ -39,6 +39,7 @@ RecordToMP4::RecordToMP4(Sample_Common_Vpss &Vpss, QObject *parent) : QThread(pa
     }
 
     mVencSet = Settings::getVencIni();
+    connect(mVencSet,SIGNAL(vencStatusChanged(VI_CHN,bool)),this,SLOT(onVencStatusChanged(VI_CHN,bool)));
     connect(mVencSet,SIGNAL(vencAttrChanged(VI_CHN,HI_U32)),this,SLOT(onVencAttrChangedSlot(VI_CHN,HI_U32)));
     connect(this,SIGNAL(createNewFileSignal(int)),this,SLOT(onCreateNewFileSlot(int)));
 
@@ -584,6 +585,11 @@ void RecordToMP4::onVencAttrChangedSlot(VI_CHN Chn,HI_U32 main)
                   mVencSet->m_Vdec_Param[main][Chn].mu32BitRate,mVencSet->m_Vdec_Param[main][Chn].mfr32DstFrmRate,
                       mVencSet->m_Vdec_Param[main][Chn].mu32Profile);
 
+}
+
+void RecordToMP4::onVencStatusChanged(VI_CHN Chn,bool open)
+{
+    onViStatusChangedSlot(Chn,open == true? HI_TRUE:HI_FALSE);
 }
 
 bool RecordToMP4::setRecordAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32BitRate,HI_FR32 frmRate,HI_U32 u32Profile)

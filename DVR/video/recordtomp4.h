@@ -62,6 +62,7 @@ public slots:
     void onCreateNewFileSlot(int Chn);
     void onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool change);
     void onVencAttrChangedSlot(VI_CHN Chn,HI_U32 main);
+    void onVencStatusChanged(VI_CHN Chn,bool open);
 
 private:
     const HI_CHAR *ALARM_FILE_PATH = "/mnt/sda1/alarm";
