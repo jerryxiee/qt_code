@@ -586,7 +586,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetAttr(PAYLOAD_TYPE_E enType, VIDEO
 
 }
 
-HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode,HI_U32 u32BitRate, HI_U32  u32Profile)
+HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_U32  u32Profile, HI_FR32 frmRate)
 {
     HI_S32 s32Ret;
     VENC_CHN_ATTR_S stVencChnAttr;
@@ -594,6 +594,18 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE
 
     SIZE_S stPicSize;
 
+    s32Ret = SAMPLE_COMM_VENC_StopRecv();
+    if(s32Ret != HI_SUCCESS){
+        SAMPLE_PRT(" SAMPLE_COMM_VENC_StopRecv failed!\n");
+        return s32Ret;
+    }
+    s32Ret = HI_MPI_VENC_ResetChn(m_Venc_Chn);
+    if(s32Ret != HI_SUCCESS){
+        SAMPLE_PRT(" SAMPLE_COMM_VENC_StopRecv failed!\n");
+        goto END;
+    }
+
+    memset((void *)&stVencChnAttr,0x0,sizeof (VENC_CHN_ATTR_S));
     s32Ret = HI_MPI_VENC_GetChnAttr(m_Venc_Chn, &stVencChnAttr);
     if (HI_SUCCESS != s32Ret)
     {
@@ -611,15 +623,40 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE
     {
         case PT_H264:
         {
+            printf("set venc(h264) attr\n");
             stVencChnAttr.stVeAttr.stAttrH264e.u32PicWidth = stPicSize.u32Width;/*the picture width*/
             stVencChnAttr.stVeAttr.stAttrH264e.u32PicHeight = stPicSize.u32Height;/*the picture height*/
 //            stVencChnAttr.stVeAttr.stAttrH264e.u32BufSize  = stPicSize.u32Width * stPicSize.u32Height * 2;/*stream buffer size*/
             stVencChnAttr.stVeAttr.stAttrH264e.u32Profile  = u32Profile;/*0: baseline; 1:MP; 2:HP;  3:svc_t */
+
             if (SAMPLE_RC_CBR == enRcMode)
             {
+                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+                if(frmRate != 0){
+                    stVencChnAttr.stRcAttr.stAttrH264Cbr.fr32DstFrmRate = frmRate;
+                }
                 if(u32BitRate != 0){
                     stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
                     stVencChnAttr.stRcAttr.stAttrH264Cbr.u32BitRate = u32BitRate;
+                }else {
+                    switch (enSize)
+                    {
+                        case PIC_QCIF:
+                            stVencChnAttr.stRcAttr.stAttrH264Cbr.u32BitRate = 256; /* average bit rate */
+                            break;
+                        case PIC_QVGA:    /* 320 * 240 */
+                        case PIC_CIF:
+                            stVencChnAttr.stRcAttr.stAttrH264Cbr.u32BitRate = 512;
+                            break;
+                        case PIC_D1:
+                        case PIC_VGA:	   /* 640 * 480 */
+                            stVencChnAttr.stRcAttr.stAttrH264Cbr.u32BitRate = 1024 * 2;
+                            break;
+                        default:   /* 1280 * 720 */
+                            stVencChnAttr.stRcAttr.stAttrH264Cbr.u32BitRate = 1024 * 2;
+                            break;
+
+                    }
                 }
 
 
@@ -633,8 +670,31 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE
             {
                 stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264VBR;
 
+                if(frmRate != 0){
+                    stVencChnAttr.stRcAttr.stAttrH264Vbr.fr32DstFrmRate = frmRate;
+                }
+
                 if(u32BitRate != 0){
                     stVencChnAttr.stRcAttr.stAttrH264Vbr.u32MaxBitRate = u32BitRate;
+                }else {
+                    switch (enSize)
+                    {
+                        case PIC_QCIF:
+                            stVencChnAttr.stRcAttr.stAttrH264Vbr.u32MaxBitRate = 256; /* average bit rate */
+                            break;
+                        case PIC_QVGA:    /* 320 * 240 */
+                        case PIC_CIF:
+                            stVencChnAttr.stRcAttr.stAttrH264Vbr.u32MaxBitRate = 512;
+                            break;
+                        case PIC_D1:
+                        case PIC_VGA:	   /* 640 * 480 */
+                            stVencChnAttr.stRcAttr.stAttrH264Vbr.u32MaxBitRate = 1024 * 2;
+                            break;
+                        default:   /* 1280 * 720 */
+                            stVencChnAttr.stRcAttr.stAttrH264Vbr.u32MaxBitRate = 1024 * 2;
+                            break;
+
+                    }
                 }
 
             }
@@ -642,9 +702,33 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE
             {
                 stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264AVBR;
 
+                if(frmRate != 0){
+                    stVencChnAttr.stRcAttr.stAttrH264AVbr.fr32DstFrmRate = frmRate;
+                }
+
                 if(u32BitRate != 0){
                     stVencChnAttr.stRcAttr.stAttrH264AVbr.u32MaxBitRate = u32BitRate;
+                }else {
+                    switch (enSize)
+                    {
+                        case PIC_QCIF:
+                            stVencChnAttr.stRcAttr.stAttrH264AVbr.u32MaxBitRate = 256; /* average bit rate */
+                            break;
+                        case PIC_QVGA:    /* 320 * 240 */
+                        case PIC_CIF:
+                            stVencChnAttr.stRcAttr.stAttrH264AVbr.u32MaxBitRate = 512;
+                            break;
+                        case PIC_D1:
+                        case PIC_VGA:	   /* 640 * 480 */
+                            stVencChnAttr.stRcAttr.stAttrH264AVbr.u32MaxBitRate = 1024 * 2;
+                            break;
+                        default:   /* 1280 * 720 */
+                            stVencChnAttr.stRcAttr.stAttrH264AVbr.u32MaxBitRate = 1024 * 2;
+                            break;
+
+                    }
                 }
+
 
             }
             else
@@ -654,47 +738,6 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE
             m_enRcMode = enRcMode;
         }
         break;
-        case PT_MJPEG:
-        {
-
-            stVencChnAttr.stVeAttr.stAttrMjpege.u32PicWidth = stPicSize.u32Width;
-            stVencChnAttr.stVeAttr.stAttrMjpege.u32PicHeight = stPicSize.u32Height;
-//            stVencChnAttr.stVeAttr.stAttrMjpege.u32BufSize = stPicSize.u32Width * stPicSize.u32Height * 3;
-
-
-            if (SAMPLE_RC_FIXQP == enRcMode)
-            {
-                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_MJPEGFIXQP;
-            }
-            else if (SAMPLE_RC_CBR == enRcMode)
-            {
-                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_MJPEGCBR;
-
-                if(u32BitRate != 0){
-                    stVencChnAttr.stRcAttr.stAttrMjpegeCbr.u32BitRate = u32BitRate;
-                }
-            }
-            else if (SAMPLE_RC_VBR == enRcMode)
-            {
-                stVencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_MJPEGVBR;
-
-                if(u32BitRate != 0){
-                    stVencChnAttr.stRcAttr.stAttrMjpegeVbr.u32MaxBitRate = u32BitRate;
-                }
-            }
-            else
-            {
-                SAMPLE_PRT("cann't support other mode in this version!\n");
-                return HI_FAILURE;
-            }
-        }
-        break;
-        case PT_JPEG:
-            stVencChnAttr.stVeAttr.stAttrJpege.u32PicWidth  = stPicSize.u32Width;
-            stVencChnAttr.stVeAttr.stAttrJpege.u32PicHeight = stPicSize.u32Height;
-//            stVencChnAttr.stVeAttr.stAttrJpege.u32BufSize   = stPicSize.u32Width * stPicSize.u32Height * 3;
-
-            break;
         case PT_H265:
         {
             stVencChnAttr.stVeAttr.stAttrH265e.u32PicWidth = stPicSize.u32Width;/*the picture width*/
@@ -749,6 +792,13 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE
         return HI_FAILURE;
     }
 
+END:
+    s32Ret = SAMPLE_COMM_VENC_StartRecv();
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_PRT(" SAMPLE_COMM_VENC_StartRecv failed with(%#x)!\n",s32Ret);
+        return HI_FAILURE;
+    }
 
     m_enSize = enSize;
     m_enRcMode = enRcMode;

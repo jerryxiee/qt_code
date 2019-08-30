@@ -261,8 +261,10 @@ int MP4VideoPlay::readFrame(AVPacket &pkt)
         }else {
             qDebug()<<"changeCurFile sucess";
         }
+        if(ret >= 0){
+            ret = av_read_frame(mAVfmtCtx, &pkt);
+        }
 
-        ret = av_read_frame(mAVfmtCtx, &pkt);
 
     }
 //    mCurPosition = pkt.pts;

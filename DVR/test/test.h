@@ -16,11 +16,13 @@ public:
     Q_INVOKABLE void setIOAlarm(int Chn,int io,bool value);
     Q_INVOKABLE void setWinNum(int num);
     Q_INVOKABLE void play(int Chn,QString starttime,QString endtime);
+    Q_INVOKABLE void setRtspSize(int mode);
 
 signals:
     void videoAlarmEventChangedSignal(VI_CHN Chn,VIDEO_TYPE type,bool change);
     void videoPlayListSignal(QList<MP4FileInfo> &);
     void setWinNumSignal(int);
+    void setRtspSizeSignal(int);
 
 public slots:
 

@@ -332,7 +332,8 @@ void VencSet::setVencConfig(int Chn,uint stream,VDEC_PARAM &str)
     result = QString::number(str.mu32BitRate);
     vioConfig->setValue("Channel"+QString::number(Chn)+"/stream"+QString::number(stream)+"/BitRate",result);
 
-    emit vencAttrChanged(Chn,stream);
+    if(stream == 0)
+        emit vencAttrChanged(Chn,stream);
     delete vioConfig;
 }
 /*******************

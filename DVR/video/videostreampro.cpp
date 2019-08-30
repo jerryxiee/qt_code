@@ -114,6 +114,20 @@ bool VideoStreamPro::stopLocalStream(VO_DEV VoDev,VO_LAYER VoLayer)
     return true;
 }
 
+bool VideoStreamPro::setVencAttr(PIC_SIZE_E enSize, HI_U32 u32BitRate, SAMPLE_RC_E enRcMode,HI_U32  u32Profile)
+{
+    if(!mpVenc){
+        return false;
+    }
+
+    if(mpVenc->SAMPLE_COMM_VENC_SetChnAttr(enSize,enRcMode,u32BitRate,u32Profile) != HI_SUCCESS){
+        qDebug()<<"set Venc Attr error!";
+        return false;
+    }
+
+    return true;
+}
+
 bool VideoStreamPro::startVenc(int Chn,SEND_STREAM_T type)
 {
     int ret;

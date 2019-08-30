@@ -36,6 +36,7 @@ protected:
 
 private:
     bool isRecordOpen(int Chn);
+    bool setRecordAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32BitRate,HI_FR32 frmRate,HI_U32 u32Profile);
     bool startRecordChn(VI_CHN ViChnCnt, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_FR32 frmRate, HI_U32 u32Profile);
     int checkRecordChn(int Chn);
     bool createNewMp4File(int Chn);
@@ -60,6 +61,7 @@ public slots:
     void onViStatusChangedSlot(VI_CHN Chn,HI_BOOL status);
     void onCreateNewFileSlot(int Chn);
     void onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool change);
+    void onVencAttrChangedSlot(VI_CHN Chn,HI_U32 main);
 
 private:
     const HI_CHAR *ALARM_FILE_PATH = "/mnt/sda1/alarm";

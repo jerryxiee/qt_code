@@ -47,6 +47,10 @@ void H264VideoSource::doGetNextFrame()
         mHaveStartedReading = true;
         fFrameSize = 0;
 
+//        if(!mVideoStreamPro.setVencAttr(PIC_CIF,0)){
+//            qDebug()<<"mVideoStreamPro.setVencAttr error";
+//        }
+
     }
 
     if (!isCurrentlyAwaitingData()) {
@@ -69,8 +73,8 @@ void H264VideoSource::doGetNextFrame()
         FD_ZERO(&mRead_fds);
         FD_SET(mFd, &mRead_fds);
 
-        TimeoutVal.tv_sec  = 1;
-        TimeoutVal.tv_usec = 0;
+        TimeoutVal.tv_sec  = 0;
+        TimeoutVal.tv_usec = 200000;
 
         ret = select(mFd + 1, &mRead_fds, nullptr, nullptr, &TimeoutVal);
         if(ret < 0){
@@ -166,7 +170,7 @@ void H264VideoSource::doGetNextFrame()
 
     if (fFrameSize == 0) {
 //        doStopGettingFrames();
-      handleClosure();
+//      handleClosure();
       return;
     }
 

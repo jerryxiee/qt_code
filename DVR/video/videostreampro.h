@@ -23,6 +23,7 @@ public:
     int getVencFd() const;
     int getVencChn() const;
     bool startVenc(int Chn,SEND_STREAM_T type);
+    bool setVencAttr(PIC_SIZE_E enSize, HI_U32 u32BitRate, SAMPLE_RC_E enRcMode = SAMPLE_RC_CBR,HI_U32  u32Profile = 0);
     bool stopVenc(int Chn);
     bool isStop() const {return !mStart;}
 

@@ -7,6 +7,7 @@
 #include "windows/MyModel/mytablemodel.h"
 
 VideoDisplay  *Widget::mVideoDisplay = nullptr;
+Test * Widget::mPTest = new Test();
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -36,13 +37,13 @@ Widget::Widget(QWidget *parent) :
         context->setContextProperty("DispSet",Settings::getDispSetIni());
         context->setContextProperty("SystemConfig",Settings::getSystemSetIni());
         context->setContextProperty("AlarmConfig",Settings::getAlarmSetIni());
-        context->setContextProperty("VideoTest",&mTest);
+        context->setContextProperty("VideoTest",mPTest);
     }
 
 
 #ifndef LUNUX_WIN
     mvideoControl.videoStart();
-    connect(&mTest,SIGNAL(videoAlarmEventChangedSignal(VI_CHN,VIDEO_TYPE,bool)),&mvideoControl,SLOT(onTestVideoAlarmSlot(VI_CHN,VIDEO_TYPE,bool)));
+    connect(mPTest,SIGNAL(videoAlarmEventChangedSignal(VI_CHN,VIDEO_TYPE,bool)),&mvideoControl,SLOT(onTestVideoAlarmSlot(VI_CHN,VIDEO_TYPE,bool)));
 //    connect(this,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&mvideoControl,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
 #endif
 
@@ -53,7 +54,7 @@ Widget::Widget(QWidget *parent) :
 Widget::~Widget()
 {
     delete ui;
-
+//    delete mPTest;
     qDebug("exit %s:%d",__FUNCTION__,__LINE__);
 
 }
@@ -79,8 +80,8 @@ void Widget::InitWindows()
 
     mVideoPlayTestWin = new videoplaytest();
     connect(mVideoPlayTestWin, SIGNAL(exitClicked()), this, SLOT(onShowQml()));
-    connect(&mTest,SIGNAL(setWinNumSignal(int)),mVideoPlayTestWin,SLOT(onSetWinNum(int)));
-    connect(&mTest,SIGNAL(videoPlayListSignal(QList<MP4FileInfo> &)),mVideoPlayTestWin,SLOT(onVideoDispListSlot(QList<MP4FileInfo> &)));
+    connect(mPTest,SIGNAL(setWinNumSignal(int)),mVideoPlayTestWin,SLOT(onSetWinNum(int)));
+    connect(mPTest,SIGNAL(videoPlayListSignal(QList<MP4FileInfo> &)),mVideoPlayTestWin,SLOT(onVideoDispListSlot(QList<MP4FileInfo> &)));
     mWindows->addWidget(mVideoPlayTestWin);
 
 
@@ -106,6 +107,15 @@ VideoDisplay  *Widget::getVideoDisplayWin()
     }
 
     return mVideoDisplay;
+}
+
+Test *Widget::getTestOperate()
+{
+    if(!mPTest){
+        mPTest = new Test();
+    }
+
+    return mPTest;
 }
 
 void Widget::paintEvent(QPaintEvent *event)

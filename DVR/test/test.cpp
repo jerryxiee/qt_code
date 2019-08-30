@@ -46,6 +46,10 @@ void Test::setWinNum(int num)
     emit setWinNumSignal(num);
 }
 
+void Test::setRtspSize(int mode)
+{
+    emit setRtspSizeSignal(mode);
+}
 
 void Test::play(int Chn,QString starttime,QString endtime)
 {

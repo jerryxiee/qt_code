@@ -32,6 +32,7 @@ public:
     void paintEvent(QPaintEvent *event);
 
     static VideoDisplay  *getVideoDisplayWin();
+    static Test *getTestOperate();
 
 
 signals:
@@ -69,7 +70,8 @@ private:
     QStackedWidget *mWindows;
     QQuickWidget* mQuickWidget = nullptr;
 
-    Test mTest;
+//    Test mTest;
+    static Test *mPTest;
 
 };
 

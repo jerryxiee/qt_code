@@ -23,7 +23,7 @@ public:
     HI_S32 SAMPLE_COMM_VENC_SetAttr(PAYLOAD_TYPE_E enType, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_FR32 frmRate, HI_U32  u32Profile);
     HI_S32 SAMPLE_COMM_VENC_Start();
     HI_S32 SAMPLE_COMM_VENC_StartEx(PAYLOAD_TYPE_E enType, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32  u32Profile, VENC_GOP_ATTR_S *pstGopAttr);
-    HI_S32 SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode,HI_U32 u32BitRate, HI_U32  u32Profile);
+    HI_S32 SAMPLE_COMM_VENC_SetChnAttr(PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode,HI_U32 u32BitRate,HI_U32  u32Profile, HI_FR32 frmRate = 0);
     HI_S32 SAMPLE_COMM_VENC_GetChnAttr(VENC_CHN VeChn, VENC_CHN_ATTR_S*pstAttr);
     HI_S32 SAMPLE_COMM_VENC_Stop();
     HI_S32 SAMPLE_COMM_VENC_StopRecv();

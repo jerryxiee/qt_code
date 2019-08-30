@@ -39,7 +39,7 @@ RecordToMP4::RecordToMP4(Sample_Common_Vpss &Vpss, QObject *parent) : QThread(pa
     }
 
     mVencSet = Settings::getVencIni();
-
+    connect(mVencSet,SIGNAL(vencAttrChanged(VI_CHN,HI_U32)),this,SLOT(onVencAttrChangedSlot(VI_CHN,HI_U32)));
     connect(this,SIGNAL(createNewFileSignal(int)),this,SLOT(onCreateNewFileSlot(int)));
 
 }
@@ -373,7 +373,7 @@ bool RecordToMP4::createNewMp4File(int Chn)
 //    mPFileTabFind[Chn]->createNewDayTab();
 
     sprintf(fileindex_name,"%sHI%d.mp4",venc_path_name,mVencParam[index].curFileIndex);
-    if(!file.createMP4File(fileindex_name,25,size)){
+    if(!file.createMP4File(fileindex_name,mVencSet->m_Vdec_Param[0][Chn].mfr32DstFrmRate,size)){
         qDebug()<<"create new file error";
         mFileMutex.unlock();
         return false;
@@ -575,6 +575,36 @@ void RecordToMP4::onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool c
     }
     LOGWE("%s:%d",__FUNCTION__,__LINE__);
     mEventFileMutex.unlock();
+}
+
+void RecordToMP4::onVencAttrChangedSlot(VI_CHN Chn,HI_U32 main)
+{
+    if(main == 0)
+    setRecordAttr(Chn,mVencSet->m_Vdec_Param[main][Chn].mvencSize,mVencSet->m_Vdec_Param[main][Chn].menRcMode,
+                  mVencSet->m_Vdec_Param[main][Chn].mu32BitRate,mVencSet->m_Vdec_Param[main][Chn].mfr32DstFrmRate,
+                      mVencSet->m_Vdec_Param[main][Chn].mu32Profile);
+
+}
+
+bool RecordToMP4::setRecordAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E enRcMode,HI_U32 u32BitRate,HI_FR32 frmRate,HI_U32 u32Profile)
+{
+    bool deleteRecord = false;
+    HI_S32 s32Ret ;
+
+    deleteRecord = deleteChnFromRecord(ViChnCnt);
+
+    s32Ret = mPVenc[ViChnCnt]->SAMPLE_COMM_VENC_SetChnAttr(enSize,enRcMode,u32BitRate,u32Profile,frmRate);
+    if(s32Ret != HI_SUCCESS){
+        SAMPLE_PRT("SAMPLE_COMM_VENC_SetChnAttr error!\n");
+    }
+
+    if(deleteRecord == true){
+//        Venc_CreatNewFile(ViChnCnt);
+        addChnToRecord(ViChnCnt);
+    }
+
+    qDebug()<<"setRecordAttr end";
+    return s32Ret;
 }
 
 bool RecordToMP4::startRecordChn(VI_CHN ViChnCnt, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_FR32 frmRate, HI_U32 u32Profile)
