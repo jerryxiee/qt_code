@@ -15,6 +15,8 @@ Widget::Widget(QWidget *parent) :
 {
     ui->setupUi(this);
     this->resize(1280,720);
+    mPLogDb = LogTabData::getLogRecoedPoint();
+    mPLogDb->writeOneData(INFO,SYSTEMSTART,"开机");
 
     mQuickWidget = new QQuickWidget(this);//this基类为QWidget
     mQuickWidget->move(0,0);
@@ -56,6 +58,7 @@ Widget::~Widget()
     delete ui;
 //    delete mPTest;
     qDebug("exit %s:%d",__FUNCTION__,__LINE__);
+    mPLogDb->writeOneData(INFO,SYSTEMEND,"关机");
 
 }
 

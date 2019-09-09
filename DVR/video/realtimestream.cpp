@@ -196,19 +196,15 @@ void RealTimeStream::run()
     // A H.264 video elementary stream:
     {
       char const* streamName = "h264ESVideoTest";
-      char const* inputFileName = "test.264";
       ServerMediaSession* sms
         = ServerMediaSession::createNew(*env, streamName, streamName,
                         descriptionString);
       sms->addSubsession(H264MediaSubsession::createNew(*env,0,false));
-//      sms->addSubsession(H264VideoFileServerMediaSubsession
-//                 ::createNew(*env, inputFileName, false));
+
       rtspServer->addServerMediaSession(sms);
 
       char* url = rtspServer->rtspURL(sms);
       UsageEnvironment& env = rtspServer->envir();
-      env << "\n\"" << streamName << "\" stream, from the file \""
-          << inputFileName << "\"\n";
       env << "Play this stream using the URL \"" << url << "\"\n";
       delete[] url;
     }

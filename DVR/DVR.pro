@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui quickwidgets multimedia network multimediawidgets concurrent
+QT       += core gui quickwidgets multimedia network multimediawidgets concurrent sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -57,7 +57,9 @@ SOURCES += \
     video/videosearch.cpp \
     windows/videoplaytest.cpp \
     video/mp4fileindex.cpp \
-    video/mp4filetab.cpp
+    video/mp4filetab.cpp \
+    common/sqlitedatebase.cpp \
+    common/logtabdata.cpp
 
 
 
@@ -89,7 +91,9 @@ HEADERS += \
     video/videosearch.h \
     windows/videoplaytest.h \
     video/mp4fileindex.h \
-    video/mp4filetab.h
+    video/mp4filetab.h \
+    common/sqlitedatebase.h \
+    common/logtabdata.h
 
 
 

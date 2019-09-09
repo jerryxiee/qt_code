@@ -15,6 +15,8 @@ RecordToMP4::RecordToMP4(Sample_Common_Vpss &Vpss, QObject *parent) : QThread(pa
 {
     char venc_path_name[VIDEO_FILENAME_SIZE];
 
+    mPLogDb = LogTabData::getLogRecoedPoint();
+
     QDir dir(ALARM_FILE_PATH);
     if(!dir.exists()){
         if(!dir.mkpath(ALARM_FILE_PATH)){
@@ -450,6 +452,7 @@ bool RecordToMP4::addRecordList(int Chn)
        qDebug()<<"add record Chn:"<<Chn<<" record num:"<<mVencParam.count();
        mFileMutex.unlock();
        LOGWE("%s:%d",__FUNCTION__,__LINE__);
+       mPLogDb->writeOneData(INFO,STRECORD,"视频信号接入",Chn);
        return true;
     }
 
@@ -470,7 +473,7 @@ bool RecordToMP4::deleteFromRecordList(int Chn)
     mVencParam.removeAt(index);
     mFileMutex.unlock();
     LOGWE("%s:%d",__FUNCTION__,__LINE__);
-
+    mPLogDb->writeOneData(EXCEPT,ENDRECORD,"视频信号丢失",Chn);
     return true;
 
 }
@@ -490,7 +493,7 @@ bool RecordToMP4::addChnToRecord(int Chn)
         start();
     }
     LOGWE("%s:%d",__FUNCTION__,__LINE__);
-
+    mPLogDb->writeOneData(INFO,STRECORD,"录像开始",Chn);
     return true;
 }
 
@@ -502,6 +505,7 @@ bool RecordToMP4::deleteChnFromRecord(int Chn)
     removeVideoAlarmEventFromlist(Chn);
     mEventFileMutex.unlock();
     LOGWE("%s:%d",__FUNCTION__,__LINE__);
+    mPLogDb->writeOneData(INFO,ENDRECORD,"录像结束",Chn);
     return saveMp4File(Chn);
 }
 
@@ -567,7 +571,9 @@ void RecordToMP4::onVideoAlarmEventChangedSlot(VI_CHN Chn,VIDEO_TYPE type,bool c
         if(!addVideoAlarmEventFromlist(Chn,type)){
             qDebug()<<"addVideoAlarmEventFromlist falied";
         }
+        mPLogDb->writeOneData(ALARM,MOTODET,"移动侦测开始",Chn);
     }else {
+        mPLogDb->writeOneData(ALARM,MOTODET,"移动侦测结束",Chn);
         addVideoAlarmToFile(Chn,type);
         if(!removeVideoAlarmEventFromlist(Chn,type)){
             mEventFileMutex.unlock();
@@ -604,6 +610,7 @@ bool RecordToMP4::setRecordAttr(VI_CHN ViChnCnt,PIC_SIZE_E enSize,SAMPLE_RC_E en
         SAMPLE_PRT("SAMPLE_COMM_VENC_SetChnAttr error!\n");
     }
 
+    mPLogDb->writeOneData(OPERATE,LOCALCFG,"设置通道编码参数",ViChnCnt);
     if(deleteRecord == true){
 //        Venc_CreatNewFile(ViChnCnt);
         addChnToRecord(ViChnCnt);

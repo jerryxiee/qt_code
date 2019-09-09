@@ -12,6 +12,7 @@
 #include "common/systemlog.h"
 #include "filetabfind.h"
 #include "mp4fileindex.h"
+#include "common/logtabdata.h"
 
 #define BUFLEN 1024*1024
 
@@ -96,6 +97,8 @@ private:
 
     QList<MP4FileInfo> mVideoEventFileInfoList[VIDEO_MAX_NUM];
     QMutex mEventFileMutex;
+
+    LogTabData *mPLogDb;
 
 
 };

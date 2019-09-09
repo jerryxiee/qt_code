@@ -14,6 +14,7 @@
 #include "video/videocontrol.h"
 #include "common/sample_comm.h"
 #include "test/test.h"
+#include "common/logtabdata.h"
 
 
 namespace Ui {
@@ -72,6 +73,7 @@ private:
 
 //    Test mTest;
     static Test *mPTest;
+    LogTabData *mPLogDb;
 
 };
 
