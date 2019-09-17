@@ -53,8 +53,8 @@ bool MsgQueue::msgQueueSend(pMsgInfo pInfo, uint size)
 
 void MsgQueue::time_add_ms(struct timeval *time, int ms)
 {
-        time->tv_usec += ms * 1000; // 微秒 = 毫秒 * 1000
-        if(time->tv_usec >= 1000000) // 进位，1000 000 微秒 = 1 秒
+        time->tv_usec += ms * 1000; //
+        if(time->tv_usec >= 1000000) //
         {
             time->tv_sec += time->tv_usec / 1000000;
             time->tv_usec %= 1000000;
