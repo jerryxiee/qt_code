@@ -59,7 +59,8 @@ SOURCES += \
     video/mp4fileindex.cpp \
     video/mp4filetab.cpp \
     common/sqlitedatebase.cpp \
-    common/logtabdata.cpp
+    common/logtabdata.cpp \
+    common/msgqueue.cpp
 
 
 
@@ -93,7 +94,8 @@ HEADERS += \
     video/mp4fileindex.h \
     video/mp4filetab.h \
     common/sqlitedatebase.h \
-    common/logtabdata.h
+    common/logtabdata.h \
+    common/msgqueue.h
 
 
 
