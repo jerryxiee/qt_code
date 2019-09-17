@@ -1,5 +1,6 @@
 #include "msgqueue.h"
 #include <string.h>
+#include <sys/time.h>
 
 MsgQueue::MsgQueue()
 {
@@ -50,16 +51,32 @@ bool MsgQueue::msgQueueSend(pMsgInfo pInfo, uint size)
     return true;
 }
 
+void MsgQueue::time_add_ms(struct timeval *time, int ms)
+{
+        time->tv_usec += ms * 1000; // 微秒 = 毫秒 * 1000
+        if(time->tv_usec >= 1000000) // 进位，1000 000 微秒 = 1 秒
+        {
+            time->tv_sec += time->tv_usec / 1000000;
+            time->tv_usec %= 1000000;
+        }
+}
+
+
 bool MsgQueue::msgQueueRecv(pMsgInfo pInfo,uint size,int timeout)
 {
-    struct timespec ts;
-    ts.tv_sec=timeout/1000;
-    ts.tv_nsec=timeout*1000000%1000000000;
-
     if (timeout == -1)
         sem_wait(&mSem);
     else
     {
+        struct timespec ts;
+        struct timeval time;
+        gettimeofday(&time, nullptr);
+
+        time_add_ms(&time, timeout);
+
+        ts.tv_sec=time.tv_sec;
+        ts.tv_nsec=time.tv_usec*1000;
+
         int sts =sem_timedwait(&mSem, &ts);
         if (-1 == sts)
         {

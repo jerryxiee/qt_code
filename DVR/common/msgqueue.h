@@ -24,6 +24,8 @@ public:
     bool msgQueueSend(pMsgInfo pInfo, uint size);   //发送消息到队列并发送信号 size:消息结构大小
     bool msgQueueRecv(pMsgInfo pInfo, uint size,int timeout);   //接收消息  timeout:单位ms
 
+private:
+    void time_add_ms(struct timeval *time, int ms);
 
 private:
     sem_t mSem;
