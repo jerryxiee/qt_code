@@ -15,6 +15,7 @@
 #include <iostream>
 #include <exception>
 #include <execinfo.h>
+#include "communication/remotethread.h"
 
 #ifndef LUNUX_WIN
 #include "test/venctomp4test.h"
@@ -97,6 +98,9 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf-8"));
     signal(SIGINT,sign);
     signal(SIGSEGV, dump);
+
+    RemoteThread *remotethread = RemoteThread::getRemoteThread();
+    remotethread->start();
 
 //    QDateTime current_date_time =QDateTime::currentDateTime();
 //    QString current_date =QDateTime::currentDateTime().toString("ddd yyyy年MM月dd日 hh时mm分ss秒 AP");

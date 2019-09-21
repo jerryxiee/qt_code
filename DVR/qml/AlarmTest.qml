@@ -74,6 +74,16 @@ Rectangle {
         onClicked: VideoTest.setIOAlarm(chnindex.currentIndex,iotypeindex.currentIndex,false)
     }
 
+    Button{
+        id:msgtest
+        text: qsTr("msgtest")
+        anchors.left: io2.left
+        anchors.top:io2.bottom
+        anchors.topMargin: 20
+
+        onClicked: VideoTest.sentSeg(0);
+    }
+
 //    Button{
 //        id:test
 //        anchors.top: io2.bottom

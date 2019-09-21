@@ -17,6 +17,7 @@ public:
     Q_INVOKABLE void setWinNum(int num);
     Q_INVOKABLE void play(int Chn,QString starttime,QString endtime);
     Q_INVOKABLE void setRtspSize(int mode);
+    Q_INVOKABLE void sentSeg(int mode);
 
 signals:
     void videoAlarmEventChangedSignal(VI_CHN Chn,VIDEO_TYPE type,bool change);

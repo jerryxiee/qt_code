@@ -91,6 +91,8 @@ bool MsgQueue::msgQueueRecv(pMsgInfo pInfo,uint size,int timeout)
         return false;
 
     }
+    pInfo->mMsgType = msginfo.mMsgType;
+    pInfo->mSize = msginfo.mSize;
     memcpy(pInfo->mMesgCache,msginfo.mMesgCache,msginfo.mSize);
     delete [] msginfo.mMesgCache;
     mMsgQueue.pop();

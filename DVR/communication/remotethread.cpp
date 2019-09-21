@@ -1,0 +1,162 @@
+#include "remotethread.h"
+#include <QDebug>
+
+
+RemoteTaskScheduler* RemoteTaskScheduler::createNew(MsgQueue &msgqueue,unsigned maxSchedulerGranularity) {
+    return new RemoteTaskScheduler(msgqueue,maxSchedulerGranularity);
+}
+
+RemoteTaskScheduler::RemoteTaskScheduler(MsgQueue &msgqueue,unsigned maxSchedulerGranularity)
+  : fMaxSchedulerGranularity(maxSchedulerGranularity), mMsgQueue(msgqueue)
+#if defined(__WIN32__) || defined(_WIN32)
+  , fDummySocketNum(-1)
+#endif
+{
+
+  if (maxSchedulerGranularity > 0) schedulerTickTask(); // ensures that we handle events frequently
+}
+
+void RemoteTaskScheduler::schedulerTickTask(void* clientData) {
+  ((RemoteTaskScheduler*)clientData)->schedulerTickTask();
+}
+
+void RemoteTaskScheduler::schedulerTickTask() {
+  scheduleDelayedTask(fMaxSchedulerGranularity, schedulerTickTask, this);
+//  qDebug()<<"RemoteTaskScheduler run";
+
+}
+
+RemoteTaskScheduler::~RemoteTaskScheduler() {
+
+}
+
+
+#ifndef MILLION
+#define MILLION 1000000
+#endif
+
+void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
+
+    DelayInterval const& timeToDelay = fDelayQueue.timeToNextAlarm();
+    struct timeval tv_timeToDelay;
+    tv_timeToDelay.tv_sec = timeToDelay.seconds();
+    tv_timeToDelay.tv_usec = timeToDelay.useconds();
+    // Very large "tv_sec" values cause select() to fail.
+    // Don't make it any larger than 1 million seconds (11.5 days)
+    const long MAX_TV_SEC = MILLION;
+    if (tv_timeToDelay.tv_sec > MAX_TV_SEC) {
+        tv_timeToDelay.tv_sec = MAX_TV_SEC;
+    }
+    // Also check our "maxDelayTime" parameter (if it's > 0):
+    if (maxDelayTime > 0 &&
+        (tv_timeToDelay.tv_sec > (long)maxDelayTime/MILLION ||
+        (tv_timeToDelay.tv_sec == (long)maxDelayTime/MILLION &&
+        tv_timeToDelay.tv_usec > (long)maxDelayTime%MILLION))) {
+        tv_timeToDelay.tv_sec = maxDelayTime/MILLION;
+        tv_timeToDelay.tv_usec = maxDelayTime%MILLION;
+    }
+
+    MsgInfo msginfo;
+    msginfo.mMesgCache = mCmdBuf;
+    msginfo.mMsgType = -1;
+    mMsgQueue.msgQueueRecv(&msginfo,CMDMAXLEN,tv_timeToDelay.tv_sec*1000+tv_timeToDelay.tv_usec/1000);
+    switch (msginfo.mMsgType) {
+    case 0:
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    default:
+        ;
+    }
+
+
+
+    // Also handle any newly-triggered event (Note that we do this *after* calling a socket handler,
+    // in case the triggered event handler modifies The set of readable sockets.)
+    if (fTriggersAwaitingHandling != 0) {
+    if (fTriggersAwaitingHandling == fLastUsedTriggerMask) {
+      // Common-case optimization for a single event trigger:
+      fTriggersAwaitingHandling &=~ fLastUsedTriggerMask;
+      if (fTriggeredEventHandlers[fLastUsedTriggerNum] != NULL) {
+        (*fTriggeredEventHandlers[fLastUsedTriggerNum])(fTriggeredEventClientDatas[fLastUsedTriggerNum]);
+      }
+    } else {
+      // Look for an event trigger that needs handling (making sure that we make forward progress through all possible triggers):
+      unsigned i = fLastUsedTriggerNum;
+      EventTriggerId mask = fLastUsedTriggerMask;
+
+      do {
+        i = (i+1)%MAX_NUM_EVENT_TRIGGERS;
+        mask >>= 1;
+        if (mask == 0) mask = 0x80000000;
+
+        if ((fTriggersAwaitingHandling&mask) != 0) {
+          fTriggersAwaitingHandling &=~ mask;
+          if (fTriggeredEventHandlers[i] != NULL) {
+            (*fTriggeredEventHandlers[i])(fTriggeredEventClientDatas[i]);
+          }
+
+          fLastUsedTriggerMask = mask;
+          fLastUsedTriggerNum = i;
+          break;
+        }
+      } while (i != fLastUsedTriggerNum);
+    }
+    }
+
+    // Also handle any delayed event that may have come due.
+    fDelayQueue.handleAlarm();
+}
+
+
+RemoteThread *RemoteThread::mRemoteThread = nullptr;
+
+RemoteThread *RemoteThread::getRemoteThread()
+{
+    if(!mRemoteThread){
+        mRemoteThread = new RemoteThread();
+    }
+
+    return mRemoteThread;
+}
+
+RemoteThread::RemoteThread(QObject *parent) : QThread(parent),mRemoteTask(nullptr)
+{
+    mRemoteTask = RemoteTaskScheduler::createNew(mReceMsgQueue);
+    mReceMsgQueue.createMsgQueue();
+}
+
+bool RemoteThread::msgQueueSendToNet(pMsgInfo pInfo, uint size)
+{
+    return mSendMsgQueue.msgQueueSend(pInfo,size);
+}
+
+bool RemoteThread::msgQueueLocalSend(pMsgInfo pInfo, uint size)
+{
+    return mReceMsgQueue.msgQueueSend(pInfo,size);
+}
+
+RemoteThread::~RemoteThread()
+{
+    if(isRunning()){
+        mRun = false;
+        wait();
+        if(mRemoteTask)
+            delete mRemoteTask;
+        mReceMsgQueue.destroyMsgQueue();
+    }
+
+}
+
+
+void RemoteThread::run()
+{
+
+    mRun = true;
+    qDebug()<<"start remotethread";
+    while (mRun) {
+        if(mRemoteTask){
+            mRemoteTask->doEventLoop(nullptr);
+        }
+    }
+
+}

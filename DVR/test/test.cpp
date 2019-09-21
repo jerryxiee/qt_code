@@ -1,6 +1,7 @@
 #include "test.h"
 #include "QDebug"
 #include <QDateTime>
+#include "communication/remotethread.h"
 
 Test::Test(QObject *parent) : QObject(parent)
 {
@@ -51,6 +52,18 @@ void Test::setRtspSize(int mode)
     emit setRtspSizeSignal(mode);
 }
 
+void Test::sentSeg(int mode)
+{
+    MsgInfo msginfo;
+    int a = 10;
+    msginfo.mSize = sizeof(int);
+    msginfo.mMsgType = 0;
+    msginfo.mMesgCache = (char *)&a;
+    RemoteThread *remotethread = RemoteThread::getRemoteThread();
+    remotethread->msgQueueLocalSend(&msginfo,sizeof(int));
+    qDebug()<<"send msg test";
+}
+
 void Test::play(int Chn,QString starttime,QString endtime)
 {
     qDebug()<<"chn:"<<Chn<<" stime:"<<starttime<<" endt:"<<endtime;
@@ -62,8 +75,10 @@ void Test::play(int Chn,QString starttime,QString endtime)
 
 
     MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(Chn);
-    mp4fileindex->getFileList(filelist,sttime,entime);
-    delete  mp4fileindex;
+    if(mp4fileindex){
+        mp4fileindex->getFileList(filelist,sttime,entime);
+        delete  mp4fileindex;
+    }
 
     if(filelist.count() == 0){
         return;

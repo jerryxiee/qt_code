@@ -60,8 +60,15 @@ SOURCES += \
     video/mp4filetab.cpp \
     common/sqlitedatebase.cpp \
     common/logtabdata.cpp \
-    common/msgqueue.cpp
-
+    common/msgqueue.cpp \
+    common/schedule/BasicTaskScheduler.cpp \
+    common/schedule/BasicTaskScheduler0.cpp \
+    common/schedule/BasicUsageEnvironment.cpp \
+    common/schedule/BasicUsageEnvironment0.cpp \
+    common/schedule/DelayQueue.cpp \
+    common/schedule/strDup.cpp \
+    common/schedule/UsageEnvironment.cpp \
+    communication/remotethread.cpp
 
 
 
@@ -95,16 +102,21 @@ HEADERS += \
     video/mp4filetab.h \
     common/sqlitedatebase.h \
     common/logtabdata.h \
-    common/msgqueue.h
+    common/msgqueue.h \
+    common/schedule/BasicUsageEnvironment.hh \
+    common/schedule/BasicUsageEnvironment0.hh \
+    common/schedule/BasicUsageEnvironment_version.hh \
+    common/schedule/Boolean.hh \
+    common/schedule/DelayQueue.hh \
+    common/schedule/HandlerSet.hh \
+    common/schedule/NetCommon.h \
+    common/schedule/strDup.hh \
+    common/schedule/UsageEnvironment.hh \
+    common/schedule/UsageEnvironment_version.hh \
+    communication/remotethread.h
 
 
-
-
-
-
-
-
-INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
+INCLUDEPATH +=/home/abhw/git/qt_code/DVR/common/schedule \
                 /home/abhw/haisi/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/include \
                 /home/abhw/haisi/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/nvp6134_ex \
                 /home/abhw/haisi/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/tlv320aic31 \
@@ -116,10 +128,13 @@ INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
                 /home/abhw/libdir/ffmpeg-hisi/include
 
 
-
 if(contains(DEFINES,LUNUX_WIN)){
         message("linux platform")
 }else{
+
+INCLUDEPATH +=/opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include
+
+
 SOURCES +=common/sample_common_sys.cpp \
             common/loadbmp.c \
             common/sample_common_vpss.cpp \
@@ -129,11 +144,6 @@ SOURCES +=common/sample_common_sys.cpp \
             common/sample_common_vi.cpp \
             common/sample_common_vo.cpp \
             live555/BasicUsageEnvironment/BasicHashTable.cpp \
-            live555/BasicUsageEnvironment/BasicTaskScheduler.cpp \
-            live555/BasicUsageEnvironment/BasicTaskScheduler0.cpp \
-            live555/BasicUsageEnvironment/BasicUsageEnvironment.cpp \
-            live555/BasicUsageEnvironment/BasicUsageEnvironment0.cpp \
-            live555/BasicUsageEnvironment/DelayQueue.cpp \
             live555/groupsock/GroupEId.cpp \
             live555/groupsock/Groupsock.cpp \
             live555/groupsock/GroupsockHelper.cpp \
@@ -311,8 +321,6 @@ SOURCES +=common/sample_common_sys.cpp \
             live555/liveMedia/WAVAudioFileServerMediaSubsession.cpp \
             live555/liveMedia/WAVAudioFileSource.cpp \
             live555/UsageEnvironment/HashTable.cpp \
-            live555/UsageEnvironment/strDup.cpp \
-            live555/UsageEnvironment/UsageEnvironment.cpp \
             live555/groupsock/inet.c \
             live555/liveMedia/rtcp_from_spec.c \
             live555/mytest/h264videosource.cpp \
@@ -341,11 +349,6 @@ HEADERS +=common/loadbmp.h \
             common/sample_common_vi.h \
             common/sample_common_vo.h \
             live555/BasicUsageEnvironment/include/BasicHashTable.hh \
-            live555/BasicUsageEnvironment/include/BasicUsageEnvironment.hh \
-            live555/BasicUsageEnvironment/include/BasicUsageEnvironment0.hh \
-            live555/BasicUsageEnvironment/include/BasicUsageEnvironment_version.hh \
-            live555/BasicUsageEnvironment/include/DelayQueue.hh \
-            live555/BasicUsageEnvironment/include/HandlerSet.hh \
             live555/groupsock/include/GroupEId.hh \
             live555/groupsock/include/Groupsock.hh \
             live555/groupsock/include/groupsock_version.hh \
@@ -527,11 +530,7 @@ HEADERS +=common/loadbmp.h \
             live555/liveMedia/OggFileServerMediaSubsession.hh \
             live555/liveMedia/rtcp_from_spec.h \
             live555/liveMedia/StreamParser.hh \
-            live555/UsageEnvironment/include/Boolean.hh \
             live555/UsageEnvironment/include/HashTable.hh \
-            live555/UsageEnvironment/include/strDup.hh \
-            live555/UsageEnvironment/include/UsageEnvironment.hh \
-            live555/UsageEnvironment/include/UsageEnvironment_version.hh \
             live555/mytest/h264videosource.h \
             live555/mytest/h264mediasubsession.h \
             video/vio.h \

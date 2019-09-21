@@ -8,7 +8,7 @@
 
 class DateInfo{
 public:
-    uint64_t mId;
+    quint64 mId;
     int mChn;
     uint mCreateTime;
     QString mType;
