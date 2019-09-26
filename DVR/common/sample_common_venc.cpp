@@ -22,26 +22,41 @@ HI_U32 Sample_Common_Venc::m_Venc_MaxTab[VENC_MAX_CHN_NUM] = {0};
 
 Sample_Common_Venc::Sample_Common_Venc()
 {
-    HI_U32 Venc_Index = 0;
+//    int Venc_Index = 0;
 
-//    m_Venc_Tab[VENC_MAX_CHN_NUM] = {0};
+////    m_Venc_Tab[VENC_MAX_CHN_NUM] = {0};
+
+//    while(m_Venc_MaxTab[Venc_Index] != 0){
+//        Venc_Index++;
+//        if(Venc_Index >= VENC_MAX_CHN_NUM){
+////            m_Venc_ChnNum = 0;
+//            return;
+//        }
+//    }
+//    m_Venc_MaxTab[Venc_Index] = 1;
+//    m_Venc_Chn = Venc_Index;
+}
+
+Sample_Common_Venc::~Sample_Common_Venc()
+{
+//    m_Venc_MaxTab[m_Venc_Chn] = 0;
+    qDebug("exit %s:%d\n",__FUNCTION__,__LINE__);
+
+}
+
+int Sample_Common_Venc::getVencIndex()
+{
+    int Venc_Index = 0;
 
     while(m_Venc_MaxTab[Venc_Index] != 0){
         Venc_Index++;
         if(Venc_Index >= VENC_MAX_CHN_NUM){
 //            m_Venc_ChnNum = 0;
-            return;
+            return -1;
         }
     }
-    m_Venc_MaxTab[Venc_Index] = 1;
-    m_Venc_Chn = Venc_Index;
-}
 
-Sample_Common_Venc::~Sample_Common_Venc()
-{
-    m_Venc_MaxTab[m_Venc_Chn] = 0;
-    qDebug("exit %s:%d\n",__FUNCTION__,__LINE__);
-
+    return Venc_Index;
 }
 
 /******************************************************************************
@@ -839,6 +854,12 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Start()
     }
 
 
+    int index = getVencIndex();
+    if(index < 0){
+        return HI_FAILURE;
+    }
+    m_Venc_MaxTab[index] = 1;
+    m_Venc_Chn = index;
     /******************************************
      step 1:  Create Venc Channel
      ******************************************/
@@ -1302,6 +1323,13 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_StartEx(PAYLOAD_TYPE_E enType, VIDEO
         SAMPLE_PRT("Get picture size failed!\n");
         return HI_FAILURE;
     }
+
+    int index = getVencIndex();
+    if(index < 0){
+        return HI_FAILURE;
+    }
+    m_Venc_MaxTab[index] = 1;
+    m_Venc_Chn = index;
     /******************************************
      step 1:  Create Venc Channel
     ******************************************/
@@ -1787,7 +1815,7 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_Stop()
     /******************************************
      step 1:  Stop Recv Pictures
     ******************************************/
-//    m_Venc_MaxTab[m_Venc_Chn] = 0;
+    m_Venc_MaxTab[m_Venc_Chn] = 0;
     s32Ret = HI_MPI_VENC_StopRecvPic(m_Venc_Chn);
     if (HI_SUCCESS != s32Ret)
     {

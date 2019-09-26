@@ -61,9 +61,97 @@ void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
     msginfo.mMsgType = -1;
     mMsgQueue.msgQueueRecv(&msginfo,CMDMAXLEN,tv_timeToDelay.tv_sec*1000+tv_timeToDelay.tv_usec/1000);
     switch (msginfo.mMsgType) {
-    case 0:
+    case 0x8004:  //查询服务器时间应答
         qDebug()<<"rece:"<<*((int *)mCmdBuf);
         break;
+    case 0x8100: //终端注册应答
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8103://设置终端参数
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8104:   //查询终端参数
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8106:   //查询指定参数
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8105: //终端控制
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8017: //查询终端属性
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8108://下发升级包
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8201://位置信息查询
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8202://临时位置跟踪控制
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8203://人工确认报警信息
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8204://链路检查
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8300://文本信息下发
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8500://车辆控制
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8702://驾驶员信息上传
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x8804://录音开始
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9101://实时音视频传输
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9102://实时音视频控制
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9105://实时音视频状态通知
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9201://录像回放请求
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9202://回放控制
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9205://查询录像资源列表
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9206://文件上传
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9207://文件上传控制
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9301://云台控制
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9302://云台调焦
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9303://云台调光圈
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9304://云台雨刷
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9305://红外补光
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+    case 0x9306://云台变倍
+        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        break;
+
     default:
         ;
     }

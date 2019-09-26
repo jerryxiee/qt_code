@@ -39,6 +39,8 @@ public:
     static HI_S32 SAMPLE_COMM_VENC_SaveJPEG(FILE* fpJpegFile, VENC_STREAM_S* pstStream);
     static HI_S32 SAMPLE_COMM_VENC_SaveFile(FILE* pFd, VENC_STREAM_BUF_INFO_S *pstStreamBuf, VENC_STREAM_S* pstStream);
 
+private:
+    int getVencIndex();
 public:
 //    HI_U32 m_Venc_Tab[VENC_MAX_CHN_NUM];
 //    HI_U32 m_Venc_ChnNum;

@@ -46,7 +46,7 @@ private:
     SEND_STREAM_T mStreamType;
 
     Sample_Common_Venc *mpVenc;
-    Sample_Common_Vpss *mpVpss;
+//    Sample_Common_Vpss *mpVpss;
     VideoLink mVideoLink;
     QList<MP4VideoPlay>mVideoPlayList;
     QList<uint>mStartTime;

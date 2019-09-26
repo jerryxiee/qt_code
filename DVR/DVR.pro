@@ -68,7 +68,8 @@ SOURCES += \
     common/schedule/DelayQueue.cpp \
     common/schedule/strDup.cpp \
     common/schedule/UsageEnvironment.cpp \
-    communication/remotethread.cpp
+    communication/remotethread.cpp \
+    streamserver/streamservermanage.cpp
 
 
 
@@ -113,7 +114,9 @@ HEADERS += \
     common/schedule/strDup.hh \
     common/schedule/UsageEnvironment.hh \
     common/schedule/UsageEnvironment_version.hh \
-    communication/remotethread.h
+    communication/remotethread.h \
+    streamserver/streamservermanage.h \
+    communication/jtt808define.h
 
 
 INCLUDEPATH +=/home/abhw/git/qt_code/DVR/common/schedule \
