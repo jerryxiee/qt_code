@@ -341,7 +341,10 @@ SOURCES +=common/sample_common_sys.cpp \
             video/videostreampro.cpp \
             test/venctomp4test.cpp \
             video/filetabfind.cpp  \
-            video/mp4play.cpp
+            video/mp4play.cpp  \
+            HW/mpivenc.cpp  \
+            HW/mpivdec.cpp \
+            HW/mpivpss.cpp
 
 HEADERS +=common/loadbmp.h \
             common/sample_common_sys.h \
@@ -549,7 +552,10 @@ HEADERS +=common/loadbmp.h \
             video/videostreampro.h \
             test/venctomp4test.h \
             video/filetabfind.h  \
-            video/mp4play.h
+            video/mp4play.h  \
+            HW/mpivenc.h  \
+            HW/mpivdec.h \
+            HW/mpivpss.h
 
 
 LIBS += -lpthread
