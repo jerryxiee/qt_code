@@ -21,8 +21,12 @@ LogTabData * LogTabData::getLogRecoedPoint()
                 qDebug()<<"create logdbtab success";
             }else {
                 qDebug()<<"create logdbtab failed";
+                delete mLogRecord;
+                return nullptr;
             }
         }
+
+        mLogRecord->setLogId(mLogRecord->count());
     }
 
     return mLogRecord;
@@ -63,27 +67,33 @@ LogTabData::~LogTabData()
 
 bool LogTabData::createTable()
 {
-    QSqlQuery query;
-    QString str = "CREATE TABLE "+LOGDBTAB+"(ID INTEGER PRIMARY KEY NOT NULL, \
-                                            CH TEXT , \
-                                            MainType TEXT NOT NULL, \
-                                            SecType TEXT NOT NULL, \
-                                            CreateT INTEGER NOT NULL, \
-                                            Describe TEXT)";
+//    QSqlQuery query;
+    QString tabinfo = "(ID INTEGER PRIMARY KEY NOT NULL, \
+            CH TEXT , \
+            MainType TEXT NOT NULL, \
+            SecType TEXT NOT NULL, \
+            CreateT INTEGER NOT NULL, \
+            Describe TEXT)";
 
-    if(query.exec(str)){
-        return true;
-    }
-
-    qDebug()<<query.lastError();
-
-    return false;
+    return SqliteDateBase::createTable(LOGDBTAB,tabinfo);
 }
 
 bool LogTabData::isTabExists()
 {
-    mLogId = countInTab(LOGDBTAB);
+//    mLogId = countInTab(LOGDBTAB);
     return SqliteDateBase::isTabExists(LOGDBTAB);
+}
+
+bool LogTabData::setLogId(quint64 logid)
+{
+    mLogId = logid;
+
+    return true;
+}
+
+int LogTabData::count()
+{
+    return countInTab(LOGDBTAB);
 }
 
 bool LogTabData::insertSignalData(DateInfo &info)

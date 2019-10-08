@@ -20,15 +20,28 @@ bool SqliteDateBase::open(const QString dbname)
     }
     mDataBase = QSqlDatabase::addDatabase("QSQLITE");
 
-#ifndef LUNUX_WIN
     mDataBase.setDatabaseName(dbname);
 
-#else
-    mDataBase.setDatabaseName("database.db");
-#endif
 
     return mDataBase.open();
 }
+
+bool SqliteDateBase::createTable(const QString &tabname, QString &tabinfo)
+{
+    QSqlQuery query;
+
+    QString str = "CREATE TABLE "+tabname+tabinfo;
+
+    if(query.exec(str)){
+        return true;
+    }
+
+    qDebug()<<query.lastError();
+
+    return false;
+
+}
+
 
 bool SqliteDateBase::isTabExists(const QString &tabname)
 {
@@ -61,5 +74,29 @@ int SqliteDateBase::countInTab(const QString &tabname)
     int nRecordCount = model->rowCount();
     qDebug() << nRecordCount;
     return nRecordCount;
+}
+
+bool SqliteDateBase::getTabData(QSqlQuery &query,const QString &tabname,QString &where)
+{
+    query.prepare("SELECT * FROM "+tabname+" where"+where);
+
+    if(!query.exec()){
+        qDebug()<<query.lastError();
+        return false;
+    }
+
+    return true;
+}
+
+bool SqliteDateBase::updateTabData(const QString &tabname,QString &setvalue,QString &where)
+{
+    QSqlQuery query;
+    query.prepare("UPDATE "+tabname+" SET"+setvalue+" where "+where);
+    if(!query.exec()){
+        qDebug()<<query.lastError();
+        return false;
+    }
+
+    return true;
 }
 

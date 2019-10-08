@@ -29,6 +29,8 @@ public:
     bool insertMorelData(QList<DateInfo> &infolist);
     bool writeOneData(MLOGTYPE mtype,CLOGTYPE ctype,QString commit,int Chn =-1 );
     bool isTabExists();
+    bool setLogId(quint64 logid);
+    int count();
 
 private:
     explicit LogTabData(QObject *parent = nullptr);
@@ -37,6 +39,7 @@ signals:
 public slots:
 
 private:
+    const QString LOGDBTAB = "logtab";
     static LogTabData *mLogRecord;
     static QMap<CLOGTYPE,QString> mLogType;
     static QMap<MLOGTYPE,QString> mLogMType;

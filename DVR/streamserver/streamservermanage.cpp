@@ -35,6 +35,7 @@ bool StreamServerManage::createNewConnect(StreamParam &param)
     QList<uint> endtime;
     StreamInfo streaminfo;
 
+
     streaminfo.Channel = param.LogicChannel;
     ret = inet_pton(AF_INET, param.IpAddr, &streaminfo.IpAddr);
     if(ret < 0){
@@ -53,14 +54,31 @@ bool StreamServerManage::createNewConnect(StreamParam &param)
     //step2:调用流媒体结构创建流媒体链接通道
 
 
-
+#ifndef LUNUX_WIN
+    VideoStreamPro sourcePor;
     //step3:创建码流通道
     if(!param.PlayType){ //直播通道
-
+        sourcePor.setTime(sttime,endtime,VIDEO_NORMAL);
+        if(!sourcePor.startVenc(param.LogicChannel,REALTIME1)){
+            return false;
+        }
 
     }else {  //回放通道
-
+        return false;
     }
+
+    streaminfo.VencChn = sourcePor.getVencChn();
+    streaminfo.VencFd = sourcePor.getVencFd();
+
+    mStreamMutex.lock();
+    mStreamInfo.append(streaminfo);
+    mStreamMutex.unlock();
+
+    mStreamProvider.insert(streaminfo.VencChn,sourcePor);
+
+#endif
+
+    return true;
 
 }
 
