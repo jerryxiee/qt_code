@@ -72,5 +72,15 @@
         <file>qml/State/AlarmState/AlarmState.qml</file>
         <file>qml/State/PlatformState/PlatformState.qml</file>
         <file>qml/AlarmTest.qml</file>
+        <file>qml/platform/platformconnect.qml</file>
+        <file>qml/platform/bubiao/bubiaoregister.qml</file>
+        <file>qml/platform/bubiao/RegisterConfig.qml</file>
+        <file>qml/platform/bubiao/DeviceConfig.qml</file>
+        <file>qml/platform/bubiao/RunManage.qml</file>
+        <file>qml/platform/bubiao/bubiaoConfig.qml</file>
+        <file>qml/platform/bubiao/DriverSet.qml</file>
+        <file>qml/platform/bubiao/PhoneSet.qml</file>
+        <file>qml/platform/bubiao/PositionSet.qml</file>
+        <file>qml/platform/bubiao/ICSet.qml</file>
     </qresource>
 </RCC>

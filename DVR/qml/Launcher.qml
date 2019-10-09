@@ -23,6 +23,12 @@ Rectangle {
         }
         ListElement{
             flag:"qml"
+            name:"平台注册"
+            icon:"qrc:/qml/setting/images/set.jpg"
+            page:"qrc:/qml/platform/platformconnect.qml"
+        }
+        ListElement{
+            flag:"qml"
             name:"报警设置"
             icon:"qrc:/qml/setting/images/set.jpg"
             page:"qrc:/qml/Alarm/AlarmSet.qml"
