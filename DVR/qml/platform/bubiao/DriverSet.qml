@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.0
 import QtQuick.VirtualKeyboard 2.2
+import PlatformSet 1.0
 
 Item {
     property int fontpixelSize : 32
@@ -361,7 +362,7 @@ Item {
         anchors.top: collisionacc.bottom
         anchors.topMargin: 10
         anchors.left: collisionacc.left
-        text: qsTr("拐点补传脚")
+        text: qsTr("拐点补传角")
         font.pixelSize: fontpixelSize
     }
 

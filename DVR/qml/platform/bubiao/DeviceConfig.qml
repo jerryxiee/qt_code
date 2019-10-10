@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.0
 import QtQuick.VirtualKeyboard 2.2
+import PlatformSet 1.0
 
 Item {
     property int fontpixelSize : 32
@@ -13,6 +14,23 @@ Item {
         onPressed:{
             if(setindex == index){
                 console.log("设备配置")
+                platformset.provienceID = provinceidtext.text
+                platformset.cityID = cityidtext.text
+                platformset.produceID = produceridtext.text
+                 platformset.deviceID = deviceidtext.text
+                platformset.deviceModel = devicemodeltext.text
+                platformset.carColor = combocarcolor.currentIndex
+                platformset.deviceType = combocartype.currentIndex
+                platformset.carVinNumber = vinidtext.text
+                platformset.tcpAnswerTimeout = tcptimeouttext.text
+                platformset.tcpRepeatTimes = tcpreptnumtext.text
+                platformset.udpAnswerTimeout = udptimeouttext.text
+                platformset.udpRepeatTimes = udpreptnumtext.text
+                platformset.smsAnswerTimeout = smstimeouttext.text
+                platformset.smsRepeatTimes = smsreptnumtext.text
+                platformset.heartBeat = heartbeattext.text
+
+
             }
         }
     }
@@ -41,6 +59,10 @@ Item {
         }
     }
 
+    PlatformSet{
+        id:platformset
+    }
+
     Label{
         id:provinceid
         anchors.top: parent.top
@@ -57,6 +79,7 @@ Item {
         anchors.verticalCenter: provinceid.verticalCenter
         anchors.left: provinceid.right
         anchors.leftMargin: 5
+        text: platformset.provienceID
 //        font.pixelSize: fontpixelSize
         onPressed: {
             pressPos(x,y,width,height)
@@ -79,6 +102,7 @@ Item {
         anchors.verticalCenter: provinceid.verticalCenter
         anchors.left: cityid.right
         anchors.leftMargin: 10
+        text: platformset.cityID
 //        font.pixelSize: fontpixelSize
         onPressed: pressPos(x,y,width,height)
     }
@@ -98,6 +122,7 @@ Item {
         anchors.verticalCenter: provinceid.verticalCenter
         anchors.left: producerid.right
         anchors.leftMargin: 10
+        text:platformset.produceID
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -117,6 +142,7 @@ Item {
         anchors.verticalCenter: deviceid.verticalCenter
         anchors.left: deviceid.right
         anchors.leftMargin: 10
+        text: platformset.deviceID
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -136,6 +162,7 @@ Item {
         anchors.verticalCenter: deviceid.verticalCenter
         anchors.left: devicemodel.right
         anchors.leftMargin: 10
+        text: platformset.deviceModel
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -155,6 +182,7 @@ Item {
         anchors.verticalCenter: carcolor.verticalCenter
         anchors.left: carcolor.right
         anchors.leftMargin: 5
+        currentIndex: platformset.carColor
         model: ["蓝色","黄色","黑色","白色","绿色","其他"]
     }
 
@@ -163,7 +191,7 @@ Item {
         anchors.verticalCenter: carcolor.verticalCenter
         anchors.left: combocarcolor.right
         anchors.leftMargin: 20
-        text: qsTr("车牌颜色")
+        text: qsTr("车辆类型")
         font.pixelSize: fontpixelSize
     }
 
@@ -173,6 +201,7 @@ Item {
         anchors.verticalCenter: carcolor.verticalCenter
         anchors.left: cartype.right
         anchors.leftMargin: 10
+        currentIndex: platformset.deviceType
         model: ["客运车辆","危险品车辆","货运车辆","出租汽车","其他"]
     }
 
@@ -192,6 +221,7 @@ Item {
         anchors.verticalCenter: vinid.verticalCenter
         anchors.left: vinid.right
         anchors.leftMargin: 10
+        text: platformset.carVinNumber
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -211,6 +241,7 @@ Item {
         anchors.verticalCenter: vinid.verticalCenter
         anchors.left: tcptimeout.right
         anchors.leftMargin: 10
+        text: platformset.tcpAnswerTimeout
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -239,6 +270,7 @@ Item {
         anchors.verticalCenter: tcpreptnum.verticalCenter
         anchors.left: tcpreptnum.right
         anchors.leftMargin: 10
+        text: platformset.tcpRepeatTimes
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -259,6 +291,7 @@ Item {
         anchors.verticalCenter: udptimeout.verticalCenter
         anchors.left: udptimeout.right
         anchors.leftMargin: 10
+        text: platformset.udpAnswerTimeout
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -286,6 +319,7 @@ Item {
         anchors.verticalCenter: udpreptnum.verticalCenter
         anchors.left: udpreptnum.right
         anchors.leftMargin: 10
+        text: platformset.udpRepeatTimes
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -305,6 +339,7 @@ Item {
         anchors.verticalCenter: smstimeout.verticalCenter
         anchors.left: smstimeout.right
         anchors.leftMargin: 10
+        text: platformset.smsAnswerTimeout
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -332,6 +367,7 @@ Item {
         anchors.verticalCenter: smsreptnum.verticalCenter
         anchors.left: smsreptnum.right
         anchors.leftMargin: 10
+        text: platformset.smsRepeatTimes
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -351,6 +387,7 @@ Item {
         anchors.verticalCenter: heartbeat.verticalCenter
         anchors.left: heartbeat.right
         anchors.leftMargin: 10
+        text: platformset.heartBeat
         onPressed:
         {
 

@@ -17,6 +17,7 @@ Config::Config(const QString &filename)
 Config::~Config()
 {
     delete mpSetting;
+    qDebug()<<"close QSetting "+mFileName;
 //    mpSetting = nullptr;
 }
 

@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.0
 import QtQuick.VirtualKeyboard 2.2
+import PlatformSet 1.0
 
 Item {
     property int fontpixelSize : 32

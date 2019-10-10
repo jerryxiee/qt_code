@@ -11,7 +11,7 @@ class SystemSet : public QObject ,public Config
     Q_PROPERTY(QString UTC READ readUtc WRITE setUtc)
     Q_PROPERTY(bool dhcp READ readDhcp WRITE setDhcp)
 public:
-    explicit SystemSet(QObject *parent = nullptr, const QString &filename = ".system.ini");
+    explicit SystemSet(QObject *parent = nullptr, const QString filename = ".system.ini");
 
     Q_INVOKABLE void setSystemTime(QString datetime);
     Q_INVOKABLE void setSystemNet(bool dhcp,QString ip,QString mask,QString route,QString dns,QString mac);

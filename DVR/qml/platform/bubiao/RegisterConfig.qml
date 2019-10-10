@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.0
 import QtQuick.VirtualKeyboard 2.2
+import PlatformSet 1.0
 
 Item {
     property int fontpixelSize : 32
@@ -11,6 +12,7 @@ Item {
     property int labelheight: 80
 
     signal pressPos(int x,int y,int w,int h)
+
 
     onPressPos: {
         if(x+keyboardvir.width > parent.width){
@@ -44,9 +46,22 @@ Item {
             if(setindex == index){
 
                 console.log("注册配置")
-
+                platformset.registerEnable = checkenable.checked
+                platformset.mainEnableTcp = maintcpenable.checked
+                platformset.mainEnableUdp = mainudpenable.checked
+                platformset.secEnableTcp = scetcpenable.checked
+                platformset.secEnableUdp = sceudpenable.checked
+                platformset.registerType = comboregistertype.currentIndex
+                platformset.mainServer = mainserveriptext.text+":"+maintcpporttext.text+":"+mainudpporttext.text
+                platformset.backupServer  = secserveriptext.text+":"+sectcpporttext.text+":"+secudpporttext.text
+                platformset.phoneNumber = phonenumtext.text
+                platformset.carLisence = cardlicensetext.text
             }
         }
+    }
+
+    PlatformSet{
+        id:platformset
     }
 
     Label{
@@ -64,6 +79,7 @@ Item {
         id:checkenable
         anchors.verticalCenter: enableregister.verticalCenter
         anchors.left:enableregister.right
+        checked: platformset.registerEnable
 //        anchors.leftMargin: 20
     }
 
@@ -82,6 +98,7 @@ Item {
         width: labelwidth
         anchors.verticalCenter: enableregister.verticalCenter
         anchors.left: registertype.right
+        currentIndex: platformset.registerType
         model: ["主从方式","同时注册"]
     }
 
@@ -101,7 +118,12 @@ Item {
         width: boxwidth
         anchors.verticalCenter: mainserverip.verticalCenter
         anchors.left: mainserverip.right
-        onPressed: pressPos(x,y,width,height)
+        text: platformset.mainServerIp
+//        inputMethodHints: Qt.ImhUppercaseOnly | Qt.ImhDigitsOnly
+        onPressed: {
+            keyboardvir.visible = true
+            pressPos(x,y,width,height)
+        }
 //        font.pixelSize: fontpixelSize
     }
 
@@ -141,6 +163,7 @@ Item {
         width: boxwidth
         anchors.verticalCenter: maintcpport.verticalCenter
         anchors.left: maintcpport.right
+        text: platformset.mainServerTcpPort
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -150,7 +173,7 @@ Item {
         anchors.verticalCenter: maintcpport.verticalCenter
         anchors.left:maintcpporttext.right
         anchors.leftMargin: 10
-        checked: !mainudpenable.checked
+        checked: platformset.mainEnableTcp
     }
 
     Label{
@@ -168,6 +191,7 @@ Item {
         width: boxwidth
         anchors.verticalCenter: mainudpport.verticalCenter
         anchors.left: mainudpport.right
+        text: platformset.mainServerUdpPort
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -177,7 +201,7 @@ Item {
         anchors.verticalCenter: mainudpport.verticalCenter
         anchors.left:mainudpporttext.right
         anchors.leftMargin: 10
-        checked: !maintcpenable.checked
+        checked: platformset.mainEnableUdp
     }
 
     Label{
@@ -194,6 +218,7 @@ Item {
         width: boxwidth
         anchors.verticalCenter: secserverip.verticalCenter
         anchors.left: secserverip.right
+        text: platformset.backupServerIp
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -233,6 +258,7 @@ Item {
         width: boxwidth
         anchors.verticalCenter: sectcpport.verticalCenter
         anchors.left: sectcpport.right
+        text: platformset.backupServerTcpPort
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -242,7 +268,7 @@ Item {
         anchors.verticalCenter: sectcpport.verticalCenter
         anchors.left:sectcpporttext.right
         anchors.leftMargin: 10
-        checked: !sceudpenable.checked
+        checked: platformset.secEnableTcp
     }
 
     Label{
@@ -260,6 +286,7 @@ Item {
         width: boxwidth
         anchors.verticalCenter: secudpport.verticalCenter
         anchors.left: secudpport.right
+        text: platformset.backupServerUdpPort
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -268,7 +295,7 @@ Item {
         anchors.verticalCenter: secudpport.verticalCenter
         anchors.left:secudpporttext.right
         anchors.leftMargin: 10
-        checked: !scetcpenable.checked
+        checked: platformset.secEnableUdp
     }
 
     Label{
@@ -286,6 +313,7 @@ Item {
         width: boxwidth
         anchors.verticalCenter: cardlicense.verticalCenter
         anchors.left: cardlicense.right
+        text: platformset.carLisence
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -305,6 +333,7 @@ Item {
         width: boxwidth
         anchors.verticalCenter: phonenum.verticalCenter
         anchors.left: phonenum.right
+        text: platformset.phoneNumber
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }

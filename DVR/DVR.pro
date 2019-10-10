@@ -70,7 +70,9 @@ SOURCES += \
     common/schedule/UsageEnvironment.cpp \
     communication/remotethread.cpp \
     streamserver/streamservermanage.cpp \
-    settings/config/deviceparamconfig.cpp
+    settings/config/deviceparamconfig.cpp \
+    settings/platformset.cpp \
+    settings/config/platformconfigini.cpp
 
 
 
@@ -118,7 +120,9 @@ HEADERS += \
     communication/remotethread.h \
     streamserver/streamservermanage.h \
     communication/jtt808define.h \
-    settings/config/deviceparamconfig.h
+    settings/config/deviceparamconfig.h \
+    settings/platformset.h \
+    settings/config/platformconfigini.h
 
 
 INCLUDEPATH +=/home/abhw/git/qt_code/DVR/common/schedule \

@@ -41,8 +41,7 @@ bool DeviceParamConfig::createTable()
             ID INTEGER NOT NULL, \
             NUM INTEGER NOT NULL, \
             FIELD INTEGER NOT NULL, \
-            VALUE TEXT, \
-            )";
+            VALUE TEXT)";
 
     return SqliteDateBase::createTable(TABNAME,tabinfo);
 

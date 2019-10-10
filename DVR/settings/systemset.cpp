@@ -2,7 +2,7 @@
 #include "QDebug"
 #include <QRegExp>
 
-SystemSet::SystemSet(QObject *parent, const QString &filename) : QObject(parent),Config (filename)
+SystemSet::SystemSet(QObject *parent, const QString filename) : QObject(parent),Config (filename)
 {
 
 }
