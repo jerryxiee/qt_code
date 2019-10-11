@@ -18,6 +18,9 @@ class VideoStreamPro : public QObject
 public:
     explicit VideoStreamPro(QObject *parent = nullptr);
 
+    VideoStreamPro(const VideoStreamPro& provide);
+    VideoStreamPro& operator=(const VideoStreamPro& provide);
+
     void setTime(QList<uint> &start, QList<uint> &end,VIDEO_TYPE type);      //设置播放本地视频时间段,type为报警文件或正常录像文件
     void setStreamType(SEND_STREAM_T type);
     int getVencFd() const;

@@ -14,6 +14,8 @@ class VideoLink : public QObject
 public:
     explicit VideoLink(QObject *parent = nullptr);
 
+    VideoLink& operator=(const VideoLink & videolink);
+
     int Init(VO_DEV VoDev,VO_LAYER VoLayer,SAMPLE_VO_MODE_E enMode);
     int DeInit(VO_DEV VoDev,VO_LAYER VoLayer);
 

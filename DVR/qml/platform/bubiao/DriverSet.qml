@@ -43,9 +43,27 @@ Item {
             if(setindex == index){
 
                 console.log("驾驶设置")
+                platformset.minRestTime = minresttimetext.text
+                platformset.overspeedDuration = speedcontinuetimetext.text
+                platformset.maxStopTime = carstoptimetext.text
+                platformset.electronicFenceRadius = fenceradiustext.text
+                platformset.driverDuration = drivertimetext.text
+                platformset.topSpeed = maxspeedtext.text
+                platformset.sadOverSpeed = speedsadtext.text
+                platformset.sadFatigueDriving = driversadtext.text
+                platformset.collisionAlarmTime = collisiontimetext.text
+                platformset.collisionAlarmAcc = collisionacctext.text
+                platformset.rolloverAngle = rolloverangletext.text
+                platformset.inflectionCompensationAngle = cornerangletext.text
+                platformset.driverDayDuration = drivertotaltimetext.text
+
 
             }
         }
+    }
+
+    PlatformSet{
+        id:platformset
     }
 
     Label{
@@ -64,6 +82,7 @@ Item {
         anchors.verticalCenter: minresttime.verticalCenter
         anchors.left: minresttime.right
         anchors.leftMargin: 5
+        text: platformset.minRestTime
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -92,6 +111,7 @@ Item {
         anchors.verticalCenter: minresttime.verticalCenter
         anchors.left: speedcontinuetime.right
         anchors.leftMargin: 5
+        text: platformset.overspeedDuration
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -121,6 +141,7 @@ Item {
         anchors.verticalCenter: carstoptime.verticalCenter
         anchors.left: carstoptime.right
         anchors.leftMargin: 5
+        text: platformset.maxStopTime
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -149,6 +170,7 @@ Item {
         anchors.verticalCenter: fenceradius.verticalCenter
         anchors.left: fenceradius.right
         anchors.leftMargin: 5
+        text: platformset.electronicFenceRadius
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -177,6 +199,7 @@ Item {
         anchors.verticalCenter: drivertime.verticalCenter
         anchors.left: drivertime.right
         anchors.leftMargin: 5
+        text: platformset.driverDuration
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -205,6 +228,7 @@ Item {
         anchors.verticalCenter: drivertime.verticalCenter
         anchors.left: maxspeed.right
         anchors.leftMargin: 5
+        text: platformset.topSpeed
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -233,6 +257,7 @@ Item {
         anchors.verticalCenter: speedsad.verticalCenter
         anchors.left: speedsad.right
         anchors.leftMargin: 5
+        text: platformset.sadOverSpeed
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -261,6 +286,7 @@ Item {
         anchors.verticalCenter: driversad.verticalCenter
         anchors.left: driversad.right
         anchors.leftMargin: 5
+        text: platformset.sadFatigueDriving
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -289,6 +315,7 @@ Item {
         anchors.verticalCenter: collisiontime.verticalCenter
         anchors.left: collisiontime.right
         anchors.leftMargin: 5
+        text: platformset.collisionAlarmTime
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -317,6 +344,7 @@ Item {
         anchors.verticalCenter: collisionacc.verticalCenter
         anchors.left: collisionacc.right
         anchors.leftMargin: 5
+        text: platformset.collisionAlarmAcc
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -344,6 +372,7 @@ Item {
         anchors.verticalCenter: rolloverangle.verticalCenter
         anchors.left: rolloverangle.right
         anchors.leftMargin: 5
+        text: platformset.rolloverAngle
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -372,6 +401,7 @@ Item {
         anchors.verticalCenter: cornerangle.verticalCenter
         anchors.left: cornerangle.right
         anchors.leftMargin: 5
+        text: platformset.inflectionCompensationAngle
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -400,6 +430,7 @@ Item {
         anchors.verticalCenter: drivertotaltime.verticalCenter
         anchors.left: drivertotaltime.right
         anchors.leftMargin: 5
+        text: platformset.driverDayDuration
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }

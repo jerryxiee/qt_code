@@ -28,8 +28,8 @@ class PlatformSet : public QObject
     Q_PROPERTY(QString icAuthBackupServerIp READ readIcAuthBackupServerIp WRITE setIcAuthBackupServerIp NOTIFY icAuthBackupServerIpChanged)
     Q_PROPERTY(QString icAuthServerTcpPort READ readIcAuthServerTcpPort WRITE setIcAuthServerTcpPort NOTIFY icAuthServerTcpPortChanged)
     Q_PROPERTY(QString icAuthServerUdpPort READ readIcAuthServerUdpPort WRITE setIcAuthServerUdpPort NOTIFY icAuthServerUdpPortChanged)
-    Q_PROPERTY(QString positionReportingStrategy READ readPositionReportingStrategy WRITE setPositionReportingStrategy NOTIFY positionReportingStrategyChnaged)
-    Q_PROPERTY(QString positionReportingProgramme READ readPositionReportingProgramme WRITE setPositionReportingProgramme NOTIFY positionReportingProgrammeChnaged)
+    Q_PROPERTY(int positionReportingStrategy READ readPositionReportingStrategy WRITE setPositionReportingStrategy NOTIFY positionReportingStrategyChnaged)
+    Q_PROPERTY(int positionReportingProgramme READ readPositionReportingProgramme WRITE setPositionReportingProgramme NOTIFY positionReportingProgrammeChnaged)
     Q_PROPERTY(QString positionReportingSleepDistanceInterval READ readPositionReportingSleepDistanceInterval WRITE setPositionReportingSleepDistanceInterval NOTIFY positionReportingSleepDistanceIntervalChnaged)
     Q_PROPERTY(QString positionReportingUrgentDistanceInterval READ readPositionReportingUrgentDistanceInterval WRITE setPositionReportingUrgentDistanceInterval NOTIFY positionReportingUrgentDistanceIntervalChnaged)
     Q_PROPERTY(QString positionReportingDefaultDistanceInterval READ readPositionReportingDefaultDistanceInterval WRITE setPositionReportingDefaultDistanceInterval NOTIFY positionReportingDefaultDistanceIntervalChnaged)
@@ -45,7 +45,7 @@ class PlatformSet : public QObject
     Q_PROPERTY(QString telephoneOfFactory READ readTelephoneOfFactory WRITE setTelephoneOfFactory NOTIFY telephoneOfFactoryChnaged)
     Q_PROPERTY(QString smsTelephoneOfMonitoringPlatform READ readSmsTelephoneOfMonitoringPlatform WRITE setSmsTelephoneOfMonitoringPlatform NOTIFY smsTelephoneOfMonitoringPlatformChnaged)
     Q_PROPERTY(QString smsTelephoneOfTextAlarm READ readSmsTelephoneOfTextAlarm WRITE setSmsTelephoneOfTextAlarm NOTIFY smsTelephoneOfTextAlarmChnaged)
-    Q_PROPERTY(QString telephoneReceptionStrategy READ readTelephoneReceptionStrategy WRITE setTelephoneReceptionStrategy NOTIFY telephoneReceptionStrategyChnaged)
+    Q_PROPERTY(int telephoneReceptionStrategy READ readTelephoneReceptionStrategy WRITE setTelephoneReceptionStrategy NOTIFY telephoneReceptionStrategyChnaged)
     Q_PROPERTY(QString onesReceptionMaxTime READ readOnesReceptionMaxTime WRITE setOnesReceptionMaxTime NOTIFY onesReceptionMaxTimeChnaged)
     Q_PROPERTY(QString monthReceptionMaxTime READ readMonthReceptionMaxTime WRITE setMonthReceptionMaxTime NOTIFY monthReceptionMaxTimeChnaged)
     Q_PROPERTY(QString monitorTelephoneNumber READ readMonitorTelephoneNumber WRITE setMonitorTelephoneNumber NOTIFY monitorTelephoneNumberChnaged)
@@ -59,8 +59,8 @@ class PlatformSet : public QObject
     Q_PROPERTY(QString sadOverSpeed READ readSadOverSpeed WRITE setSadOverSpeed NOTIFY sadOverSpeedChnaged)
     Q_PROPERTY(QString sadFatigueDriving READ readSadFatigueDriving WRITE setSadFatigueDriving NOTIFY sadFatigueDrivingChnaged)
     Q_PROPERTY(QString collisionAlarm READ readCollisionAlarm WRITE setCollisionAlarm NOTIFY collisionAlarmChnaged)
-    Q_PROPERTY(QString collisionAlarmTime READ readCollisionAlarmTime NOTIFY collisionAlarmTimeChnaged)
-    Q_PROPERTY(QString collisionAlarmAcc READ readCollisionAlarmAcc NOTIFY collisionAlarmAccChnaged)
+    Q_PROPERTY(QString collisionAlarmTime READ readCollisionAlarmTime WRITE setCollisionAlarmTime NOTIFY collisionAlarmTimeChnaged)
+    Q_PROPERTY(QString collisionAlarmAcc READ readCollisionAlarmAcc WRITE setCollisionAlarmAcc NOTIFY collisionAlarmAccChnaged)
     Q_PROPERTY(QString rolloverAngle READ readRolloverAngle WRITE setRolloverAngle NOTIFY rolloverAngleChnaged)
     Q_PROPERTY(QString provienceID READ readProvienceID WRITE setProvienceID NOTIFY provienceIDChnaged)
     Q_PROPERTY(QString cityID READ readCityID WRITE setCityID NOTIFY cityIDChnaged)
@@ -78,6 +78,7 @@ class PlatformSet : public QObject
     Q_PROPERTY(int deviceType READ readDeviceType WRITE setDeviceType NOTIFY deviceTypeChnaged)
     Q_PROPERTY(QString deviceModel READ readDeviceModel WRITE setDeviceModel NOTIFY deviceModelChnaged)
     Q_PROPERTY(QString deviceID READ readDeviceID WRITE setDeviceID NOTIFY deviceIDChnaged)
+    Q_PROPERTY(QString authNumber READ readAuthNumber WRITE setAuthNumber NOTIFY authNumberChnaged)
 
 public:
     explicit PlatformSet(QObject *parent = nullptr);
@@ -120,10 +121,10 @@ public:
     void setIcAuthServerTcpPort(QString value);
     QString readIcAuthServerUdpPort() const;
     void setIcAuthServerUdpPort(QString value);
-    QString readPositionReportingStrategy() const;
-    void setPositionReportingStrategy(QString value);
-    QString readPositionReportingProgramme() const;
-    void setPositionReportingProgramme(QString value);
+    int readPositionReportingStrategy() const;
+    void setPositionReportingStrategy(int value);
+    int readPositionReportingProgramme() const;
+    void setPositionReportingProgramme(int value);
     QString readPositionReportingSleepDistanceInterval() const;
     void setPositionReportingSleepDistanceInterval(QString value);
     QString readPositionReportingUrgentDistanceInterval() const;
@@ -155,8 +156,8 @@ public:
     void setSmsTelephoneOfMonitoringPlatform(QString value);
     QString readSmsTelephoneOfTextAlarm() const;
     void setSmsTelephoneOfTextAlarm(QString value);
-    QString readTelephoneReceptionStrategy() const;
-    void setTelephoneReceptionStrategy(QString value);
+    int readTelephoneReceptionStrategy() const;
+    void setTelephoneReceptionStrategy(int value);
 
     QString readOnesReceptionMaxTime() const;
     void setOnesReceptionMaxTime(QString value);
@@ -185,7 +186,9 @@ public:
     QString readCollisionAlarm() const;
     void setCollisionAlarm(QString value);
     QString readCollisionAlarmTime() const;
+    void setCollisionAlarmTime(QString value);
     QString readCollisionAlarmAcc() const;
+    void setCollisionAlarmAcc(QString value);
     QString readRolloverAngle() const;
     void setRolloverAngle(QString value);
     QString readProvienceID() const;
@@ -222,6 +225,10 @@ public:
     void setDeviceModel(QString value);
     QString readDeviceID() const;
     void setDeviceID(QString value);
+
+    QString readAuthNumber() const;
+    void setAuthNumber(QString value);
+
 
 signals:
     void heartBeatChanged();
@@ -293,6 +300,7 @@ signals:
     void deviceModelChnaged();
     void deviceIDChnaged();
     void carVinNumberChnaged();
+    void authNumberChnaged();
 
 public slots:
 

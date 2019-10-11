@@ -276,31 +276,31 @@ void PlatformSet::setIcAuthServerUdpPort(QString value)
 
     mPlatformConfig.insertSignalData(config);
 }
-QString PlatformSet::readPositionReportingStrategy() const
+int PlatformSet::readPositionReportingStrategy() const
 {
-    return mPlatformConfig.getValue(0x8103,0x20,0).toString();
+    return mPlatformConfig.getValue(0x8103,0x20,0).toInt();
 }
-void PlatformSet::setPositionReportingStrategy(QString value)
+void PlatformSet::setPositionReportingStrategy(int value)
 {
     DeviceParam config;
     config.id = 0x8103;
     config.num = 0x20;
     config.field = 0x0;
-    config.value = value;
+    config.value = QString::number(value);
 
     mPlatformConfig.insertSignalData(config);
 }
-QString PlatformSet::readPositionReportingProgramme() const
+int PlatformSet::readPositionReportingProgramme() const
 {
-    return mPlatformConfig.getValue(0x8103,0x21,0).toString();
+    return mPlatformConfig.getValue(0x8103,0x21,0).toInt();
 }
-void PlatformSet::setPositionReportingProgramme(QString value)
+void PlatformSet::setPositionReportingProgramme(int value)
 {
     DeviceParam config;
     config.id = 0x8103;
     config.num = 0x21;
     config.field = 0x0;
-    config.value = value;
+    config.value = QString::number(value);
 
     mPlatformConfig.insertSignalData(config);
 }
@@ -515,17 +515,17 @@ void PlatformSet::setSmsTelephoneOfTextAlarm(QString value)
 
     mPlatformConfig.insertSignalData(config);
 }
-QString PlatformSet::readTelephoneReceptionStrategy() const
+int PlatformSet::readTelephoneReceptionStrategy() const
 {
-    return mPlatformConfig.getValue(0x8103,0x45,0).toString();
+    return mPlatformConfig.getValue(0x8103,0x45,0).toInt();
 }
-void PlatformSet::setTelephoneReceptionStrategy(QString value)
+void PlatformSet::setTelephoneReceptionStrategy(int value)
 {
     DeviceParam config;
     config.id = 0x8103;
     config.num = 0x45;
     config.field = 0x0;
-    config.value = value;
+    config.value = QString::number(value);
 
     mPlatformConfig.insertSignalData(config);
 }
@@ -714,17 +714,43 @@ void PlatformSet::setCollisionAlarm(QString value)
 
     mPlatformConfig.insertSignalData(config);
 }
+
 QString PlatformSet::readCollisionAlarmTime() const
 {
-    int str = readCollisionAlarm().toInt()&0x000000ff;
+//    int str = readCollisionAlarm().toInt()&0x000000ff;
 
-    return QString::number(str);
+//    return QString::number(str);
+    return mPlatformConfig.getValue(0x8103,0x5d,0).toString();
+}
+
+void PlatformSet::setCollisionAlarmTime(QString value)
+{
+    DeviceParam config;
+    config.id = 0x8103;
+    config.num = 0x5d;
+    config.field = 0x0;
+    config.value = value;
+
+    mPlatformConfig.insertSignalData(config);
 }
 QString PlatformSet::readCollisionAlarmAcc() const
 {
-    int str = readCollisionAlarm().toInt()>>8;
+//    int str = readCollisionAlarm().toInt()>>8;
 
-    return QString::number(str);
+//    return QString::number(str);
+    return mPlatformConfig.getValue(0x8103,0x5d,1).toString();
+}
+
+
+void PlatformSet::setCollisionAlarmAcc(QString value)
+{
+    DeviceParam config;
+    config.id = 0x8103;
+    config.num = 0x5d;
+    config.field = 0x1;
+    config.value = value;
+
+    mPlatformConfig.insertSignalData(config);
 }
 
 QString PlatformSet::readRolloverAngle() const
@@ -910,6 +936,21 @@ void PlatformSet::setCarVinNumber(QString value)
     config.id = 0x8103;
     config.num = 0;
     config.field = 7;
+    config.value = value;
+
+    mPlatformConfig.insertSignalData(config);
+}
+
+QString PlatformSet::readAuthNumber() const
+{
+    return mPlatformConfig.getValue(0x8103,0,8).toString();
+}
+void PlatformSet::setAuthNumber(QString value)
+{
+    DeviceParam config;
+    config.id = 0x8103;
+    config.num = 0;
+    config.field = 8;
     config.value = value;
 
     mPlatformConfig.insertSignalData(config);

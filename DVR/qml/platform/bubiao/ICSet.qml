@@ -42,9 +42,17 @@ Item {
             if(setindex == index){
 
                 console.log("IC设置")
+                platformset.icAuthServerIp = icmainserveriptext.text
+                platformset.icAuthBackupServerIp = icsecserveriptext.text
+                platformset.icAuthServerTcpPort = ictcpporttext.text
+                platformset.icAuthServerUdpPort = icudpporttext.text
 
             }
         }
+    }
+
+    PlatformSet{
+        id:platformset
     }
 
     Label{
@@ -64,6 +72,7 @@ Item {
         anchors.verticalCenter: icmainserverip.verticalCenter
         anchors.left: icmainserverip.right
         anchors.leftMargin: 10
+        text: platformset.icAuthServerIp
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -84,6 +93,7 @@ Item {
         anchors.verticalCenter: icsecserverip.verticalCenter
         anchors.left: icsecserverip.right
         anchors.leftMargin: 10
+        text: platformset.icAuthBackupServerIp
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -104,6 +114,7 @@ Item {
         anchors.verticalCenter: ictcpport.verticalCenter
         anchors.left: ictcpport.right
         anchors.leftMargin: 10
+        text: platformset.icAuthServerTcpPort
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -125,6 +136,7 @@ Item {
         anchors.verticalCenter: icudpport.verticalCenter
         anchors.left: icudpport.right
         anchors.leftMargin: 10
+        text: platformset.icAuthServerUdpPort
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }

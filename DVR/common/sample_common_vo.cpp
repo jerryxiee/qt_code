@@ -45,6 +45,8 @@ Sample_Common_Vo & Sample_Common_Vo::operator=(const Sample_Common_Vo &Sample_Vo
 //    stCallbackFunc = Sample_Vo.stCallbackFunc;
 //    stHdmiArgs     = Sample_Vo.stHdmiArgs;
 
+    return *this;
+
 }
 
 HI_S32 Sample_Common_Vo::SAMPLE_COMM_VO_SetDev(VO_DEV VoDev,VO_LAYER VoLayer,SAMPLE_VO_MODE_E enVoMode)

@@ -43,10 +43,25 @@ Item {
             if(setindex == index){
 
                 console.log("位置设置")
+                platformset.positionReportingStrategy = comboposrepetstyle.currentIndex
+                platformset.positionReportingProgramme = comboposrepettype.currentIndex
+                platformset.positionReportingUrgentTimeInterval = report1text.text
+                platformset.positionReportingUrgentDistanceInterval = report1text1.text
+                platformset.driverNoSignInTimeInterval = report2text.text
+                platformset.driverNoSignInDistanceInterval = report2text1.text
+                platformset.positionReportingSleepTimeInterval = report3text.text
+                platformset.positionReportingSleepDistanceInterval = report3text1.text
+                platformset.positionReportingDefaultTimeInterval = report4text.text
+                platformset.positionReportingDefaultDistanceInterval = report4text1.text
 
             }
         }
     }
+
+    PlatformSet{
+        id:platformset
+    }
+
 
     Label{
         id:posrepetstyle
@@ -64,6 +79,7 @@ Item {
         anchors.left: posrepetstyle.right
         anchors.leftMargin: 10
         width: 300
+        currentIndex: platformset.positionReportingStrategy
         model: ["定时汇报","定距汇报","定距/定距"]
     }
 
@@ -83,6 +99,7 @@ Item {
         anchors.left: posrepettype.right
         anchors.leftMargin: 10
         width: 300
+        currentIndex: platformset.positionReportingProgramme
         model: ["根据ACC状态","根据登录状态和ACC状态"]
     }
 
@@ -102,6 +119,7 @@ Item {
         anchors.verticalCenter: report1.verticalCenter
         anchors.left: report1.right
         anchors.leftMargin: 10
+        text: platformset.positionReportingUrgentTimeInterval
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -120,6 +138,7 @@ Item {
         anchors.verticalCenter: report1.verticalCenter
         anchors.left: report1textsec.right
         anchors.leftMargin: 5
+        text: platformset.positionReportingUrgentDistanceInterval
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -150,6 +169,7 @@ Item {
         anchors.verticalCenter: report2.verticalCenter
         anchors.left: report2.right
         anchors.leftMargin: 10
+        text: platformset.driverNoSignInTimeInterval
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -168,6 +188,7 @@ Item {
         anchors.verticalCenter: report2.verticalCenter
         anchors.left: report2textsec.right
         anchors.leftMargin: 5
+        text: platformset.driverNoSignInDistanceInterval
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -197,6 +218,7 @@ Item {
         anchors.verticalCenter: report3.verticalCenter
         anchors.left: report3.right
         anchors.leftMargin: 10
+        text: platformset.positionReportingSleepTimeInterval
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -215,6 +237,7 @@ Item {
         anchors.verticalCenter: report3.verticalCenter
         anchors.left: report3textsec.right
         anchors.leftMargin: 5
+        text: platformset.positionReportingSleepDistanceInterval
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -245,6 +268,7 @@ Item {
         anchors.verticalCenter: report4.verticalCenter
         anchors.left: report4.right
         anchors.leftMargin: 10
+        text: platformset.positionReportingDefaultTimeInterval
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -263,6 +287,7 @@ Item {
         anchors.verticalCenter: report4.verticalCenter
         anchors.left: report4textsec.right
         anchors.leftMargin: 5
+        text: platformset.positionReportingDefaultDistanceInterval
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }

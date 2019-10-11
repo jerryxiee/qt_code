@@ -5,6 +5,15 @@ VideoLink::VideoLink(QObject *parent) : QObject(parent),mpVpss(nullptr)
 
 }
 
+VideoLink& VideoLink::operator=(const VideoLink & videolink)
+{
+    mVo = videolink.mVo;
+    mpVpss = videolink.mpVpss;
+    mProcess = videolink.mProcess;
+
+    return *this;
+}
+
 int VideoLink::Init(VO_DEV VoDev, VO_LAYER VoLayer, SAMPLE_VO_MODE_E enMode)
 {
     int ret;

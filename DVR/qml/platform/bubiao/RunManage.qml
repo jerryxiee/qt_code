@@ -43,11 +43,15 @@ Item {
             if(setindex == index){
 
                 console.log("运行管理")
+                platformset.authNumber = authidtext.text
 
             }
         }
     }
 
+    PlatformSet{
+        id:platformset
+    }
 
     Label{
         id:authid
@@ -65,6 +69,7 @@ Item {
         anchors.verticalCenter: authid.verticalCenter
         anchors.left: authid.right
         anchors.leftMargin: 20
+        text: platformset.authNumber
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }

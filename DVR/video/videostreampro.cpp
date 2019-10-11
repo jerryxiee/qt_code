@@ -10,6 +10,38 @@ VideoStreamPro::VideoStreamPro(QObject *parent) : QObject(parent),mStreamType(TY
 
 }
 
+VideoStreamPro::VideoStreamPro(const VideoStreamPro& provide)
+{
+    mStreamType = provide.mStreamType;
+
+    mpVenc = provide.mpVenc;
+
+    mVideoLink = provide.mVideoLink;
+    mVideoPlayList = provide.mVideoPlayList;
+    mStartTime = provide.mStartTime;
+    mEndTime = provide.mEndTime;
+    mVideoType = provide.mVideoType;
+}
+
+VideoStreamPro& VideoStreamPro::operator=(const VideoStreamPro& provide)
+{
+    if(&provide == this){
+        return *this;
+    }
+    mStreamType = provide.mStreamType;
+
+    mpVenc = provide.mpVenc;
+
+    mVideoLink = provide.mVideoLink;
+    mVideoPlayList = provide.mVideoPlayList;
+    mStartTime = provide.mStartTime;
+    mEndTime = provide.mEndTime;
+    mVideoType = provide.mVideoType;
+
+    return *this;
+
+}
+
 void VideoStreamPro::setTime(QList<uint> &start, QList<uint> &end, VIDEO_TYPE type)
 {
     mStartTime = start;

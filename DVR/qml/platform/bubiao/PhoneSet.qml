@@ -41,9 +41,24 @@ Item {
             if(setindex == index){
 
                 console.log("电话设置")
+                platformset.monitorTelephoneNumber = monitornumtext.text
+                platformset.telephoneOfReset = resetphonenumtext.text
+                platformset.telephoneOfMonitoringPlatform = platformnumtext.text
+                platformset.smsTelephoneOfMonitoringPlatform = smsphonenumtext.text
+                platformset.onesReceptionMaxTime = timetext.text
+                platformset.monthReceptionMaxTime = time1text.text
+                platformset.platformSpecialNumber = emsnumtext.text
+                platformset.telephoneOfFactory = factorynumtext.text
+                platformset.smsTelephoneOfTextAlarm = smsalarmnumtext.text
+
+
 
             }
         }
+    }
+
+    PlatformSet{
+        id:platformset
     }
 
     Label{
@@ -62,6 +77,7 @@ Item {
         anchors.left: phonestyle.right
         anchors.leftMargin: 10
         width: 400
+        currentIndex: platformset.telephoneReceptionStrategy
         model: ["自动接听","ACC ON时自动接听，OFF时手动接听"]
     }
 
@@ -80,6 +96,7 @@ Item {
         anchors.verticalCenter: monitornum.verticalCenter
         anchors.left: monitornum.right
         anchors.leftMargin: 10
+        text: platformset.monitorTelephoneNumber
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -89,7 +106,7 @@ Item {
         anchors.verticalCenter: monitornum.verticalCenter
         anchors.left: monitornumtext.right
         anchors.leftMargin: 20
-        text: qsTr("监听电话")
+        text: qsTr("复位电话")
         font.pixelSize: fontpixelSize
     }
 
@@ -99,6 +116,7 @@ Item {
         anchors.verticalCenter: monitornum.verticalCenter
         anchors.left: resetphonenum.right
         anchors.leftMargin: 10
+        text: platformset.telephoneOfReset
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -118,6 +136,7 @@ Item {
         anchors.verticalCenter: platformnum.verticalCenter
         anchors.left: platformnum.right
         anchors.leftMargin: 10
+        text: platformset.telephoneOfMonitoringPlatform
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -137,6 +156,7 @@ Item {
         anchors.verticalCenter: platformnum.verticalCenter
         anchors.left: smsphonenum.right
         anchors.leftMargin: 10
+        text: platformset.smsTelephoneOfMonitoringPlatform
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -156,6 +176,7 @@ Item {
         anchors.verticalCenter: time.verticalCenter
         anchors.left: time.right
         anchors.leftMargin: 10
+        text: platformset.onesReceptionMaxTime
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -185,6 +206,7 @@ Item {
         anchors.verticalCenter: time1.verticalCenter
         anchors.left: time1.right
         anchors.leftMargin: 10
+        text: platformset.monthReceptionMaxTime
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -213,6 +235,7 @@ Item {
         anchors.verticalCenter: emsnum.verticalCenter
         anchors.left: emsnum.right
         anchors.leftMargin: 10
+        text: platformset.platformSpecialNumber
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -232,6 +255,7 @@ Item {
         anchors.verticalCenter: factorynum.verticalCenter
         anchors.left: factorynum.right
         anchors.leftMargin: 10
+        text: platformset.telephoneOfFactory
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
@@ -252,6 +276,7 @@ Item {
         anchors.verticalCenter: smsalarmnum.verticalCenter
         anchors.left: smsalarmnum.right
         anchors.leftMargin: 10
+        text: platformset.smsTelephoneOfTextAlarm
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
