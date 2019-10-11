@@ -37,12 +37,14 @@ bool MsgQueue::msgQueueSend(pMsgInfo pInfo, uint size)
 
     msgInfo.mMsgType = pInfo->mMsgType;
     msgInfo.mSize = size;
-    msgInfo.mMesgCache = new char[size];
-    if(!msgInfo.mMesgCache){
-        pthread_mutex_unlock(&mPthreadMutex);
-        return false;
+    if(size > 0){
+        msgInfo.mMesgCache = new char[size];
+        if(!msgInfo.mMesgCache){
+            pthread_mutex_unlock(&mPthreadMutex);
+            return false;
+        }
+        memcpy(msgInfo.mMesgCache,pInfo->mMesgCache,size);
     }
-    memcpy(msgInfo.mMesgCache,pInfo->mMesgCache,size);
 
     mMsgQueue.push(msgInfo);
     pthread_mutex_unlock(&mPthreadMutex);
@@ -86,15 +88,18 @@ bool MsgQueue::msgQueueRecv(pMsgInfo pInfo,uint size,int timeout)
 
     pthread_mutex_lock(&mPthreadMutex);
     MsgInfo msginfo = mMsgQueue.front();
-    if(msginfo.mSize > size){
-        pthread_mutex_unlock(&mPthreadMutex);
-        return false;
+    if(pInfo->mSize > 0){
+        if(msginfo.mSize > size){
+            pthread_mutex_unlock(&mPthreadMutex);
+            return false;
 
+        }
+        pInfo->mSize = msginfo.mSize;
+        memcpy(pInfo->mMesgCache,msginfo.mMesgCache,msginfo.mSize);
+        delete [] msginfo.mMesgCache;
     }
+
     pInfo->mMsgType = msginfo.mMsgType;
-    pInfo->mSize = msginfo.mSize;
-    memcpy(pInfo->mMesgCache,msginfo.mMesgCache,msginfo.mSize);
-    delete [] msginfo.mMesgCache;
     mMsgQueue.pop();
 
     pthread_mutex_unlock(&mPthreadMutex);

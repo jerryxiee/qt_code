@@ -50,6 +50,9 @@ public:
 
     bool msgQueueSendToNet(pMsgInfo pInfo, uint size);    //通过网络发送至服务器
     bool msgQueueLocalSend(pMsgInfo pInfo, uint size);   //本地信号处理
+    TaskToken scheduleDelayedTask(int64_t microseconds, TaskFunc* proc,
+                    void* clientData);                          //注册延时任务
+    void unscheduleDelayedTask(TaskToken& prevTask);            //移除延时任务
 
 protected:
     explicit RemoteThread(QObject *parent = nullptr);

@@ -72,7 +72,9 @@ SOURCES += \
     streamserver/streamservermanage.cpp \
     settings/config/deviceparamconfig.cpp \
     settings/platformset.cpp \
-    settings/config/platformconfigini.cpp
+    settings/config/platformconfigini.cpp \
+    modules/platformregister.cpp \
+    windows/MyModel/platformfunmodel.cpp
 
 
 
@@ -122,7 +124,9 @@ HEADERS += \
     communication/jtt808define.h \
     settings/config/deviceparamconfig.h \
     settings/platformset.h \
-    settings/config/platformconfigini.h
+    settings/config/platformconfigini.h \
+    modules/platformregister.h \
+    windows/MyModel/platformfunmodel.h
 
 
 INCLUDEPATH +=/home/abhw/git/qt_code/DVR/common/schedule \

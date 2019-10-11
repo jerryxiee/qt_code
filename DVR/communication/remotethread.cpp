@@ -223,6 +223,17 @@ bool RemoteThread::msgQueueLocalSend(pMsgInfo pInfo, uint size)
     return mReceMsgQueue.msgQueueSend(pInfo,size);
 }
 
+TaskToken RemoteThread::scheduleDelayedTask(int64_t microseconds, TaskFunc* proc,
+                void* clientData)
+{
+    return mRemoteTask->scheduleDelayedTask(microseconds,proc,clientData);
+}
+
+void RemoteThread::unscheduleDelayedTask(TaskToken& prevTask)
+{
+    return mRemoteTask->unscheduleDelayedTask(prevTask);
+}
+
 RemoteThread::~RemoteThread()
 {
     if(isRunning()){

@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.0
 import QtQuick.VirtualKeyboard 2.2
 import PlatformSet 1.0
+import PlatformFunModel 1.0
 
 Item {
     property int fontpixelSize : 32
@@ -53,6 +54,10 @@ Item {
         id:platformset
     }
 
+    PlatformFunModel{
+        id:paltformfunmodel
+    }
+
     Label{
         id:authid
         anchors.top: parent.top
@@ -81,6 +86,9 @@ Item {
         anchors.left: authid.left
         width: 100
         text: qsTr("注册")
+        onClicked: {
+            paltformfunmodel.enable = true;
+        }
         font.pixelSize: fontpixelSize-8
     }
 
@@ -101,6 +109,9 @@ Item {
         anchors.leftMargin: 20
         width: 100
         text: qsTr("注消")
+        onClicked: {
+            paltformfunmodel.enable = false;
+        }
         font.pixelSize: fontpixelSize-8
     }
 

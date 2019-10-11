@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.0
 import QtQuick.VirtualKeyboard 2.2
 import PlatformSet 1.0
+import PlatformFunModel 1.0
 
 Item {
     property int fontpixelSize : 32
@@ -62,6 +63,32 @@ Item {
 
     PlatformSet{
         id:platformset
+    }
+
+    PlatformFunModel{
+        id:platformfunmodel
+
+        onMainServerStatusChanged: {
+            if(status === 0){
+                connectresult.text = "未连接"
+            }else if(status === 1){
+                connectresult.text = "连接中..."
+            }else{
+                connectresult.text = "已连接"
+            }
+
+        }
+
+        onBackupServerStatusChanged: {
+            if(status === 0){
+                secconnectresult.text = "未连接"
+            }else if(status === 1){
+                secconnectresult.text = "连接中..."
+            }else{
+                secconnectresult.text = "已连接"
+            }
+
+        }
     }
 
     Label{

@@ -17,6 +17,7 @@
 #include <execinfo.h>
 #include "communication/remotethread.h"
 #include "settings/platformset.h"
+#include "windows/MyModel/platformfunmodel.h"
 
 #ifndef LUNUX_WIN
 #include "test/venctomp4test.h"
@@ -114,6 +115,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<MyTableModel>("MyTableViewModel", 1, 0, "MyTableViewModel");
     qmlRegisterType<YuvFrameProvider>("FrameProvider", 1, 0, "FrameProvider");
     qmlRegisterType<PlatformSet>("PlatformSet", 1, 0, "PlatformSet");
+    qmlRegisterType<PlatformFunModel>("PlatformFunModel", 1, 0, "PlatformFunModel");
 //    qmlRegisterType<QFileInfo>("FileInfo", 1, 0, "FileInfo");
 //    qmlRegisterType<SystemSet>("SystemConfig", 1, 0, "SystemConfig");
 
