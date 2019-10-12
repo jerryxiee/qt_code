@@ -1,6 +1,7 @@
 #include "platformregister.h"
 #include "communication/jtt808define.h"
 #include "settings/platformset.h"
+#include <QDebug>
 
 PlatformRegister* PlatformRegister::mPlatformRegister = nullptr;
 
@@ -81,6 +82,7 @@ void PlatformRegister::serverRegister()
     msginfo.mSize = sizeof (RegisterMsg);
     msginfo.mMsgType = 0x0100;
     remote->msgQueueSendToNet(&msginfo,sizeof (RegisterMsg));
+    qDebug()<<"sendMsgToRegister";
 }
 
 void PlatformRegister::serverUnRegister()
@@ -89,6 +91,7 @@ void PlatformRegister::serverUnRegister()
 
     RemoteThread *remote = RemoteThread::getRemoteThread();
     msginfo.mMsgType = 0x3;
+    msginfo.mSize = 0;
     remote->msgQueueSendToNet(&msginfo,0);
 
     if(mRegisterToken){
@@ -106,7 +109,7 @@ PlatFormStatus PlatformRegister::getMainServerStatus() const
 {
     return mMainStatus;
 }
-void PlatformRegister::setMainServerStatus(PlatFormStatus &status)
+void PlatformRegister::setMainServerStatus(PlatFormStatus status)
 {
     mMainStatus = status;
     if(mMainStatus != Connected){
@@ -174,7 +177,7 @@ PlatFormStatus PlatformRegister::getBackupServerStatus() const
     return mBackupStatus;
 }
 
-void PlatformRegister::setBackupServerStatus(PlatFormStatus &status)
+void PlatformRegister::setBackupServerStatus(PlatFormStatus status)
 {
     mBackupStatus = status;
 

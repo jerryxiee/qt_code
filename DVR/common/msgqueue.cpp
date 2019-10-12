@@ -1,6 +1,7 @@
 #include "msgqueue.h"
 #include <string.h>
 #include <sys/time.h>
+#include <stdio.h>
 
 MsgQueue::MsgQueue()
 {
@@ -45,10 +46,11 @@ bool MsgQueue::msgQueueSend(pMsgInfo pInfo, uint size)
         }
         memcpy(msgInfo.mMesgCache,pInfo->mMesgCache,size);
     }
-
+//    printf("enter %s:%d msgInfo.mSize:%d\n",__FUNCTION__,__LINE__,msgInfo.mSize);
     mMsgQueue.push(msgInfo);
     pthread_mutex_unlock(&mPthreadMutex);
-
+    MsgInfo msginfo = mMsgQueue.front();
+//    printf("enter %s:%d read mSize:%d\n",__FUNCTION__,__LINE__,msginfo.mSize);
     sem_post(&mSem);
     return true;
 }
@@ -85,20 +87,21 @@ bool MsgQueue::msgQueueRecv(pMsgInfo pInfo,uint size,int timeout)
             return false;
         }
     }
-
+//    printf("enter %s:%d\n",__FUNCTION__,__LINE__);
     pthread_mutex_lock(&mPthreadMutex);
     MsgInfo msginfo = mMsgQueue.front();
-    if(pInfo->mSize > 0){
+    if(msginfo.mSize > 0){
+//        printf("enter %s:%d mSize=%d\n",__FUNCTION__,__LINE__,msginfo.mSize);
         if(msginfo.mSize > size){
             pthread_mutex_unlock(&mPthreadMutex);
             return false;
 
         }
+//        printf("enter %s:%d\n",__FUNCTION__,__LINE__);
         pInfo->mSize = msginfo.mSize;
         memcpy(pInfo->mMesgCache,msginfo.mMesgCache,msginfo.mSize);
         delete [] msginfo.mMesgCache;
     }
-
     pInfo->mMsgType = msginfo.mMsgType;
     mMsgQueue.pop();
 

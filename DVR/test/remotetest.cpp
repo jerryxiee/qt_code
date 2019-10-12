@@ -1,15 +1,14 @@
-#include "remotethread.h"
+#include "remotetest.h"
+
 #include <QDebug>
-#include "test/remotetest.h"
-#include "modules/platformregister.h"
 
 
-RemoteTaskScheduler* RemoteTaskScheduler::createNew(MsgQueue &msgqueue,unsigned maxSchedulerGranularity) {
-    return new RemoteTaskScheduler(msgqueue,maxSchedulerGranularity);
+RemoteTestTaskScheduler* RemoteTestTaskScheduler::createNew(MsgQueue &recvMsgQueue,MsgQueue &sendMsgQueue,unsigned maxSchedulerGranularity) {
+    return new RemoteTestTaskScheduler(recvMsgQueue,sendMsgQueue,maxSchedulerGranularity);
 }
 
-RemoteTaskScheduler::RemoteTaskScheduler(MsgQueue &msgqueue,unsigned maxSchedulerGranularity)
-  : fMaxSchedulerGranularity(maxSchedulerGranularity), mMsgQueue(msgqueue)
+RemoteTestTaskScheduler::RemoteTestTaskScheduler(MsgQueue &recvMsgQueue,MsgQueue &sendMsgQueue,unsigned maxSchedulerGranularity)
+  : fMaxSchedulerGranularity(maxSchedulerGranularity), mRecvMsgQueue(recvMsgQueue),mSendMsgQueue(sendMsgQueue)
 #if defined(__WIN32__) || defined(_WIN32)
   , fDummySocketNum(-1)
 #endif
@@ -18,17 +17,17 @@ RemoteTaskScheduler::RemoteTaskScheduler(MsgQueue &msgqueue,unsigned maxSchedule
   if (maxSchedulerGranularity > 0) schedulerTickTask(); // ensures that we handle events frequently
 }
 
-void RemoteTaskScheduler::schedulerTickTask(void* clientData) {
-  ((RemoteTaskScheduler*)clientData)->schedulerTickTask();
+void RemoteTestTaskScheduler::schedulerTickTask(void* clientData) {
+  ((RemoteTestTaskScheduler*)clientData)->schedulerTickTask();
 }
 
-void RemoteTaskScheduler::schedulerTickTask() {
+void RemoteTestTaskScheduler::schedulerTickTask() {
   scheduleDelayedTask(fMaxSchedulerGranularity, schedulerTickTask, this);
 //  qDebug()<<"RemoteTaskScheduler run";
 
 }
 
-RemoteTaskScheduler::~RemoteTaskScheduler() {
+RemoteTestTaskScheduler::~RemoteTestTaskScheduler() {
 
 }
 
@@ -37,7 +36,7 @@ RemoteTaskScheduler::~RemoteTaskScheduler() {
 #define MILLION 1000000
 #endif
 
-void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
+void RemoteTestTaskScheduler::SingleStep(unsigned maxDelayTime) {
 
     DelayInterval const& timeToDelay = fDelayQueue.timeToNextAlarm();
     struct timeval tv_timeToDelay;
@@ -61,20 +60,24 @@ void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
     MsgInfo msginfo;
     msginfo.mMesgCache = mCmdBuf;
     msginfo.mMsgType = -1;
-    mMsgQueue.msgQueueRecv(&msginfo,CMDMAXLEN,tv_timeToDelay.tv_sec*1000+tv_timeToDelay.tv_usec/1000);
+    mRecvMsgQueue.msgQueueRecv(&msginfo,CMDMAXLEN,tv_timeToDelay.tv_sec*1000+tv_timeToDelay.tv_usec/1000);
     switch (msginfo.mMsgType) {
     case 0:
-        qDebug()<<"recv test msg";
+        qDebug()<<"recv msg to net test";
         break;
-    case 0x8004:  //查询服务器时间应答
-        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+    case 0x0100:  //
+        qDebug()<<"register paltform";
+        RegisterResult msg;
+        msg.reportNum = 0;
+        msg.result = 1;
+        sleep(4);
+        msginfo.mMesgCache = (char *)&msg;
+        msginfo.mMsgType = 0x8100;
+        msginfo.mSize = sizeof (RegisterResult);
+        mSendMsgQueue.msgQueueSend(&msginfo,sizeof (RegisterResult));
         break;
-    case 0x8100: //终端注册应答
-        qDebug()<<"rece:register result";
-//        RegisterResult *msg = (RegisterResult *)msginfo.mMesgCache;
-        if(((RegisterResult *)msginfo.mMesgCache)->result != 0){
-            PlatformRegister::getPlatformRegister()->setMainServerStatus(DisConnect);
-        }
+    case 0x3: //
+        qDebug()<<"rece unregister";
         break;
     case 0x8103://设置终端参数
         qDebug()<<"rece:"<<*((int *)mCmdBuf);
@@ -163,6 +166,7 @@ void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
 
     default:
         ;
+//        qDebug()<<"msgtype:"<<msginfo.mMsgType;
     }
 
 
@@ -204,71 +208,41 @@ void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
     fDelayQueue.handleAlarm();
 }
 
+RemoteTest * RemoteTest::mRemoteTest = nullptr;
 
-RemoteThread *RemoteThread::mRemoteThread = nullptr;
-
-RemoteThread *RemoteThread::getRemoteThread()
+RemoteTest* RemoteTest::createRemoteTest(MsgQueue &recvMsgQueue,MsgQueue &sendMsgQueue)
 {
-    if(!mRemoteThread){
-        mRemoteThread = new RemoteThread();
+    if(!mRemoteTest){
+        mRemoteTest = new RemoteTest(recvMsgQueue,sendMsgQueue);
     }
 
-    return mRemoteThread;
+    return mRemoteTest;
 }
 
-RemoteThread::RemoteThread(QObject *parent) : QThread(parent),mRemoteTask(nullptr)
+RemoteTest::RemoteTest(MsgQueue &recvMsgQueue,MsgQueue &sendMsgQueue,QObject *parent) : QThread(parent)
 {
-    mReceMsgQueue.createMsgQueue();
-    mSendMsgQueue.createMsgQueue();
-    mRemoteTask = RemoteTaskScheduler::createNew(mReceMsgQueue);
-    RemoteTest *remotetest = RemoteTest::createRemoteTest(mSendMsgQueue,mReceMsgQueue);
-    remotetest->start();
+    mRemoteTestTaskScheduler = RemoteTestTaskScheduler::createNew(recvMsgQueue,sendMsgQueue);
 
 }
 
-bool RemoteThread::msgQueueSendToNet(pMsgInfo pInfo, uint size)
-{
-    return mSendMsgQueue.msgQueueSend(pInfo,size);
-}
-
-bool RemoteThread::msgQueueLocalSend(pMsgInfo pInfo, uint size)
-{
-    return mReceMsgQueue.msgQueueSend(pInfo,size);
-}
-
-TaskToken RemoteThread::scheduleDelayedTask(int64_t microseconds, TaskFunc* proc,
-                void* clientData)
-{
-    return mRemoteTask->scheduleDelayedTask(microseconds,proc,clientData);
-}
-
-void RemoteThread::unscheduleDelayedTask(TaskToken& prevTask)
-{
-    return mRemoteTask->unscheduleDelayedTask(prevTask);
-}
-
-RemoteThread::~RemoteThread()
+RemoteTest::~RemoteTest()
 {
     if(isRunning()){
         mRun = false;
         wait();
-        if(mRemoteTask)
-            delete mRemoteTask;
-        mReceMsgQueue.destroyMsgQueue();
-        mSendMsgQueue.destroyMsgQueue();
+        if(mRemoteTestTaskScheduler){
+            delete mRemoteTestTaskScheduler;
+        }
     }
-
 }
 
-
-void RemoteThread::run()
+void RemoteTest::run()
 {
-
     mRun = true;
-    qDebug()<<"start remotethread";
+    qDebug()<<"start RemoteTest";
     while (mRun) {
-        if(mRemoteTask){
-            mRemoteTask->doEventLoop(nullptr);
+        if(mRemoteTestTaskScheduler){
+            mRemoteTestTaskScheduler->doEventLoop(nullptr);
         }
     }
 

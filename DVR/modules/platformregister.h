@@ -23,12 +23,12 @@ public:
     void serverRegister();
     void serverUnRegister();
     PlatFormStatus getMainServerStatus() const;
-    void setMainServerStatus(PlatFormStatus &status);
+    void setMainServerStatus(PlatFormStatus status);
 
 //    static void backupServerRegister(void *object);
 //    void backupServerRegister();
     PlatFormStatus getBackupServerStatus() const;
-    void setBackupServerStatus(PlatFormStatus &status);
+    void setBackupServerStatus(PlatFormStatus status);
     bool readEnableRegister() const;
 
 protected:

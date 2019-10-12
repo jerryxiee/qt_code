@@ -61,6 +61,7 @@ void Test::sentSeg(int mode)
     msginfo.mMesgCache = (char *)&a;
     RemoteThread *remotethread = RemoteThread::getRemoteThread();
     remotethread->msgQueueLocalSend(&msginfo,sizeof(int));
+    remotethread->msgQueueSendToNet(&msginfo,sizeof(int));
     qDebug()<<"send msg test";
 }
 

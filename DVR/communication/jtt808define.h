@@ -18,6 +18,13 @@ typedef struct{
     char CarLicense[16];       //车牌
 } RegisterMsg;
 
+typedef struct{
+    short reportNum;
+    char result;
+    char authNum[16];
+
+} RegisterResult;
+
 //终端鉴权
 typedef struct{
     char Len;               //鉴权码长度
