@@ -44,7 +44,7 @@ Item {
             if(setindex == index){
 
                 console.log("运行管理")
-                platformset.authNumber = authidtext.text
+//                platformset.authNumber = authidtext.text
 
             }
         }
