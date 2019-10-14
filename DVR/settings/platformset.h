@@ -83,6 +83,8 @@ class PlatformSet : public QObject
 public:
     explicit PlatformSet(QObject *parent = nullptr);
 
+//    Q_INVOKABLE void updateServerInfo(int type);
+
     QString readHeartBeat() const;
     void setHeartBeat(QString value);
     QString readTcpAnswerTimeout() const;
@@ -231,6 +233,7 @@ public:
 
 
 signals:
+//    void serverInfoChanged(int type);
     void heartBeatChanged();
     void tcpAnswerTimeoutChanged();
     void tcpRepeatTimesChanged();

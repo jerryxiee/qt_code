@@ -31,6 +31,8 @@ public:
     void setBackupServerStatus(PlatFormStatus status);
     bool readEnableRegister() const;
 
+    bool sendServerInfo();
+
 protected:
     explicit PlatformRegister(QObject *parent = nullptr);
 
@@ -39,7 +41,7 @@ signals:
     void backupServerStatusChanged(PlatFormStatus &status);
 
 public slots:
-
+    void updateServerInfo(int type);
 private:
     PlatFormStatus mMainStatus;
     PlatFormStatus mBackupStatus;

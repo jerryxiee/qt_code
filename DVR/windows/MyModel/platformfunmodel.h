@@ -12,6 +12,8 @@ class PlatformFunModel : public QObject
     Q_PROPERTY(PlatFormStatus backupServerStatus READ readBackupServerStatus NOTIFY backupServerStatusChanged)
     Q_PROPERTY(bool enable READ readEnable WRITE setEnable NOTIFY enabledChanged)
 public:
+    Q_INVOKABLE void updateServerInfo(int type);
+
     explicit PlatformFunModel(QObject *parent = nullptr);
 
     PlatFormStatus readMainServerStatus() const;
@@ -19,6 +21,7 @@ public:
     bool readEnable() const;
     void setEnable(bool enable);
 signals:
+    void serverInfoChanged(int type);
     void mainServerStatusChanged(PlatFormStatus &status);
     void backupServerStatusChanged(PlatFormStatus &status);
     void enabledChanged();

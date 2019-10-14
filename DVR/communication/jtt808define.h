@@ -7,6 +7,30 @@ extern "C"{
 #endif
 #endif /* End of #ifdef __cplusplus */
 
+#define CUSTOMCMD     0xAA00
+
+#define SERVERINFOMSGTYPE  CUSTOMCMD|0x01
+typedef struct{
+    int registerType;                      //注册方式 0：主服务器注册，1：同时注册
+    unsigned mainServerIp;                 //
+    unsigned short mainTcpPort;            //
+    unsigned short mainUdpPort;            //
+    unsigned backupServerIp;               //
+    unsigned short backupTcpPort;          //
+    unsigned short backupUdpPort;          //
+    unsigned mainServerUseTcp;             //主服务器注册协议 1：tcp 其他：udp
+    unsigned backupServerUseTcp;           //备份服务器注册协议 1：tcp 其他：udp
+    char telephoneNum[12];                 //
+    unsigned short tcpTimeout;             //
+    unsigned short udpTimeout;             //
+    unsigned short tcpRepeatTimes;           //
+    unsigned short udpRepeatTimes;           //
+    unsigned short smsTimeout;             //
+    unsigned short smsRepeatTimes;           //
+    unsigned heratBeatTime;                //
+    unsigned reserve[8];                   //
+}ServerInfo;
+
 //终端注册
 typedef struct{
     short ProvinceID;          //省域ID

@@ -57,6 +57,8 @@ Item {
                 platformset.backupServer  = secserveriptext.text+":"+sectcpporttext.text+":"+secudpporttext.text
                 platformset.phoneNumber = phonenumtext.text
                 platformset.carLisence = cardlicensetext.text
+                platformfunmodel.updateServerInfo(0)
+//                platformset.updateServerInfo(0);
             }
         }
     }

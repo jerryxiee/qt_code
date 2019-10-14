@@ -23,6 +23,12 @@ PlatformRegister::PlatformRegister(QObject *parent) : QObject(parent),mMainStatu
     PlatformSet platformparam;
 
     mRegisterEnable = platformparam.readRegisterEnable();
+
+    if(!sendServerInfo()){
+        qDebug()<<"send server info error";
+    }
+
+    setMainServerStatus(mMainStatus);
 }
 
 
@@ -184,3 +190,55 @@ void PlatformRegister::setBackupServerStatus(PlatFormStatus status)
     backupServerStatusChanged(mBackupStatus);
 }
 
+bool PlatformRegister::sendServerInfo()
+{
+    MsgInfo msginfo;
+    ServerInfo serverinfo;
+    QByteArray array;
+    int len;
+
+    PlatformSet platformparam;
+
+    serverinfo.registerType = platformparam.readRegisterType();
+    serverinfo.mainServerIp = platformparam.readMainServerIp().toUInt();
+    serverinfo.mainTcpPort = platformparam.readMainServerTcpPort().toUShort();
+    serverinfo.mainUdpPort = platformparam.readMainServerUdpPort().toUShort();
+    serverinfo.mainServerUseTcp = platformparam.readMainEnableTcp();
+    serverinfo.backupServerIp = platformparam.readBackupServerIp().toUInt();
+    serverinfo.backupTcpPort = platformparam.readBackupServerTcpPort().toUShort();
+    serverinfo.backupUdpPort = platformparam.readBackupServerUdpPort().toUShort();
+    serverinfo.backupServerUseTcp = platformparam.readSecEnableTcp();
+    array = platformparam.readPhoneNumber().toLatin1();
+    if(array.length() > 12){
+        len = 12;
+    }else {
+        len = array.length();
+    }
+    memcpy(serverinfo.telephoneNum,array.data(),len);
+    serverinfo.tcpTimeout = platformparam.readTcpAnswerTimeout().toUShort();
+    serverinfo.tcpRepeatTimes = platformparam.readTcpRepeatTimes().toUShort();
+    serverinfo.udpTimeout = platformparam.readUdpAnswerTimeout().toUShort();
+    serverinfo.udpRepeatTimes = platformparam.readUdpRepeatTimes().toUShort();
+    serverinfo.smsTimeout = platformparam.readSmsAnswerTimeout().toUShort();
+    serverinfo.smsRepeatTimes = platformparam.readSmsRepeatTimes().toUShort();
+    serverinfo.heratBeatTime = platformparam.readHeartBeat().toUInt();
+
+
+    RemoteThread *remote = RemoteThread::getRemoteThread();
+//    msginfo.mMesgCache = static_cast<char *>(&serverinfo);
+    msginfo.mMesgCache = (char *)(&serverinfo);
+    msginfo.mSize = sizeof (ServerInfo);
+    msginfo.mMsgType = SERVERINFOMSGTYPE;
+    return remote->msgQueueSendToNet(&msginfo,sizeof (RegisterMsg));
+}
+
+void PlatformRegister::updateServerInfo(int type)
+{
+    qDebug()<<"updateserverinfo type:"<<type;
+    sendServerInfo();
+
+    if(type == 0){
+        serverUnRegister();
+        setMainServerStatus(DisConnect);
+    }
+}

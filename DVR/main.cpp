@@ -18,6 +18,7 @@
 #include "communication/remotethread.h"
 #include "settings/platformset.h"
 #include "windows/MyModel/platformfunmodel.h"
+#include "modules/moduleinit.h"
 
 #ifndef LUNUX_WIN
 #include "test/venctomp4test.h"
@@ -103,6 +104,10 @@ int main(int argc, char *argv[])
 
     RemoteThread *remotethread = RemoteThread::getRemoteThread();
     remotethread->start();
+
+    module_init();
+
+
 
 //    QDateTime current_date_time =QDateTime::currentDateTime();
 //    QString current_date =QDateTime::currentDateTime().toString("ddd yyyy年MM月dd日 hh时mm分ss秒 AP");

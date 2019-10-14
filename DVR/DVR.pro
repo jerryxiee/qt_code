@@ -75,7 +75,8 @@ SOURCES += \
     settings/config/platformconfigini.cpp \
     modules/platformregister.cpp \
     windows/MyModel/platformfunmodel.cpp \
-    test/remotetest.cpp
+    test/remotetest.cpp \
+    modules/moduleinit.cpp
 
 
 
@@ -128,7 +129,8 @@ HEADERS += \
     settings/config/platformconfigini.h \
     modules/platformregister.h \
     windows/MyModel/platformfunmodel.h \
-    test/remotetest.h
+    test/remotetest.h \
+    modules/moduleinit.h
 
 
 INCLUDEPATH +=/home/abhw/git/qt_code/DVR/common/schedule \

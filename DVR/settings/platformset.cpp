@@ -3,6 +3,7 @@
 
 PlatformSet::PlatformSet(QObject *parent) : QObject(parent)
 {
+//    connect(this,SIGNAL(serverInfoChanged(int)),PlatformRegister::getPlatformRegister(),SLOT(updateServerInfo(int)));
 }
 
 QString PlatformSet::readHeartBeat() const
@@ -1016,4 +1017,9 @@ void PlatformSet::setDeviceID(QString value)
 
     mPlatformConfig.insertSignalData(config);
 }
+
+//void PlatformSet::updateServerInfo(int type)
+//{
+//    serverInfoChanged(type);
+//}
 

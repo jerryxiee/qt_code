@@ -74,6 +74,8 @@ void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
 //        RegisterResult *msg = (RegisterResult *)msginfo.mMesgCache;
         if(((RegisterResult *)msginfo.mMesgCache)->result != 0){
             PlatformRegister::getPlatformRegister()->setMainServerStatus(DisConnect);
+        }else {
+            PlatformRegister::getPlatformRegister()->setMainServerStatus(Connected);
         }
         break;
     case 0x8103://设置终端参数

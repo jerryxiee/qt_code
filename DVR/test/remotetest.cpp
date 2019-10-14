@@ -62,14 +62,14 @@ void RemoteTestTaskScheduler::SingleStep(unsigned maxDelayTime) {
     msginfo.mMsgType = -1;
     mRecvMsgQueue.msgQueueRecv(&msginfo,CMDMAXLEN,tv_timeToDelay.tv_sec*1000+tv_timeToDelay.tv_usec/1000);
     switch (msginfo.mMsgType) {
-    case 0:
-        qDebug()<<"recv msg to net test";
+    case SERVERINFOMSGTYPE:
+        qDebug()<<"recv server info";
         break;
     case 0x0100:  //
         qDebug()<<"register paltform";
         RegisterResult msg;
         msg.reportNum = 0;
-        msg.result = 1;
+        msg.result = 0;
         sleep(4);
         msginfo.mMesgCache = (char *)&msg;
         msginfo.mMsgType = 0x8100;

@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.0
 import QtQuick.VirtualKeyboard 2.2
 import PlatformSet 1.0
+import PlatformFunModel 1.0
 
 Item {
     property int fontpixelSize : 32
@@ -29,6 +30,8 @@ Item {
                 platformset.smsAnswerTimeout = smstimeouttext.text
                 platformset.smsRepeatTimes = smsreptnumtext.text
                 platformset.heartBeat = heartbeattext.text
+                platformfunmodel.updateServerInfo(1)
+//                platformset.updateServerInfo(1)
 
 
             }
@@ -61,6 +64,10 @@ Item {
 
     PlatformSet{
         id:platformset
+    }
+
+    PlatformFunModel{
+        id:platformfunmodel
     }
 
     Label{
