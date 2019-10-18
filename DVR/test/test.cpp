@@ -55,13 +55,19 @@ void Test::setRtspSize(int mode)
 void Test::sentSeg(int mode)
 {
     MsgInfo msginfo;
-    int a = 10;
-    msginfo.mSize = sizeof(int);
-    msginfo.mMsgType = 0;
-    msginfo.mMesgCache = (char *)&a;
+    SourceFileMsg filemsg;
+
+    memset(&filemsg,0x0,sizeof (SourceFileMsg));
+
+    filemsg.LogicChn = 0;
+    filemsg.FileType = 0;
+
+    msginfo.mSize = sizeof(SourceFileMsg);
+    msginfo.mMsgType = 0x9205;
+    msginfo.mMesgCache = (char *)&filemsg;
     RemoteThread *remotethread = RemoteThread::getRemoteThread();
-    remotethread->msgQueueLocalSend(&msginfo,sizeof(int));
-    remotethread->msgQueueSendToNet(&msginfo,sizeof(int));
+    remotethread->msgQueueLocalSend(&msginfo,msginfo.mSize);
+//    remotethread->msgQueueSendToNet(&msginfo,sizeof(int));
     qDebug()<<"send msg test";
 }
 

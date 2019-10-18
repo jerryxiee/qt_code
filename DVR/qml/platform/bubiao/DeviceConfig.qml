@@ -190,7 +190,7 @@ Item {
         anchors.left: carcolor.right
         anchors.leftMargin: 5
         currentIndex: platformset.carColor
-        model: ["蓝色","黄色","黑色","白色","绿色","其他"]
+        model: ["0","蓝色","黄色","黑色","白色","绿色","其他"]
     }
 
     Label{

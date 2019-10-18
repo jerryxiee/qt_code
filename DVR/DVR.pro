@@ -76,7 +76,16 @@ SOURCES += \
     modules/platformregister.cpp \
     windows/MyModel/platformfunmodel.cpp \
     test/remotetest.cpp \
-    modules/moduleinit.cpp
+    modules/moduleinit.cpp \
+    modules/positionctr.cpp \
+    modules/positionreport.cpp \
+    common/bcdtransform.cpp \
+    video/encodetaskscheduler.cpp \
+    HW/video/hiframesource.cpp \
+    HW/video/hiframeconsumer.cpp \
+    HW/video/hivideobase.cpp \
+    HW/video/viframesource.cpp \
+    HW/video/hivpsssource.cpp
 
 
 
@@ -130,7 +139,16 @@ HEADERS += \
     modules/platformregister.h \
     windows/MyModel/platformfunmodel.h \
     test/remotetest.h \
-    modules/moduleinit.h
+    modules/moduleinit.h \
+    modules/positionctr.h \
+    modules/positionreport.h \
+    common/bcdtransform.h \
+    video/encodetaskscheduler.h \
+    HW/video/hiframesource.h \
+    HW/video/hiframeconsumer.h \
+    HW/video/hivideobase.h \
+    HW/video/viframesource.h \
+    HW/video/hivpsssource.h
 
 
 INCLUDEPATH +=/home/abhw/git/qt_code/DVR/common/schedule \

@@ -2,6 +2,11 @@
 #include <QDebug>
 #include "test/remotetest.h"
 #include "modules/platformregister.h"
+#include "settings/platformset.h"
+#include "video/videofile.h"
+#include "video/mp4fileindex.h"
+#include <QDateTime>
+#include "common/bcdtransform.h"
 
 
 RemoteTaskScheduler* RemoteTaskScheduler::createNew(MsgQueue &msgqueue,unsigned maxSchedulerGranularity) {
@@ -29,6 +34,224 @@ void RemoteTaskScheduler::schedulerTickTask() {
 }
 
 RemoteTaskScheduler::~RemoteTaskScheduler() {
+
+}
+
+void RemoteTaskScheduler::setDeviceParam(int msgid, const char *cmd)
+{
+    QString cmdstr(cmd);
+    QStringList valuestr;
+    QStringList cmdlist = cmdstr.split("/");
+    QList<int> idlist;
+    QVariantList valuelist;
+
+    for (int i = 0;i < cmdlist.count();i++) {
+        valuestr = cmdlist.at(i).split(":");
+        if(valuestr.count() > 1){
+            idlist.append(valuestr.at(0).toInt());
+            valuelist.append(valuestr.at(1));
+        }
+    }
+    PlatformSet paltfromset;
+    paltfromset.setDeviceParamList(msgid,idlist,valuelist);
+
+}
+
+void RemoteTaskScheduler::sendDiveceParam(int msgid,const char *cmd)
+{
+
+}
+
+void RemoteTaskScheduler::sendDiveceParam(int msgid,QList<int> &idlist)
+{
+    QByteArray cmdArray;
+    QByteArrayList valuelist;
+
+    PlatformSet paltfromset;
+    valuelist = paltfromset.readDeviceParamList(msgid,idlist);
+
+    for (int i = 1;i < valuelist.count();i++) {
+        cmdArray += valuelist.at(i);
+        if(i != valuelist.count() -1){
+            cmdArray +="/";
+        }
+    }
+
+    MsgInfo msginfo;
+    msginfo.mMsgType = 0x0104;
+    msginfo.mSize = cmdArray.length();
+    msginfo.mMesgCache = cmdArray.data();
+    RemoteThread::getRemoteThread()->msgQueueSendToNet(&msginfo, cmdArray.length());
+}
+
+void RemoteTaskScheduler::sendDiveceParam(int msgid, const char *cmd,int cmdlen)
+{
+    QList<int> idlist;
+    int i = 0;
+    int len = cmdlen/4;
+    int dat = 0;
+
+    for (i = 0;i < len;i += 4) {
+        dat = cmd[i]<<24|cmd[i+1]<<16|cmd[i+2]<<8|cmd[i+3];
+        idlist.append(dat);
+    }
+
+    sendDiveceParam(msgid,idlist);
+}
+
+void RemoteTaskScheduler::sendDiveceParamAll()
+{
+    QList<int> idlist;
+
+    for (int i = 0;i < 0x84;i++) {
+        idlist.append(i);
+    }
+
+    sendDiveceParam(0x8103,idlist);
+}
+
+void RemoteTaskScheduler::sendDeviceAttr()
+{
+    DeviceAttrMsg deviceattr;
+    size_t len;
+    PlatformSet paltfromset;
+    QByteArray bytearray;
+
+    deviceattr.DeviceType = paltfromset.readDeviceType();
+    bytearray = paltfromset.readProduceID().toLatin1();
+    if(bytearray.length() > 5){
+        len = 5;
+    }else {
+        len = bytearray.length();
+    }
+    memcpy(deviceattr.ManufacturerID,bytearray.data(),len);
+    bytearray = paltfromset.readDeviceModel().toLatin1();
+    if(bytearray.length() > 30){
+        len = 30;
+    }else {
+        len = bytearray.length();
+    }
+    memcpy(deviceattr.DeviceModel,bytearray.data(),len);
+
+    bytearray = paltfromset.readDeviceID().toLatin1();
+    if(bytearray.length() > 30){
+        len = 30;
+    }else {
+        len = bytearray.length();
+    }
+    memcpy(deviceattr.DeviceID,bytearray.data(),len);
+
+    bytearray = paltfromset.readSIMICCID().toLatin1();
+    if(bytearray.length() > 10){
+        len = 10;
+    }else {
+        len = bytearray.length();
+    }
+    memcpy(deviceattr.ICCID,bytearray.data(),len);
+
+    deviceattr.HWVersionLen = DEFAULTLEN;
+    deviceattr.HWVersionLen1 = DEFAULTLEN;
+
+    bytearray = paltfromset.readHWVersion().toLatin1();
+    if(bytearray.length() > DEFAULTLEN){
+        len = 30;
+    }else {
+        len = bytearray.length();
+    }
+    memcpy(deviceattr.HwVersion,bytearray.data(),len);
+
+    bytearray = paltfromset.readFWVersion().toLatin1();
+    if(bytearray.length() > DEFAULTLEN){
+        len = 10;
+    }else {
+        len = bytearray.length();
+    }
+    memcpy(deviceattr.HwVersion1,bytearray.data(),len);
+
+    deviceattr.GNSSAttr = static_cast<char>(paltfromset.readGNSSAttr()) ;
+    deviceattr.ComModuleAttr = static_cast<char>(paltfromset.readCommunicatModule()) ;
+
+    MsgInfo msginfo;
+    msginfo.mMsgType = 0x0107;
+    msginfo.mSize = sizeof (DeviceAttrMsg);
+    msginfo.mMesgCache = (char *)&deviceattr;
+    RemoteThread::getRemoteThread()->msgQueueSendToNet(&msginfo, sizeof (DeviceAttrMsg));
+
+}
+
+void RemoteTaskScheduler::reportRecordFileList(SourceFileMsg &fileattr)
+{
+    QList<MP4FileInfo> filelist;
+    SourceFileInfo *fileinfolist = nullptr;
+    QDateTime datetime;
+    QByteArray bytearray;
+    uint sttime = 0;
+    uint entime = 0;
+
+    bytearray = BCDTransform::toArray(fileattr.StartTime,sizeof (fileattr.StartTime));
+    if(bytearray.toInt() != 0){
+        sttime = QDateTime::fromString("20"+QString(BCDTransform::toArray(fileattr.StartTime,sizeof (fileattr.StartTime))), "yyyyMMddhhmmss").toTime_t();
+    }
+
+    bytearray = BCDTransform::toArray(fileattr.EndTime,sizeof (fileattr.EndTime));
+    if(bytearray.toInt() != 0){
+        entime = QDateTime::fromString("20"+QString(BCDTransform::toArray(fileattr.EndTime,sizeof (fileattr.EndTime))), "yyyyMMddhhmmss").toTime_t();
+    }
+
+
+    if(entime == 0){
+        entime = QDateTime::currentDateTime().toTime_t();
+    }
+
+    qDebug()<<"sttime:"<<sttime<<" endtime:"<<entime<<QDateTime::currentDateTime().toString("yyMMddhhmmss");
+    filelist.clear();
+    switch (fileattr.FileType) {
+        case 0:
+        {
+    #ifndef LUNUX_WIN
+            MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(fileattr.LogicChn);
+            mp4fileindex->getFileList(filelist,sttime,entime);
+            delete  mp4fileindex;
+    #endif
+            break;
+        }
+        case 1:
+        {
+        #ifndef LUNUX_WIN
+            MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(fileattr.LogicChn,VIDEO_MOVEDETECT);
+            mp4fileindex->getFileList(filelist,sttime,entime);
+            delete  mp4fileindex;
+        #endif
+            break;
+        }
+    }
+
+    qDebug()<<"find file num:"<<filelist.count();
+
+    fileinfolist = (SourceFileInfo*)malloc(sizeof (SourceFileInfo)*filelist.count());
+    if(!fileinfolist){
+        return;
+    }
+    for (int i =0 ;i < filelist.count();i++) {
+        fileinfolist[i].file.LogicChn = fileattr.LogicChn;
+        fileinfolist[i].file.FileType = fileattr.FileType;
+        fileinfolist[i].file.StreamType = fileattr.StreamType;
+        fileinfolist[i].file.StoreType = fileattr.StoreType;
+        datetime = QDateTime::fromTime_t(filelist.at(i).sttime);
+//        bytearray = datetime.toString("yyMMddhhmmss").toLatin1();
+        memcpy(fileinfolist[i].file.StartTime,BCDTransform::toBcd(datetime.toString("yyMMddhhmmss").toLong()).data(),6);
+        datetime = QDateTime::fromTime_t(filelist.at(i).endtime);
+        memcpy(fileinfolist[i].file.EndTime,BCDTransform::toBcd(datetime.toString("yyMMddhhmmss").toLong()).data(),6);
+        QFileInfo fileinfo(filelist.at(i).filename);
+        fileinfolist[i].fileSize = fileinfo.size();
+    }
+
+
+    MsgInfo msginfo;
+    msginfo.mMsgType = 0x1205;
+    msginfo.mSize = sizeof (SourceFileInfo)*filelist.count();
+    msginfo.mMesgCache = (char *)fileinfolist;
+    RemoteThread::getRemoteThread()->msgQueueSendToNet(&msginfo, msginfo.mSize);
 
 }
 
@@ -65,6 +288,7 @@ void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
     switch (msginfo.mMsgType) {
     case 0:
         qDebug()<<"recv test msg";
+        sendDeviceAttr();
         break;
     case 0x8004:  //查询服务器时间应答
         qDebug()<<"rece:"<<*((int *)mCmdBuf);
@@ -76,22 +300,26 @@ void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
             PlatformRegister::getPlatformRegister()->setMainServerStatus(DisConnect);
         }else {
             PlatformRegister::getPlatformRegister()->setMainServerStatus(Connected);
+            PlatformSet platformset;
+            platformset.setAuthNumber(QString(((RegisterResult *)msginfo.mMesgCache)->authNum));
         }
         break;
     case 0x8103://设置终端参数
-        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+//        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        setDeviceParam(msginfo.mMsgType, mCmdBuf);
         break;
     case 0x8104:   //查询终端参数
-        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        sendDiveceParamAll();
         break;
     case 0x8106:   //查询指定参数
         qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        sendDiveceParam(0x8103, mCmdBuf,msginfo.mSize);
         break;
     case 0x8105: //终端控制
         qDebug()<<"rece:"<<*((int *)mCmdBuf);
         break;
     case 0x8017: //查询终端属性
-        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        sendDeviceAttr();
         break;
     case 0x8108://下发升级包
         qDebug()<<"rece:"<<*((int *)mCmdBuf);
@@ -136,7 +364,7 @@ void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
         qDebug()<<"rece:"<<*((int *)mCmdBuf);
         break;
     case 0x9205://查询录像资源列表
-        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        reportRecordFileList((*(SourceFileMsg*)mCmdBuf));
         break;
     case 0x9206://文件上传
         qDebug()<<"rece:"<<*((int *)mCmdBuf);

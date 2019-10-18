@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
         a.setFont(fontThis);
         }
     }
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf-8"));
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("GBK"));
     signal(SIGINT,sign);
     signal(SIGSEGV, dump);
 
@@ -110,8 +110,9 @@ int main(int argc, char *argv[])
 
 
 //    QDateTime current_date_time =QDateTime::currentDateTime();
-//    QString current_date =QDateTime::currentDateTime().toString("ddd yyyy年MM月dd日 hh时mm分ss秒 AP");
+//    QString current_date =QDateTime::currentDateTime().toString("yyMMddhhmmss");
 //    qDebug()<<current_date;
+//    qDebug()<<current_date.toUcs4()<<" len:"<<current_date.toUcs4().length();
 //    QByteArray time = current_date.toLocal8Bit();
 //    qDebug("%s",time.data());
 //    qDebug()<<current_date_time.toTime_t();

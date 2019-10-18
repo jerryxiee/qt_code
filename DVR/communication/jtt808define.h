@@ -35,9 +35,9 @@ typedef struct{
 typedef struct{
     short ProvinceID;          //省域ID
     short CountyID;            //市县域ID
-    char ManufacturerID[11];   //制造商ID
-    char DeviceModel[30];      //终端型号
-    char DeviceID[30];         //终端ID
+    char ManufacturerID[5];   //制造商ID
+    char DeviceModel[20];      //终端型号
+    char DeviceID[7];         //终端ID
     char CarColor;             //车牌颜色
     char CarLicense[16];       //车牌
 } RegisterMsg;
@@ -76,8 +76,8 @@ typedef struct{
 
 //位置基本信息
 typedef struct{
-    int AlarmType;            //报警标志
-    int Status;               //状态
+    unsigned AlarmType;            //报警标志
+    unsigned Status;               //状态
     int Latitude;             //纬度
     int Longitude;            //经度
     short Altitude;           //海拔
@@ -102,6 +102,36 @@ typedef struct{
 } DriverInfoMsg;
 
 
+//实时音视频请求指令包
+typedef struct{
+    unsigned char ipLen;
+    char ipAddr[16];
+    short tcpPort;
+    short udpPort;
+    unsigned char channel;
+    unsigned char dataType;
+    unsigned char streamType;
+
+} RealTimeStreamPack;
+
+//回放音视频请求指令包
+typedef struct{
+    unsigned char ipLen;
+    unsigned char ipAddr[16];
+    short tcpPort;
+    short udpPort;
+    unsigned char channel;
+    unsigned char dataType;
+    unsigned char streamType;
+    unsigned char playType;
+    unsigned char speedCtr1;
+    unsigned char speedCtr2;
+    unsigned char startTime[6];
+    unsigned char endTime[6];
+
+} PlayBackStreamPack;
+
+
 //音视频传输请求
 typedef struct{
     char PlayType;        //判断直播与回放
@@ -119,18 +149,34 @@ typedef struct{
 }StreamParam;
 
 typedef struct{
-    char LogicChannel;         //通道
-    char OrderCtr;             //控制指令
-    char CloseStreamType;      //关闭音视频类型
-    char ChangeStream;         //切换码流类型
+    char LogicChn;
+    char StartTime[6];
+    char EndTime[6];
+    char AlarmFlag[8];
+    char FileType;
+    char StreamType;
+    char StoreType;
+} SourceFileMsg;
+
+typedef struct{
+    SourceFileMsg file;
+    unsigned fileSize;
+
+} SourceFileInfo;
+
+typedef struct{
+    unsigned char logicChannel;         //通道
+    unsigned char orderCtr;             //控制指令
+    unsigned char closeStreamType;      //关闭音视频类型
+    unsigned char changeStream;         //切换码流类型
 
 } ReamTimeStreamControl;
 
 typedef struct{
-    int LogicChannel;           //通道
-    int OrderCtr;               //控制指令
-    int PlayBackRate;           //快进快退速率
-    unsigned PosTime;             //控制视频回放位置
+    unsigned char LogicChannel;           //通道
+    unsigned char OrderCtr;               //控制指令
+    unsigned char PlayBackRate;           //快进快退速率
+    unsigned char PosTime[6];             //控制视频回放位置
 } StreamControl;
 
 

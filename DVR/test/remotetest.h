@@ -16,7 +16,7 @@ public:
     // (You should set it to 0 only if you know that you will not be using 'event triggers'.)
   virtual ~RemoteTestTaskScheduler();
 
-  #define CMDMAXLEN  1024
+  #define CMDMAXLEN  1024*1024
 
 protected:
   RemoteTestTaskScheduler(MsgQueue &recvMsgQueue,MsgQueue &sendMsgQueue,unsigned maxSchedulerGranularity);
@@ -25,6 +25,11 @@ protected:
   static void schedulerTickTask(void* clientData);
   void schedulerTickTask();
 
+  static void sendHeartBeat(void* clientData);
+  void sendHeartBeat();
+  static void sendPos(void* clientData);
+  void sendPos();
+
 protected:
   // Redefined virtual functions:
   virtual void SingleStep(unsigned maxDelayTime);
@@ -32,12 +37,15 @@ protected:
   virtual void setBackgroundHandling(int socketNum, int conditionSet, BackgroundHandlerProc* handlerProc, void* clientData){}
   virtual void moveSocketHandling(int oldSocketNum, int newSocketNum){}
 
+private:
+  void check(unsigned char *cmd, int len);
 protected:
   unsigned fMaxSchedulerGranularity;
 
   // To implement background operations:
 
 private:
+    int mSockfd;
     MsgQueue &mRecvMsgQueue;
     MsgQueue &mSendMsgQueue;
     char mCmdBuf[CMDMAXLEN];

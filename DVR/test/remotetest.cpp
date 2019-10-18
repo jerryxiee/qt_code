@@ -3,6 +3,40 @@
 #include <QDebug>
 
 
+void RemoteTestTaskScheduler::check(unsigned char *cmd,int len)
+{
+    char tmp = 0x0;
+    for (int i = 1;i < len - 2;i++) {
+        tmp ^= cmd[i];
+    }
+    cmd[len-2] = tmp;
+}
+
+void RemoteTestTaskScheduler::sendHeartBeat(void* clientData)
+{
+    ((RemoteTestTaskScheduler*)clientData)->sendHeartBeat();
+}
+void RemoteTestTaskScheduler::sendHeartBeat()
+{
+    unsigned char heartCmd[] = {0x7E,0x00,0x02,0x00,0x00,0x01,0x36,0x99,0x99,0x99,0x99,0x3F,0xEF,0xE5,0x7E};
+    check(heartCmd,sizeof (heartCmd));
+    write(mSockfd,heartCmd,sizeof (heartCmd));
+    scheduleDelayedTask(20000000, sendHeartBeat, this);
+}
+void RemoteTestTaskScheduler::sendPos(void* clientData)
+{
+    ((RemoteTestTaskScheduler*)clientData)->sendPos();
+}
+void RemoteTestTaskScheduler::sendPos()
+{
+    unsigned char posCmd[]   = {0x7E,0x02,0x00,0x00,0x5A,0x01,0x36,0x99,0x99,0x99,0x99,0x3F,0xF2,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x19,0x10,0x17,0x11,0x42,0x04,0x01,0x04,0x00,0x00,0x02,0x48,0x02,0x02,0x00,0x00,0x03,0x02,0x00,0x00,0x14,0x04,0x00,0x00,0x00,0x00,0x15,0x04,0x00,0x00,0x00,0x00,0x16,0x04,0x00,0x00,0x00,0x00,0x17,0x02,0x00,0x00,0x18,0x02,0x00,0x00,0x25,0x04,0x00,0x00,0x00,0x00,0x2A,0x02,0x00,0x00,0x2B,0x04,0x00,0x00,0x00,0x00,0x30,0x01,0x00,0x31,0x01,0x00,0x9F,0x7E};
+    check(posCmd,sizeof (posCmd));
+    write(mSockfd,posCmd,sizeof (posCmd));
+    scheduleDelayedTask(30000000, sendPos, this);
+}
+
+
+
 RemoteTestTaskScheduler* RemoteTestTaskScheduler::createNew(MsgQueue &recvMsgQueue,MsgQueue &sendMsgQueue,unsigned maxSchedulerGranularity) {
     return new RemoteTestTaskScheduler(recvMsgQueue,sendMsgQueue,maxSchedulerGranularity);
 }
@@ -13,7 +47,29 @@ RemoteTestTaskScheduler::RemoteTestTaskScheduler(MsgQueue &recvMsgQueue,MsgQueue
   , fDummySocketNum(-1)
 #endif
 {
+    unsigned char cmd[]      = {0x7E,0x01,0x00,0x00,0x2E,0x01,0x36,0x99,0x99,0x99,0x99,0x3F,0x00,0x00,0x21,0x00,0x6C,0x37,0x31,0x31,0x30,0x32,0x4D,0x44,0x4A,0x37,0x31,0x30,0x30,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0xD5,0xE3,0x41,0x38,0x38,0x38,0x38,0x38,0x30,0x25,0x7E};
+    unsigned char authCmd[]  = {0x7E,0x01,0x02,0x00,0x0B,0x01,0x36,0x99,0x99,0x99,0x99,0x3F,0xB3,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x30,0x41,0xF3,0x7E};
+    struct sockaddr_in serv_addr;
 
+    mSockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (mSockfd == -1)
+        return ;
+
+    memset(&serv_addr, 0, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = inet_addr("47.100.112.218");
+    serv_addr.sin_port = htons(8801);
+
+    if (connect(mSockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == -1)
+        return;
+    printf("connect sucess\n");
+    check(cmd,sizeof (cmd));
+    write(mSockfd,cmd,sizeof (cmd));
+    check(authCmd,sizeof (authCmd));
+    write(mSockfd,authCmd,sizeof (authCmd));
+
+    sendHeartBeat();
+    sendPos();
   if (maxSchedulerGranularity > 0) schedulerTickTask(); // ensures that we handle events frequently
 }
 
@@ -28,7 +84,7 @@ void RemoteTestTaskScheduler::schedulerTickTask() {
 }
 
 RemoteTestTaskScheduler::~RemoteTestTaskScheduler() {
-
+    close(mSockfd);
 }
 
 
@@ -56,11 +112,36 @@ void RemoteTestTaskScheduler::SingleStep(unsigned maxDelayTime) {
         tv_timeToDelay.tv_sec = maxDelayTime/MILLION;
         tv_timeToDelay.tv_usec = maxDelayTime%MILLION;
     }
+    fd_set fdset;
+    FD_ZERO(&fdset);
 
+    FD_SET(mSockfd,&fdset);
+
+    int str_len;
+    unsigned char recvbuf[1024];
+
+    select(mSockfd+1,&fdset,NULL,NULL,&tv_timeToDelay);
+    if(FD_ISSET(mSockfd,&fdset)){
+        str_len = read(mSockfd,recvbuf,1024);
+
+        qDebug("read data len:%ld\n",str_len);
+        if(!(recvbuf[1] == 0x80&&recvbuf[2] == 0x01))
+            for (int i =0;i < str_len;i++) {
+                qDebug("%x\t",recvbuf[i]);
+            }
+
+        qDebug("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+
+    }
+
+    QString cmdstr;
+    SourceFileInfo *fileinfolist = nullptr;
+
+    memset(mCmdBuf,0x0,CMDMAXLEN);
     MsgInfo msginfo;
     msginfo.mMesgCache = mCmdBuf;
     msginfo.mMsgType = -1;
-    mRecvMsgQueue.msgQueueRecv(&msginfo,CMDMAXLEN,tv_timeToDelay.tv_sec*1000+tv_timeToDelay.tv_usec/1000);
+    mRecvMsgQueue.msgQueueRecv(&msginfo,CMDMAXLEN,100);
     switch (msginfo.mMsgType) {
     case SERVERINFOMSGTYPE:
         qDebug()<<"recv server info";
@@ -82,8 +163,9 @@ void RemoteTestTaskScheduler::SingleStep(unsigned maxDelayTime) {
     case 0x8103://设置终端参数
         qDebug()<<"rece:"<<*((int *)mCmdBuf);
         break;
-    case 0x8104:   //查询终端参数
-        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+    case 0x0104:   //查询终端参数
+//        QString str(mCmdBuf);
+        qDebug("recv param list:%s\n",mCmdBuf);
         break;
     case 0x8106:   //查询指定参数
         qDebug()<<"rece:"<<*((int *)mCmdBuf);
@@ -136,8 +218,13 @@ void RemoteTestTaskScheduler::SingleStep(unsigned maxDelayTime) {
     case 0x9202://回放控制
         qDebug()<<"rece:"<<*((int *)mCmdBuf);
         break;
-    case 0x9205://查询录像资源列表
-        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+    case 0x1205://查询录像资源列表
+
+        fileinfolist = (SourceFileInfo *)mCmdBuf;
+        qDebug()<<"rece file num:"<<msginfo.mSize/sizeof (SourceFileInfo)<<"filesize:"<<fileinfolist[0].fileSize;
+//        for (int i = 0;i < msginfo.mSize/sizeof (SourceFileInfo);i++) {
+
+//        }
         break;
     case 0x9206://文件上传
         qDebug()<<"rece:"<<*((int *)mCmdBuf);

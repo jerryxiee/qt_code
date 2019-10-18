@@ -78,6 +78,11 @@ class PlatformSet : public QObject
     Q_PROPERTY(int deviceType READ readDeviceType WRITE setDeviceType NOTIFY deviceTypeChnaged)
     Q_PROPERTY(QString deviceModel READ readDeviceModel WRITE setDeviceModel NOTIFY deviceModelChnaged)
     Q_PROPERTY(QString deviceID READ readDeviceID WRITE setDeviceID NOTIFY deviceIDChnaged)
+    Q_PROPERTY(QString simICCID READ readSIMICCID WRITE setSIMICCID NOTIFY simICCIDChnaged)
+    Q_PROPERTY(QString hwVersion READ readHWVersion WRITE setHWVersion NOTIFY hwVersionChnaged)
+    Q_PROPERTY(QString fwVersion READ readFWVersion WRITE setFWVersion NOTIFY fwVersionChnaged)
+    Q_PROPERTY(int gmssAttr READ readGNSSAttr WRITE setGNSSAttr NOTIFY gmssAttrChnaged)
+    Q_PROPERTY(int comModuleAttr READ readCommunicatModule WRITE setCommunicatModule NOTIFY comModuleAttrChnaged)
     Q_PROPERTY(QString authNumber READ readAuthNumber WRITE setAuthNumber NOTIFY authNumberChnaged)
 
 public:
@@ -227,9 +232,27 @@ public:
     void setDeviceModel(QString value);
     QString readDeviceID() const;
     void setDeviceID(QString value);
+    QString readSIMICCID() const;
+    void setSIMICCID(QString value);
+    QString readHWVersion() const;
+    void setHWVersion(QString value);
+    QString readFWVersion() const;
+    void setFWVersion(QString value);
+    int readGNSSAttr() const;
+    void setGNSSAttr(int value);
+    int readCommunicatModule() const;
+    void setCommunicatModule(int value);
 
     QString readAuthNumber() const;
     void setAuthNumber(QString value);
+
+    QByteArray readDeviceParam(int msgid,int id,int offset) const;
+    QByteArray readDeviceParam(int msgid,int id) const;
+    QByteArrayList readDeviceParamList(int msgid,QList<int> &offlist) const;  //返回：id:value列表
+    void setDeviceParam(int msgid, int id, int offset, QVariant value);
+    void setDeviceParam(int msgid, int id, QVariant value);
+    void setDeviceParamList(int msgid,QList<int> &offlist,QVariantList &valuelist);
+
 
 
 signals:
@@ -302,6 +325,12 @@ signals:
     void deviceTypeChnaged();
     void deviceModelChnaged();
     void deviceIDChnaged();
+    void simICCIDChnaged();
+    void hwVersionChnaged();
+    void fwVersionChnaged();
+    void gmssAttrChnaged();
+    void comModuleAttrChnaged();
+
     void carVinNumberChnaged();
     void authNumberChnaged();
 

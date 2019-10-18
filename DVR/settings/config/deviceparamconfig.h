@@ -9,7 +9,7 @@ typedef struct{
     int id;
     int num;
     int field;
-    QString value;
+    QVariant value;
 } DeviceParam;
 
 typedef QList<DeviceParam> DeviceParamList;

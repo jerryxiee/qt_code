@@ -3,6 +3,7 @@
 
 #include "common/msgqueue.h"
 #include <QThread>
+#include "jtt808define.h"
 
 #include "BasicUsageEnvironment0.hh"
 
@@ -30,6 +31,15 @@ protected:
 
   virtual void setBackgroundHandling(int socketNum, int conditionSet, BackgroundHandlerProc* handlerProc, void* clientData){}
   virtual void moveSocketHandling(int oldSocketNum, int newSocketNum){}
+
+private:
+  void setDeviceParam(int msgid,const char *cmd);
+  void sendDiveceParam(int msgid,const char *cmd);
+  void sendDiveceParam(int msgid, QList<int> &idlist);
+  void sendDiveceParam(int msgid, const char *cmd,int cmdlen);
+  void sendDiveceParamAll();
+  void sendDeviceAttr();
+  void reportRecordFileList(SourceFileMsg &fileattr);
 
 protected:
   unsigned fMaxSchedulerGranularity;

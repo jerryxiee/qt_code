@@ -247,6 +247,10 @@ int MP4FileIndex::getFileList(QList<MP4FileInfo> &filelist,uint sttime,uint endt
         if(list.at(startindex).sttime > endtime || list.at(startindex).endtime < sttime){
             return 0;
         }
+    }else {
+        if(list.at(endindex).sttime == endtime){
+            endindex--;
+        }
     }
 
     qDebug()<<"startindex:"<<startindex<<" endindex:"<<endindex;
@@ -309,7 +313,7 @@ int MP4FileIndex::findRightIndex(QList<MP4FileInfo> &filelist,int stindex,int en
         return index;
     }
 
-    if(fileinfo.endtime < time){
+    if(fileinfo.endtime <= time){
         return findRightIndex(filelist,index,endindex,time);
     }else {
         return findRightIndex(filelist,stindex,index-1,time);

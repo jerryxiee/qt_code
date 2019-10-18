@@ -578,9 +578,11 @@ void MyTableModel::priSearchFile(int type,int Chn,int filetype,QString starttime
         }
         case 1:
         {
+        #ifndef LUNUX_WIN
             MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(Chn,VIDEO_MOVEDETECT);
             mp4fileindex->getFileList(mMp4FileList,sttime,entime);
             delete  mp4fileindex;
+        #endif
             break;
         }
     }
