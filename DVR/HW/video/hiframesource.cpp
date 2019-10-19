@@ -5,6 +5,11 @@ HiFrameSource::HiFrameSource(MOD_ID_E Mod,int &DevId, int &Chn):HiVideoBase(Mod,
 
 }
 
+HiFrameSource::HiFrameSource(HiVideoBase* base):HiVideoBase (base)
+{
+
+}
+
 HiFrameSource::~HiFrameSource()
 {
 
@@ -32,6 +37,20 @@ bool HiFrameSource::isSource() const
 {
     return true;
 }
+
+MOD_ID_E HiFrameSource::getHiModId() const
+{
+    return HiVideoBase::getHiModId();
+}
+int HiFrameSource::getDevNo() const
+{
+    return HiVideoBase::getDevNo();
+}
+int HiFrameSource::getChn() const
+{
+    return HiVideoBase::getChn();
+}
+
 
 
 

@@ -7,19 +7,19 @@
 class HiVpssSource : public HiFrameSource
 {
 public:
-    HiVpssSource *createNew(HiFrameSource & inSource);
-    HiVpssSource *createNew(HiFrameSource & inSource,int DevId,int Chn);      //vpss通道已经创建
-
-
-protected:
-    HiVpssSource(HiFrameSource & inSource,int &DevId,int &Chn,MOD_ID_E Mod = HI_ID_VPSS);
+    static HiVpssSource *createNew(int ChnNum,SIZE_S *pstSize,VPSS_GRP_ATTR_S *pstVpssGrpAttr);
+    static HiVpssSource *createNew(int DevId, int Chn);      //vpss通道已经创建
     virtual ~HiVpssSource();
 
+protected:
+    HiVpssSource(Sample_Common_Vpss *vpss,int DevId,int Chn,MOD_ID_E Mod = HI_ID_VPSS);
+
 private:
+
     virtual bool isVpssSource() const;
 
 private:
-    HiFrameSource &mInSource;
+    Sample_Common_Vpss *mVpss;
 
 
 };

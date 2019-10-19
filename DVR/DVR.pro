@@ -85,7 +85,13 @@ SOURCES += \
     HW/video/hiframeconsumer.cpp \
     HW/video/hivideobase.cpp \
     HW/video/viframesource.cpp \
-    HW/video/hivpsssource.cpp
+    HW/video/hivpsssource.cpp \
+    HW/video/hivpssconsumer.cpp \
+    HW/video/hivencconsumer.cpp \
+    HW/video/hivoconsumer.cpp \
+    HW/video/hivdaconsumer.cpp \
+    HW/video/hiconsumertosource.cpp \
+    HW/video/hivenctomp4.cpp
 
 
 
@@ -146,9 +152,15 @@ HEADERS += \
     video/encodetaskscheduler.h \
     HW/video/hiframesource.h \
     HW/video/hiframeconsumer.h \
-    HW/video/hivideobase.h \
     HW/video/viframesource.h \
-    HW/video/hivpsssource.h
+    HW/video/hivpsssource.h \
+    HW/video/hivpssconsumer.h \
+    HW/video/hivencconsumer.h \
+    HW/video/hivoconsumer.h \
+    HW/video/hivdaconsumer.h \
+    HW/video/hivideobase.h \
+    HW/video/hiconsumertosource.h \
+    HW/video/hivenctomp4.h
 
 
 INCLUDEPATH +=/home/abhw/git/qt_code/DVR/common/schedule \

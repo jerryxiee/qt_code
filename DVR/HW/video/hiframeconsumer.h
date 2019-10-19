@@ -2,6 +2,7 @@
 #define HIFRAMECONSUMER_H
 
 #include "hivideobase.h"
+#include "hiframesource.h"
 
 class HiFrameConsumer:public HiVideoBase
 {
@@ -12,14 +13,21 @@ public:
     virtual bool isVoConsumer() const;
     virtual bool isVdecConsumer() const;
     virtual bool isVdaConsumer() const;
+    virtual bool isSucessbindSource() const;
+    virtual void doProcess() = 0;
+
+    static void doProcess(void *consumer,int value);
 
 protected:
-    HiFrameConsumer(MOD_ID_E Mod, int &DevId, int& Chn);
+    HiFrameConsumer(HiFrameSource *,MOD_ID_E Mod, int &DevId, int& Chn);
     virtual ~HiFrameConsumer();
 
 
 private:
     virtual bool isConsumer() const;
+    bool mBindSource;
+    HiFrameSource *mFramSource;
+
 };
 
 #endif // HIFRAMECONSUMER_H

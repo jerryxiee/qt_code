@@ -19,7 +19,7 @@ protected:
   static void schedulerTickTask(void* clientData);
   void schedulerTickTask();
 
-protected:
+public:
   // Redefined virtual functions:
   virtual void SingleStep(unsigned maxDelayTime);
 

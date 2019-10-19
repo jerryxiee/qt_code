@@ -1,6 +1,9 @@
 #include "realtimestream.h"
 #include <QDebug>
 #include "../live555/mytest/h264mediasubsession.h"
+#include "HW/video/hivenctomp4.h"
+#include "HW/video/hivpsssource.h"
+
 
 
 RealTimeStream::RealTimeStream(QObject *parent) : QThread(parent)
@@ -11,7 +14,6 @@ RealTimeStream::RealTimeStream(QObject *parent) : QThread(parent)
 RealTimeStream::~RealTimeStream()
 {
     mRun = false;
-    terminate();
     wait();
     qDebug()<<"exit RealTimeStream thread";
 }
@@ -166,57 +168,22 @@ void RealTimeStream::run()
 
 #endif
 
-    UsageEnvironment* env;
-//    H264VideoStreamFramer* videoSource;
-//    RTPSink* videoSink;
+    EncodeTaskScheduler *scheduler = EncodeTaskScheduler::createNew();
+    HiVpssSource *source = HiVpssSource::createNew(0,VPSS_CHN1);
+    HiVpssSource *source1 = HiVpssSource::createNew(1,VPSS_CHN1);
+    HiVencToMp4 *encodeMp4 = HiVencToMp4::createNew(source,VIDEO_NORM,PIC_HD720,SAMPLE_RC_CBR,0,25,0,PAYLOAD_TYPE,"realtime.mp4");
+    HiVencToMp4 *encodeMp41 = HiVencToMp4::createNew(source1,VIDEO_NORM,PIC_HD720,SAMPLE_RC_CBR,0,25,0,PAYLOAD_TYPE,"realtime1.mp4");
 
-    TaskScheduler* scheduler = BasicTaskScheduler::createNew();
-    env = BasicUsageEnvironment::createNew(*scheduler);
+    scheduler->setBackgroundHandling(((HiVencConsumer *)encodeMp4)->getVencFd(),SOCKET_READABLE,HiFrameConsumer::doProcess,encodeMp4);
+    scheduler->setBackgroundHandling(((HiVencConsumer *)encodeMp41)->getVencFd(),SOCKET_READABLE,HiFrameConsumer::doProcess,encodeMp41);
+    mRun = true;
 
-    UserAuthenticationDatabase* authDB = nullptr;
-  #ifdef ACCESS_CONTROL
-    // To implement client access control to the RTSP server, do the following:
-    authDB = new UserAuthenticationDatabase;
-    authDB->addUserRecord("username1", "password1"); // replace these with real strings
-    // Repeat the above with each <username>, <password> that you wish to allow
-    // access to the server.
-  #endif
-
-    // Create the RTSP server:
-    RTSPServer* rtspServer = RTSPServer::createNew(*env, 8554, authDB);
-    if (rtspServer == nullptr) {
-      *env << "Failed to create RTSP server: " << env->getResultMsg() << "\n";
-      exit(1);
+    while (mRun) {
+        scheduler->SingleStep(0);
     }
 
-    char const* descriptionString
-      = "Session streamed by \"testOnDemandRTSPServer\"";
-
-    OutPacketBuffer::maxSize = 200000;
-    // A H.264 video elementary stream:
-    {
-      char const* streamName = "h264ESVideoTest";
-      ServerMediaSession* sms
-        = ServerMediaSession::createNew(*env, streamName, streamName,
-                        descriptionString);
-      sms->addSubsession(H264MediaSubsession::createNew(*env,0,false));
-
-      rtspServer->addServerMediaSession(sms);
-
-      char* url = rtspServer->rtspURL(sms);
-      UsageEnvironment& env = rtspServer->envir();
-      env << "Play this stream using the URL \"" << url << "\"\n";
-      delete[] url;
-    }
-
-    if (rtspServer->setUpTunnelingOverHTTP(80) || rtspServer->setUpTunnelingOverHTTP(8000) || rtspServer->setUpTunnelingOverHTTP(8080)) {
-      *env << "\n(We use port " << rtspServer->httpServerPortNum() << " for optional RTSP-over-HTTP tunneling.)\n";
-    } else {
-      *env << "\n(RTSP-over-HTTP tunneling is not available.)\n";
-    }
-
-
-    env->taskScheduler().doEventLoop(); // does not return
-
+    delete scheduler;
+    delete encodeMp4;
+    delete encodeMp41;
 
 }

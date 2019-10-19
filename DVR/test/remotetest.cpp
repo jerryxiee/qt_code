@@ -120,19 +120,19 @@ void RemoteTestTaskScheduler::SingleStep(unsigned maxDelayTime) {
     int str_len;
     unsigned char recvbuf[1024];
 
-    select(mSockfd+1,&fdset,NULL,NULL,&tv_timeToDelay);
-    if(FD_ISSET(mSockfd,&fdset)){
-        str_len = read(mSockfd,recvbuf,1024);
+//    select(mSockfd+1,&fdset,NULL,NULL,&tv_timeToDelay);
+//    if(FD_ISSET(mSockfd,&fdset)){
+//        str_len = read(mSockfd,recvbuf,1024);
 
-        qDebug("read data len:%ld\n",str_len);
-        if(!(recvbuf[1] == 0x80&&recvbuf[2] == 0x01))
-            for (int i =0;i < str_len;i++) {
-                qDebug("%x\t",recvbuf[i]);
-            }
+//        qDebug("read data len:%ld\n",str_len);
+//        if(!(recvbuf[1] == 0x80&&recvbuf[2] == 0x01))
+//            for (int i =0;i < str_len;i++) {
+//                qDebug("%x\t",recvbuf[i]);
+//            }
 
-        qDebug("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+//        qDebug("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
-    }
+//    }
 
     QString cmdstr;
     SourceFileInfo *fileinfolist = nullptr;

@@ -118,7 +118,7 @@ const char *MP4File::getMP4FileName()
 
 }
 
-bool MP4File::createMP4File(char *filename,int framerate,QSize &size,int bitrate,bool enAudio)
+bool MP4File::createMP4File(const char *filename,int framerate,QSize &size,int bitrate,bool enAudio)
 {
     int ret = 0;
     AVOutputFormat *pOutFmt = nullptr;

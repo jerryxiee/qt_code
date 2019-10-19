@@ -19,3 +19,4 @@ bool ViFrameSource::isViSource() const
 {
     return true;
 }
+

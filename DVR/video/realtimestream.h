@@ -4,10 +4,8 @@
 #include <QThread>
 #include <QMutex>
 #include <QList>
-#include "video/videostreampro.h"
-#include <liveMedia.hh>
-#include "common/schedule/BasicUsageEnvironment.hh"
-#include <GroupsockHelper.hh>
+#include "encodetaskscheduler.h"
+
 
 class RealTimeStream : public QThread
 {
@@ -25,7 +23,7 @@ signals:
 public slots:
 
 private:
-    VideoStreamPro mStreamPro;
+
     bool mRun;
 };
 

@@ -587,6 +587,11 @@ HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SaveFile(FILE* pFd, VENC_STREAM_BUF_
 //    return HI_SUCCESS;
 //}
 
+HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_GetFd()
+{
+    return HI_MPI_VENC_GetFd(m_Venc_Chn);
+}
+
 HI_S32 Sample_Common_Venc::SAMPLE_COMM_VENC_SetAttr(PAYLOAD_TYPE_E enType, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, HI_U32 u32BitRate, HI_FR32 frmRate, HI_U32  u32Profile)
 {
     m_enType = enType;

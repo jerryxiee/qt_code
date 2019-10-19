@@ -13,7 +13,7 @@ public:
     MP4File();
     ~MP4File();
 
-    bool createMP4File(char *filename,int framerate,QSize &size,int bitrate = 0,bool enAudio = false);  //创建MP4文件，默认无音频
+    bool createMP4File(const char *filename,int framerate,QSize &size,int bitrate = 0,bool enAudio = false);  //创建MP4文件，默认无音频
     void closeMO4File();
     bool isOpen();
 //    uint getFileSize();

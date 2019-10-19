@@ -5,6 +5,17 @@ HiVideoBase::HiVideoBase(MOD_ID_E Mod, int &DevId, int &Chn):mHiModId(Mod),mDevN
 
 }
 
+HiVideoBase::HiVideoBase(HiVideoBase *base)
+{
+    if(!base || base == this)
+        return;
+
+    mHiModId = base->getHiModId();
+    mDevNo = base->getDevNo();
+    mChn = base->getChn();
+
+}
+
 HiVideoBase::~HiVideoBase()
 {
 
