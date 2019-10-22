@@ -81,17 +81,8 @@ SOURCES += \
     modules/positionreport.cpp \
     common/bcdtransform.cpp \
     video/encodetaskscheduler.cpp \
-    HW/video/hiframesource.cpp \
-    HW/video/hiframeconsumer.cpp \
-    HW/video/hivideobase.cpp \
-    HW/video/viframesource.cpp \
-    HW/video/hivpsssource.cpp \
-    HW/video/hivpssconsumer.cpp \
-    HW/video/hivencconsumer.cpp \
-    HW/video/hivoconsumer.cpp \
-    HW/video/hivdaconsumer.cpp \
-    HW/video/hiconsumertosource.cpp \
-    HW/video/hivenctomp4.cpp
+    streamserver/himediaserversession.cpp \
+    streamserver/himediaservermanage.cpp
 
 
 
@@ -150,17 +141,9 @@ HEADERS += \
     modules/positionreport.h \
     common/bcdtransform.h \
     video/encodetaskscheduler.h \
-    HW/video/hiframesource.h \
-    HW/video/hiframeconsumer.h \
-    HW/video/viframesource.h \
-    HW/video/hivpsssource.h \
-    HW/video/hivpssconsumer.h \
-    HW/video/hivencconsumer.h \
-    HW/video/hivoconsumer.h \
-    HW/video/hivdaconsumer.h \
-    HW/video/hivideobase.h \
-    HW/video/hiconsumertosource.h \
-    HW/video/hivenctomp4.h
+    streamserver/himediaserversession.h \
+    streamserver/himediaservermanage.h
+
 
 
 INCLUDEPATH +=/home/abhw/git/qt_code/DVR/common/schedule \
@@ -388,7 +371,23 @@ SOURCES +=common/sample_common_sys.cpp \
             video/mp4play.cpp  \
             HW/mpivenc.cpp  \
             HW/mpivdec.cpp \
-            HW/mpivpss.cpp
+            HW/mpivpss.cpp \
+            HW/video/hiframesource.cpp \
+            HW/video/hiframeconsumer.cpp \
+            HW/video/hivideobase.cpp \
+            HW/video/hivpsssource.cpp \
+            HW/video/hivpssconsumer.cpp \
+            HW/video/hivencconsumer.cpp \
+            HW/video/hivoconsumer.cpp \
+            HW/video/hivdaconsumer.cpp \
+            HW/video/hiconsumertosource.cpp \
+            HW/video/hivenctomp4.cpp \
+            HW/video/hiviframesource.cpp \
+            HW/video/hivdecframesources.cpp \
+            HW/video/hivenctofile.cpp \
+            HW/video/hivdecframeconsumer.cpp \
+            HW/mediaserver/decodeserver.cpp
+
 
 HEADERS +=common/loadbmp.h \
             common/sample_common_sys.h \
@@ -599,7 +598,22 @@ HEADERS +=common/loadbmp.h \
             video/mp4play.h  \
             HW/mpivenc.h  \
             HW/mpivdec.h \
-            HW/mpivpss.h
+            HW/mpivpss.h \
+            HW/video/hiframesource.h \
+            HW/video/hiframeconsumer.h \
+            HW/video/hivpsssource.h \
+            HW/video/hivpssconsumer.h \
+            HW/video/hivencconsumer.h \
+            HW/video/hivoconsumer.h \
+            HW/video/hivideobase.h \
+            HW/video/hiconsumertosource.h \
+            HW/video/hivenctomp4.h  \
+            HW/video/hiviframesource.h \
+            HW/video/hivdecframesources.h \
+            HW/video/hivdaframeconsumer.h \
+            HW/video/hivenctofile.h \
+            HW/video/hivdecframeconsumer.h \
+            HW/mediaserver/decodeserver.h
 
 
 LIBS += -lpthread

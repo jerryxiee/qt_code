@@ -12,14 +12,16 @@ public:
     virtual ~HiVpssSource();
 
 protected:
-    HiVpssSource(Sample_Common_Vpss *vpss,int DevId,int Chn,MOD_ID_E Mod = HI_ID_VPSS);
+    HiVpssSource(int DevId, int Chn,int ChnNum = 0,SIZE_S *pstSize = nullptr,VPSS_GRP_ATTR_S *pstVpssGrpAttr = nullptr, MOD_ID_E Mod = HI_ID_VPSS);
 
 private:
 
+    bool isCreateSucess() const;
     virtual bool isVpssSource() const;
 
 private:
     Sample_Common_Vpss *mVpss;
+    bool mCreateSucess;
 
 
 };

@@ -189,7 +189,7 @@ exit_avio_open_failed:
 exit_outFmt_failed:
     if(nullptr != mAVFmtCtx)
         avformat_free_context(mAVFmtCtx);
-
+    mAVFmtCtx = nullptr;
     return false;
 }
 

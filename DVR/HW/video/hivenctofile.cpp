@@ -1,9 +1,6 @@
-#include "hivenctomp4.h"
-#include <QDebug>
-#include "common/sample_common_sys.h"
+#include "hivenctofile.h"
 
-
-HiVencToMp4 *HiVencToMp4::createNew(HiFrameSource *Source,
+HiVencToFile *HiVencToFile::createNew(HiFrameSource *Source,
                           VIDEO_NORM_E enNorm,
                           PIC_SIZE_E enSize,
                           SAMPLE_RC_E enRcMode,
@@ -11,33 +8,25 @@ HiVencToMp4 *HiVencToMp4::createNew(HiFrameSource *Source,
                           uint32_t frmRate,
                           uint32_t  u32Profile,
                           PAYLOAD_TYPE_E enType,
-                       const char *mp4FileName)
+                       const char *fileName)
 {
-    HiVencToMp4 *consumer = nullptr;
+    HiVencToFile *consumer = nullptr;
 
-    QSize size(1280,720);
-    SIZE_S picsize;
-
-    if(Sample_Common_Sys::SAMPLE_COMM_SYS_GetPicSize(VIDEO_NORM, enSize, &picsize) == HI_SUCCESS){
-        size.setWidth(picsize.u32Width);
-        size.setHeight(picsize.u32Height);
-    }
-
-    MP4File *mp4file = new MP4File();
-    if(!mp4file->createMP4File(mp4FileName,frmRate,size)){
+    FILE *fp = fopen(fileName,"wb+");
+    if(!fp){
         if(Source)
             delete Source;
-        goto END;
+        return nullptr;
     }
 
-    consumer = new HiVencToMp4(Source,mp4file,enNorm,enSize,enRcMode,u32BitRate,frmRate,u32Profile,enType);
+    consumer = new HiVencToFile(Source,fp,enNorm,enSize,enRcMode,u32BitRate,frmRate,u32Profile,enType);
     if(!consumer){
         if(Source)
             delete Source;
         goto END;
     }
     if(!consumer->isSucessbindSource()){
-        qDebug("%s:%d\n",__FUNCTION__,__LINE__);
+
         goto END1;
     }
     return consumer;
@@ -45,60 +34,29 @@ HiVencToMp4 *HiVencToMp4::createNew(HiFrameSource *Source,
 END1:
     delete consumer;
 END:
-    mp4file->closeMO4File();
-    delete mp4file;
-    qDebug("%s:%d\n",__FUNCTION__,__LINE__);
+    fclose(fp);
     return nullptr;
 
 }
 
-
-HiVencToMp4::HiVencToMp4(HiFrameSource *Source, MP4File *mp4file, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, uint32_t u32BitRate, uint32_t frmRate, uint32_t u32Profile, PAYLOAD_TYPE_E enType):
-    HiVencConsumer (Source,enNorm,enSize,enRcMode,u32BitRate,frmRate,u32Profile,enType),mMp4File(mp4file)
+HiVencToFile::HiVencToFile(HiFrameSource *Source, FILE *fp, VIDEO_NORM_E enNorm, PIC_SIZE_E enSize, SAMPLE_RC_E enRcMode, uint32_t u32BitRate, uint32_t frmRate, uint32_t u32Profile, PAYLOAD_TYPE_E enType):
+    HiVencConsumer (Source,enNorm,enSize,enRcMode,u32BitRate,frmRate,u32Profile,enType),mFile(fp)
 {
-    mIDRFramBuf = (unsigned char *)malloc(BUFLEN);
-    if(!mIDRFramBuf){
-        printf("malloc error\n");
-    }
 
 }
 
-HiVencToMp4::~HiVencToMp4()
+HiVencToFile::~HiVencToFile()
 {
-    if(mIDRFramBuf){
-        free(mIDRFramBuf);
+    if(mFile){
+        fclose(mFile);
     }
-
-    if(mMp4File){
-        qDebug()<<"exit HiVencToMp4";
-        mMp4File->closeMO4File();
-        delete mMp4File;
-    }
-    qDebug()<<"exit HiVencToMp4 end";
 }
 
-bool HiVencToMp4::saveFile(const char *newFileName,QSize size,uint32_t frmRate)
-{
-    mMutex.lock();
-    if(!newFileName){
-        mMp4File->closeMO4File();
-        return true;
-    }
-
-    bool result = mMp4File->createMP4File(newFileName,frmRate,size);
-    mMutex.unlock();
-
-    return result;
-}
-
-void HiVencToMp4::doProcess()
+void HiVencToFile::doProcess()
 {
     VENC_CHN_STAT_S stStat;
     VENC_STREAM_S stStream;
     int s32Ret;
-    unsigned char* pPackVirtAddr = nullptr;
-    unsigned int u32PackLen = 0;
-    bool isIDR = false;
 
     /*******************************************************
     step 2.1 : query how many packs in one-frame stream.
@@ -144,37 +102,14 @@ void HiVencToMp4::doProcess()
         return;
     }
 
-    //处理关键帧,关键帧有多个包
-    u32PackLen = 0;
-    if(stStream.u32PackCount == 1){
-        pPackVirtAddr = stStream.pstPack[0].pu8Addr + stStream.pstPack[0].u32Offset;
-        u32PackLen = stStream.pstPack[0].u32Len - stStream.pstPack[0].u32Offset;
-//                        u32PackOffset = stStream.pstPack[0].u32Offset;
-        isIDR = Sample_Common_Venc::isIDRFrame(&stStream,PAYLOAD_TYPE);
-
-    }else {
-        for (uint n = 0 ; n < stStream.u32PackCount; n++)
-        {
-            isIDR = Sample_Common_Venc::isIDRFrame(&stStream,PAYLOAD_TYPE);
-
-            memcpy(&mIDRFramBuf[u32PackLen],stStream.pstPack[n].pu8Addr+stStream.pstPack[n].u32Offset,
-                   stStream.pstPack[n].u32Len - stStream.pstPack[n].u32Offset);
-
-            u32PackLen += stStream.pstPack[n].u32Len - stStream.pstPack[n].u32Offset;
-            if(u32PackLen > BUFLEN){
-                qDebug()<<"frame size larger than bufsize";
-                break;
-            }
-
-
-        }
-        pPackVirtAddr = mIDRFramBuf;
-
+    s32Ret = Sample_Common_Venc::SAMPLE_COMM_VENC_SaveStream(getPlaylodType(), mFile, &stStream);
+    if (HI_SUCCESS != s32Ret)
+    {
+//        free(stStream.pstPack);
+//        stStream.pstPack = nullptr;
+        SAMPLE_PRT("save stream failed!\n");
+//        return;
     }
-    mMutex.lock();
-    mMp4File->writeFrame(pPackVirtAddr,u32PackLen,isIDR);
-    mMutex.unlock();
-
 
     /*******************************************************
      step 2.6 : release stream

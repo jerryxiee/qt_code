@@ -78,7 +78,6 @@ void VideoPlay::setCurrentposition(int percent)
     qDebug()<<"setCurrentposition:"<<position;
     play();
 
-
 }
 
 void VideoPlay::setPosition(uint value)
@@ -165,18 +164,18 @@ HI_BOOL VideoPlay::Start_Vdec()
         return HI_FALSE;
     }
 
-    m_pVdec = new Sample_Common_Vdec(1,1,0);
+    m_pVdec = new Sample_Common_Vdec(1,1,1);
 
-    if(m_pVdec->m_Vdec_Tab[0] == 0){
-        printf("init CommonPool\n");
-        m_pVdec->SAMPLE_COMM_VDEC_ModCommPoolConf(&stModVbConf, m_enType, &stSize, 1, HI_FALSE);
-        s32Ret = m_pVdec->SAMPLE_COMM_VDEC_InitModCommVb(&stModVbConf);
-        if(s32Ret != HI_SUCCESS)
-        {
-            SAMPLE_PRT("init mod common vb fail for %#x!\n", s32Ret);
-            return HI_FALSE;
-        }
-    }
+//    if(m_pVdec->m_Vdec_Tab[0] == 0){
+//        printf("init CommonPool\n");
+//        m_pVdec->SAMPLE_COMM_VDEC_ModCommPoolConf(&stModVbConf, m_enType, &stSize, 1, HI_FALSE);
+//        s32Ret = m_pVdec->SAMPLE_COMM_VDEC_InitModCommVb(&stModVbConf);
+//        if(s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_PRT("init mod common vb fail for %#x!\n", s32Ret);
+//            return HI_FALSE;
+//        }
+//    }
 
     m_pVdec->SAMPLE_COMM_VDEC_ChnAttr(1, &stVdecChnAttr, m_enType, &stSize);
 

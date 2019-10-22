@@ -13,14 +13,18 @@ public:
     virtual bool isVoConsumer() const;
     virtual bool isVdecConsumer() const;
     virtual bool isVdaConsumer() const;
-    virtual bool isSucessbindSource() const;
+    virtual bool isSucessbindSource();
     virtual void doProcess() = 0;
+    bool bindSource();
 
     static void doProcess(void *consumer,int value);
 
 protected:
-    HiFrameConsumer(HiFrameSource *,MOD_ID_E Mod, int &DevId, int& Chn);
+    HiFrameConsumer(HiFrameSource *, MOD_ID_E Mod, int DevId, int Chn);
     virtual ~HiFrameConsumer();
+
+private:
+
 
 
 private:

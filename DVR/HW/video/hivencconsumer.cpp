@@ -13,38 +13,49 @@ HiVencConsumer *HiVencConsumer::createNew(HiFrameSource *Source,
 {
     HiVencConsumer *consumer = nullptr;
 
-    Sample_Common_Venc *Venc = new Sample_Common_Venc();
-    if(Venc){
-        Venc->SAMPLE_COMM_VENC_SetAttr(enType,enNorm,enSize,enRcMode,u32BitRate,frmRate,u32Profile);
-        if(Venc->SAMPLE_COMM_VENC_Start() != HI_SUCCESS){
-           goto END;
-        }
-    }
-
-    consumer = new HiVencConsumer(Source,Venc,0,Venc->m_Venc_Chn);
+    consumer = new HiVencConsumer(Source,enNorm,enSize,enRcMode,u32BitRate,frmRate,u32Profile,enType);
     if(!consumer){
-        goto END;
+        if(Source)
+            delete Source;
+        return nullptr;
     }
-    if(!consumer->isSucessbindSource()){
-
-        goto END1;
+    if(!consumer->isCreateVencSucess()||!consumer->isSucessbindSource()){
+        delete consumer;
+        return nullptr;
     }
     return consumer;
 
-END1:
-    delete consumer;
-END:
-    if(Venc){
-        Venc->SAMPLE_COMM_VENC_Stop();
-        delete Venc;
-        Venc = nullptr;
-    }
-    return nullptr;
 }
 
-HiVencConsumer::HiVencConsumer(HiFrameSource *Source, Sample_Common_Venc *Venc, int DevId, int Chn, MOD_ID_E Mod):
-    HiFrameConsumer (Source,Mod,DevId,Chn),mVenc(Venc)
+HiVencConsumer::HiVencConsumer(HiFrameSource *Source,
+                               VIDEO_NORM_E enNorm,
+                               PIC_SIZE_E enSize,
+                               SAMPLE_RC_E enRcMode,
+                               uint32_t u32BitRate,
+                               uint32_t frmRate,
+                               uint32_t  u32Profile,
+                               PAYLOAD_TYPE_E enType,
+                               int DevId,
+                               int Chn,
+                               MOD_ID_E Mod):
+    HiFrameConsumer (Source,Mod,DevId,Chn),mVenc(nullptr),mCreateVencSucess(false)
 {
+    mVenc = new Sample_Common_Venc();
+    if(mVenc){
+        mVenc->SAMPLE_COMM_VENC_SetAttr(enType,enNorm,enSize,enRcMode,u32BitRate,frmRate,u32Profile);
+        if(mVenc->SAMPLE_COMM_VENC_Start() != HI_SUCCESS){
+            mVenc->SAMPLE_COMM_VENC_Stop();
+            delete mVenc;
+            mVenc = nullptr;
+            return;
+        }
+        mCreateVencSucess = true;
+        //重新设置目的通道，重新绑定源
+        static_cast<HiVideoBase *>(this)->setDevNo(0);
+        static_cast<HiVideoBase *>(this)->setChn(mVenc->m_Venc_Chn);
+        static_cast<HiFrameConsumer *>(this)->bindSource();
+
+    }
 
 }
 
@@ -60,6 +71,20 @@ int HiVencConsumer::getVencFd() const
     }
 
     return -1;
+}
+
+PAYLOAD_TYPE_E HiVencConsumer::getPlaylodType() const
+{
+    if(mVenc){
+        return mVenc->m_enType;
+    }
+
+    return PT_BUTT;
+}
+
+bool HiVencConsumer::isCreateVencSucess() const
+{
+    return mCreateVencSucess;
 }
 
 bool HiVencConsumer::isVencConsumer() const

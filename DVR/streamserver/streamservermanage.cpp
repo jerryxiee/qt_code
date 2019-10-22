@@ -36,13 +36,13 @@ bool StreamServerManage::createNewConnect(StreamParam &param)
     StreamInfo streaminfo;
 
 
-    streaminfo.Channel = param.LogicChannel;
-    ret = inet_pton(AF_INET, param.IpAddr, &streaminfo.IpAddr);
+    streaminfo.Channel = param.logicChannel;
+    ret = inet_pton(AF_INET, param.ipAddr, &streaminfo.IpAddr);
     if(ret < 0){
         qDebug()<<"ip error!";
         return false;
     }
-    streaminfo.Port = param.TcpPort != 0?param.TcpPort:param.UdpPort;
+    streaminfo.Port = param.tcpPort != 0?param.tcpPort:param.udpPort;
 
     //step1:检查是否已经创建
     ret = checkConnectExist(streaminfo);
@@ -57,9 +57,9 @@ bool StreamServerManage::createNewConnect(StreamParam &param)
 #ifndef LUNUX_WIN
     VideoStreamPro sourcePor;
     //step3:创建码流通道
-    if(!param.PlayType){ //直播通道
+    if(!param.playType){ //直播通道
         sourcePor.setTime(sttime,endtime,VIDEO_NORMAL);
-        if(!sourcePor.startVenc(param.LogicChannel,REALTIME1)){
+        if(!sourcePor.startVenc(param.logicChannel,REALTIME1)){
             return false;
         }
 

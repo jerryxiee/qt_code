@@ -9,9 +9,12 @@ public:
     virtual bool isSource() const;
     virtual bool isConsumer() const;
 
-    virtual MOD_ID_E getHiModId() const;
-    virtual int getDevNo() const;
-    virtual int getChn() const;
+    MOD_ID_E getHiModId() const;
+    int getDevNo() const;
+    int getChn() const;
+    void setDevNo(int DevNo);
+    void setChn(int Chn);
+
 protected:
     HiVideoBase(MOD_ID_E Mod,int &DevId,int& Chn);
     HiVideoBase(HiVideoBase *base);

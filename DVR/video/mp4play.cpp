@@ -320,18 +320,18 @@ bool MP4VideoPlay::startPlay()
         return false;
     }
 
-    mpVdec = new Sample_Common_Vdec(1,1,0);
+    mpVdec = new Sample_Common_Vdec(1,1,1);
 
-    if(mpVdec->m_Vdec_Tab[0] == 0){
-        printf("init CommonPool\n");
-        mpVdec->SAMPLE_COMM_VDEC_ModCommPoolConf(&stModVbConf, PT_H264, &stSize, 1, HI_FALSE);
-        s32Ret = mpVdec->SAMPLE_COMM_VDEC_InitModCommVb(&stModVbConf);
-        if(s32Ret != HI_SUCCESS)
-        {
-            SAMPLE_PRT("init mod common vb fail for %#x!\n", s32Ret);
-            return HI_FALSE;
-        }
-    }
+//    if(mpVdec->m_Vdec_Tab[0] == 0){
+//        printf("init CommonPool\n");
+//        mpVdec->SAMPLE_COMM_VDEC_ModCommPoolConf(&stModVbConf, PT_H264, &stSize, 1, HI_FALSE);
+//        s32Ret = mpVdec->SAMPLE_COMM_VDEC_InitModCommVb(&stModVbConf);
+//        if(s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_PRT("init mod common vb fail for %#x!\n", s32Ret);
+//            return HI_FALSE;
+//        }
+//    }
 
     mpVdec->SAMPLE_COMM_VDEC_ChnAttr(1, &stVdecChnAttr, PT_H264, &stSize);
 

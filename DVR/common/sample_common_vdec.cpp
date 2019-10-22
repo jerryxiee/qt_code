@@ -17,6 +17,7 @@
 #include "sample_common_vdec.h"
 
 HI_U32 Sample_Common_Vdec::m_Vdec_MaxTab[VDEC_MAX_CHN_NUM] = {0};
+bool Sample_Common_Vdec::mModeInit = false;
 
 //HI_S32 m_s32VBSource = 0;
 //VB_POOL m_ahVbPool[VB_MAX_POOLS] ;//= {[0 ... (VB_MAX_POOLS-1)] = VB_INVALID_POOLID};
@@ -167,6 +168,7 @@ HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_Start(HI_S32 s32ChnNum)
     HI_S32  i;
     HI_U32 u32BlkCnt = 10;
     VDEC_CHN_POOL_S stPool;
+    VDEC_MOD_PARAM_S stModParam;
 //    SIZE_S stRotateSize;
 //    MPP_CHN_S stSrcChn;
 //    MPP_CHN_S stDestChn;
@@ -191,11 +193,25 @@ HI_S32 Sample_Common_Vdec::SAMPLE_COMM_VDEC_Start(HI_S32 s32ChnNum)
 
         if(1 == m_s32VBSource)
         {
+            if(!mModeInit){
+                mModeInit = true;
+                stModParam.u32VBSource = 1;
+                stModParam.u32MiniBufMode = 0;
+                HI_MPI_VDEC_SetModParam(&stModParam);
+            }
+
             CHECK_CHN_RET(HI_MPI_VDEC_SetChnVBCnt(m_Vdec_Tab[i], u32BlkCnt), m_Vdec_Tab[i], "HI_MPI_VDEC_SetChnVBCnt");
         }
         CHECK_CHN_RET(HI_MPI_VDEC_CreateChn(m_Vdec_Tab[i], &m_stVdecChnAttr[i]), m_Vdec_Tab[i], "HI_MPI_VDEC_CreateChn");
         if (2 == m_s32VBSource)
         {
+            if(!mModeInit){
+                mModeInit = true;
+                stModParam.u32VBSource = 2;
+                stModParam.u32MiniBufMode = 0;
+                HI_MPI_VDEC_SetModParam(&stModParam);
+            }
+
             stPool.hPicVbPool = m_ahVbPool[0];
             stPool.hPmvVbPool = -1;
             CHECK_CHN_RET(HI_MPI_VDEC_AttachVbPool(m_Vdec_Tab[i], &stPool), m_Vdec_Tab[i], "HI_MPI_VDEC_AttachVbPool");

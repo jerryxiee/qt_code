@@ -1,8 +1,11 @@
 #include "realtimestream.h"
 #include <QDebug>
+#include <QDateTime>
 #include "../live555/mytest/h264mediasubsession.h"
 #include "HW/video/hivenctomp4.h"
 #include "HW/video/hivpsssource.h"
+#include "HW/video/hivenctofile.h"
+#include "streamserver/himediaserversession.h"
 
 
 
@@ -168,22 +171,37 @@ void RealTimeStream::run()
 
 #endif
 
-    EncodeTaskScheduler *scheduler = EncodeTaskScheduler::createNew();
-    HiVpssSource *source = HiVpssSource::createNew(0,VPSS_CHN1);
-    HiVpssSource *source1 = HiVpssSource::createNew(1,VPSS_CHN1);
-    HiVencToMp4 *encodeMp4 = HiVencToMp4::createNew(source,VIDEO_NORM,PIC_HD720,SAMPLE_RC_CBR,0,25,0,PAYLOAD_TYPE,"realtime.mp4");
-    HiVencToMp4 *encodeMp41 = HiVencToMp4::createNew(source1,VIDEO_NORM,PIC_HD720,SAMPLE_RC_CBR,0,25,0,PAYLOAD_TYPE,"realtime1.mp4");
+//    EncodeTaskScheduler *scheduler = EncodeTaskScheduler::createNew();
+//    HiVpssSource *source = HiVpssSource::createNew(0,VPSS_CHN1);
+//    HiVpssSource *source1 = HiVpssSource::createNew(1,VPSS_CHN1);
+//    HiVencToMp4 *encodeMp4 = HiVencToMp4::createNew(source,VIDEO_NORM,PIC_HD720,SAMPLE_RC_CBR,0,25,0,PAYLOAD_TYPE,"realtime.mp4");
+//    HiVencToFile *encodeToFile = HiVencToFile::createNew(source1,VIDEO_NORM,PIC_HD720,SAMPLE_RC_CBR,0,25,0,PAYLOAD_TYPE,"realtime1.h264");
 
-    scheduler->setBackgroundHandling(((HiVencConsumer *)encodeMp4)->getVencFd(),SOCKET_READABLE,HiFrameConsumer::doProcess,encodeMp4);
-    scheduler->setBackgroundHandling(((HiVencConsumer *)encodeMp41)->getVencFd(),SOCKET_READABLE,HiFrameConsumer::doProcess,encodeMp41);
-    mRun = true;
+//    scheduler->setBackgroundHandling(((HiVencConsumer *)encodeMp4)->getVencFd(),SOCKET_READABLE,HiFrameConsumer::doProcess,encodeMp4);
+//    scheduler->setBackgroundHandling(((HiVencConsumer *)encodeToFile)->getVencFd(),SOCKET_READABLE,HiFrameConsumer::doProcess,encodeToFile);
+//    mRun = true;
 
-    while (mRun) {
-        scheduler->SingleStep(0);
+//    while (mRun) {
+//        scheduler->SingleStep(0);
+//    }
+
+//    delete scheduler;
+//    delete encodeMp4;
+//    delete encodeToFile;
+
+    HiMediaServerSession *serverSession = HiMediaServerSession::createNew("test");
+    HiMediaServerSubSession *subSession = HiMediaServerSubSession::createNew(serverSession->getTaskScheduler(),*serverSession,0,0,false,0,QDateTime::currentDateTime().toTime_t());
+    if(subSession){
+        serverSession->addMediaServerSubSession(subSession);
+    }else {
+        qDebug()<<"create subSession failed";
     }
 
-    delete scheduler;
-    delete encodeMp4;
-    delete encodeMp41;
+    mRun = true;
+    while (mRun) {
+        sleep(1);
+    }
+
+    delete serverSession;
 
 }

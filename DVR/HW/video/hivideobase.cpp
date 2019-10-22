@@ -54,3 +54,12 @@ int HiVideoBase::getChn() const
 {
     return mChn;
 }
+
+void HiVideoBase::setDevNo(int DevNo)
+{
+    mDevNo = DevNo;
+}
+void HiVideoBase::setChn(int Chn)
+{
+    mChn = Chn;
+}

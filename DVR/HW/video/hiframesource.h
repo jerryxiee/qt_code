@@ -11,6 +11,7 @@ public:
     virtual bool isVpssSource() const;
     virtual bool isVoSource() const;
     virtual bool isVdecSource() const;
+    virtual bool isFileSource() const;
 
     virtual MOD_ID_E getHiModId() const;
     virtual int getDevNo() const;

@@ -134,18 +134,18 @@ typedef struct{
 
 //音视频传输请求
 typedef struct{
-    char PlayType;        //判断直播与回放
-    char IpAddr[16];      //ip地址
-    short TcpPort;        //tcp端口
-    short UdpPort;        //udp端口
-    char LogicChannel;    //逻辑通道
-    char DateType;        //数据类型
-    char StreamType;      //码流类型 0：主码流 1：子码流
-    char StoreType;       //存储器类型
-    char PlayBackType;    //回放模式
-    char PlayRate;        //快进快推倍数
-    char StartTime[6];    //开始时间
-    char EndTime[6];      //结束时间
+    char playType;        //判断直播与回放
+    char ipAddr[16];      //ip地址
+    short tcpPort;        //tcp端口
+    short udpPort;        //udp端口
+    char logicChannel;    //逻辑通道
+    char dateType;        //数据类型
+    char streamType;      //码流类型 0：主码流 1：子码流
+    char storeType;       //存储器类型
+    char playBackType;    //回放模式
+    char playRate;        //快进快推倍数
+    char startTime[6];    //开始时间
+    char endTime[6];      //结束时间
 }StreamParam;
 
 typedef struct{
@@ -173,10 +173,12 @@ typedef struct{
 } ReamTimeStreamControl;
 
 typedef struct{
-    unsigned char LogicChannel;           //通道
-    unsigned char OrderCtr;               //控制指令
-    unsigned char PlayBackRate;           //快进快退速率
-    unsigned char PosTime[6];             //控制视频回放位置
+    unsigned char streamType;             //0:直播 1：回放
+    unsigned char logicChannel;           //通道
+    unsigned char orderCtr;               //控制指令
+    unsigned char cmd1;           //
+    unsigned char cmd2;
+    unsigned char posTime[6];             //控制视频回放位置
 } StreamControl;
 
 

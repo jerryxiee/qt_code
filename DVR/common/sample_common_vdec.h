@@ -50,6 +50,7 @@ public:
     VB_POOL m_ahVbPool[VB_MAX_POOLS] ;
 //    VDEC_CHN_ATTR_S *m_pstVdecChnAttr = nullptr;
     VDEC_CHN_ATTR_S m_stVdecChnAttr[VDEC_MAX_CHN_NUM];
+    static bool mModeInit;
     //SIZE_S  m_stSize;
     //HI_BOOL m_enVpss;
 

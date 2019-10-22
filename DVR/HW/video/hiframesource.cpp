@@ -32,6 +32,11 @@ bool HiFrameSource::isVdecSource() const
     return false;
 }
 
+bool HiFrameSource::isFileSource() const
+{
+    return false;
+}
+
 
 bool HiFrameSource::isSource() const
 {

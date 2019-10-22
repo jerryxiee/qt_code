@@ -12,6 +12,7 @@
 #ifndef LUNUX_WIN
 #include "video/videostreampro.h"
 #endif
+#include "video/encodetaskscheduler.h"
 
 typedef struct{
     int Channel;     //录像通道

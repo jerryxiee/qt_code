@@ -5,7 +5,7 @@
 #include "video/mp4file.h"
 #include <QMutex>
 
-#define BUFLEN 1024*1024
+#define BUFLEN 256*1024
 
 class HiVencToMp4:public HiVencConsumer
 {
@@ -24,7 +24,15 @@ public:
     bool saveFile(const char *newFileName,QSize size,uint32_t frmRate);
 
 protected:
-    HiVencToMp4(HiFrameSource *Source, Sample_Common_Venc *Venc,MP4File *mp4file, int DevId, int Chn);
+    HiVencToMp4(HiFrameSource *Source,
+                MP4File *mp4file,
+                VIDEO_NORM_E enNorm,
+                PIC_SIZE_E enSize,
+                SAMPLE_RC_E enRcMode,
+                uint32_t u32BitRate,
+                uint32_t frmRate,
+                uint32_t  u32Profile,
+                PAYLOAD_TYPE_E enType);
 
 private:
     virtual void doProcess();
