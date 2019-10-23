@@ -135,7 +135,7 @@ void RemoteTestTaskScheduler::SingleStep(unsigned maxDelayTime) {
 //    }
 
     QString cmdstr;
-    SourceFileInfo *fileinfolist = nullptr;
+    RecordFileInfo *fileinfolist = nullptr;
 
     memset(mCmdBuf,0x0,CMDMAXLEN);
     MsgInfo msginfo;
@@ -148,14 +148,14 @@ void RemoteTestTaskScheduler::SingleStep(unsigned maxDelayTime) {
         break;
     case 0x0100:  //
         qDebug()<<"register paltform";
-        RegisterResult msg;
+        RegisterResponse msg;
         msg.reportNum = 0;
         msg.result = 0;
         sleep(4);
         msginfo.mMesgCache = (char *)&msg;
         msginfo.mMsgType = 0x8100;
-        msginfo.mSize = sizeof (RegisterResult);
-        mSendMsgQueue.msgQueueSend(&msginfo,sizeof (RegisterResult));
+        msginfo.mSize = sizeof (RegisterResponse);
+        mSendMsgQueue.msgQueueSend(&msginfo,sizeof (RegisterResponse));
         break;
     case 0x3: //
         qDebug()<<"rece unregister";
@@ -220,8 +220,8 @@ void RemoteTestTaskScheduler::SingleStep(unsigned maxDelayTime) {
         break;
     case 0x1205://查询录像资源列表
 
-        fileinfolist = (SourceFileInfo *)mCmdBuf;
-        qDebug()<<"rece file num:"<<msginfo.mSize/sizeof (SourceFileInfo)<<"filesize:"<<fileinfolist[0].fileSize;
+        fileinfolist = (RecordFileInfo *)mCmdBuf;
+        qDebug()<<"rece file num:"<<msginfo.mSize/sizeof (RecordFileInfo)<<"filesize:"<<fileinfolist[0].fileSize;
 //        for (int i = 0;i < msginfo.mSize/sizeof (SourceFileInfo);i++) {
 
 //        }

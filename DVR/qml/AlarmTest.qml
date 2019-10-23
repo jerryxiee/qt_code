@@ -84,6 +84,42 @@ Rectangle {
         onClicked: VideoTest.sentSeg(0);
     }
 
+    Button{
+        id:createsession
+        text: qsTr("createsession")
+        anchors.left: parent.left
+        anchors.top:msgtest.bottom
+        anchors.topMargin: 20
+
+        onClicked: VideoTest.createSession(comb.currentIndex,check.checked)
+    }
+
+    ComboBox{
+        id:comb
+        model: [0,1,2,3,4,5,6,7]
+        anchors.left: createsession.right
+        anchors.leftMargin: 20
+        anchors.verticalCenter: createsession.verticalCenter
+    }
+    CheckBox{
+        id:check
+        text: qsTr("直播")
+        anchors.left: comb.right
+        anchors.leftMargin: 20
+        anchors.verticalCenter: createsession.verticalCenter
+    }
+
+    Button{
+        id:deletesession
+        text: qsTr("deletesession")
+        anchors.left: check.right
+        anchors.leftMargin: 20
+        anchors.verticalCenter: createsession.verticalCenter
+
+        onClicked: VideoTest.deleteSession(comb.currentIndex,check.checked);
+    }
+
+
 //    Button{
 //        id:test
 //        anchors.top: io2.bottom

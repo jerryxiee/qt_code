@@ -2,10 +2,18 @@
 #include "video/mp4fileindex.h"
 #include "HW/video/hivpsssource.h"
 #include <QDebug>
+#include <QDateTime>
 
 
 HiMediaServerSession *HiMediaServerSession::createNew(const QString sessionName)
 {
+    return new HiMediaServerSession(sessionName);
+}
+
+HiMediaServerSession *HiMediaServerSession::createNew(const char *ipAddr,int port)
+{
+    QString sessionName = generateSessionName(ipAddr,port);
+
     return new HiMediaServerSession(sessionName);
 }
 
@@ -32,9 +40,9 @@ QString HiMediaServerSession::generateSessionName(const char *ipAddr, int port)
 QString HiMediaServerSession::generateSubSessionName(int chn,bool isReal)
 {
     if(isReal){
-        return "real:"+QString::number(chn);
+        return "real"+QString::number(chn);
     }else {
-        return "playback:"+QString::number(chn);
+        return "playback"+QString::number(chn);
     }
 }
 
@@ -53,8 +61,26 @@ HiMediaServerSubSession *HiMediaServerSession::lockupSubSessionByName(QString su
 
 }
 
+HiMediaServerSubSession *HiMediaServerSession::lockupSubSessionByChn(int chn,bool isReal)
+{
+    QString name = generateSubSessionName(chn,isReal);
+
+    return lockupSubSessionByName(name);
+}
+
 bool HiMediaServerSession::addMediaServerSubSession(HiMediaServerSubSession *session)
 {
+//    qDebug()<<"addsession name:"<<session->getName();
+//    HiMediaServerSubSession * subsession = lockupSubSessionByName(session->getName());
+//    if(subsession&&subsession->isAlive()){    //判断是否已经建立并处于连接状态
+//        qDebug("%s:%d \n",__FUNCTION__,__LINE__);
+//        return false;
+//    }
+//    if(subsession&&!subsession->isAlive()){    //会话已经断连接
+//        qDebug("%s:%d\n",__FUNCTION__,__LINE__);
+//        deleteSubSession(subsession->getName());
+//    }
+
     mMutex.lock();
     mSubSession.insert(session->getName(),session);
 //#ifndef LUNUX_WIN
@@ -69,12 +95,10 @@ bool HiMediaServerSession::addMediaServerSubSession(HiMediaServerSubSession *ses
 
 void HiMediaServerSession::deleteSubSession(QString subSessionName)
 {
+    qDebug()<<"delete subsession:"<<subSessionName;
     HiMediaServerSubSession *subsession = lockupSubSessionByName(subSessionName);
     mMutex.lock();
     if(subsession){
-//#ifndef LUNUX_WIN
-//        mTaskScheduler->turnOffBackgroundReadHandling(subsession->getSelectFd());
-//#endif
         mSubSession.remove(subsession->getName());
         delete subsession;
     }
@@ -99,6 +123,10 @@ void HiMediaServerSession::deleteAllSubSession()
     mMutex.unlock();
 }
 
+bool HiMediaServerSession::isEmpty() const
+{
+    return mSubSession.isEmpty();
+}
 
 void HiMediaServerSession::run()
 {
@@ -109,58 +137,73 @@ void HiMediaServerSession::run()
 
 }
 
-HiMediaServerSubSession *HiMediaServerSubSession::createNew(EncodeTaskScheduler &taskScheduler,HiMediaServerSession &mediaServerSession, int chn, int type, bool isReal, uint startTime, uint endTime)
+HiMediaServerSubSession *HiMediaServerSubSession::createNew(EncodeTaskScheduler &taskScheduler, HiMediaServerSession &mediaServerSession)
 {
-    HiMediaServerSubSession *subSession = new HiMediaServerSubSession(taskScheduler,mediaServerSession,chn,type,isReal, startTime, endTime);
-    if(!subSession){
-        return nullptr;
-    }
-    if(!subSession->isCreateSucess()){
-        delete subSession;
-        subSession = nullptr;
-    }
+//    HiMediaServerSubSession *subSession = new HiMediaServerSubSession(taskScheduler,mediaServerSession);
+//    if(!subSession){
+//        return nullptr;
+//    }
+//    if(!subSession->isCreateSucess()){
+//        delete subSession;
+//        subSession = nullptr;
+//    }
 
-    return subSession;
+    return new HiMediaServerSubSession(taskScheduler,mediaServerSession);
 }
 
-HiMediaServerSubSession::HiMediaServerSubSession(EncodeTaskScheduler &taskScheduler,HiMediaServerSession &mediaServerSession,int chn, int type, bool isReal, uint startTime, uint endTime):
+HiMediaServerSubSession::HiMediaServerSubSession(EncodeTaskScheduler &taskScheduler, HiMediaServerSession &mediaServerSession, QObject *parent):QObject (parent),
 #ifndef LUNUX_WIN
-    mTestVenc(nullptr),mVideoPlay(nullptr),
+    mConsumers(nullptr),mVideoPlay(nullptr),
 #endif
     mCreateSucess(false),mTaskScheduler(taskScheduler),mOurServerSession(mediaServerSession)
 {
-#ifndef LUNUX_WIN
-    HiVpssSource * source;
+//#ifndef LUNUX_WIN
+//    HiVpssSource * source;
 
-    if(!isReal){
-        mVideoPlay = createVideoPlay(chn,type,startTime,endTime);
-        source = HiVpssSource::createNew(mVideoPlay->getVpssGrp(),mVideoPlay->getVpssChn());
-    }else {
-        source = HiVpssSource::createNew(chn,VPSSCHN);
-    }
-    mTestVenc = HiVencToMp4::createNew(source,VIDEO_NORM,PIC_HD720,SAMPLE_RC_CBR,0,25,0,PAYLOAD_TYPE,"stareamtest.mp4");
-    if(!mTestVenc){
-        qDebug("%s:%d\n",__FUNCTION__,__LINE__);
-        return;
-    }
-    mTaskScheduler.setBackgroundHandling(((HiVencConsumer *)mTestVenc)->getVencFd(),SOCKET_READABLE,HiFrameConsumer::doProcess,mTestVenc);
-    mCreateSucess = true;
-#endif
+//    if(!isReal){
+//        mVideoPlay = createVideoPlay(chn,type,startTime,endTime);
+//        source = HiVpssSource::createNew(mVideoPlay->getVpssGrp(),mVideoPlay->getVpssChn());
+//    }else {
+//        source = HiVpssSource::createNew(chn,VPSSCHN);
+//    }
+//    mConsumers = HiVencToMp4::createNew(source,VIDEO_NORM,PIC_HD720,SAMPLE_RC_CBR,0,25,0,PAYLOAD_TYPE,"stareamtest.mp4");
+//    if(!mConsumers){
+//        qDebug("%s:%d\n",__FUNCTION__,__LINE__);
+//        return;
+//    }
+//    mTaskScheduler.setBackgroundHandling(mConsumers->getVencFd(),SOCKET_READABLE,HiFrameConsumer::doProcess,mConsumers);
+//    mCreateSucess = true;
+//    mAlive = true;
+//    mSubSessionName = HiMediaServerSession::generateSubSessionName(chn,isReal);
+//#endif
 
 }
 
 HiMediaServerSubSession::~HiMediaServerSubSession()
 {
+    close();
+}
+
+void HiMediaServerSubSession::onEndOfPlaySlot()
+{
+    close();
+}
+
+void HiMediaServerSubSession::close()
+{
 #ifndef LUNUX_WIN
-    if(mTestVenc){
-        mTaskScheduler.turnOffBackgroundReadHandling(mTestVenc->getVencFd());
-        delete mTestVenc;
+    if(mConsumers){
+        mTaskScheduler.turnOffBackgroundReadHandling(mConsumers->getVencFd());
+        delete mConsumers;
+        mConsumers = nullptr;
     }
     if(mVideoPlay){
         mVideoPlay->stopPlay();
         delete mVideoPlay;
+        mVideoPlay = nullptr;
     }
 #endif
+    mAlive = false;
 }
 
 //int HiMediaServerSubSession::getSelectFd() const
@@ -209,3 +252,60 @@ MP4VideoPlay *HiMediaServerSubSession::createVideoPlay(int Chn,int type,uint stT
     }
 }
 #endif
+
+bool HiMediaServerSubSession::createNewMediaSubSession(StreamParam &param)
+{
+
+    mSubSessionName = HiMediaServerSession::generateSubSessionName(param.logicChannel,param.playType == 0);
+    qDebug()<<"create subsession:"<<mSubSessionName;
+    //step1:创建流媒体连接
+
+
+    //step2:创建码流通道
+#ifndef LUNUX_WIN
+    HiVpssSource * source;
+
+    if(param.playType != 0){
+        QByteArray bytearray;
+        uint sttime = 0;
+        uint entime = 0;
+        bytearray = BCDTransform::toArray(param.startTime,sizeof (param.startTime));
+        if(bytearray.toInt() != 0){
+            sttime = QDateTime::fromString("20"+QString(BCDTransform::toArray(param.endTime,sizeof (param.endTime))), "yyyyMMddhhmmss").toTime_t();
+        }
+
+        bytearray = BCDTransform::toArray(param.endTime,sizeof (param.endTime));
+        if(bytearray.toInt() != 0){
+            entime = QDateTime::fromString("20"+QString(BCDTransform::toArray(param.endTime,sizeof (param.endTime))), "yyyyMMddhhmmss").toTime_t();
+        }
+        if(entime == 0){
+            entime = QDateTime::currentDateTime().toTime_t();
+        }
+        mVideoPlay = createVideoPlay(param.logicChannel,0,sttime,entime);
+        connect(mVideoPlay,SIGNAL(endOfStream()),this,SLOT(onEndOfPlaySlot()));
+        source = HiVpssSource::createNew(mVideoPlay->getVpssGrp(),mVideoPlay->getVpssChn());
+    }else {
+        qDebug("%s:%d cahnnel:%d\n",__FUNCTION__,__LINE__,param.logicChannel);
+        source = HiVpssSource::createNew(param.logicChannel,VPSSCHN);
+    }
+    QString mp4filename = mSubSessionName+".mp4";
+
+    QByteArray namearray = mp4filename.toLatin1();
+    char *namep = namearray.data();
+    mConsumers = HiVencToMp4::createNew(source,VIDEO_NORM,PIC_HD720,SAMPLE_RC_CBR,0,25,0,PAYLOAD_TYPE,namep);
+    if(!mConsumers){
+        qDebug("%s:%d\n",__FUNCTION__,__LINE__);
+        return false;
+    }
+    mTaskScheduler.setBackgroundHandling(mConsumers->getVencFd(),SOCKET_READABLE,HiFrameConsumer::doProcess,mConsumers);
+
+#endif
+    mCreateSucess = true;
+    mAlive = true;
+    qDebug("%s:%d exit\n",__FUNCTION__,__LINE__);
+    return true;
+}
+void HiMediaServerSubSession::mediaSubSessionCtr(StreamControl &control)
+{
+
+}

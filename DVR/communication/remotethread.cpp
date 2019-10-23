@@ -70,7 +70,7 @@ void RemoteTaskScheduler::sendDiveceParam(int msgid,QList<int> &idlist)
     PlatformSet paltfromset;
     valuelist = paltfromset.readDeviceParamList(msgid,idlist);
 
-    for (int i = 1;i < valuelist.count();i++) {
+    for (int i = 0;i < valuelist.count();i++) {
         cmdArray += valuelist.at(i);
         if(i != valuelist.count() -1){
             cmdArray +="/";
@@ -88,12 +88,14 @@ void RemoteTaskScheduler::sendDiveceParam(int msgid, const char *cmd,int cmdlen)
 {
     QList<int> idlist;
     int i = 0;
-    int len = cmdlen/4;
-    int dat = 0;
+//    int len = cmdlen/2;
+//    int dat = 0;
+    QString cmdstr(cmd);
+    QStringList cmdlist = cmdstr.split("/");
 
-    for (i = 0;i < len;i += 4) {
-        dat = cmd[i]<<24|cmd[i+1]<<16|cmd[i+2]<<8|cmd[i+3];
-        idlist.append(dat);
+    for (i = 0;i < cmdlist.count();i ++) {
+//        dat = cmd[i]<<8|cmd[i+1];
+        idlist.append(cmdlist.at(i).toInt());
     }
 
     sendDiveceParam(msgid,idlist);
@@ -126,16 +128,16 @@ void RemoteTaskScheduler::sendDeviceAttr()
     }
     memcpy(deviceattr.ManufacturerID,bytearray.data(),len);
     bytearray = paltfromset.readDeviceModel().toLatin1();
-    if(bytearray.length() > 30){
-        len = 30;
+    if(bytearray.length() > 20){
+        len = 20;
     }else {
         len = bytearray.length();
     }
     memcpy(deviceattr.DeviceModel,bytearray.data(),len);
 
     bytearray = paltfromset.readDeviceID().toLatin1();
-    if(bytearray.length() > 30){
-        len = 30;
+    if(bytearray.length() > 7){
+        len = 7;
     }else {
         len = bytearray.length();
     }
@@ -158,7 +160,7 @@ void RemoteTaskScheduler::sendDeviceAttr()
     }else {
         len = bytearray.length();
     }
-    memcpy(deviceattr.HwVersion,bytearray.data(),len);
+    memcpy(deviceattr.HWVersion,bytearray.data(),len);
 
     bytearray = paltfromset.readFWVersion().toLatin1();
     if(bytearray.length() > DEFAULTLEN){
@@ -166,7 +168,7 @@ void RemoteTaskScheduler::sendDeviceAttr()
     }else {
         len = bytearray.length();
     }
-    memcpy(deviceattr.HwVersion1,bytearray.data(),len);
+    memcpy(deviceattr.HWVersion1,bytearray.data(),len);
 
     deviceattr.GNSSAttr = static_cast<char>(paltfromset.readGNSSAttr()) ;
     deviceattr.ComModuleAttr = static_cast<char>(paltfromset.readCommunicatModule()) ;
@@ -179,23 +181,23 @@ void RemoteTaskScheduler::sendDeviceAttr()
 
 }
 
-void RemoteTaskScheduler::reportRecordFileList(SourceFileMsg &fileattr)
+void RemoteTaskScheduler::reportRecordFileList(RecordFileMsg &fileattr)
 {
     QList<MP4FileInfo> filelist;
-    SourceFileInfo *fileinfolist = nullptr;
+    RecordFileInfo *fileinfolist = nullptr;
     QDateTime datetime;
     QByteArray bytearray;
     uint sttime = 0;
     uint entime = 0;
 
-    bytearray = BCDTransform::toArray(fileattr.StartTime,sizeof (fileattr.StartTime));
+    bytearray = BCDTransform::toArray(fileattr.startTime,sizeof (fileattr.startTime));
     if(bytearray.toInt() != 0){
-        sttime = QDateTime::fromString("20"+QString(BCDTransform::toArray(fileattr.StartTime,sizeof (fileattr.StartTime))), "yyyyMMddhhmmss").toTime_t();
+        sttime = QDateTime::fromString("20"+QString(BCDTransform::toArray(fileattr.startTime,sizeof (fileattr.startTime))), "yyyyMMddhhmmss").toTime_t();
     }
 
-    bytearray = BCDTransform::toArray(fileattr.EndTime,sizeof (fileattr.EndTime));
+    bytearray = BCDTransform::toArray(fileattr.endTime,sizeof (fileattr.endTime));
     if(bytearray.toInt() != 0){
-        entime = QDateTime::fromString("20"+QString(BCDTransform::toArray(fileattr.EndTime,sizeof (fileattr.EndTime))), "yyyyMMddhhmmss").toTime_t();
+        entime = QDateTime::fromString("20"+QString(BCDTransform::toArray(fileattr.endTime,sizeof (fileattr.endTime))), "yyyyMMddhhmmss").toTime_t();
     }
 
 
@@ -205,11 +207,11 @@ void RemoteTaskScheduler::reportRecordFileList(SourceFileMsg &fileattr)
 
     qDebug()<<"sttime:"<<sttime<<" endtime:"<<entime<<QDateTime::currentDateTime().toString("yyMMddhhmmss");
     filelist.clear();
-    switch (fileattr.FileType) {
+    switch (fileattr.fileType) {
         case 0:
         {
     #ifndef LUNUX_WIN
-            MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(fileattr.LogicChn);
+            MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(fileattr.logicChn);
             mp4fileindex->getFileList(filelist,sttime,entime);
             delete  mp4fileindex;
     #endif
@@ -218,7 +220,7 @@ void RemoteTaskScheduler::reportRecordFileList(SourceFileMsg &fileattr)
         case 1:
         {
         #ifndef LUNUX_WIN
-            MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(fileattr.LogicChn,VIDEO_MOVEDETECT);
+            MP4FileIndex *mp4fileindex = MP4FileIndex::openFileIndex(fileattr.logicChn,VIDEO_MOVEDETECT);
             mp4fileindex->getFileList(filelist,sttime,entime);
             delete  mp4fileindex;
         #endif
@@ -228,20 +230,20 @@ void RemoteTaskScheduler::reportRecordFileList(SourceFileMsg &fileattr)
 
     qDebug()<<"find file num:"<<filelist.count();
 
-    fileinfolist = (SourceFileInfo*)malloc(sizeof (SourceFileInfo)*filelist.count());
+    fileinfolist = (RecordFileInfo*)malloc(sizeof (RecordFileInfo)*filelist.count());
     if(!fileinfolist){
         return;
     }
     for (int i =0 ;i < filelist.count();i++) {
-        fileinfolist[i].file.LogicChn = fileattr.LogicChn;
-        fileinfolist[i].file.FileType = fileattr.FileType;
-        fileinfolist[i].file.StreamType = fileattr.StreamType;
-        fileinfolist[i].file.StoreType = fileattr.StoreType;
+        fileinfolist[i].file.logicChn = fileattr.logicChn;
+        fileinfolist[i].file.fileType = fileattr.fileType;
+        fileinfolist[i].file.streamType = fileattr.streamType;
+        fileinfolist[i].file.storeType = fileattr.storeType;
         datetime = QDateTime::fromTime_t(filelist.at(i).sttime);
 //        bytearray = datetime.toString("yyMMddhhmmss").toLatin1();
-        memcpy(fileinfolist[i].file.StartTime,BCDTransform::toBcd(datetime.toString("yyMMddhhmmss").toLong()).data(),6);
+        memcpy(fileinfolist[i].file.startTime,BCDTransform::toBcd(datetime.toString("yyMMddhhmmss").toLong()).data(),6);
         datetime = QDateTime::fromTime_t(filelist.at(i).endtime);
-        memcpy(fileinfolist[i].file.EndTime,BCDTransform::toBcd(datetime.toString("yyMMddhhmmss").toLong()).data(),6);
+        memcpy(fileinfolist[i].file.endTime,BCDTransform::toBcd(datetime.toString("yyMMddhhmmss").toLong()).data(),6);
         QFileInfo fileinfo(filelist.at(i).filename);
         fileinfolist[i].fileSize = fileinfo.size();
     }
@@ -249,7 +251,7 @@ void RemoteTaskScheduler::reportRecordFileList(SourceFileMsg &fileattr)
 
     MsgInfo msginfo;
     msginfo.mMsgType = 0x1205;
-    msginfo.mSize = sizeof (SourceFileInfo)*filelist.count();
+    msginfo.mSize = sizeof (RecordFileInfo)*filelist.count();
     msginfo.mMesgCache = (char *)fileinfolist;
     RemoteThread::getRemoteThread()->msgQueueSendToNet(&msginfo, msginfo.mSize);
 
@@ -296,12 +298,12 @@ void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
     case 0x8100: //终端注册应答
         qDebug()<<"rece:register result";
 //        RegisterResult *msg = (RegisterResult *)msginfo.mMesgCache;
-        if(((RegisterResult *)msginfo.mMesgCache)->result != 0){
+        if(((RegisterResponse *)msginfo.mMesgCache)->result != 0){
             PlatformRegister::getPlatformRegister()->setMainServerStatus(DisConnect);
         }else {
             PlatformRegister::getPlatformRegister()->setMainServerStatus(Connected);
             PlatformSet platformset;
-            platformset.setAuthNumber(QString(((RegisterResult *)msginfo.mMesgCache)->authNum));
+            platformset.setAuthNumber(QString(((RegisterResponse *)msginfo.mMesgCache)->authNum));
         }
         break;
     case 0x8103://设置终端参数
@@ -349,22 +351,31 @@ void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
         qDebug()<<"rece:"<<*((int *)mCmdBuf);
         break;
     case 0x9101://实时音视频传输
-        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+
+        if(mMediaServerManage.createNewServerMediaSession(*((StreamParam *)mCmdBuf))){
+            qDebug()<<"real createNewServerMediaSession sucess";
+        }
         break;
     case 0x9102://实时音视频控制
-        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        if(mMediaServerManage.serverMediaSessionCtr(*((StreamControl*)mCmdBuf))){
+            qDebug()<<"real serverMediaSessionCtr sucess";
+        }
         break;
     case 0x9105://实时音视频状态通知
         qDebug()<<"rece:"<<*((int *)mCmdBuf);
         break;
     case 0x9201://录像回放请求
-        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        if(mMediaServerManage.createNewServerMediaSession(*((StreamParam *)mCmdBuf))){
+            qDebug()<<"back createNewServerMediaSession sucess";
+        }
         break;
     case 0x9202://回放控制
-        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+        if(mMediaServerManage.serverMediaSessionCtr(*((StreamControl*)mCmdBuf))){
+            qDebug()<<"back serverMediaSessionCtr sucess";
+        }
         break;
     case 0x9205://查询录像资源列表
-        reportRecordFileList((*(SourceFileMsg*)mCmdBuf));
+        reportRecordFileList((*(RecordFileMsg*)mCmdBuf));
         break;
     case 0x9206://文件上传
         qDebug()<<"rece:"<<*((int *)mCmdBuf);

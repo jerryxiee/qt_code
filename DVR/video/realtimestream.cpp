@@ -189,12 +189,27 @@ void RealTimeStream::run()
 //    delete encodeMp4;
 //    delete encodeToFile;
 
+    StreamParam param;
+    param.playType = 0;
+    param.logicChannel = 0;
     HiMediaServerSession *serverSession = HiMediaServerSession::createNew("test");
-    HiMediaServerSubSession *subSession = HiMediaServerSubSession::createNew(serverSession->getTaskScheduler(),*serverSession,0,0,false,0,QDateTime::currentDateTime().toTime_t());
+    HiMediaServerSubSession *subSession = HiMediaServerSubSession::createNew(serverSession->getTaskScheduler(),*serverSession);
     if(subSession){
-        serverSession->addMediaServerSubSession(subSession);
+        if(subSession->createNewMediaSubSession(param)){
+            if(!serverSession->addMediaServerSubSession(subSession)){
+                delete subSession;
+                delete serverSession;
+                qDebug()<<"add subSession failed";
+                return;
+            }
+        }else {
+            delete subSession;
+            delete serverSession;
+            qDebug()<<"create subSession failed";
+            return;
+        }
     }else {
-        qDebug()<<"create subSession failed";
+        qDebug()<<"create subSession failed1";
     }
 
     mRun = true;

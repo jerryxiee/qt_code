@@ -55,20 +55,71 @@ void Test::setRtspSize(int mode)
 void Test::sentSeg(int mode)
 {
     MsgInfo msginfo;
-    SourceFileMsg filemsg;
+    RecordFileMsg filemsg;
 
-    memset(&filemsg,0x0,sizeof (SourceFileMsg));
+    memset(&filemsg,0x0,sizeof (RecordFileMsg));
 
-    filemsg.LogicChn = 0;
-    filemsg.FileType = 0;
+    filemsg.logicChn = 0;
+    filemsg.fileType = 0;
 
-    msginfo.mSize = sizeof(SourceFileMsg);
+    msginfo.mSize = sizeof(RecordFileMsg);
     msginfo.mMsgType = 0x9205;
     msginfo.mMesgCache = (char *)&filemsg;
     RemoteThread *remotethread = RemoteThread::getRemoteThread();
     remotethread->msgQueueLocalSend(&msginfo,msginfo.mSize);
 //    remotethread->msgQueueSendToNet(&msginfo,sizeof(int));
     qDebug()<<"send msg test";
+}
+
+void Test::createSession(int chn,bool isReal)
+{
+    StreamParam param;
+    MsgInfo msginfo;
+
+    memset(&param,0x0,sizeof (StreamParam));
+    memcpy(param.ipAddr,"192.168.3.3",strlen("192.168.3.3"));
+    param.tcpPort = 8000;
+    param.logicChannel = chn;
+
+    msginfo.mSize = sizeof(StreamParam);
+    if(isReal ){
+        msginfo.mMsgType = 0x9101;
+        param.playType = 0;
+    }else {
+        msginfo.mMsgType = 0x9201;
+        param.playType = 1;
+    }
+
+    msginfo.mMesgCache = (char *)&param;
+    RemoteThread *remotethread = RemoteThread::getRemoteThread();
+    remotethread->msgQueueLocalSend(&msginfo,msginfo.mSize);
+
+}
+void Test::deleteSession(int chn,bool isReal)
+{
+    StreamControl param;
+    MsgInfo msginfo;
+
+    memset(&param,0x0,sizeof (StreamControl));
+    memcpy(param.ipAddr,"192.168.3.3",strlen("192.168.3.3"));
+    param.port = 8000;
+    param.logicChannel = chn;
+
+    msginfo.mSize = sizeof(StreamControl);
+    if(isReal ){
+        param.streamType = 0;
+        msginfo.mMsgType = 0x9102;
+        param.orderCtr = 0x0;
+    }else {
+        msginfo.mMsgType = 0x9202;
+        param.orderCtr = 0x02;
+        param.streamType = 1;
+    }
+
+    msginfo.mMesgCache = (char *)&param;
+    RemoteThread *remotethread = RemoteThread::getRemoteThread();
+    remotethread->msgQueueLocalSend(&msginfo,msginfo.mSize);
+
 }
 
 void Test::play(int Chn,QString starttime,QString endtime)

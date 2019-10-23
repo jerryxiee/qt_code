@@ -4,6 +4,7 @@
 #include "common/msgqueue.h"
 #include <QThread>
 #include "jtt808define.h"
+#include "streamserver/himediaservermanage.h"
 
 #include "BasicUsageEnvironment0.hh"
 
@@ -39,7 +40,7 @@ private:
   void sendDiveceParam(int msgid, const char *cmd,int cmdlen);
   void sendDiveceParamAll();
   void sendDeviceAttr();
-  void reportRecordFileList(SourceFileMsg &fileattr);
+  void reportRecordFileList(RecordFileMsg &fileattr);
 
 protected:
   unsigned fMaxSchedulerGranularity;
@@ -49,6 +50,7 @@ protected:
 private:
     MsgQueue &mMsgQueue;
     char mCmdBuf[CMDMAXLEN];
+    HiMediaServerManage mMediaServerManage;
 };
 
 class RemoteThread : public QThread

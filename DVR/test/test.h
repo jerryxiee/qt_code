@@ -18,6 +18,8 @@ public:
     Q_INVOKABLE void play(int Chn,QString starttime,QString endtime);
     Q_INVOKABLE void setRtspSize(int mode);
     Q_INVOKABLE void sentSeg(int mode);
+    Q_INVOKABLE void createSession(int chn,bool isReal);
+    Q_INVOKABLE void deleteSession(int chn,bool isReal);
 
 signals:
     void videoAlarmEventChangedSignal(VI_CHN Chn,VIDEO_TYPE type,bool change);

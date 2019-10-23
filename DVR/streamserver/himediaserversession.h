@@ -5,6 +5,8 @@
 #include <QHash>
 #include "video/encodetaskscheduler.h"
 #include <QMutex>
+#include "communication/jtt808define.h"
+#include "common/bcdtransform.h"
 #ifndef LUNUX_WIN
 #include "HW/video/hivenctomp4.h"
 #include "video/mp4play.h"
@@ -17,10 +19,13 @@ class HiMediaServerSession : public QThread
     Q_OBJECT
 public:
     static HiMediaServerSession *createNew(const QString sessionName);
+    static HiMediaServerSession *createNew(const char *ipAddr,int port);
     HiMediaServerSubSession *lockupSubSessionByName(QString subSessionName);
+    HiMediaServerSubSession *lockupSubSessionByChn(int chn,bool isReal);
     bool addMediaServerSubSession(HiMediaServerSubSession *session);
     void deleteSubSession(QString subSessionName);
     void deleteAllSubSession();
+    bool isEmpty() const;
     ~HiMediaServerSession();
 
     static QString generateSessionName(const char *ipAddr,int port);
@@ -45,47 +50,53 @@ private:
     QHash<QString,void *> mSubSession;
     QMutex mMutex;
     bool mRun;
+//    bool mFirstCreate;
 };
 
 
-class HiMediaServerSubSession
+class HiMediaServerSubSession:public QObject
 {
+    Q_OBJECT
 public:
     static HiMediaServerSubSession *createNew(EncodeTaskScheduler &taskScheduler,
-                                       HiMediaServerSession &mediaServerSession,
-                                       int chn,int type,bool isReal = true,
-                                       uint startTime = 0,uint endTime = 0);
+                                       HiMediaServerSession &mediaServerSession);
 
     QString getName() const {return mSubSessionName;}
-//    int getSelectFd() const;
+
     bool isCreateSucess() const{return mCreateSucess;}
-//#ifndef LUNUX_WIN
-//    HiVencToMp4 *getHiVenc() const{return mTestVenc;}
-//#endif
+    bool isAlive() const {return mAlive;}
+
+    bool createNewMediaSubSession(StreamParam &param);
+    void mediaSubSessionCtr(StreamControl &control);
 
     ~HiMediaServerSubSession();
 protected:
     HiMediaServerSubSession(EncodeTaskScheduler &taskScheduler,
-                            HiMediaServerSession &mediaServerSession,
-                            int chn,int type,bool isReal,
-                            uint startTime,uint endTime);
+                            HiMediaServerSession &mediaServerSession,QObject *parent = nullptr);
 
 private:
 #ifndef LUNUX_WIN
     MP4VideoPlay *createVideoPlay(int Chn,int type,uint stTime,uint endTime);
 #endif
+    void close();
+
+signals:
+
+public slots:
+    void onEndOfPlaySlot();
 
 private:
     QString mSubSessionName;
 
 #ifndef LUNUX_WIN
     const int VPSSCHN = VPSS_CHN1;
-    HiVencToMp4 *mTestVenc;
+    HiVencConsumer *mConsumers;
     MP4VideoPlay *mVideoPlay;
 #endif
     bool mCreateSucess;
     EncodeTaskScheduler &mTaskScheduler;
     HiMediaServerSession &mOurServerSession;
+    bool mAlive;
 
 };
 

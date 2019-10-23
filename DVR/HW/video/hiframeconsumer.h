@@ -18,10 +18,10 @@ public:
     bool bindSource();
 
     static void doProcess(void *consumer,int value);
+    virtual ~HiFrameConsumer();
 
 protected:
     HiFrameConsumer(HiFrameSource *, MOD_ID_E Mod, int DevId, int Chn);
-    virtual ~HiFrameConsumer();
 
 private:
 
