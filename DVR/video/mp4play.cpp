@@ -37,6 +37,8 @@ void MP4VideoPlay::setPlaylist(QList<MP4FileInfo> &playlist)
     }
     mStartPosition = playlist.first().duration + playlist.first().stPts - playlist.first().endPts;
 
+    mFileStartTime = playlist.first().sttime;
+    mFileEndTime = playlist.last().endtime;
     emit durationChanged(mDuration);
 
 }

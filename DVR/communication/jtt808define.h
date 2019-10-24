@@ -181,12 +181,12 @@ typedef struct{
 typedef struct{                      //字段                 直播          回放
     char ipAddr[16];
     short port;
-    unsigned char streamType;             //                0            1
-    unsigned char logicChannel;           //通道              Y           Y
-    unsigned char orderCtr;               //控制指令           Y           Y
-    unsigned char cmd1;           //                   关闭音视频类型Y    快进快退倍数Y
-    unsigned char cmd2;             //                  切换码流类型Y
-    unsigned char posTime[6];             //                            控制视频回放位置Y
+    char streamType;             //                0            1
+    char logicChannel;           //通道              Y           Y
+    char orderCtr;               //控制指令           Y           Y
+    char cmd1;           //                   关闭音视频类型Y    快进快退倍数Y
+    char cmd2;             //                  切换码流类型Y
+    char posTime[6];             //                            控制视频回放位置Y
 } StreamControl;
 
 

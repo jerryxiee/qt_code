@@ -307,5 +307,79 @@ bool HiMediaServerSubSession::createNewMediaSubSession(StreamParam &param)
 }
 void HiMediaServerSubSession::mediaSubSessionCtr(StreamControl &control)
 {
+    if(control.streamType == 0){
+        if(control.orderCtr == 0x02){
+            pause(true);
+        }else if(control.orderCtr == 0x03){
+            play(true);
+        }else if(control.orderCtr == 0x0){
+            stop(true);
+        }
+    }else {
+        if(control.orderCtr == 0x01){
+            pause(false);
+        }else if(control.orderCtr == 0x0){
+            play(false);
+        }else if(control.orderCtr == 0x02){
+            stop(false);
+        }else if(control.orderCtr == 0x05){
+            uint pos = 0;
+            QByteArray bytearray = BCDTransform::toArray(control.posTime,sizeof (control.posTime));
+            if(bytearray.toInt() != 0){
+                pos = QDateTime::fromString("20"+QString(BCDTransform::toArray(control.posTime,sizeof (control.posTime))), "yyyyMMddhhmmss").toTime_t();
+            }
+            setCurPosition(pos);
+        }
+    }
+
+}
+
+void HiMediaServerSubSession::pause(bool isReal)
+{
+    if(isReal){
+        if(mConsumers){
+            static_cast<HiVencConsumer*>(mConsumers)->stopStreamRecv();
+        }
+    }else {
+        if(mVideoPlay){
+            mVideoPlay->pause();
+        }
+    }
+
+}
+void HiMediaServerSubSession::play(bool isReal)
+{
+    if(isReal){
+        if(mConsumers){
+            static_cast<HiVencConsumer*>(mConsumers)->startStreamRecv();
+        }
+    }else {
+        if(mVideoPlay){
+            mVideoPlay->play();
+        }
+    }
+
+}
+
+void HiMediaServerSubSession::stop(bool isReal)
+{
+    Q_UNUSED(isReal)
+    close();
+}
+
+void HiMediaServerSubSession::setCurPosition(qint64 position)
+{
+    qint64 pos;
+
+    if(mVideoPlay){
+        if(position > mVideoPlay->getFileEndTime()){
+            pos = mVideoPlay->getFileEndTime() - mVideoPlay->getFileStartTime();
+        }else if(position < mVideoPlay->getFileStartTime()){
+            pos = 0;
+        }else {
+            pos = position - mVideoPlay->getFileStartTime();
+        }
+        mVideoPlay->setPosition(pos);
+    }
 
 }

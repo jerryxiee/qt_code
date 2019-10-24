@@ -102,3 +102,35 @@ void HiVencConsumer::closeVenc()
     }
     qDebug()<<"exit closeVenc";
 }
+
+int HiVencConsumer::stopStreamRecv() const
+{
+    if(!mVenc){
+        return -1;
+    }
+
+    return mVenc->SAMPLE_COMM_VENC_StopRecv();
+}
+
+int HiVencConsumer::startStreamRecv() const
+{
+    if(!mVenc){
+        return -1;
+    }
+
+    return mVenc->SAMPLE_COMM_VENC_StartRecv();
+}
+
+int HiVencConsumer::setVencAttr( PIC_SIZE_E enSize,
+                SAMPLE_RC_E enRcMode,
+                HI_U32 u32BitRate,
+                HI_FR32 frmRate,
+                HI_U32 u32Profile)
+{
+    if(!mVenc){
+        return -1;
+    }
+
+    return mVenc->SAMPLE_COMM_VENC_SetChnAttr(enSize,enRcMode,u32BitRate,u32Profile,frmRate);
+
+}

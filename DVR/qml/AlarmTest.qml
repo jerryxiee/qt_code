@@ -119,6 +119,27 @@ Rectangle {
         onClicked: VideoTest.deleteSession(comb.currentIndex,check.checked);
     }
 
+    Button{
+        id:stopsession
+        text: qsTr("stopsession")
+        anchors.left: parent.left
+        anchors.top:createsession.bottom
+        anchors.topMargin: 20
+
+        onClicked: VideoTest.stopSession(comb.currentIndex,check.checked)
+    }
+
+    Button{
+        id:playsession
+        text: qsTr("playsession")
+        anchors.left: stopsession.right
+        anchors.leftMargin: 20
+        anchors.verticalCenter: stopsession.verticalCenter
+
+        onClicked: VideoTest.playSession(comb.currentIndex,check.checked)
+    }
+
+
 
 //    Button{
 //        id:test

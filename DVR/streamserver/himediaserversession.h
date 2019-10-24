@@ -62,12 +62,15 @@ public:
                                        HiMediaServerSession &mediaServerSession);
 
     QString getName() const {return mSubSessionName;}
-
     bool isCreateSucess() const{return mCreateSucess;}
     bool isAlive() const {return mAlive;}
 
     bool createNewMediaSubSession(StreamParam &param);
     void mediaSubSessionCtr(StreamControl &control);
+    void pause(bool isReal);
+    void play(bool isReal);
+    void stop(bool isReal);
+    void setCurPosition(qint64 position);
 
     ~HiMediaServerSubSession();
 protected:
@@ -92,6 +95,8 @@ private:
     const int VPSSCHN = VPSS_CHN1;
     HiVencConsumer *mConsumers;
     MP4VideoPlay *mVideoPlay;
+    uint mFileStartTime;
+    uint mFileEndTime;
 #endif
     bool mCreateSucess;
     EncodeTaskScheduler &mTaskScheduler;

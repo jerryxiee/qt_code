@@ -19,6 +19,8 @@ public:
     Q_INVOKABLE void setRtspSize(int mode);
     Q_INVOKABLE void sentSeg(int mode);
     Q_INVOKABLE void createSession(int chn,bool isReal);
+    Q_INVOKABLE void stopSession(int chn,bool isReal);
+    Q_INVOKABLE void playSession(int chn,bool isReal);
     Q_INVOKABLE void deleteSession(int chn,bool isReal);
 
 signals:

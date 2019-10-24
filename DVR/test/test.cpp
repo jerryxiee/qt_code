@@ -122,6 +122,59 @@ void Test::deleteSession(int chn,bool isReal)
 
 }
 
+void Test::stopSession(int chn,bool isReal)
+{
+    StreamControl param;
+    MsgInfo msginfo;
+
+    memset(&param,0x0,sizeof (StreamControl));
+    memcpy(param.ipAddr,"192.168.3.3",strlen("192.168.3.3"));
+    param.port = 8000;
+    param.logicChannel = chn;
+
+    msginfo.mSize = sizeof(StreamControl);
+    if(isReal ){
+        msginfo.mMsgType = 0x9102;
+        param.streamType = 0;
+        param.orderCtr = 0x02;
+    }else {
+        msginfo.mMsgType = 0x9202;
+        param.streamType = 1;
+        param.orderCtr = 0x01;
+    }
+
+    msginfo.mMesgCache = (char *)&param;
+    RemoteThread *remotethread = RemoteThread::getRemoteThread();
+    remotethread->msgQueueLocalSend(&msginfo,msginfo.mSize);
+
+}
+void Test::playSession(int chn,bool isReal)
+{
+    StreamControl param;
+    MsgInfo msginfo;
+
+    memset(&param,0x0,sizeof (StreamControl));
+    memcpy(param.ipAddr,"192.168.3.3",strlen("192.168.3.3"));
+    param.port = 8000;
+    param.logicChannel = chn;
+
+    msginfo.mSize = sizeof(StreamControl);
+    if(isReal ){
+        msginfo.mMsgType = 0x9102;
+        param.streamType = 0;
+        param.orderCtr = 0x03;
+    }else {
+        msginfo.mMsgType = 0x9202;
+        param.streamType = 1;
+    }
+
+    msginfo.mMesgCache = (char *)&param;
+    RemoteThread *remotethread = RemoteThread::getRemoteThread();
+    remotethread->msgQueueLocalSend(&msginfo,msginfo.mSize);
+
+
+}
+
 void Test::play(int Chn,QString starttime,QString endtime)
 {
     qDebug()<<"chn:"<<Chn<<" stime:"<<starttime<<" endt:"<<endtime;

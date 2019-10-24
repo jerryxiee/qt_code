@@ -19,6 +19,13 @@ public:
     int getVencFd() const;
     PAYLOAD_TYPE_E getPlaylodType() const;
     bool isCreateVencSucess() const;
+    int stopStreamRecv() const;
+    int startStreamRecv() const;
+    int setVencAttr(PIC_SIZE_E enSize,
+                    SAMPLE_RC_E enRcMode,
+                    HI_U32 u32BitRate,
+                    HI_FR32 frmRate,
+                    HI_U32 u32Profile);
 
 protected:
     HiVencConsumer(HiFrameSource *Source,

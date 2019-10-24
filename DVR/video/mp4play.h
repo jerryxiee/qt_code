@@ -27,6 +27,8 @@ public:
     int setVpssToUser(SIZE_S  stSize);
     bool startPlay();
     void stopPlay();
+    uint getFileStartTime() const {return mFileStartTime;}
+    uint getFileEndTime() const {return mFileEndTime;}
 protected:
     virtual void run();
 
@@ -72,6 +74,8 @@ private:
     Sample_Common_Vdec *mpVdec = nullptr;
     AVFormatContext *mAVfmtCtx;
     int mVideoIndex;
+    uint mFileStartTime;
+    uint mFileEndTime;
 };
 
 #endif // MP4PLAY_H
