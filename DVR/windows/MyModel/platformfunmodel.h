@@ -11,6 +11,7 @@ class PlatformFunModel : public QObject
     Q_PROPERTY(PlatFormStatus mianServerStatus READ readMainServerStatus NOTIFY mainServerStatusChanged)
     Q_PROPERTY(PlatFormStatus backupServerStatus READ readBackupServerStatus NOTIFY backupServerStatusChanged)
     Q_PROPERTY(bool enable READ readEnable WRITE setEnable NOTIFY enabledChanged)
+    Q_PROPERTY(QString authNum READ readAuthNum)
 public:
     Q_INVOKABLE void updateServerInfo(int type);
 
@@ -18,6 +19,7 @@ public:
 
     PlatFormStatus readMainServerStatus() const;
     PlatFormStatus readBackupServerStatus() const;
+    QString readAuthNum() const;
     bool readEnable() const;
     void setEnable(bool enable);
 signals:
@@ -25,10 +27,12 @@ signals:
     void mainServerStatusChanged(PlatFormStatus &status);
     void backupServerStatusChanged(PlatFormStatus &status);
     void enabledChanged();
+    void authNumChanged(QString value);
 
 public slots:
     void mainServerStatusChangedSlot(PlatFormStatus &status);
     void backupServerStatusChangedSlot(PlatFormStatus &status);
+    void authNumChangeSlot(QString value);
 };
 
 #endif // PLATFORMFUNMODEL_H

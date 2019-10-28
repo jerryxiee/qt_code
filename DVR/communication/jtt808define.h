@@ -1,6 +1,8 @@
 #ifndef JTT808DEFINE_H
 #define JTT808DEFINE_H
 
+#include "common/sample_comm.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C"{
@@ -10,46 +12,48 @@ extern "C"{
 #define CUSTOMCMD     0xAA00
 #define SERVERINFOMSGTYPE  CUSTOMCMD|0x01
 typedef struct{
-    int registerType;                      //注册方式 0：主服务器注册，1：同时注册
-    unsigned mainServerIp;                 //主服务器ip
-    unsigned short mainTcpPort;            //主服务器tcp端口
-    unsigned short mainUdpPort;            //主服务器udp端口
-    unsigned backupServerIp;               //备份服务器ip
-    unsigned short backupTcpPort;          //备份服务器tcp端口
-    unsigned short backupUdpPort;          //备份服务器udp端口
-    unsigned mainServerUseTcp;             //主服务器注册协议 1：tcp 其他：udp
-    unsigned backupServerUseTcp;           //备份服务器注册协议 1：tcp 其他：udp
-    char telephoneNum[12];                 //电话号码
-    unsigned short tcpTimeout;             //tcp超时时间
-    unsigned short udpTimeout;             //udp超时时间
-    unsigned short tcpRepeatTimes;           //tcp重传次数
-    unsigned short udpRepeatTimes;           //udp重传次数
-    unsigned short smsTimeout;             //sms超时时间
-    unsigned short smsRepeatTimes;           //sms重传次数
-    unsigned heratBeatTime;                //心跳时间
-    unsigned reserve[8];                   //
+    uint32_t registerType;       //注册方式 0：主服务器注册，1：同时注册
+    uint32_t mainIpLen;              //地址长度
+    char mainServerIp[16];        //主服务器ip
+    uint16_t mainTcpPort;            //主服务器tcp端口
+    uint16_t mainUdpPort;            //主服务器udp端口
+    uint32_t backupIpLen;            //地址长度
+    char backupServerIp[16];       //备份服务器ip
+    uint16_t backupTcpPort;          //备份服务器tcp端口
+    uint16_t backupUdpPort;          //备份服务器udp端口
+    uint32_t mainServerUseTcp;       //主服务器注册协议 1：tcp 其他：udp
+    uint32_t backupServerUseTcp;     //备份服务器注册协议 1：tcp 其他：udp
+    char telephoneNum[12];        //电话号码
+    uint16_t tcpTimeout;             //tcp超时时间
+    uint16_t udpTimeout;             //udp超时时间
+    uint16_t tcpRepeatTimes;         //tcp重传次数
+    uint16_t udpRepeatTimes;         //udp重传次数
+    uint16_t smsTimeout;             //sms超时时间
+    uint16_t smsRepeatTimes;         //sms重传次数
+    uint32_t heratBeatTime;          //心跳时间
+    uint32_t reserve[8];             //
 }ServerInfo;
 
 //通用应答
 typedef struct{
-    short responseNum;       //应答流水号
-    short msgId;             //应答ID
-    unsigned char result;    //结果
+    uint16_t responseNum;       //应答流水号
+    uint16_t msgId;             //应答ID
+    char result;    //结果
 } CommonResponse;
 
 //终端注册
 typedef struct{
-    short ProvinceID;          //省域ID
-    short CountyID;            //市县域ID
-    char ManufacturerID[5];   //制造商ID
-    char DeviceModel[20];      //终端型号
-    char DeviceID[7];         //终端ID
-    char CarColor;             //车牌颜色
-    char CarLicense[16];       //车牌
+    uint16_t provinceID;          //省域ID
+    uint16_t countyID;            //市县域ID
+    char manufacturerID[5];   //制造商ID
+    char deviceModel[20];      //终端型号
+    char deviceID[7];         //终端ID
+    char carColor;             //车牌颜色
+    char carLicense[10];       //车牌
 } RegisterMsg;
 
 typedef struct{
-    short reportNum;
+    uint16_t reportNum;
     char result;
     char authNum[16];
 
@@ -57,38 +61,43 @@ typedef struct{
 
 //终端鉴权
 typedef struct{
-    char Len;               //鉴权码长度
-    char AuthID[16];        //鉴权码
-    char DeviceIMEI[15];    //
-    char SoftWareV[20];     //软件版本
+    char len;               //鉴权码长度
+    char authID[16];        //鉴权码
+    char deviceIMEI[15];    //
+    char softWareV[20];     //软件版本
 }AuthMsg;
 
-#define DEFAULTLEN 20
+#define DEFAULTLEN 60
 //终端属性应答
 typedef struct{
-    short DeviceType;       //终端类型
-    char ManufacturerID[5]; //制造商ID
-    char DeviceModel[20];   //终端型号
-    char DeviceID[7];      //终端ID
-    char ICCID[10];         //SIM卡ICCID号
-    char HWVersionLen;      //终端硬件版本长度
-    char HWVersion[DEFAULTLEN];     //硬件版本
-    char HWVersionLen1;     //固件版本长度
-    char HWVersion1[DEFAULTLEN];    //固件版本
-    char GNSSAttr;          //GNSS模块属性
-    char ComModuleAttr;     //通信模块属性
+    uint16_t deviceType;       //终端类型
+    char manufacturerID[5]; //制造商ID
+    char deviceModel[20];   //终端型号
+    char deviceID[7];      //终端ID
+    char simID[10];         //SIM卡ICCID号
+    char hardVersionLen;      //终端硬件版本长度
+    char hardVersion[DEFAULTLEN];     //硬件版本
+    char hardVersionLen1;     //固件版本长度
+    char hardVersion1[DEFAULTLEN];    //固件版本
+    char gnssAttr;          //GNSS模块属性
+    char moduleAttr;     //通信模块属性
 } DeviceAttrMsg;
 
+typedef struct{
+    uint16_t id;
+    char len;
+    char value[DEFAULTLEN];
+} DeviceParamInfo;
 
 //位置基本信息
 typedef struct{
-    unsigned AlarmType;            //报警标志
-    unsigned Status;               //状态
-    int Latitude;             //纬度
-    int Longitude;            //经度
-    short Altitude;           //海拔
-    short Speed;              //速度
-    short Direction;          //方向
+    uint32_t AlarmType;            //报警标志
+    uint32_t Status;               //状态
+    uint32_t Latitude;             //纬度
+    uint32_t Longitude;            //经度
+    uint16_t Altitude;           //海拔
+    uint16_t Speed;              //速度
+    uint16_t Direction;          //方向
     char time[6];             //时间
 
 } PositionBaseMsg;
@@ -110,30 +119,30 @@ typedef struct{
 
 //实时音视频请求指令包
 typedef struct{
-    unsigned char ipLen;
+    char ipLen;
     char ipAddr[16];
-    short tcpPort;
-    short udpPort;
-    unsigned char channel;
-    unsigned char dataType;
-    unsigned char streamType;
+    uint16_t tcpPort;
+    uint16_t udpPort;
+    char channel;
+    char dataType;
+    char streamType;
 
 } RealTimeStreamPack;
 
 //回放音视频请求指令包
 typedef struct{
-    unsigned char ipLen;
-    unsigned char ipAddr[16];
-    short tcpPort;
-    short udpPort;
-    unsigned char channel;
-    unsigned char dataType;
-    unsigned char streamType;
-    unsigned char playType;
-    unsigned char speedCtr1;
-    unsigned char speedCtr2;
-    unsigned char startTime[6];
-    unsigned char endTime[6];
+    char ipLen;
+    char ipAddr[16];
+    uint16_t tcpPort;
+    uint16_t udpPort;
+    char channel;
+    char dataType;
+    char streamType;
+    char playType;
+    char speedCtr1;
+    char speedCtr2;
+    char startTime[6];
+    char endTime[6];
 
 } PlayBackStreamPack;
 
@@ -141,9 +150,10 @@ typedef struct{
 //音视频传输请求
 typedef struct{               //字段            //直播           //回放
     char playType;        //判断直播与回放           0               1
+    char ipLen;
     char ipAddr[16];      //ip地址                Y               Y
-    short tcpPort;        //tcp端口               Y               Y
-    short udpPort;        //udp端口               Y               Y
+    uint16_t tcpPort;        //tcp端口               Y               Y
+    uint16_t udpPort;        //udp端口               Y               Y
     char logicChannel;    //逻辑通道               Y               Y
     char dateType;        //数据类型               Y            音视频类型Y
     char streamType;      //码流类型               Y               Y
@@ -154,33 +164,36 @@ typedef struct{               //字段            //直播           //回放
     char endTime[6];      //结束时间                                Y
 }StreamParam;
 
+//查询文件报文
 typedef struct{
-    char logicChn;
-    char startTime[6];
-    char endTime[6];
-    char alarmFlag[8];
-    char fileType;
-    char streamType;
-    char storeType;
+    char logicChn;         //通道
+    char startTime[6];     //开始时间
+    char endTime[6];       //结束时间
+    char alarmFlag[8];     //报警标志
+    char fileType;         //文件类型
+    char streamType;       //码流类型
+    char storeType;        //存储器类型
 } RecordFileMsg;
 
+//查询文件应答
 typedef struct{
     RecordFileMsg file;
-    unsigned fileSize;
+    uint32_t fileSize;
 
 } RecordFileInfo;
 
 typedef struct{
-    unsigned char logicChannel;         //通道
-    unsigned char orderCtr;             //控制指令
-    unsigned char closeStreamType;      //关闭音视频类型
-    unsigned char changeStream;         //切换码流类型
+    char logicChannel;         //通道
+    char orderCtr;             //控制指令
+    char closeStreamType;      //关闭音视频类型
+    char changeStream;         //切换码流类型
 
 } ReamTimeStreamControl;
 
 typedef struct{                      //字段                 直播          回放
+    char ipLen;
     char ipAddr[16];
-    short port;
+    uint16_t port;
     char streamType;             //                0            1
     char logicChannel;           //通道              Y           Y
     char orderCtr;               //控制指令           Y           Y

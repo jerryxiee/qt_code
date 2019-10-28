@@ -67,28 +67,39 @@ Item {
         id:platformset
     }
 
+    function getstatus(value){
+        if(value === 0){
+            return "未连接"
+        }else if(value === 1){
+            return "连接中..."
+        }else{
+            return "已连接"
+        }
+    }
     PlatformFunModel{
         id:platformfunmodel
 
         onMainServerStatusChanged: {
-            if(status === 0){
-                connectresult.text = "未连接"
-            }else if(status === 1){
-                connectresult.text = "连接中..."
-            }else{
-                connectresult.text = "已连接"
-            }
+//            if(status === 0){
+//                connectresult.text = "未连接"
+//            }else if(status === 1){
+//                connectresult.text = "连接中..."
+//            }else{
+//                connectresult.text = "已连接"
+//            }
+            connectresult.text = getstatus(status)
 
         }
 
         onBackupServerStatusChanged: {
-            if(status === 0){
-                secconnectresult.text = "未连接"
-            }else if(status === 1){
-                secconnectresult.text = "连接中..."
-            }else{
-                secconnectresult.text = "已连接"
-            }
+//            if(status === 0){
+//                secconnectresult.text = "未连接"
+//            }else if(status === 1){
+//                secconnectresult.text = "连接中..."
+//            }else{
+//                secconnectresult.text = "已连接"
+//            }
+            secconnectresult.text = getstatus(status)
 
         }
     }
@@ -171,7 +182,7 @@ Item {
         anchors.left: connectstatus.right
 //        anchors.leftMargin: 10
         width: labelwidth
-        text: qsTr("未连接")
+        text: getstatus(platformfunmodel.mianServerStatus)
         font.pixelSize: fontpixelSize
     }
 
@@ -267,7 +278,7 @@ Item {
         anchors.left: secconnectstatus.right
 //        anchors.leftMargin: 10
         width: labelwidth
-        text: qsTr("未连接")
+        text: getstatus(platformfunmodel.backupServerStatus)
         font.pixelSize: fontpixelSize
     }
 

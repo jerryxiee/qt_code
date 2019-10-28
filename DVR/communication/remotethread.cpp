@@ -37,20 +37,17 @@ RemoteTaskScheduler::~RemoteTaskScheduler() {
 
 }
 
-void RemoteTaskScheduler::setDeviceParam(int msgid, const char *cmd)
+void RemoteTaskScheduler::setDeviceParam(int msgid, const char *cmd, int len)
 {
-    QString cmdstr(cmd);
-    QStringList valuestr;
-    QStringList cmdlist = cmdstr.split("/");
     QList<int> idlist;
     QVariantList valuelist;
 
-    for (int i = 0;i < cmdlist.count();i++) {
-        valuestr = cmdlist.at(i).split(":");
-        if(valuestr.count() > 1){
-            idlist.append(valuestr.at(0).toInt());
-            valuelist.append(valuestr.at(1));
-        }
+    int paramnum = len/sizeof (DeviceParamInfo);
+    DeviceParamInfo *param = (DeviceParamInfo*)cmd;
+
+    for (int i = 0;i < paramnum;i++) {
+        idlist.append(param[i].id);
+        valuelist.append(QString(param[i].value));
     }
     PlatformSet paltfromset;
     paltfromset.setDeviceParamList(msgid,idlist,valuelist);
@@ -64,38 +61,33 @@ void RemoteTaskScheduler::sendDiveceParam(int msgid,const char *cmd)
 
 void RemoteTaskScheduler::sendDiveceParam(int msgid,QList<int> &idlist)
 {
-    QByteArray cmdArray;
-    QByteArrayList valuelist;
+    QList<DeviceParamInfo> deviceparamlist;
 
     PlatformSet paltfromset;
-    valuelist = paltfromset.readDeviceParamList(msgid,idlist);
+    deviceparamlist = paltfromset.readDeviceParamList(msgid,idlist);
 
-    for (int i = 0;i < valuelist.count();i++) {
-        cmdArray += valuelist.at(i);
-        if(i != valuelist.count() -1){
-            cmdArray +="/";
-        }
+    DeviceParamInfo * parambuf = (DeviceParamInfo *)malloc(deviceparamlist.count()*sizeof (DeviceParamInfo));
+    for (int i = 0;i < deviceparamlist.count();i++) {
+        parambuf[i] = deviceparamlist.at(i);
     }
 
     MsgInfo msginfo;
     msginfo.mMsgType = 0x0104;
-    msginfo.mSize = cmdArray.length();
-    msginfo.mMesgCache = cmdArray.data();
-    RemoteThread::getRemoteThread()->msgQueueSendToNet(&msginfo, cmdArray.length());
+    msginfo.mSize = deviceparamlist.count() *sizeof (DeviceParamInfo);
+    msginfo.mMesgCache = (char *)parambuf;
+    RemoteThread::getRemoteThread()->msgQueueSendToNet(&msginfo, msginfo.mSize,nullptr,nullptr);
+    free(parambuf);
 }
 
 void RemoteTaskScheduler::sendDiveceParam(int msgid, const char *cmd,int cmdlen)
 {
     QList<int> idlist;
     int i = 0;
-//    int len = cmdlen/2;
-//    int dat = 0;
-    QString cmdstr(cmd);
-    QStringList cmdlist = cmdstr.split("/");
+    int *id = (int *)cmd;
 
-    for (i = 0;i < cmdlist.count();i ++) {
+    for (i = 0;i < cmdlen/4;i ++) {
 //        dat = cmd[i]<<8|cmd[i+1];
-        idlist.append(cmdlist.at(i).toInt());
+        idlist.append(id[i]);
     }
 
     sendDiveceParam(msgid,idlist);
@@ -119,21 +111,21 @@ void RemoteTaskScheduler::sendDeviceAttr()
     PlatformSet paltfromset;
     QByteArray bytearray;
 
-    deviceattr.DeviceType = paltfromset.readDeviceType();
+    deviceattr.deviceType = paltfromset.readDeviceType();
     bytearray = paltfromset.readProduceID().toLatin1();
     if(bytearray.length() > 5){
         len = 5;
     }else {
         len = bytearray.length();
     }
-    memcpy(deviceattr.ManufacturerID,bytearray.data(),len);
+    memcpy(deviceattr.manufacturerID,bytearray.data(),len);
     bytearray = paltfromset.readDeviceModel().toLatin1();
     if(bytearray.length() > 20){
         len = 20;
     }else {
         len = bytearray.length();
     }
-    memcpy(deviceattr.DeviceModel,bytearray.data(),len);
+    memcpy(deviceattr.deviceModel,bytearray.data(),len);
 
     bytearray = paltfromset.readDeviceID().toLatin1();
     if(bytearray.length() > 7){
@@ -141,7 +133,7 @@ void RemoteTaskScheduler::sendDeviceAttr()
     }else {
         len = bytearray.length();
     }
-    memcpy(deviceattr.DeviceID,bytearray.data(),len);
+    memcpy(deviceattr.deviceID,bytearray.data(),len);
 
     bytearray = paltfromset.readSIMICCID().toLatin1();
     if(bytearray.length() > 10){
@@ -149,10 +141,10 @@ void RemoteTaskScheduler::sendDeviceAttr()
     }else {
         len = bytearray.length();
     }
-    memcpy(deviceattr.ICCID,bytearray.data(),len);
+    memcpy(deviceattr.simID,bytearray.data(),len);
 
-    deviceattr.HWVersionLen = DEFAULTLEN;
-    deviceattr.HWVersionLen1 = DEFAULTLEN;
+    deviceattr.hardVersionLen = DEFAULTLEN;
+    deviceattr.hardVersionLen1 = DEFAULTLEN;
 
     bytearray = paltfromset.readHWVersion().toLatin1();
     if(bytearray.length() > DEFAULTLEN){
@@ -160,7 +152,7 @@ void RemoteTaskScheduler::sendDeviceAttr()
     }else {
         len = bytearray.length();
     }
-    memcpy(deviceattr.HWVersion,bytearray.data(),len);
+    memcpy(deviceattr.hardVersion,bytearray.data(),len);
 
     bytearray = paltfromset.readFWVersion().toLatin1();
     if(bytearray.length() > DEFAULTLEN){
@@ -168,16 +160,16 @@ void RemoteTaskScheduler::sendDeviceAttr()
     }else {
         len = bytearray.length();
     }
-    memcpy(deviceattr.HWVersion1,bytearray.data(),len);
+    memcpy(deviceattr.hardVersion1,bytearray.data(),len);
 
-    deviceattr.GNSSAttr = static_cast<char>(paltfromset.readGNSSAttr()) ;
-    deviceattr.ComModuleAttr = static_cast<char>(paltfromset.readCommunicatModule()) ;
+    deviceattr.gnssAttr = static_cast<char>(paltfromset.readGNSSAttr()) ;
+    deviceattr.moduleAttr = static_cast<char>(paltfromset.readCommunicatModule()) ;
 
     MsgInfo msginfo;
     msginfo.mMsgType = 0x0107;
     msginfo.mSize = sizeof (DeviceAttrMsg);
     msginfo.mMesgCache = (char *)&deviceattr;
-    RemoteThread::getRemoteThread()->msgQueueSendToNet(&msginfo, sizeof (DeviceAttrMsg));
+    RemoteThread::getRemoteThread()->msgQueueSendToNet(&msginfo, sizeof (DeviceAttrMsg),nullptr,nullptr);
 
 }
 
@@ -253,10 +245,58 @@ void RemoteTaskScheduler::reportRecordFileList(RecordFileMsg &fileattr)
     msginfo.mMsgType = 0x1205;
     msginfo.mSize = sizeof (RecordFileInfo)*filelist.count();
     msginfo.mMesgCache = (char *)fileinfolist;
-    RemoteThread::getRemoteThread()->msgQueueSendToNet(&msginfo, msginfo.mSize);
-
+    RemoteThread::getRemoteThread()->msgQueueSendToNet(&msginfo, msginfo.mSize,nullptr,nullptr);
+    free(fileinfolist);
 }
 
+bool RemoteTaskScheduler::checkFuncOperateIsExist(int id)
+{
+    QHashIterator<int,QList<BackgroundHandlerProc *>> hashtab(mFunHashTab);
+    while (hashtab.hasNext()) {
+        hashtab.next();
+        if(hashtab.key() == id){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void RemoteTaskScheduler::addFuncOperate(int id, BackgroundHandlerProc *fun, void *object)
+{
+    if(checkFuncOperateIsExist(id)){
+        mFunHashTab[id].append(fun);
+        mFunDataHashTab[id].append(object);
+    }else {
+        QList<BackgroundHandlerProc *> funlist;
+        QList<void *> fundatalist;
+        funlist.append(fun);
+        mFunHashTab.insert(id,funlist);
+        fundatalist.append(object);
+        mFunDataHashTab.insert(id,fundatalist);
+    }
+}
+
+void RemoteTaskScheduler::deleteFuncOperate(int id)
+{
+    if(checkFuncOperateIsExist(id)){
+        if(mFunHashTab[id].count() == 1){
+            mFunHashTab.remove(id);
+            mFunDataHashTab.remove(id);
+        }else {
+            mFunHashTab[id].removeFirst();
+            mFunDataHashTab[id].removeFirst();
+        }
+    }
+}
+
+void RemoteTaskScheduler::exceFirstFunc(int id, int data)
+{
+    if(checkFuncOperateIsExist(id)){
+        (mFunHashTab[id].first())(mFunDataHashTab[id].first(),data);
+        deleteFuncOperate(id);
+    }
+}
 
 #ifndef MILLION
 #define MILLION 1000000
@@ -292,6 +332,10 @@ void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
         qDebug()<<"recv test msg";
         sendDeviceAttr();
         break;
+    case 0x8001:
+        qDebug()<<"common response";
+        exceFirstFunc(((CommonResponse *)mCmdBuf)->msgId, ((CommonResponse *)mCmdBuf)->result);
+        break;
     case 0x8004:  //查询服务器时间应答
         qDebug()<<"rece:"<<*((int *)mCmdBuf);
         break;
@@ -302,13 +346,12 @@ void RemoteTaskScheduler::SingleStep(unsigned maxDelayTime) {
             PlatformRegister::getPlatformRegister()->setMainServerStatus(DisConnect);
         }else {
             PlatformRegister::getPlatformRegister()->setMainServerStatus(Connected);
-            PlatformSet platformset;
-            platformset.setAuthNumber(QString(((RegisterResponse *)msginfo.mMesgCache)->authNum));
+            PlatformRegister::getPlatformRegister()->setAuthNum(QString(((RegisterResponse *)msginfo.mMesgCache)->authNum));
         }
         break;
     case 0x8103://设置终端参数
 //        qDebug()<<"rece:"<<*((int *)mCmdBuf);
-        setDeviceParam(msginfo.mMsgType, mCmdBuf);
+        setDeviceParam(msginfo.mMsgType, mCmdBuf,msginfo.mSize);
         break;
     case 0x8104:   //查询终端参数
         sendDiveceParamAll();
@@ -467,8 +510,11 @@ RemoteThread::RemoteThread(QObject *parent) : QThread(parent),mRemoteTask(nullpt
 
 }
 
-bool RemoteThread::msgQueueSendToNet(pMsgInfo pInfo, uint size)
+bool RemoteThread::msgQueueSendToNet(pMsgInfo pInfo, uint size, TaskScheduler::BackgroundHandlerProc *fun, void *data)
 {
+    if(fun){
+        mRemoteTask->addFuncOperate(pInfo->mMsgType,fun,data);
+    }
     return mSendMsgQueue.msgQueueSend(pInfo,size);
 }
 

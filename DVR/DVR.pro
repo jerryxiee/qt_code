@@ -82,7 +82,8 @@ SOURCES += \
     common/bcdtransform.cpp \
     video/encodetaskscheduler.cpp \
     streamserver/himediaserversession.cpp \
-    streamserver/himediaservermanage.cpp
+    streamserver/himediaservermanage.cpp \
+    windows/test/testwidget.cpp
 
 
 
@@ -142,7 +143,8 @@ HEADERS += \
     common/bcdtransform.h \
     video/encodetaskscheduler.h \
     streamserver/himediaserversession.h \
-    streamserver/himediaservermanage.h
+    streamserver/himediaservermanage.h \
+    windows/test/testwidget.h
 
 
 

@@ -18,6 +18,9 @@ public:
   virtual ~RemoteTaskScheduler();
 
   #define CMDMAXLEN  1024
+  typedef void CmdAnswerFunc(void* clientData, void* cmd);
+
+  void addFuncOperate(int id,BackgroundHandlerProc *fun,void *object);
 
 protected:
   RemoteTaskScheduler(MsgQueue &msgqueue,unsigned maxSchedulerGranularity);
@@ -34,13 +37,16 @@ protected:
   virtual void moveSocketHandling(int oldSocketNum, int newSocketNum){}
 
 private:
-  void setDeviceParam(int msgid,const char *cmd);
+  void setDeviceParam(int msgid,const char *cmd,int len);
   void sendDiveceParam(int msgid,const char *cmd);
   void sendDiveceParam(int msgid, QList<int> &idlist);
   void sendDiveceParam(int msgid, const char *cmd,int cmdlen);
   void sendDiveceParamAll();
   void sendDeviceAttr();
   void reportRecordFileList(RecordFileMsg &fileattr);
+  bool checkFuncOperateIsExist(int id);
+  void deleteFuncOperate(int id);
+  void exceFirstFunc(int id, int data);
 
 protected:
   unsigned fMaxSchedulerGranularity;
@@ -51,6 +57,8 @@ private:
     MsgQueue &mMsgQueue;
     char mCmdBuf[CMDMAXLEN];
     HiMediaServerManage mMediaServerManage;
+    QHash<int,QList<BackgroundHandlerProc *>> mFunHashTab;
+    QHash<int,QList<void *>> mFunDataHashTab;
 };
 
 class RemoteThread : public QThread
@@ -60,7 +68,7 @@ public:
     static RemoteThread *getRemoteThread();
     ~RemoteThread();
 
-    bool msgQueueSendToNet(pMsgInfo pInfo, uint size);    //通过网络发送至服务器
+    bool msgQueueSendToNet(pMsgInfo pInfo, uint size,TaskScheduler::BackgroundHandlerProc *fun,void *data);    //通过网络发送至服务器
     bool msgQueueLocalSend(pMsgInfo pInfo, uint size);   //本地信号处理
     TaskToken scheduleDelayedTask(int64_t microseconds, TaskFunc* proc,
                     void* clientData);                          //注册延时任务

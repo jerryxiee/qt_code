@@ -8,7 +8,7 @@ BCDTransform::BCDTransform()
 }
 
 
-QByteArray BCDTransform::toArray(char *bcd,int len)
+QByteArray BCDTransform::toArray(const char *bcd, int len)
 {
     QByteArray bytearray;
 

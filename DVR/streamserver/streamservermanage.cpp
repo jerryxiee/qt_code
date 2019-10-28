@@ -37,11 +37,11 @@ bool StreamServerManage::createNewConnect(StreamParam &param)
 
 
     streaminfo.Channel = param.logicChannel;
-    ret = inet_pton(AF_INET, param.ipAddr, &streaminfo.IpAddr);
-    if(ret < 0){
-        qDebug()<<"ip error!";
-        return false;
-    }
+//    ret = inet_pton(AF_INET, param.ipAddr, &streaminfo.IpAddr);
+//    if(ret < 0){
+//        qDebug()<<"ip error!";
+//        return false;
+//    }
     streaminfo.Port = param.tcpPort != 0?param.tcpPort:param.udpPort;
 
     //step1:检查是否已经创建

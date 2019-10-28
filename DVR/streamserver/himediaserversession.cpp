@@ -103,7 +103,9 @@ void HiMediaServerSession::deleteSubSession(QString subSessionName)
         delete subsession;
     }
     mMutex.unlock();
-
+    if(isEmpty()){
+        mRun = false;
+    }
 }
 
 void HiMediaServerSession::deleteAllSubSession()
@@ -121,6 +123,7 @@ void HiMediaServerSession::deleteAllSubSession()
 
     }
     mMutex.unlock();
+    mRun = false;
 }
 
 bool HiMediaServerSession::isEmpty() const
@@ -336,6 +339,7 @@ void HiMediaServerSubSession::mediaSubSessionCtr(StreamControl &control)
 
 void HiMediaServerSubSession::pause(bool isReal)
 {
+#ifndef LUNUX_WIN
     if(isReal){
         if(mConsumers){
             static_cast<HiVencConsumer*>(mConsumers)->stopStreamRecv();
@@ -345,10 +349,12 @@ void HiMediaServerSubSession::pause(bool isReal)
             mVideoPlay->pause();
         }
     }
+#endif
 
 }
 void HiMediaServerSubSession::play(bool isReal)
 {
+    #ifndef LUNUX_WIN
     if(isReal){
         if(mConsumers){
             static_cast<HiVencConsumer*>(mConsumers)->startStreamRecv();
@@ -358,6 +364,7 @@ void HiMediaServerSubSession::play(bool isReal)
             mVideoPlay->play();
         }
     }
+#endif
 
 }
 
@@ -370,7 +377,7 @@ void HiMediaServerSubSession::stop(bool isReal)
 void HiMediaServerSubSession::setCurPosition(qint64 position)
 {
     qint64 pos;
-
+#ifndef LUNUX_WIN
     if(mVideoPlay){
         if(position > mVideoPlay->getFileEndTime()){
             pos = mVideoPlay->getFileEndTime() - mVideoPlay->getFileStartTime();
@@ -381,5 +388,6 @@ void HiMediaServerSubSession::setCurPosition(qint64 position)
         }
         mVideoPlay->setPosition(pos);
     }
+#endif
 
 }

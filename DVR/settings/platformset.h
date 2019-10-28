@@ -4,6 +4,7 @@
 #include <QObject>
 //#include "config/deviceparamconfig.h"
 #include "config/platformconfigini.h"
+#include "communication/jtt808define.h"
 
 class PlatformSet : public QObject
 {
@@ -248,7 +249,7 @@ public:
 
     QByteArray readDeviceParam(int msgid,int id,int offset) const;
     QByteArray readDeviceParam(int msgid,int id) const;
-    QByteArrayList readDeviceParamList(int msgid,QList<int> &offlist) const;  //返回：id:value列表
+    QList<DeviceParamInfo> readDeviceParamList(int msgid,QList<int> &offlist) const;  //返回：id:value列表
     void setDeviceParam(int msgid, int id, int offset, QVariant value);
     void setDeviceParam(int msgid, int id, QVariant value);
     void setDeviceParamList(int msgid,QList<int> &offlist,QVariantList &valuelist);

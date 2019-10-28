@@ -30,6 +30,8 @@ public:
     PlatFormStatus getBackupServerStatus() const;
     void setBackupServerStatus(PlatFormStatus status);
     bool readEnableRegister() const;
+    void setAuthNum(QString value);
+    QString readAuthNum() const;
 
     bool sendServerInfo();
 
@@ -39,6 +41,7 @@ protected:
 signals:
     void mainServerStatusChanged(PlatFormStatus &status);
     void backupServerStatusChanged(PlatFormStatus &status);
+    void authNumChanged(QString);
 
 public slots:
     void updateServerInfo(int type);
@@ -48,6 +51,7 @@ private:
     TaskToken mRegisterToken;
     static PlatformRegister* mPlatformRegister;
     bool mRegisterEnable;
+    QString mAuthNum;
 };
 
 #endif // PLATFORMREGISTER_H

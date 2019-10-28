@@ -20,16 +20,20 @@ QByteArray PlatformSet::readDeviceParam(int msgid, int id) const
     return readDeviceParam(msgid,id,0);
 }
 
-QByteArrayList PlatformSet::readDeviceParamList(int msgid,QList<int> &offlist) const
+QList<DeviceParamInfo> PlatformSet::readDeviceParamList(int msgid,QList<int> &offlist) const
 {
-    QByteArrayList paramlist;
+    QList<DeviceParamInfo> paramlist;
     QByteArray bytearray;
 
     for (int i = 0;i < offlist.count();i++) {
         bytearray = readDeviceParam(msgid,offlist.at(i));
-        if(bytearray.isNull())
+        if(bytearray.isNull()||bytearray.length() > DEFAULTLEN)
             continue;
-        paramlist.append(QString::number(offlist.at(i)).toLatin1()+":"+bytearray);
+        DeviceParamInfo param;
+        param.id = offlist.at(i);
+        param.len = bytearray.length();
+        memcpy(param.value,bytearray.data(),bytearray.length());
+        paramlist.append(param);
     }
 
     return paramlist;
@@ -1122,6 +1126,7 @@ void PlatformSet::setAuthNumber(QString value)
     config.value = value;
 
     mPlatformConfig.insertSignalData(config);
+    emit authNumberChnaged();
 }
 
 

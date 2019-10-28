@@ -151,6 +151,7 @@ void RemoteTestTaskScheduler::SingleStep(unsigned maxDelayTime) {
         RegisterResponse msg;
         msg.reportNum = 0;
         msg.result = 0;
+        memcpy(msg.authNum,"1234567",7);
         sleep(4);
         msginfo.mMesgCache = (char *)&msg;
         msginfo.mMsgType = 0x8100;

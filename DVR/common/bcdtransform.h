@@ -10,7 +10,7 @@ public:
     BCDTransform(int value);
     BCDTransform(const char *value,int len);
 
-    static QByteArray toArray(char *bcd,int len);
+    static QByteArray toArray(const char *bcd,int len);
     static QByteArray toBcd(long value);
 
 

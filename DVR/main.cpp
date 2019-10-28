@@ -19,6 +19,7 @@
 #include "settings/platformset.h"
 #include "windows/MyModel/platformfunmodel.h"
 #include "modules/moduleinit.h"
+#include "windows/test/testwidget.h"
 
 #ifndef LUNUX_WIN
 #include "test/venctomp4test.h"
@@ -73,12 +74,6 @@ int main(int argc, char *argv[])
     }
     qDebug("system init sucess! dgf\n");
 
-//    vio.Vi_Start(VIDEO_ENCODING_MODE_PAL);
-//    vio.Vo_Start();
-//    vio.Vi_Venc_Start();
-//    vio.start();
-//    QObject::connect(&vio,SIGNAL(VistatusChanged(VI_CHN)),&vio,SLOT(onChangeStatus(VI_CHN)));
-//    QObject::connect(&vio,SIGNAL(MakeNewFile(VI_CHN)),&vio,SLOT(onMakeNewFile(VI_CHN)));
 #endif
 
 
@@ -108,16 +103,6 @@ int main(int argc, char *argv[])
     module_init();
 
 
-
-//    QDateTime current_date_time =QDateTime::currentDateTime();
-//    QString current_date =QDateTime::currentDateTime().toString("yyMMddhhmmss");
-//    qDebug()<<current_date;
-//    qDebug()<<current_date.toUcs4()<<" len:"<<current_date.toUcs4().length();
-//    QByteArray time = current_date.toLocal8Bit();
-//    qDebug("%s",time.data());
-//    qDebug()<<current_date_time.toTime_t();
-//    qDebug()<<QDateTime::fromString(current_date,"yyyy-MM-dd-hh-mm-ss").toTime_t();
-
     qmlRegisterType<MyTableModel>("MyTableViewModel", 1, 0, "MyTableViewModel");
     qmlRegisterType<YuvFrameProvider>("FrameProvider", 1, 0, "FrameProvider");
     qmlRegisterType<PlatformSet>("PlatformSet", 1, 0, "PlatformSet");
@@ -125,34 +110,16 @@ int main(int argc, char *argv[])
 //    qmlRegisterType<QFileInfo>("FileInfo", 1, 0, "FileInfo");
 //    qmlRegisterType<SystemSet>("SystemConfig", 1, 0, "SystemConfig");
 
-        Widget w;
+    Widget w;
+//        TestWidget w;
         w.show();
-
-#ifndef LUNUX_WIN
-//    vio.Vi_Start(VIDEO_ENCODING_MODE_PAL);
-//    vio.Vo_Start();
-//    vio.Vi_Venc_Start();
-//    vio.start();
-////    vio.start_timer();
-//    QObject::connect(&w,SIGNAL(ChnDispToWinSignal(QMap<VO_CHN, RECT_S> &)),&vio,SLOT(onDispChnToWin(QMap<VO_CHN, RECT_S> &)));
-//    QObject::connect(&w,SIGNAL(Set_VoMode(SAMPLE_VO_MODE_E &)),&vio,SLOT(onSet_VoMode(SAMPLE_VO_MODE_E &)));
-//    QObject::connect(&w,SIGNAL(StopVoSignal()),&vio,SLOT(onStopVoSlot()));
-#endif
-
 
 #ifndef LUNUX_WIN
 //    RealTimeStream realtest;
 //    realtest.start();
-//    VencToMp4Test mp4test;
-//    mp4test.start();
+
 #endif
         ret = a.exec();
-#ifndef LUNUX_WIN
-//    vio.Venc_exit();
-//    vio.wait();
-
-//    QThread::sleep(2);
-#endif
     qDebug()<<"exit main";
     return ret;
 }

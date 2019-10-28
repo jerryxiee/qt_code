@@ -52,10 +52,15 @@ Item {
 
     PlatformSet{
         id:platformset
+
     }
 
     PlatformFunModel{
         id:paltformfunmodel
+        onAuthNumChanged: {
+            console.log("authcahnge")
+            authidtext.text = value
+        }
     }
 
     Label{
@@ -74,7 +79,7 @@ Item {
         anchors.verticalCenter: authid.verticalCenter
         anchors.left: authid.right
         anchors.leftMargin: 20
-        text: platformset.authNumber
+        text: paltformfunmodel.authNum
         onPressed: pressPos(x,y,width,height)
 //        font.pixelSize: fontpixelSize
     }
