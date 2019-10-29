@@ -11,7 +11,7 @@ LogTabData * LogTabData::getLogRecoedPoint()
     if(mLogRecord == nullptr){
         mLogRecord = new LogTabData();
 
-        if(!mLogRecord->open()){
+        if(!SqliteDateBase::getSqliteDateBase()->open()){
             delete mLogRecord;
             return nullptr;
         }
@@ -75,13 +75,13 @@ bool LogTabData::createTable()
             CreateT INTEGER NOT NULL, \
             Describe TEXT)";
 
-    return SqliteDateBase::createTable(LOGDBTAB,tabinfo);
+    return SqliteDateBase::getSqliteDateBase()->createTable(LOGDBTAB,tabinfo);
 }
 
 bool LogTabData::isTabExists()
 {
 //    mLogId = countInTab(LOGDBTAB);
-    return SqliteDateBase::isTabExists(LOGDBTAB);
+    return SqliteDateBase::getSqliteDateBase()->isTabExists(LOGDBTAB);
 }
 
 bool LogTabData::setLogId(quint64 logid)
@@ -93,7 +93,7 @@ bool LogTabData::setLogId(quint64 logid)
 
 int LogTabData::count()
 {
-    return countInTab(LOGDBTAB);
+    return SqliteDateBase::getSqliteDateBase()->countInTab(LOGDBTAB);
 }
 
 bool LogTabData::insertSignalData(DateInfo &info)

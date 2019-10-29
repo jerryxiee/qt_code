@@ -1,6 +1,24 @@
 #include "sqlitedatebase.h"
 #include <QDebug>
 
+SqliteDateBase * SqliteDateBase::mGlobDataBase = nullptr;
+
+SqliteDateBase *SqliteDateBase::getSqliteDateBase()
+{
+    if(!mGlobDataBase){
+        mGlobDataBase = new SqliteDateBase();
+        if(mGlobDataBase){
+            if(!mGlobDataBase->open()){
+                mGlobDataBase->close();
+                delete mGlobDataBase;
+                mGlobDataBase = nullptr;
+            }
+        }
+    }
+
+    return mGlobDataBase;
+}
+
 SqliteDateBase::SqliteDateBase()
 {
 
@@ -10,6 +28,16 @@ SqliteDateBase::~SqliteDateBase()
 {
     close();
 
+}
+
+bool SqliteDateBase::isOpen()
+{
+    if(mDataBase.isOpen()){
+        qDebug()<<"database have opened";
+        return true;
+    }
+
+    return false;
 }
 
 bool SqliteDateBase::open(const QString dbname)
@@ -31,6 +59,11 @@ bool SqliteDateBase::createTable(const QString &tabname, QString &tabinfo)
     QSqlQuery query;
 
     QString str = "CREATE TABLE "+tabname+tabinfo;
+
+    if(isTabExists(tabname)){
+        qDebug()<<tabname<<" has exist";
+        return true;
+    }
 
     if(query.exec(str)){
         return true;
@@ -92,6 +125,18 @@ bool SqliteDateBase::updateTabData(const QString &tabname,QString &setvalue,QStr
 {
     QSqlQuery query;
     query.prepare("UPDATE "+tabname+" SET"+setvalue+" where "+where);
+    if(!query.exec()){
+        qDebug()<<query.lastError();
+        return false;
+    }
+
+    return true;
+}
+
+bool SqliteDateBase::deleteTabData(const QString &tabname,const QString where)
+{
+    QSqlQuery query;
+    query.prepare("DELETE FROM "+tabname+" where "+where);
     if(!query.exec()){
         qDebug()<<query.lastError();
         return false;

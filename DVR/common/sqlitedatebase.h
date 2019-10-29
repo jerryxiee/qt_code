@@ -11,14 +11,14 @@
 class SqliteDateBase
 {
 public:
-    SqliteDateBase();
+    static SqliteDateBase *getSqliteDateBase();
     virtual ~SqliteDateBase();
 #ifndef LUNUX_WIN
     #define DATEBASENAME "/mnt/sda1/database.db"
 #else
     #define DATEBASENAME "/home/abhw/nfsroot/dvr_config/database.db"
 #endif
-
+    bool isOpen();
     bool open(const QString dbname = DATEBASENAME);
     bool createTable(const QString &tabname,QString &tabinfo);
     bool isTabExists(const QString &tabname);
@@ -26,14 +26,16 @@ public:
     int countInTab(const QString &tabname);
     bool getTabData(QSqlQuery &query,const QString &tabname,QString &where);
     bool updateTabData(const QString &tabname,QString &setvalue,QString &where);
+    bool deleteTabData(const QString &tabname,const QString where);
 
     void close();
 
-
+protected:
+    SqliteDateBase();
 
 private:
 //    const QString DATEBASENAME = "/mnt/sda1/database.db";
-
+    static SqliteDateBase * mGlobDataBase;
     QSqlDatabase mDataBase;
 };
 

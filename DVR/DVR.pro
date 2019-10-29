@@ -83,7 +83,10 @@ SOURCES += \
     video/encodetaskscheduler.cpp \
     streamserver/himediaserversession.cpp \
     streamserver/himediaservermanage.cpp \
-    windows/test/testwidget.cpp
+    windows/test/testwidget.cpp \
+    modules/position/regionbase.cpp \
+    modules/position/circularregion.cpp \
+    modules/position/rectangleregion.cpp
 
 
 
@@ -144,7 +147,10 @@ HEADERS += \
     video/encodetaskscheduler.h \
     streamserver/himediaserversession.h \
     streamserver/himediaservermanage.h \
-    windows/test/testwidget.h
+    windows/test/testwidget.h \
+    modules/position/regionbase.h \
+    modules/position/circularregion.h \
+    modules/position/rectangleregion.h
 
 
 

@@ -20,6 +20,7 @@
 #include "windows/MyModel/platformfunmodel.h"
 #include "modules/moduleinit.h"
 #include "windows/test/testwidget.h"
+#include "modules/position/regionbase.h"
 
 #ifndef LUNUX_WIN
 #include "test/venctomp4test.h"
@@ -113,6 +114,7 @@ int main(int argc, char *argv[])
     Widget w;
 //        TestWidget w;
         w.show();
+//        qDebug()<<"distance:"<<RegionBase::distance(22514519,113380301,22511962,113380301);
 
 #ifndef LUNUX_WIN
 //    RealTimeStream realtest;

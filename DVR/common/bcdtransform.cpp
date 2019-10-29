@@ -22,6 +22,21 @@ QByteArray BCDTransform::toArray(const char *bcd, int len)
     return bytearray;
 }
 
+QByteArray BCDTransform::toArray(const uint8_t *bcd,int len)
+{
+    QByteArray bytearray;
+
+    bytearray.resize(len*2);
+    for (int i = 0,j = 0;i < len;i++,j = 2*i) {
+        bytearray[j] = (bcd[i]>>4) + '0';
+        bytearray[j+1] = (bcd[i]&0x0f) + '0';
+
+    }
+
+    return bytearray;
+
+}
+
 QByteArray BCDTransform::toBcd(long value)
 {
     QByteArray bytearray;

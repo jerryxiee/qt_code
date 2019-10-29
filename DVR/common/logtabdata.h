@@ -17,7 +17,7 @@ public:
 };
 
 
-class LogTabData : public QObject,public SqliteDateBase
+class LogTabData : public QObject/*,public SqliteDateBase*/
 {
     Q_OBJECT
 public:

@@ -202,6 +202,34 @@ typedef struct{                      //字段                 直播          �
     char posTime[6];             //                            控制视频回放位置Y
 } StreamControl;
 
+//圆形区域属性
+typedef struct{
+    uint32_t regionId;                  //区域ID
+    uint32_t regionAttr;                //区域属性
+    uint32_t centerLatitude;            //中心点纬度
+    uint32_t centerLongitude;           //中心点经度
+    uint32_t regionRadius;              //半径
+    uchar  startTime[6];                //开始时间
+    uchar  endTime[6];                  //结束时间
+    uint32_t topSpeed;                  //最高速度
+    uint32_t overSpeedDuration;         //超速持续时间
+} CicularRegionAttr;
+
+//矩形区域属性
+typedef struct{
+    uint32_t regionId;                    //区域ID
+    uint32_t regionAttr;                  //区域属性
+    uint32_t leftTopLatitude;             //左上角纬度
+    uint32_t leftTopLongitude;            //左上角经度
+    uint32_t rightLowLatitude;            //右下角纬度
+    uint32_t rightLowLongitude;           //右下角经度
+    uchar  startTime[6];                  //开始时间
+    uchar  endTime[6];                    //结束时间
+    uint32_t topSpeed;                    //最高速度
+    uint32_t overSpeedDuration;           //超速持续时间
+} RectangleRegionAttr;
+
+
 
 #ifdef __cplusplus
 #if __cplusplus
