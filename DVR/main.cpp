@@ -20,7 +20,7 @@
 #include "windows/MyModel/platformfunmodel.h"
 #include "modules/moduleinit.h"
 #include "windows/test/testwidget.h"
-#include "modules/position/regionbase.h"
+#include "modules/regionctr/regionbase.h"
 
 #ifndef LUNUX_WIN
 #include "test/venctomp4test.h"
@@ -102,7 +102,15 @@ int main(int argc, char *argv[])
     remotethread->start();
 
     module_init();
-
+    QDateTime datetime;
+    datetime.setDate(QDate::currentDate());
+    datetime.setTime(QTime::fromString("000050","hhmmss"));
+    qDebug()<<datetime;
+    qDebug()<<QTime::fromString("000150","hhmmss").second();
+//    QString time = QDateTime::currentDateTime().toString();
+//    qDebug()<<QDateTime::currentDateTime().toTime_t();
+//    qDebug()<<QDateTime::fromString(time.right(6),"hhmmss");
+//    qDebug()<<QDateTime::currentDateTime().toString("yyMMddhhmmss");
 
     qmlRegisterType<MyTableModel>("MyTableViewModel", 1, 0, "MyTableViewModel");
     qmlRegisterType<YuvFrameProvider>("FrameProvider", 1, 0, "FrameProvider");

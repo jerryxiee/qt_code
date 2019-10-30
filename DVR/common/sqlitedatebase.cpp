@@ -105,16 +105,17 @@ int SqliteDateBase::countInTab(const QString &tabname)
         model->fetchMore();
     }
     int nRecordCount = model->rowCount();
-    qDebug() << nRecordCount;
+//    qDebug() << nRecordCount;
     return nRecordCount;
 }
 
 bool SqliteDateBase::getTabData(QSqlQuery &query,const QString &tabname,QString &where)
 {
-    query.prepare("SELECT * FROM "+tabname+" where"+where);
+    query.exec("SELECT * FROM "+tabname+" where "+where);
 
     if(!query.exec()){
         qDebug()<<query.lastError();
+        qDebug()<<"get data error"<<tabname+" "<<where;
         return false;
     }
 

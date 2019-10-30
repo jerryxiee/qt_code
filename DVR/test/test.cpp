@@ -2,6 +2,7 @@
 #include "QDebug"
 #include <QDateTime>
 #include "communication/remotethread.h"
+#include "modules/regionctr/regioncontrol.h"
 
 Test::Test(QObject *parent) : QObject(parent)
 {
@@ -196,5 +197,31 @@ void Test::play(int Chn,QString starttime,QString endtime)
     }
 
     emit videoPlayListSignal(filelist);
+
+}
+
+void Test::deleteRegion()
+{
+    RegionControl regionctr;
+
+    regionctr.deleteRegion(REGIONTYPE::Circular,1);
+    regionctr.deleteRegion(REGIONTYPE::Rectange,1);
+
+
+}
+
+void Test::addRegion()
+{
+    CicularRegionAttr cattr;
+    RectangleRegionAttr rattr;
+    RegionControl regionctr;
+    RegionBase *region;
+
+    cattr.regionId = 1;
+    rattr.regionId = 1;
+    region = new CircularRegion(cattr);
+    regionctr.addRegion(region);
+    region = new RectangleRegion(rattr);
+    regionctr.addRegion(region);
 
 }

@@ -139,6 +139,26 @@ Rectangle {
         onClicked: VideoTest.playSession(comb.currentIndex,check.checked)
     }
 
+    Button{
+        id:addregion
+        text: qsTr("addregion")
+        anchors.top: stopsession.bottom
+        anchors.topMargin: 20
+        anchors.left: stopsession.left
+
+        onClicked: VideoTest.addRegion()
+    }
+
+    Button{
+        id:deleteregion
+        text: qsTr("deleteregion")
+        anchors.verticalCenter: addregion.verticalCenter
+        anchors.left: addregion.right
+        anchors.leftMargin: 20
+
+        onClicked: VideoTest.deleteRegion()
+    }
+
 
 
 //    Button{

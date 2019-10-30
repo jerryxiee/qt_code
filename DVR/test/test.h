@@ -22,6 +22,8 @@ public:
     Q_INVOKABLE void stopSession(int chn,bool isReal);
     Q_INVOKABLE void playSession(int chn,bool isReal);
     Q_INVOKABLE void deleteSession(int chn,bool isReal);
+    Q_INVOKABLE void deleteRegion();
+    Q_INVOKABLE void addRegion();
 
 signals:
     void videoAlarmEventChangedSignal(VI_CHN Chn,VIDEO_TYPE type,bool change);

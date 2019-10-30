@@ -84,9 +84,10 @@ SOURCES += \
     streamserver/himediaserversession.cpp \
     streamserver/himediaservermanage.cpp \
     windows/test/testwidget.cpp \
-    modules/position/regionbase.cpp \
-    modules/position/circularregion.cpp \
-    modules/position/rectangleregion.cpp
+    modules/regionctr/regionbase.cpp \
+    modules/regionctr/circularregion.cpp \
+    modules/regionctr/rectangleregion.cpp \
+    modules/regionctr/regioncontrol.cpp
 
 
 
@@ -148,9 +149,10 @@ HEADERS += \
     streamserver/himediaserversession.h \
     streamserver/himediaservermanage.h \
     windows/test/testwidget.h \
-    modules/position/regionbase.h \
-    modules/position/circularregion.h \
-    modules/position/rectangleregion.h
+    modules/regionctr/regionbase.h \
+    modules/regionctr/circularregion.h \
+    modules/regionctr/rectangleregion.h \
+    modules/regionctr/regioncontrol.h
 
 
 

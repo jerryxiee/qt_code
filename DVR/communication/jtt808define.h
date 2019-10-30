@@ -209,8 +209,8 @@ typedef struct{
     uint32_t centerLatitude;            //中心点纬度
     uint32_t centerLongitude;           //中心点经度
     uint32_t regionRadius;              //半径
-    uchar  startTime[6];                //开始时间
-    uchar  endTime[6];                  //结束时间
+    char  startTime[6];                //开始时间
+    char  endTime[6];                  //结束时间
     uint32_t topSpeed;                  //最高速度
     uint32_t overSpeedDuration;         //超速持续时间
 } CicularRegionAttr;
@@ -223,8 +223,8 @@ typedef struct{
     uint32_t leftTopLongitude;            //左上角经度
     uint32_t rightLowLatitude;            //右下角纬度
     uint32_t rightLowLongitude;           //右下角经度
-    uchar  startTime[6];                  //开始时间
-    uchar  endTime[6];                    //结束时间
+    char  startTime[6];                  //开始时间
+    char  endTime[6];                    //结束时间
     uint32_t topSpeed;                    //最高速度
     uint32_t overSpeedDuration;           //超速持续时间
 } RectangleRegionAttr;
