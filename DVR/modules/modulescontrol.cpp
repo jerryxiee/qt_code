@@ -1,5 +1,6 @@
 #include "modulescontrol.h"
 #include "platformregister.h"
+#include "positionctr.h"
 #include <QDebug>
 
 
@@ -52,8 +53,8 @@ void ModulesControlTaskScheduler::SingleStep(unsigned maxDelayTime)
         tv_timeToDelay.tv_sec = maxDelayTime/MILLION;
         tv_timeToDelay.tv_usec = maxDelayTime%MILLION;
     }
-
-    usleep(tv_timeToDelay.tv_sec*1000000 + tv_timeToDelay.tv_usec);
+    sleep(1);
+//    usleep(tv_timeToDelay.tv_sec*1000000 + tv_timeToDelay.tv_usec);
     // Also handle any newly-triggered event (Note that we do this *after* calling a socket handler,
     // in case the triggered event handler modifies The set of readable sockets.)
     if (fTriggersAwaitingHandling != 0) {
@@ -126,6 +127,7 @@ TaskScheduler &ModulesControl::getTaskScheduler() const
 void ModulesControl::initModules()
 {
     PlatformRegister::getPlatformRegister();
+    PositionCtr::getPositionCtr();
 }
 
 void ModulesControl::run()

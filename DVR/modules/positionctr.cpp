@@ -1,9 +1,60 @@
 #include "positionctr.h"
 #include "communication/remotethread.h"
+#include "settings/platformset.h"
+#include "modulescontrol.h"
+#include <QDebug>
 
-PositionCtr::PositionCtr(QObject *parent) : QObject(parent),mCurRegionId(0)
+PositionCtr * PositionCtr::mPosCtr = nullptr;
+
+PositionCtr *PositionCtr::getPositionCtr()
+{
+    if(!mPosCtr){
+        mPosCtr = new PositionCtr();
+    }
+    return mPosCtr;
+}
+
+PositionCtr::PositionCtr(QObject *parent) : QObject(parent),mCurRegionId(0),mTaskToken(nullptr)
 {
     mRegionControl = RegionControl::getRegionControlObject();
+//    PlatformSet platformset;
+
+//    mReportStrategy = platformset.readPositionReportingStrategy();
+//    mReportPlay = platformset.readPositionReportingProgramme();
+//    mUrgentReportTime = platformset.readPositionReportingUrgentTimeInterval().toInt();
+//    mUrgentReportDistance = platformset.readPositionReportingUrgentDistanceInterval().toInt();
+//    mDriverSignoutReportTime = platformset.readDriverNoSignInTimeInterval().toInt();
+//    mDriverSignoutReporDistance = platformset.readDriverNoSignInDistanceInterval().toInt();
+//    mSleepReportTime = platformset.readPositionReportingSleepTimeInterval().toInt();
+//    mSleepReporDistance = platformset.readPositionReportingSleepDistanceInterval().toInt();
+//    mDefaultReportTime = platformset.readPositionReportingDefaultTimeInterval().toInt();
+//    mDefaultReporDistance = platformset.readPositionReportingDefaultDistanceInterval().toInt();
+//    mServerConnectStatus = PlatformRegister::getPlatformRegister()->getMainServerStatus();
+    updateinfo();
+
+    if(mServerConnectStatus == PlatFormStatus::Connected){
+        PositionCtr::reportPosition(this);
+    }
+    connect(PlatformRegister::getPlatformRegister(),SIGNAL(mainServerStatusChanged(PlatFormStatus &)),this,SLOT(onServerConnectStatusChanged(PlatFormStatus &)));
+}
+
+void PositionCtr::updateinfo()
+{
+    PlatformSet platformset;
+
+    mReportStrategy = platformset.readPositionReportingStrategy();
+    mReportPlay = platformset.readPositionReportingProgramme();
+    mUrgentReportTime = platformset.readPositionReportingUrgentTimeInterval().toInt();
+    mUrgentReportDistance = platformset.readPositionReportingUrgentDistanceInterval().toInt();
+    mDriverSignoutReportTime = platformset.readDriverNoSignInTimeInterval().toInt();
+    mDriverSignoutReporDistance = platformset.readDriverNoSignInDistanceInterval().toInt();
+    mSleepReportTime = platformset.readPositionReportingSleepTimeInterval().toInt();
+    mSleepReporDistance = platformset.readPositionReportingSleepDistanceInterval().toInt();
+    mDefaultReportTime = platformset.readPositionReportingDefaultTimeInterval().toInt();
+    mDefaultReporDistance = platformset.readPositionReportingDefaultDistanceInterval().toInt();
+    mServerConnectStatus = PlatformRegister::getPlatformRegister()->getMainServerStatus();
+    mCurrentReportTime = mDefaultReportTime;
+    mCurrentReportDistance = mDefaultReporDistance;
 }
 
 void PositionCtr::setAlarmFlag(uint32_t flag)
@@ -16,6 +67,25 @@ void PositionCtr::setStatus(uint32_t status)
 {
     mPositionStatus = status;
     statusChanged();
+}
+
+int PositionCtr::getReportStrategy() const
+{
+    return mReportStrategy;
+}
+
+int PositionCtr::getCurReportTime() const
+{
+    return mCurrentReportTime;
+}
+int PositionCtr::getCurReportDistance() const
+{
+    return mCurrentReportDistance;
+}
+
+void PositionCtr::setReportStrategy(int value)
+{
+    mReportStrategy = value;
 }
 
 void PositionCtr::urgentAlarmFlagChanged(bool enable)
@@ -228,9 +298,60 @@ void PositionCtr::setDirectionAngle(uint16_t value)
     mDirectionAngle = value;
 }
 
-void reportPosition(void *object)
+void PositionCtr::reportPosition(void *object)
+{
+    PositionCtr *posctr = static_cast<PositionCtr *>(object);
+        if(posctr->mServerConnectStatus == PlatFormStatus::Connected){
+        if(posctr->getReportStrategy() == 0){
+            posctr->reportPositionA();
+        }else if(posctr->getReportStrategy() == 1) {
+            posctr->reportPositionA();
+        }else {
+
+        }
+    }
+}
+
+void PositionCtr::reportPositionA()
+{
+    QList<PositionExtensionInfo> infolist;
+    reportPosition(infolist);
+    mTaskToken = ModulesControl::getModulesControl()->getTaskScheduler().scheduleDelayedTask(mCurrentReportTime*1000000,reportPosition,this);
+}
+
+void PositionCtr::reportPositionB()
 {
 
+}
+
+void PositionCtr::onServerConnectStatusChanged(PlatFormStatus &status)
+{
+//    qDebug()<<"server status change:"<<status;
+    mServerConnectStatus = status;
+    if(status == PlatFormStatus::Connected){
+//        qDebug()<<"server connect";
+        if(!mTaskToken){
+//            qDebug()<<"report pos";
+            reportPosition(this);
+        }
+    }else if(status == PlatFormStatus::DisConnect){
+//        qDebug()<<"server disconnect";
+        if(mTaskToken){
+//            qDebug()<<"stop report";
+            ModulesControl::getModulesControl()->getTaskScheduler().unscheduleDelayedTask(mTaskToken);
+            mTaskToken = nullptr;
+        }
+    }
+}
+
+void PositionCtr::onPositionSetChanged()
+{
+//    qDebug()<<"onPositionSetChanged";
+    updateinfo();
+    if(mTaskToken &&mServerConnectStatus == PlatFormStatus::Connected){
+        ModulesControl::getModulesControl()->getTaskScheduler().unscheduleDelayedTask(mTaskToken);
+        mTaskToken = ModulesControl::getModulesControl()->getTaskScheduler().scheduleDelayedTask(mCurrentReportTime*1000000,reportPosition,this);
+    }
 }
 
 void PositionCtr::reportPosition(QList<PositionExtensionInfo> &infolist)
@@ -267,5 +388,8 @@ void PositionCtr::reportPosition(QList<PositionExtensionInfo> &infolist)
     if(!msgbuf){
         free(msgbuf);
     }
+
+    mLastLatitude = mLatitude;
+    mLastLongitude = mLongitude;
 
 }

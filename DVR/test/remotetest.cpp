@@ -161,8 +161,8 @@ void RemoteTestTaskScheduler::SingleStep(unsigned maxDelayTime) {
     case 0x3: //
         qDebug()<<"rece unregister";
         break;
-    case 0x8103://设置终端参数
-        qDebug()<<"rece:"<<*((int *)mCmdBuf);
+    case 0x0200://
+        qDebug()<<"rece:posinfo";
         break;
     case 0x0104:   //查询终端参数
 //        QString str(mCmdBuf);

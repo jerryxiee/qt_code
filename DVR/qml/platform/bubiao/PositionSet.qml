@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.0
 import QtQuick.VirtualKeyboard 2.2
 import PlatformSet 1.0
+import PlatformFunModel 1.0
 
 
 Item {
@@ -54,12 +55,19 @@ Item {
                 platformset.positionReportingDefaultTimeInterval = report4text.text
                 platformset.positionReportingDefaultDistanceInterval = report4text1.text
 
+                platformfunmodel.updatePositionSet();
             }
         }
     }
 
     PlatformSet{
         id:platformset
+    }
+
+    PlatformFunModel{
+        id:platformfunmodel
+
+
     }
 
 

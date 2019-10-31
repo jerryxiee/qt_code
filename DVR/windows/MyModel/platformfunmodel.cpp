@@ -1,4 +1,5 @@
 #include "platformfunmodel.h"
+#include "modules/positionctr.h"
 #include <QDebug>
 
 PlatformFunModel::PlatformFunModel(QObject *parent) : QObject(parent)
@@ -7,6 +8,7 @@ PlatformFunModel::PlatformFunModel(QObject *parent) : QObject(parent)
     connect(PlatformRegister::getPlatformRegister(),SIGNAL(backupServerStatusChanged(PlatFormStatus &)),this,SLOT(backupServerStatusChangedSlot(PlatFormStatus &)));
     connect(PlatformRegister::getPlatformRegister(),SIGNAL(authNumChanged(QString)),this,SLOT(authNumChangeSlot(QString)));
     connect(this,SIGNAL(serverInfoChanged(int)),PlatformRegister::getPlatformRegister(),SLOT(updateServerInfo(int)));
+    connect(this,SIGNAL(positionSetChanged()),PositionCtr::getPositionCtr(),SLOT(onPositionSetChanged()));
 }
 
 PlatFormStatus PlatformFunModel::readMainServerStatus() const
@@ -61,3 +63,7 @@ void PlatformFunModel::updateServerInfo(int type)
     serverInfoChanged(type);
 }
 
+void PlatformFunModel::updatePositionSet()
+{
+    positionSetChanged();
+}

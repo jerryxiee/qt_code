@@ -14,6 +14,7 @@ class PlatformFunModel : public QObject
     Q_PROPERTY(QString authNum READ readAuthNum)
 public:
     Q_INVOKABLE void updateServerInfo(int type);
+    Q_INVOKABLE void updatePositionSet();
 
     explicit PlatformFunModel(QObject *parent = nullptr);
 
@@ -24,6 +25,7 @@ public:
     void setEnable(bool enable);
 signals:
     void serverInfoChanged(int type);
+    void positionSetChanged();
     void mainServerStatusChanged(PlatFormStatus &status);
     void backupServerStatusChanged(PlatFormStatus &status);
     void enabledChanged();
