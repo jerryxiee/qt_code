@@ -13,22 +13,23 @@ CircularRegion::CircularRegion(QObject *parent) : RegionBase(REGIONTYPE::Circula
 }
 
 CircularRegion::CircularRegion(CicularRegionAttr &attr,QObject *parent):
-    RegionBase(REGIONTYPE::Circular,attr.regionId,attr.regionAttr,0,0,attr.topSpeed,attr.overSpeedDuration,parent),
+    RegionBase(REGIONTYPE::Circular,attr.regionId,attr.regionAttr,BCDTransform::toArray(attr.startTime,sizeof (attr.startTime)),
+               BCDTransform::toArray(attr.endTime,sizeof (attr.endTime)),attr.topSpeed,attr.overSpeedDuration,parent),
     mCenterLatitude(attr.centerLatitude),mCenterLongitude(attr.centerLongitude),mRegionRadius(attr.regionRadius)
 {
-    QByteArray bytearray;
-//    uint startT = 0,endT = 0 ;
+//    QByteArray bytearray;
+////    uint startT = 0,endT = 0 ;
 
-//    bytearray = BCDTransform::toArray(attr.startTime,sizeof (attr.startTime));
-    if(attr.startTime[0] == 0x0&&attr.startTime[1] == 0x0&&attr.startTime[2] == 0x0){
-        setEveryDayEffect(true);
-        setStartTime(QDateTime(QDate::currentDate(),QTime::fromString(bytearray.right(6),"hhmmss")));
-        setEndTime(QDateTime(QDate::currentDate(),QTime::fromString(BCDTransform::toArray(attr.endTime,sizeof (attr.endTime)).right(6),"hhmmss")));
-    }else {
-        setEveryDayEffect(false);
-        setStartTime(QDateTime::fromString("20"+QString(BCDTransform::toArray(attr.startTime,sizeof (attr.startTime))), "yyyyMMddhhmmss"));
-        setEndTime(QDateTime::fromString("20"+QString(BCDTransform::toArray(attr.endTime,sizeof (attr.endTime))), "yyyyMMddhhmmss"));
-    }
+////    bytearray = BCDTransform::toArray(attr.startTime,sizeof (attr.startTime));
+//    if(attr.startTime[0] == 0x0&&attr.startTime[1] == 0x0&&attr.startTime[2] == 0x0){
+//        setEveryDayEffect(true);
+//        setStartTime(QDateTime(QDate::currentDate(),QTime::fromString(bytearray.right(6),"hhmmss")));
+//        setEndTime(QDateTime(QDate::currentDate(),QTime::fromString(BCDTransform::toArray(attr.endTime,sizeof (attr.endTime)).right(6),"hhmmss")));
+//    }else {
+//        setEveryDayEffect(false);
+//        setStartTime(QDateTime::fromString("20"+QString(BCDTransform::toArray(attr.startTime,sizeof (attr.startTime))), "yyyyMMddhhmmss"));
+//        setEndTime(QDateTime::fromString("20"+QString(BCDTransform::toArray(attr.endTime,sizeof (attr.endTime))), "yyyyMMddhhmmss"));
+//    }
     CircularRegionDataBase database;
     if(!database.isExists()){
         database.createTab();
@@ -73,24 +74,25 @@ bool CircularRegion::addToDataBase(CicularRegionAttr &attr)
 
 bool CircularRegion::updateRegion(CicularRegionAttr &attr)
 {
-    QByteArray bytearray;
+//    QByteArray bytearray;
 
-    bytearray = BCDTransform::toArray(attr.startTime,sizeof (attr.startTime));
-    if(attr.startTime[0] == 0x0&&attr.startTime[1] == 0x0&&attr.startTime[2] == 0x0){
-        setEveryDayEffect(true);
-        setStartTime(QDateTime(QDate::currentDate(),QTime::fromString(bytearray.right(6),"hhmmss")));
-        setEndTime(QDateTime(QDate::currentDate(),QTime::fromString(BCDTransform::toArray(attr.endTime,sizeof (attr.endTime)).right(6),"hhmmss")));
-    }else {
-        setEveryDayEffect(false);
-        setStartTime(QDateTime::fromString("20"+QString(BCDTransform::toArray(attr.startTime,sizeof (attr.startTime))), "yyyyMMddhhmmss"));
-        setEndTime(QDateTime::fromString("20"+QString(BCDTransform::toArray(attr.endTime,sizeof (attr.endTime))), "yyyyMMddhhmmss"));
-    }
+//    bytearray = BCDTransform::toArray(attr.startTime,sizeof (attr.startTime));
+//    if(attr.startTime[0] == 0x0&&attr.startTime[1] == 0x0&&attr.startTime[2] == 0x0){
+//        setEveryDayEffect(true);
+//        setStartTime(QDateTime(QDate::currentDate(),QTime::fromString(bytearray.right(6),"hhmmss")));
+//        setEndTime(QDateTime(QDate::currentDate(),QTime::fromString(BCDTransform::toArray(attr.endTime,sizeof (attr.endTime)).right(6),"hhmmss")));
+//    }else {
+//        setEveryDayEffect(false);
+//        setStartTime(QDateTime::fromString("20"+QString(BCDTransform::toArray(attr.startTime,sizeof (attr.startTime))), "yyyyMMddhhmmss"));
+//        setEndTime(QDateTime::fromString("20"+QString(BCDTransform::toArray(attr.endTime,sizeof (attr.endTime))), "yyyyMMddhhmmss"));
+//    }
 
 
     mCenterLatitude = attr.centerLatitude;
     mCenterLongitude = attr.centerLongitude;
     mRegionRadius = attr.regionRadius;
-
+    setStartTime(BCDTransform::toArray(attr.startTime,sizeof (attr.startTime)));
+    setEndTime(BCDTransform::toArray(attr.endTime,sizeof (attr.endTime)));
     setRegionId(attr.regionId);
     setRegionAttr(attr.regionAttr);
     setTopSpeed(attr.topSpeed);
@@ -126,11 +128,11 @@ bool CircularRegion::addRegionToDataBase()
     attr.topSpeed = getTopSpeed();
     attr.overSpeedDuration = getOverSpeedDuration();
 
-    bytearray = BCDTransform::toBcd(getStartTime().toString("yyMMddhhmmss").toUInt());
-    memcmp(attr.startTime,bytearray.data(),sizeof (attr.startTime));
+    bytearray = BCDTransform::toBcd(getStartTime());
+    memcpy(attr.startTime,bytearray.data(),sizeof (attr.startTime));
 
-    bytearray = BCDTransform::toBcd(getEndTime().toString("yyMMddhhmmss").toUInt());
-    memcmp(attr.endTime,bytearray.data(),sizeof (attr.endTime));
+    bytearray = BCDTransform::toBcd(getEndTime());
+    memcpy(attr.endTime,bytearray.data(),sizeof (attr.endTime));
 
     if(database.isExists()){
         database.insertSignalData(attr);
@@ -240,9 +242,9 @@ bool CircularRegionDataBase::insertSignalData(CicularRegionAttr &info)
     query.bindValue(":centerlat",info.centerLatitude);
     query.bindValue(":centerlng",info.centerLongitude);
     query.bindValue(":radius",info.regionRadius);
-
-    query.bindValue(":start",QByteArray(info.startTime));
-    query.bindValue(":end",QByteArray(info.endTime));
+//qDebug()<<"circular write start:"<<BCDTransform::toArray(info.startTime,sizeof (info.startTime))<<" end:"<<BCDTransform::toArray(info.startTime,sizeof (info.endTime));
+    query.bindValue(":start",BCDTransform::toArray(info.startTime,sizeof (info.startTime)));
+    query.bindValue(":end",BCDTransform::toArray(info.startTime,sizeof (info.endTime)));
     query.bindValue(":topSpeed",info.topSpeed);
     query.bindValue(":overspeedduration",info.overSpeedDuration);
 
@@ -280,6 +282,7 @@ bool CircularRegionDataBase::getSignalData(uint id, CicularRegionAttr &attr)
     QSqlQuery query;
     QString where = "ID="+QString::number(id);
     QByteArray bytearray;
+    QByteArray tmp;
 
     if(SqliteDateBase::getSqliteDateBase()->getTabData(query,DATABASETAB,where)&&query.next()){
         attr.regionId = query.value(0).toUInt();
@@ -287,10 +290,12 @@ bool CircularRegionDataBase::getSignalData(uint id, CicularRegionAttr &attr)
         attr.centerLatitude = query.value(2).toUInt();
         attr.centerLongitude = query.value(3).toUInt();
         attr.regionRadius = query.value(4).toUInt();
-        bytearray = query.value(5).toByteArray();
-        memcmp(attr.startTime,bytearray.data(),sizeof (attr.startTime));
-        bytearray = query.value(6).toByteArray();
-        memcmp(attr.endTime,bytearray.data(),sizeof (attr.endTime));
+        tmp = query.value(5).toByteArray();
+        bytearray = BCDTransform::toBcd(tmp);
+        memcpy(attr.startTime,bytearray.data(),sizeof (attr.startTime));
+        tmp = query.value(6).toByteArray();
+        bytearray = BCDTransform::toBcd(tmp);
+        memcpy(attr.endTime,bytearray.data(),sizeof (attr.endTime));
         attr.topSpeed = query.value(7).toUInt();
         attr.overSpeedDuration = query.value(8).toUInt();
         return true;

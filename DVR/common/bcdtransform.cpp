@@ -66,3 +66,24 @@ QByteArray BCDTransform::toBcd(long value)
 
     return bytearray;
 }
+
+QByteArray BCDTransform::toBcd(QByteArray value)
+{
+    QByteArray bytearray;
+    char tmp = 0x0;
+    int start = 0;
+
+    if(value.length()%2 != 0){
+        tmp |= (value[0] - '0')&0x0f;
+        start = 1;
+        bytearray.append(tmp);
+    }else {
+        start = 0;
+    }
+
+    for (;start < value.length();start += 2) {
+        tmp = (value[start]-'0')&0xf0 + (value[start+1]-'0')&0x0f;
+        bytearray.append(tmp);
+    }
+    return bytearray;
+}

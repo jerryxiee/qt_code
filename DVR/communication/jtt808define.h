@@ -90,17 +90,113 @@ typedef struct{
 } DeviceParamInfo;
 
 //位置基本信息
-typedef struct{
-    uint32_t AlarmType;            //报警标志
-    uint32_t Status;               //状态
-    uint32_t Latitude;             //纬度
-    uint32_t Longitude;            //经度
-    uint16_t Altitude;           //海拔
-    uint16_t Speed;              //速度
-    uint16_t Direction;          //方向
-    char time[6];             //时间
+//typedef struct{
+//    uint32_t AlarmType;            //报警标志
+//    uint32_t Status;               //状态
+//    uint32_t Latitude;             //纬度
+//    uint32_t Longitude;            //经度
+//    uint16_t Altitude;           //海拔
+//    uint16_t Speed;              //速度
+//    uint16_t Direction;          //方向
+//    char time[6];             //时间
 
-} PositionBaseMsg;
+//} PositionBaseMsg;
+
+
+// 报警标志位
+typedef   union
+{
+  struct Bit
+  {
+    uint32_t sos:1;  // 紧急报瞥触动报警开关后触发
+    uint32_t overspeed:1;  // 超速报警
+    uint32_t fatigue:1;  // 疲劳驾驶
+    uint32_t earlywarning:1;  // 预警
+    uint32_t gnssfault:1;  // GNSS模块发生故障
+    uint32_t gnssantennacut:1;  // GNSS天线未接或被剪断
+    uint32_t gnssantennashortcircuit:1;  // GNSS天线短路
+    uint32_t powerlow:1;  // 终端主电源欠压
+
+    uint32_t powercut:1;  // 终端主电源掉电
+    uint32_t lcdfault:1;  // 终端LCD或显示器故障
+    uint32_t ttsfault:1;  // TTS模块故障
+    uint32_t camerafault:1;  // 摄像头故障
+    uint32_t obddtc:1;  // OBD故障码
+    uint32_t retain1:5;  // 保留
+
+    uint32_t daydriveovertime:1;  // 当天累计驾驶超时
+    uint32_t stopdrivingovertime:1;  // 超时停车
+    uint32_t inoutarea:1;  // 进出区域
+    uint32_t inoutroad:1;  // 进出路线
+    uint32_t roaddrivetime:1;  // 路段行驶时间不足/过长
+    uint32_t roaddeviate:1;   // 路线偏离报警
+    uint32_t vssfault:1;  // 车辆VSS故障
+    uint32_t oilfault:1;  // 车辆油量异常
+    uint32_t caralarm:1;  // 车辆被盗(通过车辆防盗器)
+    uint32_t caraccalarm:1;  // 车辆非法点火
+    uint32_t carmove:1;  // 车辆非法位移
+    uint32_t collision:1;  // 碰撞侧翻报警
+    uint32_t opendoor:1;  // 非法开门
+    uint32_t retain2:1;  // 保留
+  }bit;
+  uint32_t value;
+} AlarmFlagBit;
+
+// 状态位
+typedef   union
+{
+  struct Bit
+  {
+    uint32_t acc:1;  // ACC 0:ACC关; 1:ACC开
+    uint32_t location:1;  // 定位 0:未定位; 1:定位
+    uint32_t snlatitude:1;  // 0:北纬: 1:南纬
+    uint32_t ewlongitude:1;  // 0:东经; 1:西经
+    uint32_t operation:1;  // 0:运营状态; 1:停运状态
+    uint32_t gpsencrypt:1;  // 0:经纬度未经保密插件加密;
+                            // 1:经纬度已经保密插件加密
+    uint32_t retain1:2;      // 保留
+    uint32_t trip_stat:2;  // 00: 空车; 01: 半载; 10: 保留; 11: 满载;
+    uint32_t oilcut:1;  // 0:车辆油路正常; 1:车辆油路断开
+    uint32_t circuitcut:1;  // 0:车辆电路正常; 1:车辆电路断开
+    uint32_t doorlock:1;  // 0:车门解锁; 1: 车门加锁
+    uint32_t door1status:1;  // 0:门 1 关; 1: 门 1 开; (前门)
+    uint32_t door2status:1;  // 0:门 2 关; 1: 门 2 开; (中门)
+    uint32_t door3status:1;  // 0:门 3 关; 1: 门 3 开; (后门)
+    uint32_t door4status:1;  // 0:门 4 关; 1: 门 4 开; (驾驶席门)
+    uint32_t door5status:1;  // 0:门 5 关; 1: 门 5 开; (自定义)
+    uint32_t gpsen:1;  // 0: 未使用 GPS 卫星进行定位;
+                       // 1: 使用 GPS 卫星进行定位;
+    uint32_t beidouen:1;  // 0: 未使用北斗卫星进行定位;
+                          // 1: 使用北斗卫星进行定位;
+    uint32_t glonassen:1;  // 0: 未使用 GLONASS 卫星进行定位;
+                           // 1: 使用 GLONASS 卫星进行定位;
+    uint32_t galileoen:1;  // 0: 未使用 Galileo 卫星进行定位;
+                           // 1: 使用 Galileo 卫星进行定位;
+    uint32_t retain2:10;  // 保留
+  }bit;
+  uint32_t value;
+} StatusFlagBit;
+
+// 位置基本信息数据
+typedef   struct
+{
+  uint32_t alarm;		//报警标志
+  uint32_t status;      //状态标志
+  uint32_t latitude;    // 纬度(以度为单位的纬度值乘以10的6次方, 精确到百万分之一度)
+  uint32_t longitude;   // 经度(以度为单位的纬度值乘以10的6次方, 精确到百万分之一度)
+  uint16_t atitude;     // 海拔高度, 单位为米(m)
+  uint16_t speed;       // 速度 1/10km/h
+  uint16_t bearing;     // 方向 0-359,正北为0, 顺时针
+  uint8_t time[6];      // 时间 BCD[6] YY-MM-DD-hh-mm-ss(GMT+8时间, 本标准之后涉及的时间均采用此时区)
+} PositionBaseInfo;
+
+// 位置附加信息项
+typedef   struct
+{
+  uint8_t item_id;
+  uint8_t item_len;
+  uint8_t item_value[8];
+} PositionExtensionInfo;
 
 //驾驶员身份信息
 typedef struct{

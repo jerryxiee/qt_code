@@ -1,6 +1,17 @@
 #include "regioncontrol.h"
 #include <QDebug>
 
+RegionControl* RegionControl::mRegionCtr = nullptr;
+
+RegionControl* RegionControl::createNew()
+{
+    if(!mRegionCtr){
+        mRegionCtr = new RegionControl();
+    }
+
+    return mRegionCtr;
+}
+
 RegionControl::RegionControl(QObject *parent) : QObject(parent)
 {
     RectangleRegionDataBase rectangledatabase;
@@ -46,6 +57,10 @@ RegionControl::RegionControl(QObject *parent) : QObject(parent)
 
 }
 
+RegionControl::~RegionControl()
+{
+
+}
 
 QString RegionControl::genreatename(REGIONTYPE type,uint id)
 {

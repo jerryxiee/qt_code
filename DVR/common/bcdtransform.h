@@ -13,6 +13,7 @@ public:
     static QByteArray toArray(const char *bcd,int len);
     static QByteArray toArray(const uint8_t *bcd,int len);
     static QByteArray toBcd(long value);
+    static QByteArray toBcd(QByteArray value);
 
 
 private:

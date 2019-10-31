@@ -206,7 +206,7 @@ void PositionCtr::galileoEnableStatusChanged(bool status)
 
 }
 
-void PositionCtr::reportPosition()
+void PositionCtr::reportPosition(QList<PositionExtensionInfo> &infolist)
 {
 
 }

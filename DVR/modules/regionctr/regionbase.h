@@ -17,7 +17,7 @@ class RegionBase : public QObject
     Q_OBJECT
 public:
     explicit RegionBase(REGIONTYPE type,QObject *parent = nullptr);
-    RegionBase(REGIONTYPE type,uint32_t id,uint32_t attr,uint start,uint end,uint topspeed,uint topspeeddur,QObject *parent = nullptr);
+    RegionBase(REGIONTYPE type,uint32_t id,uint32_t attr,QByteArray start,QByteArray end,uint topspeed,uint topspeeddur,QObject *parent = nullptr);
 //    virtual bool modifyRegion() = 0;
 //    virtual bool updateRegion() = 0;
     virtual bool isRectangle() const;
@@ -34,10 +34,10 @@ public:
 //    uint getEndTime() const {return  mEndTime;}
 //    void setEndTime(uint value);
 
-    QDateTime getStartTime() const ;
-    void setStartTime(QDateTime value);
-    QDateTime getEndTime() const;
-    void setEndTime(QDateTime value);
+    QByteArray getStartTime() const ;
+    void setStartTime(QByteArray value);
+    QByteArray getEndTime() const;
+    void setEndTime(QByteArray value);
 
     uint getTopSpeed() const {return  mTopSpeed;}
     void setTopSpeed(uint value);
@@ -59,8 +59,8 @@ public slots:
 private:
     uint32_t mRegionId;
     uint32_t mRegionAttr;
-    uint mStartTime;
-    uint mEndTime;
+    QByteArray mStartTime;
+    QByteArray mEndTime;
     uint mTopSpeed;
     uint mOverSpeedDuration;
     bool mIsInRegion;

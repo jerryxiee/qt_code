@@ -2,6 +2,7 @@
 #define POSITIONCTR_H
 
 #include <QObject>
+#include "regionctr/regioncontrol.h"
 
 class PositionCtr : public QObject
 {
@@ -69,7 +70,7 @@ public slots:
     void glonassEnableStatusChanged(bool status);
     void galileoEnableStatusChanged(bool status);
 
-    void reportPosition();
+    void reportPosition(QList<PositionExtensionInfo> &infolist);
 
 
 

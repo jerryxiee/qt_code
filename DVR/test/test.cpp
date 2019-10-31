@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include "communication/remotethread.h"
 #include "modules/regionctr/regioncontrol.h"
+#include "common/bcdtransform.h"
 
 Test::Test(QObject *parent) : QObject(parent)
 {
@@ -202,10 +203,9 @@ void Test::play(int Chn,QString starttime,QString endtime)
 
 void Test::deleteRegion()
 {
-    RegionControl regionctr;
 
-    regionctr.deleteRegion(REGIONTYPE::Circular,1);
-    regionctr.deleteRegion(REGIONTYPE::Rectange,1);
+    RegionControl::createNew()->deleteRegion(REGIONTYPE::Circular,1);
+    RegionControl::createNew()->deleteRegion(REGIONTYPE::Rectange,1);
 
 
 }
@@ -214,14 +214,19 @@ void Test::addRegion()
 {
     CicularRegionAttr cattr;
     RectangleRegionAttr rattr;
-    RegionControl regionctr;
+
     RegionBase *region;
 
+    memset(&cattr,0x0,sizeof (CicularRegionAttr));
+    memset(&rattr,0x0,sizeof (RectangleRegionAttr));
     cattr.regionId = 1;
     rattr.regionId = 1;
+//    memcpy(cattr.startTime,"123456",sizeof (cattr.startTime));
+//    memcpy(rattr.startTime,"123456",sizeof (rattr.startTime));
     region = new CircularRegion(cattr);
-    regionctr.addRegion(region);
+    RegionControl::createNew()->addRegion(region);
     region = new RectangleRegion(rattr);
-    regionctr.addRegion(region);
+    RegionControl::createNew()->addRegion(region);
 
+    qDebug()<<"add :"<<BCDTransform::toArray(cattr.startTime,sizeof (cattr.startTime));
 }

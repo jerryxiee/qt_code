@@ -1,5 +1,6 @@
 #include "regionbase.h"
 #include <QtMath>
+#include <QDebug>
 
 RegionBase::RegionBase(REGIONTYPE type,QObject *parent) :
     QObject(parent),mIsInRegion(false),mRepeatEveryDay(false),mType(type)
@@ -8,13 +9,17 @@ RegionBase::RegionBase(REGIONTYPE type,QObject *parent) :
     qRegisterMetaType<REGIONTYPE>("REGIONTYPE&");
 }
 
-RegionBase::RegionBase(REGIONTYPE type,uint32_t id,uint32_t attr,uint start,uint end,uint topspeed,uint topspeeddur,QObject *parent):
+RegionBase::RegionBase(REGIONTYPE type, uint32_t id, uint32_t attr, QByteArray start, QByteArray end, uint topspeed, uint topspeeddur, QObject *parent):
     QObject(parent),mRegionId(id),mRegionAttr(attr),mStartTime(start),mEndTime(end),
     mTopSpeed(topspeed),mOverSpeedDuration(topspeeddur),mIsInRegion(false),mRepeatEveryDay(false),mType(type)
 {
     qRegisterMetaType<REGIONTYPE>("REGIONTYPE");
     qRegisterMetaType<REGIONTYPE>("REGIONTYPE&");
 
+    if(memcmp(mStartTime.data(),"000000",6) == 0 ||
+            memcmp(mEndTime.data(),"000000",6) == 0){
+        mRepeatEveryDay = true;
+    }
 }
 
 RegionBase::~RegionBase()
@@ -62,34 +67,38 @@ void RegionBase::setRegionAttr(uint32_t value)
     mRegionAttr = value;
 }
 
-QDateTime RegionBase::getStartTime() const
+QByteArray RegionBase::getStartTime() const
 {
-    if(isEveryDay()){
-        QDateTime datetime(QDate(0,0,0),mStart.time());
-        return datetime;
+//    if(isEveryDay()){
+//        QDateTime datetime(QDate(0,0,0),mStart.time());
+//        return datetime;
+//    }
+    return mStartTime;
+}
+
+void RegionBase::setStartTime(QByteArray value)
+{
+    if(memcmp(value.data(),"000000",6) == 0){
+        mRepeatEveryDay = true;
     }
-
-    return mStart;
+    mStartTime = value;
 }
 
-void RegionBase::setStartTime(QDateTime value)
+QByteArray RegionBase::getEndTime() const
 {
-    mStart = value;
+//    if(isEveryDay()){
+//        QDateTime datetime(QDate(0,0,0),mEnd.time());
+//        return datetime;
+//    }
+    return mEndTime;
 }
 
-QDateTime RegionBase::getEndTime() const
+void RegionBase::setEndTime(QByteArray value)
 {
-    if(isEveryDay()){
-        QDateTime datetime(QDate(0,0,0),mEnd.time());
-        return datetime;
+    if(memcmp(value.data(),"000000",6) == 0){
+        mRepeatEveryDay = true;
     }
-
-    return mEnd;
-}
-
-void RegionBase::setEndTime(QDateTime value)
-{
-    mEnd = value;
+    mEndTime = value;
 }
 
 void RegionBase::setTopSpeed(uint value)
