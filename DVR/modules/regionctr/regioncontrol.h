@@ -11,7 +11,7 @@ class RegionControl : public QObject
 {
     Q_OBJECT
 public:
-    static RegionControl* createNew();
+    static RegionControl* getRegionControlObject();
 
     RegionBase *lockup(REGIONTYPE type,uint id);
     RegionBase *lockup(QString key);

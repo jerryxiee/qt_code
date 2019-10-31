@@ -87,7 +87,8 @@ SOURCES += \
     modules/regionctr/regionbase.cpp \
     modules/regionctr/circularregion.cpp \
     modules/regionctr/rectangleregion.cpp \
-    modules/regionctr/regioncontrol.cpp
+    modules/regionctr/regioncontrol.cpp \
+    modules/modulescontrol.cpp
 
 
 
@@ -152,7 +153,8 @@ HEADERS += \
     modules/regionctr/regionbase.h \
     modules/regionctr/circularregion.h \
     modules/regionctr/rectangleregion.h \
-    modules/regionctr/regioncontrol.h
+    modules/regionctr/regioncontrol.h \
+    modules/modulescontrol.h
 
 
 

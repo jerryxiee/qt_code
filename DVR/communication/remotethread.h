@@ -22,6 +22,10 @@ public:
 
   void addFuncOperate(int id,BackgroundHandlerProc *fun,void *object);
 
+#ifndef MILLION
+#define MILLION 1000000
+#endif
+
 protected:
   RemoteTaskScheduler(MsgQueue &msgqueue,unsigned maxSchedulerGranularity);
       // called only by "createNew()"

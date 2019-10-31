@@ -204,8 +204,8 @@ void Test::play(int Chn,QString starttime,QString endtime)
 void Test::deleteRegion()
 {
 
-    RegionControl::createNew()->deleteRegion(REGIONTYPE::Circular,1);
-    RegionControl::createNew()->deleteRegion(REGIONTYPE::Rectange,1);
+    RegionControl::getRegionControlObject()->deleteRegion(REGIONTYPE::Circular,1);
+    RegionControl::getRegionControlObject()->deleteRegion(REGIONTYPE::Rectange,1);
 
 
 }
@@ -224,9 +224,9 @@ void Test::addRegion()
 //    memcpy(cattr.startTime,"123456",sizeof (cattr.startTime));
 //    memcpy(rattr.startTime,"123456",sizeof (rattr.startTime));
     region = new CircularRegion(cattr);
-    RegionControl::createNew()->addRegion(region);
+    RegionControl::getRegionControlObject()->addRegion(region);
     region = new RectangleRegion(rattr);
-    RegionControl::createNew()->addRegion(region);
+    RegionControl::getRegionControlObject()->addRegion(region);
 
     qDebug()<<"add :"<<BCDTransform::toArray(cattr.startTime,sizeof (cattr.startTime));
 }

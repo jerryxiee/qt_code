@@ -12,6 +12,7 @@ public:
 
     void setAlarmFlag(uint32_t flag);
     void setStatus(uint32_t status);
+    static void reportPosition(void *object);
 
 signals:
     void alarmFalgChanged();
@@ -71,6 +72,11 @@ public slots:
     void galileoEnableStatusChanged(bool status);
 
     void reportPosition(QList<PositionExtensionInfo> &infolist);
+    void setLatitude(uint32_t value);
+    void setLongitude(uint32_t value);
+    void setSpeed(uint16_t value);
+    void setAtitude(uint16_t value);
+    void setDirectionAngle(uint16_t value);
 
 
 
@@ -90,6 +96,12 @@ private:
     uint32_t mAlarmFlag;
     uint32_t mPositionStatus;
     uint32_t mCurRegionId;         //当前所在区域ID
+    uint32_t mLatitude;            //纬度
+    uint32_t mLongitude;           //经度
+    uint16_t mSpeed;               //速度
+    uint16_t mAtitude;             //海拔
+    uint16_t mDirectionAngle;      //方向角
+    RegionControl *mRegionControl;
 };
 
 #endif // POSITIONCTR_H

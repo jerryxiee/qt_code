@@ -2,6 +2,7 @@
 #include "communication/jtt808define.h"
 #include "settings/platformset.h"
 #include <QDebug>
+#include "modulescontrol.h"
 
 PlatformRegister* PlatformRegister::mPlatformRegister = nullptr;
 
@@ -109,7 +110,7 @@ void PlatformRegister::serverUnRegister()
     remote->msgQueueSendToNet(&msginfo,0,nullptr,nullptr);
 
     if(mRegisterToken){
-        RemoteThread::getRemoteThread()->unscheduleDelayedTask(mRegisterToken);
+        ModulesControl::getModulesControl()->getTaskScheduler().unscheduleDelayedTask(mRegisterToken);
     }
 
     setAuthNum(QString());
@@ -128,7 +129,7 @@ void PlatformRegister::setMainServerStatus(PlatFormStatus status)
 {
     mMainStatus = status;
     if(mMainStatus != Connected){
-        mRegisterToken = RemoteThread::getRemoteThread()->scheduleDelayedTask(3000000,serverRegister,this);
+        mRegisterToken = ModulesControl::getModulesControl()->getTaskScheduler().scheduleDelayedTask(3000000,serverRegister,this);
     }
 
     mainServerStatusChanged(mMainStatus);

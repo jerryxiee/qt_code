@@ -317,6 +317,7 @@ RemoteTest::~RemoteTest()
 {
     if(isRunning()){
         mRun = false;
+        mRemoteTestTaskScheduler->doExitLoop();
         wait();
         if(mRemoteTestTaskScheduler){
             delete mRemoteTestTaskScheduler;

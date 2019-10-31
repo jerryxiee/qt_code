@@ -1,8 +1,9 @@
 #include "positionctr.h"
+#include "communication/remotethread.h"
 
 PositionCtr::PositionCtr(QObject *parent) : QObject(parent),mCurRegionId(0)
 {
-
+    mRegionControl = RegionControl::getRegionControlObject();
 }
 
 void PositionCtr::setAlarmFlag(uint32_t flag)
@@ -206,7 +207,65 @@ void PositionCtr::galileoEnableStatusChanged(bool status)
 
 }
 
+void PositionCtr::setLatitude(uint32_t value)
+{
+    mLatitude = value;
+}
+void PositionCtr::setLongitude(uint32_t value)
+{
+    mLongitude = value;
+}
+void PositionCtr::setSpeed(uint16_t value)
+{
+    mSpeed = value;
+}
+void PositionCtr::setAtitude(uint16_t value)
+{
+    mAtitude = value;
+}
+void PositionCtr::setDirectionAngle(uint16_t value)
+{
+    mDirectionAngle = value;
+}
+
+void reportPosition(void *object)
+{
+
+}
+
 void PositionCtr::reportPosition(QList<PositionExtensionInfo> &infolist)
 {
+    PositionBaseInfo baseinfo;
+    char *msgbuf = nullptr;
+    char *pBuf;
+    MsgInfo msginfo;
+    int msglen;
+
+    memset(&baseinfo,0x0,sizeof (PositionBaseInfo));
+
+    if(infolist.count() != 0){
+        msglen = sizeof (PositionBaseInfo)+infolist.count()*sizeof (PositionExtensionInfo);
+        pBuf = msgbuf = (char *)malloc(msglen*2);
+        if(!msgbuf){
+            return;
+        }
+        memcpy(pBuf,&baseinfo,sizeof (PositionBaseInfo));
+        pBuf += sizeof (PositionBaseInfo);
+        for (int i = 0;i < infolist.count();i++) {
+            memcpy(pBuf,&infolist[i],sizeof (PositionExtensionInfo));
+            pBuf += sizeof (PositionExtensionInfo);
+        }
+        msginfo.mSize = msglen;
+        msginfo.mMesgCache = msgbuf;
+    }else {
+        msginfo.mSize = sizeof (PositionBaseInfo);
+        msginfo.mMesgCache = (char *)&baseinfo;
+    }
+
+    msginfo.mMsgType = 0x0200;
+    RemoteThread::getRemoteThread()->msgQueueSendToNet(&msginfo, msginfo.mSize,nullptr,nullptr);
+    if(!msgbuf){
+        free(msgbuf);
+    }
 
 }

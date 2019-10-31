@@ -21,6 +21,7 @@
 #include "modules/moduleinit.h"
 #include "windows/test/testwidget.h"
 #include "modules/regionctr/regionbase.h"
+#include "modules/modulescontrol.h"
 
 #ifndef LUNUX_WIN
 #include "test/venctomp4test.h"
@@ -62,6 +63,11 @@ void sign(int signal)
     QApplication::quit();
 }
 
+void test(void *arg)
+{
+    qDebug()<<"test run";
+    ModulesControl::getModulesControl()->getTaskScheduler().scheduleDelayedTask(1000000,test,nullptr);
+}
 int main(int argc, char *argv[])
 {
 
@@ -101,12 +107,17 @@ int main(int argc, char *argv[])
     RemoteThread *remotethread = RemoteThread::getRemoteThread();
     remotethread->start();
 
-    module_init();
-    QDateTime datetime;
-    datetime.setDate(QDate::currentDate());
-    datetime.setTime(QTime::fromString("000050","hhmmss"));
-    qDebug()<<datetime;
-    qDebug()<<QTime::fromString("000150","hhmmss").second();
+//    module_init();
+    ModulesControl *moduleinit = ModulesControl::getModulesControl();
+    moduleinit->initModules();
+//    moduleinit->getTaskScheduler().scheduleDelayedTask(1000000,test,nullptr);
+    moduleinit->start();
+
+//    QDateTime datetime;
+//    datetime.setDate(QDate::currentDate());
+//    datetime.setTime(QTime::fromString("000050","hhmmss"));
+//    qDebug()<<datetime;
+//    qDebug()<<QTime::fromString("000150","hhmmss").second();
 //    QString time = QDateTime::currentDateTime().toString();
 //    qDebug()<<QDateTime::currentDateTime().toTime_t();
 //    qDebug()<<QDateTime::fromString(time.right(6),"hhmmss");
@@ -131,5 +142,7 @@ int main(int argc, char *argv[])
 #endif
         ret = a.exec();
     qDebug()<<"exit main";
+    delete remotethread;
+    delete moduleinit;
     return ret;
 }

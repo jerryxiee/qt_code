@@ -87,6 +87,7 @@ public:
   virtual void unscheduleDelayedTask(TaskToken& prevTask);
 
   virtual void doEventLoop(char volatile* watchVariable);
+    virtual void doExitLoop();
 
   virtual EventTriggerId createEventTrigger(TaskFunc* eventHandlerProc);
   virtual void deleteEventTrigger(EventTriggerId eventTriggerId);
@@ -109,6 +110,7 @@ protected:
   TaskFunc* fTriggeredEventHandlers[MAX_NUM_EVENT_TRIGGERS];
   void* fTriggeredEventClientDatas[MAX_NUM_EVENT_TRIGGERS];
   unsigned fLastUsedTriggerNum; // in the range [0,MAX_NUM_EVENT_TRIGGERS)
+  Boolean fRun;
 };
 
 #endif

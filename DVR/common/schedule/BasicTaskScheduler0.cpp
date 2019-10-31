@@ -75,10 +75,16 @@ void BasicTaskScheduler0::unscheduleDelayedTask(TaskToken& prevTask) {
 
 void BasicTaskScheduler0::doEventLoop(char volatile* watchVariable) {
   // Repeatedly loop, handling readble sockets and timed events:
+    fRun = True;
   while (1) {
-    if (watchVariable != NULL && *watchVariable != 0) break;
+    if ((watchVariable != nullptr && *watchVariable != 0) || !fRun) break;
     SingleStep();
   }
+}
+
+void BasicTaskScheduler0::doExitLoop()
+{
+    fRun = False;
 }
 
 EventTriggerId BasicTaskScheduler0::createEventTrigger(TaskFunc* eventHandlerProc) {

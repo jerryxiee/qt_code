@@ -3,7 +3,7 @@
 
 RegionControl* RegionControl::mRegionCtr = nullptr;
 
-RegionControl* RegionControl::createNew()
+RegionControl* RegionControl::getRegionControlObject()
 {
     if(!mRegionCtr){
         mRegionCtr = new RegionControl();

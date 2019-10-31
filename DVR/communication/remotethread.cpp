@@ -538,6 +538,7 @@ RemoteThread::~RemoteThread()
 {
     if(isRunning()){
         mRun = false;
+        mRemoteTask->doExitLoop();
         wait();
         if(mRemoteTask)
             delete mRemoteTask;
