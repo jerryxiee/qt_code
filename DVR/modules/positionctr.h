@@ -13,12 +13,15 @@ public:
 
     void setAlarmFlag(uint32_t flag);
     void setStatus(uint32_t status);
-    int getReportStrategy() const;
-    int getCurReportTime() const;
-    int getCurReportDistance() const;
+    uint getReportStrategy() const;
+    void setCurReportTime(uint value);
+    uint getCurReportTime() const;
+    void setCurReportDistance(uint value);
+    uint getCurReportDistance() const;
     static void reportPosition(void *object);
     void reportPositionA();   //定时
     void reportPositionB();   //定距
+
 
 protected:
     explicit PositionCtr(QObject *parent = nullptr);
@@ -91,35 +94,37 @@ public slots:
     void setDirectionAngle(uint16_t value);
     void onServerConnectStatusChanged(PlatFormStatus &status);
     void onPositionSetChanged();
-
+    void startReport();
+    void stopReport();
 
 public:
     PlatFormStatus mServerConnectStatus;
 
 private:
-    int mCurrentReportTime;
-    int mCurrentReportDistance;
-    int mReportStrategy;
-    int mReportPlay;
-    int mUrgentReportTime;
-    int mUrgentReportDistance;
-    int mDriverSignoutReportTime;
-    int mDriverSignoutReporDistance;
-    int mSleepReportTime;
-    int mSleepReporDistance;
-    int mDefaultReportTime;
-    int mDefaultReporDistance;
-    uint32_t mAlarmFlag;
-    uint32_t mPositionStatus;
-    uint32_t mCurRegionId;         //当前所在区域ID
-    uint32_t mLatitude;            //纬度
-    uint32_t mLongitude;           //经度
-    uint32_t mLastLatitude;        //最近上报纬度
-    uint32_t mLastLongitude;       //最近上报经度
-    uint16_t mSpeed;               //速度
-    uint16_t mAtitude;             //海拔
+    uint mCurrentReportTime;
+    uint mCurrentReportDistance;
+    uint mReportStrategy;
+    uint mReportPlay;
+    uint mUrgentReportTime;
+    uint mUrgentReportDistance;
+    uint mDriverSignoutReportTime;
+    uint mDriverSignoutReporDistance;
+    uint mSleepReportTime;
+    uint mSleepReporDistance;
+    uint mDefaultReportTime;
+    uint mDefaultReporDistance;
+    uint mAlarmFlag;
+    uint mPositionStatus;
+    uint mCurRegionId;         //当前所在区域ID
+    uint mLatitude;            //纬度
+    uint mLongitude;           //经度
+    uint mLastLatitude;        //最近上报纬度
+    uint mLastLongitude;       //最近上报经度
+    uint mSpeed;               //速度
+    uint mAtitude;             //海拔
     uint16_t mDirectionAngle;      //方向角
     RegionControl *mRegionControl;
+    uint mAlarmMask;            //报警屏蔽字
 
     TaskToken mTaskToken;
     static PositionCtr * mPosCtr;

@@ -112,7 +112,7 @@ bool RegionControl::addRegion(RegionBase *region)
 
     region->addRegionToDataBase();
     mRegionHashTab.insert(key,region);
-    connect(region,SIGNAL(enterRegion(REGIONTYPE ,uint32_t,bool)),this,SLOT(onEnterRegionSlot(REGIONTYPE ,uint32_t,bool)));
+    connect(region,SIGNAL(enterRegion(REGIONTYPE ,uint32_t,bool,uint32_t)),this,SLOT(onEnterRegionSlot(REGIONTYPE ,uint32_t,bool,uint32_t)));
 //    mRegionHashTab.insert(region->getRegionId(),region);
     qDebug()<<"addRegion end";
     return true;
@@ -125,7 +125,7 @@ void RegionControl::deleteRegion(REGIONTYPE type,uint id)
         qDebug()<<"not in hashtab";
         return;
     }
-    disconnect(region,SIGNAL(enterRegion(REGIONTYPE ,uint32_t,bool)),this,SLOT(onEnterRegionSlot(REGIONTYPE ,uint32_t,bool)));
+    disconnect(region,SIGNAL(enterRegion(REGIONTYPE ,uint32_t,bool,uint32_t)),this,SLOT(onEnterRegionSlot(REGIONTYPE ,uint32_t,bool,uint32_t)));
     region->deleteRegionFromDataBase();
     mRegionHashTab.remove(genreatename(type,id));
     delete region;
@@ -134,7 +134,23 @@ void RegionControl::deleteRegion(REGIONTYPE type,uint id)
 
 }
 
-void RegionControl::onEnterRegionSlot(REGIONTYPE type,uint32_t id,bool enter)
+void RegionControl::runRegionFunction(uint32_t latitude, uint32_t longitude)
+{
+    QHashIterator<QString,RegionBase *> hashtab(mRegionHashTab);
+    while (hashtab.hasNext()) {
+        hashtab.next();
+        hashtab.value()->repeatCalcFunc(latitude,longitude);
+
+    }
+
+}
+
+void RegionControl::onEnterRegionSlot(REGIONTYPE type, uint32_t id, bool enter, uint32_t attr)
 {
 
+}
+
+void RegionControl::onOverSpeedSlot(REGIONTYPE type,uint32_t id)
+{
+    overSpeedSignal(type,id);
 }

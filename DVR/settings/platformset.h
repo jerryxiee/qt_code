@@ -175,6 +175,10 @@ public:
     void setMonitorTelephoneNumber(QString value);
     QString readPlatformSpecialNumber() const;
     void setPlatformSpecialNumber(QString value);
+
+    uint readAlarmMask() const;
+    void setAlarmMask(uint value);
+
     QString readTopSpeed() const;
     void setTopSpeed(QString value);
     QString readOverspeedDuration() const;

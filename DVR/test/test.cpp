@@ -221,6 +221,8 @@ void Test::addRegion()
     memset(&rattr,0x0,sizeof (RectangleRegionAttr));
     cattr.regionId = 1;
     rattr.regionId = 1;
+    QByteArray byte = BCDTransform::toArray(rattr.startTime,sizeof (rattr.startTime));
+    qDebug()<<"test len:"<<byte.length();
 //    memcpy(cattr.startTime,"123456",sizeof (cattr.startTime));
 //    memcpy(rattr.startTime,"123456",sizeof (rattr.startTime));
     region = new CircularRegion(cattr);

@@ -730,6 +730,16 @@ void PlatformSet::setPlatformSpecialNumber(QString value)
 //    mPlatformConfig.insertSignalData(config);
     setDeviceParam(0x8103,0x49,value);
 }
+
+uint PlatformSet::readAlarmMask() const
+{
+    return readDeviceParam(0x8103,0x50).toUInt();
+}
+void PlatformSet::setAlarmMask(uint value)
+{
+    setDeviceParam(0x8103,0x50,value);
+}
+
 QString PlatformSet::readTopSpeed() const
 {
 //    return mPlatformConfig.getValue(0x8103,0x55,0).toString();

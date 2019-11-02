@@ -10,10 +10,13 @@ public:
     BCDTransform(int value);
     BCDTransform(const char *value,int len);
 
+    static QByteArray ChartoArray(const char *bcd,int len);
     static QByteArray toArray(const char *bcd,int len);
     static QByteArray toArray(const uint8_t *bcd,int len);
     static QByteArray toBcd(long value);
-    static QByteArray toBcd(QByteArray value);
+    static QByteArray toBcd(const QByteArray &value);
+    static QByteArray BcdToHex(QByteArray &value);
+
 
 
 private:

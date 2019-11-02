@@ -13,8 +13,8 @@ CircularRegion::CircularRegion(QObject *parent) : RegionBase(REGIONTYPE::Circula
 }
 
 CircularRegion::CircularRegion(CicularRegionAttr &attr,QObject *parent):
-    RegionBase(REGIONTYPE::Circular,attr.regionId,attr.regionAttr,BCDTransform::toArray(attr.startTime,sizeof (attr.startTime)),
-               BCDTransform::toArray(attr.endTime,sizeof (attr.endTime)),attr.topSpeed,attr.overSpeedDuration,parent),
+    RegionBase(REGIONTYPE::Circular,attr.regionId,attr.regionAttr,BCDTransform::ChartoArray(attr.startTime,sizeof (attr.startTime)),
+               BCDTransform::ChartoArray(attr.endTime,sizeof (attr.endTime)),attr.topSpeed,attr.overSpeedDuration,parent),
     mCenterLatitude(attr.centerLatitude),mCenterLongitude(attr.centerLongitude),mRegionRadius(attr.regionRadius)
 {
 //    QByteArray bytearray;
@@ -91,8 +91,8 @@ bool CircularRegion::updateRegion(CicularRegionAttr &attr)
     mCenterLatitude = attr.centerLatitude;
     mCenterLongitude = attr.centerLongitude;
     mRegionRadius = attr.regionRadius;
-    setStartTime(BCDTransform::toArray(attr.startTime,sizeof (attr.startTime)));
-    setEndTime(BCDTransform::toArray(attr.endTime,sizeof (attr.endTime)));
+    setStartTime(attr.startTime);
+    setEndTime(attr.endTime);
     setRegionId(attr.regionId);
     setRegionAttr(attr.regionAttr);
     setTopSpeed(attr.topSpeed);
@@ -128,10 +128,10 @@ bool CircularRegion::addRegionToDataBase()
     attr.topSpeed = getTopSpeed();
     attr.overSpeedDuration = getOverSpeedDuration();
 
-    bytearray = BCDTransform::toBcd(getStartTime());
+    bytearray = getStartTime();
     memcpy(attr.startTime,bytearray.data(),sizeof (attr.startTime));
 
-    bytearray = BCDTransform::toBcd(getEndTime());
+    bytearray = getEndTime();
     memcpy(attr.endTime,bytearray.data(),sizeof (attr.endTime));
 
     if(database.isExists()){

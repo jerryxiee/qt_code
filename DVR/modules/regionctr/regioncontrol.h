@@ -17,6 +17,7 @@ public:
     RegionBase *lockup(QString key);
     bool addRegion(RegionBase *region);
     void deleteRegion(REGIONTYPE type,uint id);
+    void runRegionFunction(uint32_t latitude,uint32_t longitude);
     ~RegionControl();
 
 
@@ -25,9 +26,14 @@ protected:
 private:
     QString genreatename(REGIONTYPE type,uint id);
 signals:
+    void enterOrExitRegionSignal(REGIONTYPE type,uint32_t id,bool enter);
+    void reportToPlatformSignal(REGIONTYPE type,uint32_t id,bool enter);
+    void reportToDriverSignal(REGIONTYPE type,uint32_t id,bool enter);
+    void overSpeedSignal(REGIONTYPE type,uint32_t id);
 
 public slots:
-    void onEnterRegionSlot(REGIONTYPE type,uint32_t id,bool enter);
+    void onEnterRegionSlot(REGIONTYPE type,uint32_t id,bool enter,uint32_t attr);
+    void onOverSpeedSlot(REGIONTYPE type,uint32_t id);
 
 private:
     static RegionControl* mRegionCtr;

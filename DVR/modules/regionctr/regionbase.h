@@ -3,8 +3,10 @@
 
 #include <QObject>
 #include <QDateTime>
+#include "BasicUsageEnvironment0.hh"
 
 typedef enum{
+    None,
     Circular,
     Rectange,
     Other
@@ -50,24 +52,35 @@ public:
     virtual ~RegionBase();
     //n1:第一点的纬度坐标 e1:第一点的经度坐标
     static double distance(uint32_t n1, uint32_t e1, uint32_t n2, uint32_t e2);
+    static void enableRegionControl(void *object);
+    void enableRegionControl();
+    static void disEnableRegionControl(void *object);
+    void disEnableRegionControl();
 
+private:
+    //time:BCD码
+    uint calcDelay(QByteArray time,bool everyday);
 signals:
-    void enterRegion(REGIONTYPE type,uint32_t id,bool enter);
+    void enterRegion(REGIONTYPE type,uint32_t id,bool enter,uint32_t attr);
+    void overSpeedSignal(REGIONTYPE type,uint32_t id);
+    void speedCtrChanged(uint value,uint speedlimit);
 
 public slots:
 
 private:
     uint32_t mRegionId;
     uint32_t mRegionAttr;
-    QByteArray mStartTime;
-    QByteArray mEndTime;
+    QByteArray mStartTime;       //BCD码
+    QByteArray mEndTime;         //BCD码
     uint mTopSpeed;
     uint mOverSpeedDuration;
     bool mIsInRegion;
     bool mRepeatEveryDay;
+    bool mEnable;
     QDateTime mStart;
     QDateTime mEnd;
     REGIONTYPE mType;
+    TaskToken mTaskToken;
 };
 
 #endif // RAGIONBASE_H

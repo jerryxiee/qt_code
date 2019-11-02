@@ -55,6 +55,7 @@ void PositionCtr::updateinfo()
     mServerConnectStatus = PlatformRegister::getPlatformRegister()->getMainServerStatus();
     mCurrentReportTime = mDefaultReportTime;
     mCurrentReportDistance = mDefaultReporDistance;
+    mAlarmMask = platformset.readAlarmMask();
 }
 
 void PositionCtr::setAlarmFlag(uint32_t flag)
@@ -69,16 +70,27 @@ void PositionCtr::setStatus(uint32_t status)
     statusChanged();
 }
 
-int PositionCtr::getReportStrategy() const
+uint PositionCtr::getReportStrategy() const
 {
     return mReportStrategy;
 }
 
-int PositionCtr::getCurReportTime() const
+void PositionCtr::setCurReportTime(uint value)
+{
+   mCurrentReportTime = value;
+}
+
+uint PositionCtr::getCurReportTime() const
 {
     return mCurrentReportTime;
 }
-int PositionCtr::getCurReportDistance() const
+
+void PositionCtr::setCurReportDistance(uint value)
+{
+    mCurrentReportDistance = value;
+}
+
+uint PositionCtr::getCurReportDistance() const
 {
     return mCurrentReportDistance;
 }
@@ -298,10 +310,20 @@ void PositionCtr::setDirectionAngle(uint16_t value)
     mDirectionAngle = value;
 }
 
+void PositionCtr::startReport()
+{
+    mTaskToken = ModulesControl::getModulesControl()->getTaskScheduler().scheduleDelayedTask(mCurrentReportTime*1000000,reportPosition,this);
+}
+void PositionCtr::stopReport()
+{
+    ModulesControl::getModulesControl()->getTaskScheduler().unscheduleDelayedTask(mTaskToken);
+    mTaskToken = nullptr;
+}
+
 void PositionCtr::reportPosition(void *object)
 {
     PositionCtr *posctr = static_cast<PositionCtr *>(object);
-        if(posctr->mServerConnectStatus == PlatFormStatus::Connected){
+    if(posctr->mServerConnectStatus == PlatFormStatus::Connected){
         if(posctr->getReportStrategy() == 0){
             posctr->reportPositionA();
         }else if(posctr->getReportStrategy() == 1) {
@@ -316,7 +338,7 @@ void PositionCtr::reportPositionA()
 {
     QList<PositionExtensionInfo> infolist;
     reportPosition(infolist);
-    mTaskToken = ModulesControl::getModulesControl()->getTaskScheduler().scheduleDelayedTask(mCurrentReportTime*1000000,reportPosition,this);
+    startReport();
 }
 
 void PositionCtr::reportPositionB()
@@ -338,8 +360,7 @@ void PositionCtr::onServerConnectStatusChanged(PlatFormStatus &status)
 //        qDebug()<<"server disconnect";
         if(mTaskToken){
 //            qDebug()<<"stop report";
-            ModulesControl::getModulesControl()->getTaskScheduler().unscheduleDelayedTask(mTaskToken);
-            mTaskToken = nullptr;
+            stopReport();
         }
     }
 }
@@ -349,8 +370,8 @@ void PositionCtr::onPositionSetChanged()
 //    qDebug()<<"onPositionSetChanged";
     updateinfo();
     if(mTaskToken &&mServerConnectStatus == PlatFormStatus::Connected){
-        ModulesControl::getModulesControl()->getTaskScheduler().unscheduleDelayedTask(mTaskToken);
-        mTaskToken = ModulesControl::getModulesControl()->getTaskScheduler().scheduleDelayedTask(mCurrentReportTime*1000000,reportPosition,this);
+        stopReport();
+        startReport();
     }
 }
 
@@ -371,10 +392,12 @@ void PositionCtr::reportPosition(QList<PositionExtensionInfo> &infolist)
             return;
         }
         memcpy(pBuf,&baseinfo,sizeof (PositionBaseInfo));
-        pBuf += sizeof (PositionBaseInfo);
+        msglen = sizeof (PositionBaseInfo);
+//        pBuf += msglen;
         for (int i = 0;i < infolist.count();i++) {
-            memcpy(pBuf,&infolist[i],sizeof (PositionExtensionInfo));
-            pBuf += sizeof (PositionExtensionInfo);
+            memcpy(&pBuf[msglen],&infolist[i],infolist[i].item_len + 2);
+            msglen +=  infolist[i].item_len + 2;
+//            pBuf += sizeof (PositionExtensionInfo);
         }
         msginfo.mSize = msglen;
         msginfo.mMesgCache = msgbuf;

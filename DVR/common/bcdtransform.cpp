@@ -7,6 +7,16 @@ BCDTransform::BCDTransform()
 
 }
 
+QByteArray BCDTransform::ChartoArray(const char *bcd,int len)
+{
+    QByteArray bytearray;
+
+    for (int i = 0;i < len;i ++) {
+        bytearray.append(bcd[i]);
+    }
+
+    return bytearray;
+}
 
 QByteArray BCDTransform::toArray(const char *bcd, int len)
 {
@@ -67,7 +77,7 @@ QByteArray BCDTransform::toBcd(long value)
     return bytearray;
 }
 
-QByteArray BCDTransform::toBcd(QByteArray value)
+QByteArray BCDTransform::toBcd(const QByteArray &value)
 {
     QByteArray bytearray;
     char tmp = 0x0;
@@ -85,5 +95,18 @@ QByteArray BCDTransform::toBcd(QByteArray value)
         tmp = (value[start]-'0')&0xf0 + (value[start+1]-'0')&0x0f;
         bytearray.append(tmp);
     }
+    return bytearray;
+}
+
+QByteArray BCDTransform::BcdToHex(QByteArray &value)
+{
+    QByteArray bytearray;
+    char tmp;
+
+    for (int i = 0; i < value.length();i++) {
+        tmp = (value[i]>>4) *10 + (value[i]&0x0f);
+        bytearray.append(tmp);
+    }
+
     return bytearray;
 }

@@ -13,8 +13,8 @@ RectangleRegion::RectangleRegion(QObject *parent) : RegionBase(REGIONTYPE::Recta
 }
 
 RectangleRegion::RectangleRegion(RectangleRegionAttr &attr,QObject *parent):
-    RegionBase(REGIONTYPE::Rectange,attr.regionId,attr.regionAttr,BCDTransform::toArray(attr.startTime,sizeof (attr.startTime)),
-               BCDTransform::toArray(attr.endTime,sizeof (attr.endTime)),attr.topSpeed,attr.overSpeedDuration,parent),
+    RegionBase(REGIONTYPE::Rectange,attr.regionId,attr.regionAttr,BCDTransform::ChartoArray(attr.startTime,sizeof (attr.startTime)),
+               BCDTransform::ChartoArray(attr.endTime,sizeof (attr.endTime)),attr.topSpeed,attr.overSpeedDuration,parent),
     mLeftTopLatitude(attr.leftTopLatitude),mLeftTopLongitude(attr.leftTopLongitude),
     mRightLowLatitude(attr.rightLowLatitude),mRightLowLongitude(attr.rightLowLongitude)
 {
@@ -72,9 +72,9 @@ bool RectangleRegion::addRegionToDataBase()
     attr.topSpeed = getTopSpeed();
     attr.overSpeedDuration = getOverSpeedDuration();
 
-    bytearray = BCDTransform::toBcd(getStartTime());
+    bytearray = getStartTime();
     memcpy(attr.startTime,bytearray.data(),sizeof (attr.startTime));
-    bytearray = BCDTransform::toBcd(getEndTime());
+    bytearray = getEndTime();
     memcpy(attr.endTime,bytearray.data(),sizeof (attr.endTime));
     if(database.isExists()){
         database.insertSignalData(attr);
@@ -96,8 +96,8 @@ bool RectangleRegion::updateRegion(RectangleRegionAttr &attr)
     mLeftTopLongitude = attr.leftTopLongitude;
     mRightLowLatitude = attr.rightLowLatitude;
     mRightLowLongitude = attr.rightLowLongitude;
-    setStartTime(BCDTransform::toArray(attr.startTime,sizeof (attr.startTime)));
-    setEndTime(BCDTransform::toArray(attr.endTime,sizeof (attr.endTime)));
+    setStartTime(attr.startTime);
+    setEndTime(attr.startTime);
     setRegionId(attr.regionId);
     setRegionAttr(attr.regionAttr);
     setTopSpeed(attr.topSpeed);
