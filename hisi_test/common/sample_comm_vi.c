@@ -344,7 +344,7 @@ HI_S32 SAMPLE_NVP6134_CfgV(VIDEO_NORM_E enVideoMode,VI_WORK_MODE_E enWorkMode)
 			{
 				schnmode.ch = i;
 				schnmode.vformat = video_mode;
-                schnmode.chmode = NVP6134_VI_720P_2530;//NVP6134_VI_1080P_2530;
+                schnmode.chmode = NVP6134_VI_1080P_2530;//NVP6134_VI_1080P_2530;
 				ioctl(fd, IOC_VDEC_SET_CHNMODE, &schnmode);
 			}
 			for(i=0;i<chip_cnt;i++)
@@ -353,7 +353,7 @@ HI_S32 SAMPLE_NVP6134_CfgV(VIDEO_NORM_E enVideoMode,VI_WORK_MODE_E enWorkMode)
 				{
 					optmode.chipsel = i;
 					optmode.portsel = j;
-                    optmode.portmode = NVP6134_OUTMODE_1MUX_HD;//NVP6134_OUTMODE_1MUX_FHD;
+                    optmode.portmode = NVP6134_OUTMODE_1MUX_FHD;//NVP6134_OUTMODE_1MUX_FHD;
 					optmode.chid = j;
 					ioctl(fd, IOC_VDEC_SET_OUTPORTMODE, &optmode);					
 				}

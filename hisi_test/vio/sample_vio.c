@@ -60,7 +60,7 @@ void SAMPLE_VIO_HandleSig(HI_S32 signo)
 ******************************************************************************/
 HI_S32 SAMPLE_VIO_8_1080P(HI_VOID)
 {
-    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_720P;
+    SAMPLE_VI_MODE_E enViMode = SAMPLE_VI_MODE_8_1080P;
     VIDEO_NORM_E enNorm = VIDEO_ENCODING_MODE_PAL;
 
 	HI_U32 u32ViChnCnt = 8;
@@ -94,7 +94,7 @@ HI_S32 SAMPLE_VIO_8_1080P(HI_VOID)
 	******************************************/
 	memset(&stVbConf,0,sizeof(VB_CONF_S));
 	u32BlkSize = SAMPLE_COMM_SYS_CalcPicVbBlkSize(enNorm,\
-                PIC_HD720, SAMPLE_PIXEL_FORMAT, SAMPLE_SYS_ALIGN_WIDTH,COMPRESS_MODE_SEG);
+                PIC_HD1080, SAMPLE_PIXEL_FORMAT, SAMPLE_SYS_ALIGN_WIDTH,COMPRESS_MODE_SEG);
 	stVbConf.u32MaxPoolCnt = 128;
 
 	/* video buffer*/
@@ -125,7 +125,7 @@ HI_S32 SAMPLE_VIO_8_1080P(HI_VOID)
 	/******************************************
 	 step 4: start vpss and vi bind vpss
 	******************************************/
-    s32Ret = SAMPLE_COMM_SYS_GetPicSize(enNorm, PIC_HD720, &stSize);
+    s32Ret = SAMPLE_COMM_SYS_GetPicSize(enNorm, PIC_HD1080, &stSize);
 	if (HI_SUCCESS != s32Ret)
 	{
 		SAMPLE_PRT("SAMPLE_COMM_SYS_GetPicSize failed!\n");

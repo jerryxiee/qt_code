@@ -118,6 +118,227 @@ static FILE *SAMPLE_AUDIO_OpenAdecFile(ADEC_CHN AdChn, PAYLOAD_TYPE_E enType)
     return pfd;
 }
 
+HI_S32 Audio_Eecode(){
+
+    HI_S32      s32Ret;
+    PAYLOAD_TYPE_E enPayloadType = PT_G711A;
+    HI_U32 u32Len = 320;
+    AIO_ATTR_S stAioAttr;
+    HI_S32      s32AencChnCnt = 1;
+    AENC_CHN AeChn = 0;
+    AUDIO_FRAME_S stFrm;
+    int seq = 0;
+
+    stFrm.enSoundmode = AUDIO_SOUND_MODE_MONO;
+    stFrm.enBitwidth = AUDIO_BIT_WIDTH_16;
+    stFrm.u64TimeStamp = 0;
+
+
+    stAioAttr.enSamplerate   = AUDIO_SAMPLE_RATE_8000;
+    stAioAttr.enBitwidth     = AUDIO_BIT_WIDTH_16;
+    stAioAttr.enWorkmode     = AIO_MODE_I2S_MASTER;
+    stAioAttr.enSoundmode    = AUDIO_SOUND_MODE_MONO;
+    stAioAttr.u32EXFlag      = 0;
+    stAioAttr.u32FrmNum      = 30;
+    stAioAttr.u32PtNumPerFrm = SAMPLE_AUDIO_PTNUMPERFRM;
+    stAioAttr.u32ChnCnt      = 1;
+    stAioAttr.u32ClkChnCnt   = 20;
+    stAioAttr.u32ClkSel      = 0;
+
+    s32Ret = SAMPLE_COMM_AUDIO_StartAenc(s32AencChnCnt, &stAioAttr, enPayloadType);
+    if (s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_DBG(s32Ret);
+        return HI_FAILURE;
+    }
+
+    FILE *inFile = fopen("test.pcm","rb");
+    if(!inFile){
+        return 0;
+    }
+
+    FILE *outFile = fopen("test.g711a","wb");
+    if(!outFile){
+        return 0;
+    }
+
+    AUDIO_STREAM_S stStream;
+
+    HI_U8 *pu8AudioStream = NULL;
+
+    size_t u32ReadLen;
+    pu8AudioStream = (HI_U8*)malloc(sizeof(HI_U8)*MAX_AUDIO_STREAM_LEN);
+    if (NULL == pu8AudioStream)
+    {
+        printf("%s: malloc failed!\n", __FUNCTION__);
+        return 0;
+    }
+
+//    VB_POOL poolid = HI_MPI_VB_CreatePool(1024, 1, NULL);
+//    stFrm.u32PoolId[0] = poolid;
+
+//    s32Ret = HI_MPI_VB_MmapPool(poolid);
+//    if(s32Ret != 0){
+//        goto err;
+//    }
+
+//    VB_BLK blk = HI_MPI_VB_GetBlock(poolid, 1024,NULL);
+//    HI_U32 phyaddr = HI_MPI_VB_Handle2PhysAddr(blk);
+//    if(phyaddr == 0){
+//        printf("%s:%d\n",__FUNCTION__,__LINE__);
+//        goto err1;
+//    }
+
+//    s32Ret = HI_MPI_VB_GetBlkVirAddr(poolid, phyaddr, &stFrm.pVirAddr[0]);
+//    if(s32Ret != 0){
+//        printf("HI_MPI_VB_GetBlkVirAddr error\n");
+//        goto err2;
+//    }
+
+    printf("start aenc\n");
+    while (!feof(inFile))
+    {
+        stFrm.pVirAddr[0] = pu8AudioStream;
+        u32ReadLen = fread(stFrm.pVirAddr[0], 1, u32Len, inFile);
+        if (u32ReadLen <= 0)
+        {
+            printf("file end\n");
+//            fseek(audiofile, 0, SEEK_SET);/*read file again*/
+            break;
+        }
+        stFrm.u32Len = u32ReadLen;
+        stFrm.u32Seq = seq++;
+        stFrm.u64TimeStamp += 50000;
+        printf("send frame size:%d\n",u32ReadLen);
+        HI_MPI_AENC_SendFrame(AeChn, &stFrm,NULL);
+        printf("send frame size:%d\n",u32ReadLen);
+            /* get stream from aenc chn */
+        s32Ret = HI_MPI_AENC_GetStream(AeChn, &stStream, 100000);
+        if (HI_SUCCESS != s32Ret )
+        {
+            printf("HI_MPI_AENC_GetStream error\n");
+            continue;
+        }
+
+        printf("getframe size:%d\n",stStream.u32Len);
+        /* save audio stream to file */
+        fwrite(stStream.pStream,1,stStream.u32Len, outFile);
+
+            /* finally you must release the stream */
+        s32Ret = HI_MPI_AENC_ReleaseStream(AeChn, &stStream);
+        if (HI_SUCCESS != s32Ret )
+        {
+            printf("%s: HI_MPI_AENC_ReleaseStream(%d), failed with %#x!\n",\
+                   __FUNCTION__, AeChn, s32Ret);
+
+            return 0;
+        }
+
+    }
+
+    fclose(inFile);
+    fclose(outFile);
+
+//    err2:
+//    HI_MPI_VB_ReleaseBlock(blk);
+//    err1:
+//    HI_MPI_VB_MunmapPool(poolid);
+    err:
+    SAMPLE_COMM_AUDIO_StopAenc(s32AencChnCnt);
+//    HI_MPI_VB_DestroyPool(poolid);
+    return 0;
+}
+
+HI_S32 Audio_Decode(){
+    ADEC_CHN    AdChn = 0;
+    HI_S32      s32Ret;
+    PAYLOAD_TYPE_E enPayloadType = PT_G711A;
+    HI_U32 u32Len = 320;
+    AUDIO_FRAME_INFO_S framInfo;
+
+
+    s32Ret = SAMPLE_COMM_AUDIO_StartAdec(AdChn, enPayloadType);
+    if (s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_DBG(s32Ret);
+        return HI_FAILURE;
+    }
+
+    FILE *audiofile = fopen("test.g711a","rb");
+    if(!audiofile){
+        goto err;
+    }
+
+    FILE *outFile = fopen("testa.pcm","wb");
+    if(!outFile){
+        goto err;
+    }
+
+    HI_U8 *pu8AudioStream = NULL;
+    AUDIO_STREAM_S stAudioStream;
+    size_t u32ReadLen;
+    pu8AudioStream = (HI_U8*)malloc(sizeof(HI_U8)*MAX_AUDIO_STREAM_LEN);
+    if (NULL == pu8AudioStream)
+    {
+        printf("%s: malloc failed!\n", __FUNCTION__);
+        goto err;
+    }
+
+    while (!feof(audiofile))
+    {
+        /* read from file */
+        stAudioStream.pStream = pu8AudioStream;
+        stAudioStream.pStream[0] = 0x0;
+        stAudioStream.pStream[1] = 0x1;
+
+        stAudioStream.pStream[3] = 0x0;
+        u32ReadLen = fread(&stAudioStream.pStream[4], 1, u32Len, audiofile);
+        if (u32ReadLen <= 0)
+        {
+            HI_MPI_ADEC_SendEndOfStream (AdChn, HI_FALSE);
+            printf("file end\n");
+//            fseek(audiofile, 0, SEEK_SET);/*read file again*/
+            break;
+        }
+        stAudioStream.pStream[2] = u32ReadLen>>1;
+        printf("send frame size:%d\n",u32ReadLen);
+        /* here only demo adec streaming sending mode, but pack sending mode is commended */
+        stAudioStream.u32Len = u32ReadLen + 4;
+        s32Ret = HI_MPI_ADEC_SendStream(AdChn, &stAudioStream, HI_TRUE);
+        if(HI_SUCCESS != s32Ret)
+        {
+            printf("%s: HI_MPI_ADEC_SendStream(%d) failed with %#x!\n",\
+                   __FUNCTION__, AdChn, s32Ret);
+            break;
+        }
+
+        s32Ret = HI_MPI_ADEC_GetFrame(AdChn,&framInfo, HI_TRUE);
+        if(HI_SUCCESS != s32Ret){
+//            printf("HI_MPI_ADEC_GetFrame error\n");
+            continue;
+        }
+
+        printf("write frame size:%d\n",framInfo.pstFrame->u32Len);
+        fwrite(framInfo.pstFrame->pVirAddr[0],1,framInfo.pstFrame->u32Len,outFile);
+
+        HI_MPI_ADEC_ReleaseFrame( AdChn, &framInfo);
+
+    }
+
+    free(pu8AudioStream);
+    fclose(audiofile);
+    fclose(outFile);
+
+    err:
+    s32Ret = SAMPLE_COMM_AUDIO_StopAdec(AdChn);
+    if (s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_DBG(s32Ret);
+        return HI_FAILURE;
+    }
+
+    return HI_FAILURE;
+}
 
 /******************************************************************************
 * function : file -> Adec -> Ao
@@ -858,12 +1079,14 @@ int audio_main(int argc, char *argv[])
         {
             case '1':
             {
+//                Audio_Eecode();
                 SAMPLE_AUDIO_NVP6134AiAo();
                 break;
             }
             case '2':
             {
-                SAMPLE_AUDIO_AiAenc();
+                Audio_Decode();
+//                SAMPLE_AUDIO_AiAenc();
                 break;
             }
             case '3':

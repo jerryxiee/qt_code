@@ -1,4 +1,10 @@
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#include "sample_comm.h"
 
 
 #if 1
@@ -20,6 +26,25 @@ extern int audio_main(int argc, char *argv[]);
 int main(int argc, char *argv[])
 {
     int cmd;
+//    nvp6134_input_videofmt videofmt;
+
+//    int fd = open(NVP6134_FILE, O_RDWR);
+
+//    if (fd < 0)
+//    {
+//        printf("open nvp6134 (%s) fail\n", NVP6134_FILE);
+//        return -1;
+//    }
+
+//    ioctl(fd, IOC_VDEC_GET_INPUT_VIDEO_FMT, &videofmt);
+
+//    int i;
+//    for (i = 0;i < 8;i++) {
+//        printf("chn:%d %x:%x\n",i,videofmt.getvideofmt[i],videofmt.inputvideofmt[i]);
+//    }
+
+
+//    vio_main(argc, argv);
 
     printf("enter mode: \n");
     scanf("%d",&cmd);
@@ -30,16 +55,17 @@ int main(int argc, char *argv[])
         case 3:vdec_main(argc,argv);break;
         case 4:vio_main(argc,argv);break;
         case 5:vgs_main(argc,argv);break;
-    case 6:region_main(argc,argv);break;
+        case 6:region_main(argc,argv);break;
+        case 7:audio_main(argc,argv);break;
 
     }
-#if 0
-    hifb_main(argc,argv);
-#else
-    venc_main(argc,argv);
+//#if 0
+//    hifb_main(argc,argv);
+//#else
+//    venc_main(argc,argv);
 
 
-#endif
+//#endif
     return 0;
 }
 

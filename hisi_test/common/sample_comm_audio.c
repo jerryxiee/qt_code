@@ -2027,7 +2027,7 @@ HI_S32 SAMPLE_COMM_AUDIO_StartAdec(ADEC_CHN AdChn, PAYLOAD_TYPE_E enType)
     
     stAdecAttr.enType = enType;
     stAdecAttr.u32BufSize = 20;
-    stAdecAttr.enMode = ADEC_MODE_STREAM;/* propose use pack mode in your app */
+    stAdecAttr.enMode = ADEC_MODE_PACK;/* propose use pack mode in your app */
         
     if (PT_ADPCMA == stAdecAttr.enType)
     {

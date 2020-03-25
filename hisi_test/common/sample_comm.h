@@ -126,6 +126,7 @@ extern "C"{
 //add
 #define AI_DEV 1
 #define AO_DEV 0
+#define HI_ACODEC_TYPE_NVP6134
 
 #define SAMPLE_AUDIO_INNER_HDMI_AO_DEV 2
 #define SAMPLE_AUDIO_HDMI_AO_DEV 1
