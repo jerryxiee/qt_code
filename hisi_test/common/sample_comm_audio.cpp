@@ -233,7 +233,7 @@ HI_S32 SAMPLE_TP2823_SetFormat(const AIO_ATTR_S *pstAioAttr)
 #if 1
 	int fd;
     tp2823_audio_format format;
-	tp2802_audio_samplerate samplerate = 0;
+    tp2802_audio_samplerate samplerate ;
 
     switch (pstAioAttr->enBitwidth)
     {
@@ -1005,6 +1005,110 @@ void *SAMPLE_COMM_AUDIO_AencProc(void *parg)
     return NULL;
 }
 
+#include <mp4v2/mp4v2.h>
+
+void *SAMPLE_COMM_AUDIO_Mp4Proc(void *parg)
+{
+    HI_S32 s32Ret;
+    HI_S32 AencFd;
+    SAMPLE_AENC_S *pstAencCtl = (SAMPLE_AENC_S *)parg;
+    AUDIO_STREAM_S stStream;
+    fd_set read_fds;
+    struct timeval TimeoutVal;
+
+    uint64_t stStamp = 0;
+    uint64_t lastStamp = 0;
+    uint64_t dur = 0;
+
+    uint64_t timeStamp = 0;
+
+    prctl(PR_SET_NAME, "hi_AencProc", 0, 0, 0);
+
+    FD_ZERO(&read_fds);
+    AencFd = HI_MPI_AENC_GetFd(pstAencCtl->AeChn);
+    FD_SET(AencFd, &read_fds);
+
+    MP4FileHandle pHandle = nullptr;
+    MP4TrackId audioId;
+
+    pHandle = MP4Create("demo.mp4",0);
+
+    if (!MP4_IS_VALID_FILE_HANDLE(pHandle)) {
+        fprintf(stderr, "Couldn't create output file %s\n", "/home/allen/sources/demo.mp4");
+        return NULL;
+    }
+
+    MP4SetTimeScale(pHandle, 90000);
+    audioId = MP4AddAudioTrack(pHandle, 8000, 1024, MP4_MPEG4_AUDIO_TYPE);
+    MP4SetAudioProfileLevel(pHandle, 0x0F);
+
+
+
+    while (pstAencCtl->bStart)
+    {
+        TimeoutVal.tv_sec = 1;
+        TimeoutVal.tv_usec = 0;
+
+        FD_ZERO(&read_fds);
+        FD_SET(AencFd,&read_fds);
+
+        s32Ret = select(AencFd+1, &read_fds, NULL, NULL, &TimeoutVal);
+        if (s32Ret < 0)
+        {
+            break;
+        }
+        else if (0 == s32Ret)
+        {
+            printf("%s: get aenc stream select time out\n", __FUNCTION__);
+            break;
+        }
+
+        if (FD_ISSET(AencFd, &read_fds))
+        {
+            /* get stream from aenc chn */
+            s32Ret = HI_MPI_AENC_GetStream(pstAencCtl->AeChn, &stStream, HI_FALSE);
+            if (HI_SUCCESS != s32Ret )
+            {
+                printf("%s: HI_MPI_AENC_GetStream(%d), failed with %#x!\n",\
+                       __FUNCTION__, pstAencCtl->AeChn, s32Ret);
+                pstAencCtl->bStart = HI_FALSE;
+                return NULL;
+            }
+
+            stStamp = stStream.u64TimeStamp;
+            if(lastStamp == 0){
+                dur = 0;
+            }else {
+                dur = stStamp - lastStamp;
+            }
+            timeStamp += dur;
+            printf("len:%d timestamp:%lld\n",stStream.u32Len,timeStamp/1000);
+            lastStamp = stStamp;
+
+            /* save audio stream to file */
+            MP4WriteSample(pHandle, audioId, stStream.pStream, stStream.u32Len, dur*8/1000, 0, 1);
+
+//            fwrite(stStream.pStream,1,stStream.u32Len, pstAencCtl->pfd);
+
+
+            /* finally you must release the stream */
+            s32Ret = HI_MPI_AENC_ReleaseStream(pstAencCtl->AeChn, &stStream);
+            if (HI_SUCCESS != s32Ret )
+            {
+                printf("%s: HI_MPI_AENC_ReleaseStream(%d), failed with %#x!\n",\
+                       __FUNCTION__, pstAencCtl->AeChn, s32Ret);
+                pstAencCtl->bStart = HI_FALSE;
+                return nullptr;
+            }
+        }
+    }
+
+//    fclose(pstAencCtl->pfd);
+    MP4Close(pHandle);
+    pstAencCtl->bStart = HI_FALSE;
+    return nullptr;
+}
+
 /******************************************************************************
 * function : get stream from file, and send it  to Adec
 ******************************************************************************/
@@ -1194,13 +1298,32 @@ HI_S32 SAMPLE_COMM_AUDIO_CreatTrdAencAdec(AENC_CHN AeChn, ADEC_CHN AdChn, FILE *
     pstAenc = &gs_stSampleAenc[AeChn];
     pstAenc->AeChn = AeChn;
     pstAenc->AdChn = AdChn;
-    pstAenc->bSendAdChn = HI_TRUE;
+    pstAenc->bSendAdChn = HI_FALSE;
     pstAenc->pfd = pAecFd;    
     pstAenc->bStart = HI_TRUE;    
     pthread_create(&pstAenc->stAencPid, 0, SAMPLE_COMM_AUDIO_AencProc, pstAenc);
     
     return HI_SUCCESS;
 }
+
+/******************************************************************************
+* function : Create the thread to get stream from aenc and send to adec
+******************************************************************************/
+HI_S32 SAMPLE_COMM_AUDIO_CreatTrdAencToMp4(AENC_CHN AeChn, ADEC_CHN AdChn)
+{
+    SAMPLE_AENC_S *pstAenc = nullptr;
+
+
+    pstAenc = &gs_stSampleAenc[AeChn];
+    pstAenc->AeChn = AeChn;
+    pstAenc->AdChn = AdChn;
+    pstAenc->bSendAdChn = HI_FALSE;
+    pstAenc->bStart = HI_TRUE;
+    pthread_create(&pstAenc->stAencPid, 0, SAMPLE_COMM_AUDIO_Mp4Proc, pstAenc);
+
+    return HI_SUCCESS;
+}
+
 
 /******************************************************************************
 * function : Create the thread to get stream from file and send to adec

@@ -23,7 +23,7 @@
 #include "audio_aac_adp.h"
 
 
-static PAYLOAD_TYPE_E gs_enPayloadType = PT_G711A;
+static PAYLOAD_TYPE_E gs_enPayloadType = PT_AAC;
 //static HI_BOOL gs_bMicIn = HI_FALSE;
 static HI_BOOL gs_bAiVqe= HI_FALSE;
 static HI_BOOL gs_bAioReSample = HI_FALSE;
@@ -485,8 +485,8 @@ HI_S32 SAMPLE_AUDIO_AiAenc(HI_VOID)
     stAioAttr.u32EXFlag      = 1;
     stAioAttr.u32FrmNum      = 30;
     stAioAttr.u32PtNumPerFrm = SAMPLE_AUDIO_PTNUMPERFRM;
-    stAioAttr.u32ChnCnt      = 1;
-    stAioAttr.u32ClkChnCnt   = 20;
+    stAioAttr.u32ChnCnt      = 2;
+    stAioAttr.u32ClkChnCnt   = 8;
     stAioAttr.u32ClkSel      = 0;
 
     if(PT_AAC == gs_enPayloadType)
@@ -702,15 +702,15 @@ HI_S32 SAMPLE_AUDIO_NVP6134AiAo(HI_VOID)
     AUDIO_RESAMPLE_ATTR_S stAiReSampleAttr;
     AUDIO_RESAMPLE_ATTR_S stAoReSampleAttr;
 
-    stAioAttr.enSamplerate   = AUDIO_SAMPLE_RATE_16000;
+    stAioAttr.enSamplerate   = AUDIO_SAMPLE_RATE_8000;
     stAioAttr.enBitwidth     = AUDIO_BIT_WIDTH_16;
     stAioAttr.enWorkmode     = AIO_MODE_I2S_MASTER;
     stAioAttr.enSoundmode    = AUDIO_SOUND_MODE_MONO;
     stAioAttr.u32EXFlag      = 1;
     stAioAttr.u32FrmNum      = 30;
     stAioAttr.u32PtNumPerFrm = SAMPLE_AUDIO_PTNUMPERFRM;
-    stAioAttr.u32ChnCnt      = 8;
-    stAioAttr.u32ClkChnCnt   = 8;
+    stAioAttr.u32ChnCnt      = 4;
+    stAioAttr.u32ClkChnCnt   = 4;
     stAioAttr.u32ClkSel      = 0;
 
 	gs_bAioReSample = HI_FALSE;
@@ -978,6 +978,231 @@ HI_S32 SAMPLE_AUDIO_AiHdmiAo(HI_VOID)
     return HI_SUCCESS;
 }
 
+HI_S32 ai2Mp4()
+{
+    HI_S32 i, s32Ret;
+    AUDIO_DEV   AiDev = SAMPLE_AUDIO_AI_DEV;
+    AI_CHN      AiChn;
+    AUDIO_DEV   AoDev = SAMPLE_AUDIO_AO_DEV;
+    AO_CHN      AoChn = 0;
+    ADEC_CHN    AdChn = 0;
+    HI_S32      s32AiChnCnt;
+    HI_S32      s32AencChnCnt;
+    AENC_CHN    AeChn;
+    HI_BOOL     bSendAdec = HI_TRUE;
+    FILE        *pfd = NULL;
+    AIO_ATTR_S stAioAttr;
+
+    stAioAttr.enSamplerate   = AUDIO_SAMPLE_RATE_8000;
+    stAioAttr.enBitwidth     = AUDIO_BIT_WIDTH_16;
+    stAioAttr.enWorkmode     = AIO_MODE_I2S_MASTER;
+    stAioAttr.enSoundmode    = AUDIO_SOUND_MODE_MONO;
+    stAioAttr.u32EXFlag      = 1;
+    stAioAttr.u32FrmNum      = 30;
+    stAioAttr.u32PtNumPerFrm = SAMPLE_AUDIO_PTNUMPERFRM;
+    stAioAttr.u32ChnCnt      = 2;
+    stAioAttr.u32ClkChnCnt   = 8;
+    stAioAttr.u32ClkSel      = 0;
+
+    if(PT_AAC == gs_enPayloadType)
+    {
+        stAioAttr.u32PtNumPerFrm = AACLC_SAMPLES_PER_FRAME;
+    }
+
+#ifdef HI_ACODEC_TYPE_TLV320AIC31
+    stAioAttr.u32ClkSel      = 1;
+#endif
+
+    /********************************************
+    step 1: config audio codec
+    ********************************************/
+    s32Ret = SAMPLE_COMM_AUDIO_CfgAcodec(&stAioAttr);
+    if (HI_SUCCESS != s32Ret)
+    {
+        SAMPLE_DBG(s32Ret);
+        return HI_FAILURE;
+    }
+
+    /********************************************
+    step 2: start Ai
+    ********************************************/
+    s32AiChnCnt = stAioAttr.u32ChnCnt >> stAioAttr.enSoundmode;
+    s32AencChnCnt = s32AiChnCnt ;
+    g_u32AiCnt = s32AiChnCnt;
+    g_u32AiDev = AiDev;
+    s32Ret = SAMPLE_COMM_AUDIO_StartAi(AiDev, s32AiChnCnt, &stAioAttr, AUDIO_SAMPLE_RATE_BUTT, HI_FALSE, NULL, 0);
+    if (s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_DBG(s32Ret);
+        return HI_FAILURE;
+    }
+
+    /********************************************
+    step 3: start Aenc
+    ********************************************/
+    g_u32AencCnt = s32AencChnCnt;
+    s32Ret = SAMPLE_COMM_AUDIO_StartAenc(s32AencChnCnt, &stAioAttr, gs_enPayloadType);
+    if (s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_DBG(s32Ret);
+        return HI_FAILURE;
+    }
+
+    /********************************************
+    step 4: Aenc bind Ai Chn
+    ********************************************/
+    for (i=0; i<s32AencChnCnt; i++)
+    {
+        AeChn = i;
+        AiChn = i;
+
+        if (HI_TRUE == gs_bUserGetMode)
+        {
+            s32Ret = SAMPLE_COMM_AUDIO_CreatTrdAiAenc(AiDev, AiChn, AeChn);
+            if (s32Ret != HI_SUCCESS)
+            {
+                SAMPLE_DBG(s32Ret);
+                return HI_FAILURE;
+            }
+        }
+        else
+        {
+            s32Ret = SAMPLE_COMM_AUDIO_AencBindAi(AiDev, AiChn, AeChn);
+            if (s32Ret != HI_SUCCESS)
+            {
+                SAMPLE_DBG(s32Ret);
+                return s32Ret;
+            }
+        }
+        printf("Ai(%d,%d) bind to AencChn:%d ok!\n",AiDev , AiChn, AeChn);
+    }
+
+    /********************************************
+    step 5: start Adec & Ao. ( if you want )
+    ********************************************/
+    if (HI_TRUE == bSendAdec)
+    {
+//        g_u32Adec = AdChn;
+//        s32Ret = SAMPLE_COMM_AUDIO_StartAdec(AdChn, gs_enPayloadType);
+//        if (s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_DBG(s32Ret);
+//            return HI_FAILURE;
+//        }
+
+//        g_u32AoCnt = s32AiChnCnt;
+//        g_u32AoDev = AoDev;
+//        s32Ret = SAMPLE_COMM_AUDIO_StartAo(AoDev, s32AiChnCnt, &stAioAttr, AUDIO_SAMPLE_RATE_BUTT, HI_FALSE, NULL, 0);
+//        if (s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_DBG(s32Ret);
+//            return HI_FAILURE;
+//        }
+
+        pfd = SAMPLE_AUDIO_OpenAencFile(AdChn, gs_enPayloadType);
+        if (!pfd)
+        {
+            SAMPLE_DBG(HI_FAILURE);
+            return HI_FAILURE;
+        }
+        s32Ret = SAMPLE_COMM_AUDIO_CreatTrdAencToMp4(AeChn, AdChn);
+        if (s32Ret != HI_SUCCESS)
+        {
+            SAMPLE_DBG(s32Ret);
+            return HI_FAILURE;
+        }
+
+//        s32Ret = SAMPLE_COMM_AUDIO_AoBindAdec(AoDev, AoChn, AdChn);
+//        if (s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_DBG(s32Ret);
+//            return HI_FAILURE;
+//        }
+
+        printf("bind adec:%d to ao(%d,%d) ok \n", AdChn, AoDev, AoChn);
+     }
+
+    printf("\nplease press twice ENTER to exit this sample\n");
+    getchar();
+    getchar();
+
+    /********************************************
+    step 6: exit the process
+    ********************************************/
+    if (HI_TRUE == bSendAdec)
+    {
+//        s32Ret = SAMPLE_COMM_AUDIO_AoUnbindAdec(AoDev, AoChn, AdChn);
+//        if (s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_DBG(s32Ret);
+//            return HI_FAILURE;
+//        }
+
+        s32Ret = SAMPLE_COMM_AUDIO_DestoryTrdAencAdec(AdChn);
+        if (s32Ret != HI_SUCCESS)
+        {
+            SAMPLE_DBG(s32Ret);
+            return HI_FAILURE;
+        }
+
+//        s32Ret = SAMPLE_COMM_AUDIO_StopAo(AoDev, s32AiChnCnt, HI_FALSE, HI_FALSE);
+//        if (s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_DBG(s32Ret);
+//            return HI_FAILURE;
+//        }
+
+//        s32Ret = SAMPLE_COMM_AUDIO_StopAdec(AdChn);
+//        if (s32Ret != HI_SUCCESS)
+//        {
+//            SAMPLE_DBG(s32Ret);
+//            return HI_FAILURE;
+//        }
+
+    }
+
+    for (i=0; i<s32AencChnCnt; i++)
+    {
+        AeChn = i;
+        AiChn = i;
+
+        if (HI_TRUE == gs_bUserGetMode)
+        {
+            s32Ret = SAMPLE_COMM_AUDIO_DestoryTrdAi(AiDev, AiChn);
+            if (s32Ret != HI_SUCCESS)
+            {
+                SAMPLE_DBG(s32Ret);
+                return HI_FAILURE;
+            }
+        }
+        else
+        {
+            s32Ret = SAMPLE_COMM_AUDIO_AencUnbindAi(AiDev, AiChn, AeChn);
+            if (s32Ret != HI_SUCCESS)
+            {
+                SAMPLE_DBG(s32Ret);
+                return HI_FAILURE;
+            }
+        }
+    }
+
+    s32Ret = SAMPLE_COMM_AUDIO_StopAenc(s32AencChnCnt);
+    if (s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_DBG(s32Ret);
+        return HI_FAILURE;
+    }
+
+    s32Ret = SAMPLE_COMM_AUDIO_StopAi(AiDev, s32AiChnCnt, HI_FALSE, HI_FALSE);
+    if (s32Ret != HI_SUCCESS)
+    {
+        SAMPLE_DBG(s32Ret);
+        return HI_FAILURE;
+    }
+
+    return HI_SUCCESS;
+}
+
 HI_VOID SAMPLE_AUDIO_Usage(HI_VOID)
 {
     printf("\n\n/************************************/\n");
@@ -1085,8 +1310,9 @@ int audio_main(int argc, char *argv[])
             }
             case '2':
             {
-                Audio_Decode();
+//                Audio_Decode();
 //                SAMPLE_AUDIO_AiAenc();
+            ai2Mp4();
                 break;
             }
             case '3':
