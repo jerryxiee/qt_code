@@ -3,8 +3,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
 #include "sample_comm.h"
+#include "watchdog.h"
 
 
 #if 1
@@ -23,39 +25,51 @@ extern int cascade_master_main(int argc, char* argv[]);
 extern int cascade_slave_main(int argc, char* argv[]);
 extern int audio_main(int argc, char *argv[]);
 
+void wtd()
+{
+        uint32_t timeout;
+
+        int fd = open("/dev/watchdog", O_RDWR);
+
+        if (fd < 0)
+        {
+            printf("open /dev/watchdog fail\n");
+            return;
+        }
+
+        ioctl(fd, WDIOC_GETTIMEOUT, &timeout);
+        printf("get timeout :%d\n",timeout);
+
+        int count  = 200;
+        while (count --) {
+
+            ioctl(fd, WDIOC_KEEPALIVE, &timeout);
+
+            sleep(30);
+            printf("feed dog\n");
+        }
+
+
+}
+
+
+#include <time.h>
+
 int main(int argc, char *argv[])
 {
     int cmd;
-//    nvp6134_input_videofmt videofmt;
 
-//    int fd = open(NVP6134_FILE, O_RDWR);
-
-//    if (fd < 0)
-//    {
-//        printf("open nvp6134 (%s) fail\n", NVP6134_FILE);
-//        return -1;
-//    }
-
-//    ioctl(fd, IOC_VDEC_GET_INPUT_VIDEO_FMT, &videofmt);
-
-//    int i;
-//    for (i = 0;i < 8;i++) {
-//        printf("chn:%d %x:%x\n",i,videofmt.getvideofmt[i],videofmt.inputvideofmt[i]);
-//    }
-
-
-//    vio_main(argc, argv);
 
     printf("enter mode: \n");
     scanf("%d",&cmd);
 
     switch(cmd){
         case 1:hifb_main(argc,argv);break;
-        case 2:venc_main(argc,argv);break;
+//        case 2:venc_main(argc,argv);break;
         case 3:vdec_main(argc,argv);break;
-        case 4:vio_main(argc,argv);break;
+//        case 4:vio_main(argc,argv);break;
         case 5:vgs_main(argc,argv);break;
-        case 6:region_main(argc,argv);break;
+//        case 6:region_main(argc,argv);break;
         case 7:audio_main(argc,argv);break;
 
     }

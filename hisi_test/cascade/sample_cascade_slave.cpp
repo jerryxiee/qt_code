@@ -30,9 +30,9 @@ static HI_U32 gs_u32ViFrmRate = 0;
 //SAMPLE_VDEC_SENDPARAM_S gs_SendParam[SAMPLE_MAX_VDEC_CHN_CNT];
 
 pthread_t   gs_SendThread[VDEC_MAX_CHN_NUM];
-HI_S32 gs_s32VdecCnt = 0;
+static HI_S32 gs_s32VdecCnt = 0;
 
-VdecThreadParam gs_stVdecSend[VDEC_MAX_CHN_NUM];
+static VdecThreadParam gs_stVdecSend[VDEC_MAX_CHN_NUM];
 
 /******************************************************************************
 * function : show usage

@@ -4,8 +4,10 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
+    audio/sample_audio.cpp \
     common/sample_comm_audio.cpp \
     common/sample_comm_ivs.cpp \
+    common/sample_comm_vdec.c \
         main.cpp \
     common/loadbmp.cpp \
     common/sample_comm_sys.cpp \
@@ -14,8 +16,12 @@ SOURCES += \
     common/sample_comm_vpss.cpp \
     common/sample_comm_vi.cpp \
     hifb/sample_hifb.cpp \
+#    pciv/sample_common.c \
+#    pciv/sample_pciv_host.c \
+#    pciv/sample_pciv_slave.c \
+    region/sample_region.c \
+    tde/sample_tde.c \
     vio/sample_vio.cpp \
-    common/sample_comm_vdec.cpp \
     common/sample_comm_vda.cpp \
     vdec/sample_vdec.cpp \
     venc/sample_venc.cpp \
@@ -30,17 +36,11 @@ SOURCES += \
     ive/sample/sample_ive_test_memory.cpp \
     ive/sample/sample_ivs_md.cpp \
     ive/sample_ive_main.cpp \
-    region/sample_region.cpp \
-    tde/sample_tde.cpp \
-    pciv/pciv_msg.cpp \
-    pciv/pciv_trans.cpp \
-    pciv/sample_common.cpp \
-    pciv/sample_pciv_host.cpp \
-    pciv/sample_pciv_slave.cpp \
+#    pciv/pciv_msg.cpp \
+#    pciv/pciv_trans.cpp \
     cascade/sample_cascade_master.cpp \
     cascade/sample_cascade_slave.cpp \
-    audio/adp/audio_aac_adp.cpp \
-    audio/sample_audio.cpp
+    audio/adp/audio_aac_adp.cpp
 
 
 INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
@@ -50,7 +50,8 @@ INCLUDEPATH += /opt/hisi-linux/x86-arm/arm-hisiv600-linux/target/usr/include \
                 /home/abhw/haisi/software/board/Hi3531DV100_SDK_V2.0.4.0/mpp/extdrv/tlv320aic31 \
                 /home/abhw/git/qt_code/hisi_test/audio/adp \
                 /home/abhw/git/qt_code/hisi_test/audio/tp2853c \
-                lib/include
+                lib/include \
+                /home/abhw/haisi/software/board/Hi3531DV100_SDK_V2.0.4.0/drv/wtdg
 
 LIBS += -lpthread
 
