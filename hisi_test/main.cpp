@@ -25,6 +25,9 @@ extern int cascade_master_main(int argc, char* argv[]);
 extern int cascade_slave_main(int argc, char* argv[]);
 extern int audio_main(int argc, char *argv[]);
 
+extern int spi_main(int argc, char* argv[]);
+extern int uart_main(int argc, char **argv);
+
 void wtd()
 {
         uint32_t timeout;
@@ -71,6 +74,8 @@ int main(int argc, char *argv[])
         case 5:vgs_main(argc,argv);break;
 //        case 6:region_main(argc,argv);break;
         case 7:audio_main(argc,argv);break;
+    case 8:spi_main(argc,argv);break;
+    case 9:uart_main(argc,argv);break;
 
     }
 //#if 0

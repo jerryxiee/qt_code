@@ -20,7 +20,9 @@ SOURCES += \
 #    pciv/sample_pciv_host.c \
 #    pciv/sample_pciv_slave.c \
     region/sample_region.c \
+    spitts/spi_tts.cpp \
     tde/sample_tde.c \
+    uart/uart.cpp \
     vio/sample_vio.cpp \
     common/sample_comm_vda.cpp \
     vdec/sample_vdec.cpp \
@@ -98,5 +100,7 @@ HEADERS += \
     pciv/pciv_trans.h \
     pciv/sample_common.h \
     pciv/sample_pciv_comm.h \
-    audio/adp/audio_aac_adp.h
+    audio/adp/audio_aac_adp.h \
+    spitts/spi_tts.h \
+    uart/uart.h
 
